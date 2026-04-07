@@ -55,6 +55,8 @@ The published tarball contains:
    - `npm run test:ci`
    - `npm run pack:dry-run`
 
+   The dry-run step uses `npm pack --dry-run`, not `npm publish --dry-run`, so it validates the package contents without failing just because the current version is already on npm.
+
 5. Review the final `dist/angular-django2/package.json` and README if you changed package metadata or docs.
 
 6. Commit the changed manifests and lockfile, tag the release, and push:

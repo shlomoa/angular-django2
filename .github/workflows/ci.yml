@@ -35,7 +35,5 @@ jobs:
       - name: Build library
         run: npm run build
 
-      - name: Verify npm package dry run
-        run: npm publish ./dist/angular-django2 --dry-run
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Verify npm package tarball
+        run: npm pack ./dist/angular-django2 --dry-run

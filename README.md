@@ -145,11 +145,13 @@ npm run format
 
 ## Package Dry Run
 
-Verify the package can be built and published without actually publishing it:
+Verify the package tarball contents without actually publishing anything:
 
 ```bash
 npm run pack:dry-run
 ```
+
+This uses `npm pack --dry-run`, so it keeps working even after the current version has already been published.
 
 ## npm Publish Prerequisites
 
@@ -236,7 +238,7 @@ After `ng add angular-django2`, you can also use the specialized commands throug
 
 ## GitHub Actions
 
-- `CI`: installs dependencies, checks formatting, runs lint, runs tests, builds the library, and verifies an npm publish dry-run on pushes and pull requests.
+- `CI`: installs dependencies, checks formatting, runs lint, runs tests, builds the library, and verifies the generated npm tarball on pushes and pull requests.
 - `Publish npm package`: installs dependencies, checks formatting, runs lint and tests, builds the package, and publishes it to npm.
 
 Recommended npm setup:
