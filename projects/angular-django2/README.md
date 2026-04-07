@@ -82,3 +82,11 @@ npm run pack:dry-run
 ## Publishing
 
 Build the library and publish the generated package from `dist/angular-django2`.
+
+For the current unscoped package name:
+
+```bash
+npm publish ./dist/angular-django2
+```
+
+The first successful publish creates the npm package page automatically.

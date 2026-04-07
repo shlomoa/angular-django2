@@ -3,8 +3,17 @@
 ## Prerequisites
 
 - npm publish access to the `angular-django2` package
-- GitHub repository secret `NPM_TOKEN` configured for the publish workflow
 - a clean working tree or a deliberate release commit in progress
+- npm 2FA enabled, or a granular access token with bypass 2FA for non-interactive publishing
+
+Preferred CI/CD setup:
+
+- configure npm Trusted Publisher for this repository and `.github/workflows/publish.yml`
+- use GitHub-hosted runners
+
+Current workflow fallback:
+
+- if you are not using Trusted Publisher yet, configure the `NPM_TOKEN` repository secret
 
 ## What ships
 
@@ -16,19 +25,25 @@ The published tarball contains:
 
 ## Local Release Flow
 
-1. Update the root package version:
+1. Confirm the unscoped package name is still available:
+
+   ```bash
+   npm view angular-django2
+   ```
+
+2. Update the root package version:
 
    ```bash
    npm version patch --no-git-tag-version
    ```
 
-2. Sync publishable package metadata:
+3. Sync publishable package metadata:
 
    ```bash
    npm run sync:package-metadata
    ```
 
-3. Validate the release candidate:
+4. Validate the release candidate:
 
    ```bash
    npm run release:prepare
@@ -40,9 +55,9 @@ The published tarball contains:
    - `npm run test:ci`
    - `npm run pack:dry-run`
 
-4. Review the final `dist/angular-django2/package.json` and README if you changed package metadata or docs.
+5. Review the final `dist/angular-django2/package.json` and README if you changed package metadata or docs.
 
-5. Commit the changed manifests and lockfile, tag the release, and push:
+6. Commit the changed manifests and lockfile, tag the release, and push:
 
    ```bash
    git add package.json package-lock.json projects/angular-django2/package.json README.md docs/RELEASING.md
@@ -64,13 +79,25 @@ The `Publish npm package` workflow:
 
 Use the `npm-tag` workflow input to publish under `latest`, `next`, or another dist-tag.
 
+Recommended setup:
+
+- configure npm Trusted Publisher on npmjs.com for repository `shlomoa/angular-django2`
+- point it at workflow filename `publish.yml`
+- keep the workflow on GitHub-hosted runners
+
+Fallback setup:
+
+- store `NPM_TOKEN` as a repository secret until you migrate to Trusted Publisher
+
 ## Local Publish Alternative
 
 If you prefer to publish locally after validation:
 
 ```bash
-npm publish ./dist/angular-django2 --access public
+npm publish ./dist/angular-django2
 ```
+
+If the package is later renamed to a scoped package, use `npm publish ./dist/angular-django2 --access public`.
 
 ## Recommended Order Of Operations
 
@@ -79,3 +106,8 @@ npm publish ./dist/angular-django2 --access public
 3. Confirm the dry-run package contents look correct.
 4. Commit and tag.
 5. Publish locally or via GitHub Actions.
+
+## Notes
+
+- the first successful publish creates the npm package page automatically
+- `angular-django2` is currently unscoped, so the name must be globally unique on npm

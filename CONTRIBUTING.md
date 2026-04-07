@@ -35,4 +35,4 @@
 
 ## Release Prep
 
-Use the documented release flow in [docs/RELEASING.md](./angular-django2/docs/RELEASING.md).
+Use the documented release flow in [docs/RELEASING.md](./docs/RELEASING.md).

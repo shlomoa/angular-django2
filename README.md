@@ -151,6 +151,16 @@ Verify the package can be built and published without actually publishing it:
 npm run pack:dry-run
 ```
 
+## npm Publish Prerequisites
+
+Before the first real publish:
+
+- confirm the unscoped package name is still available with `npm view angular-django2`
+- sign in with `npm login` and verify with `npm whoami`
+- enable npm 2FA, or use a granular token with bypass 2FA if publishing non-interactively
+
+The first successful publish creates the package page on npmjs.com automatically.
+
 ## Custom Generate Commands
 
 This package publishes an Angular CLI schematics collection. After installing it in a consuming workspace you can use commands such as:
@@ -218,15 +228,26 @@ After `ng add angular-django2`, you can also use the specialized commands throug
    ```
 
 5. Publish with one of these options:
-   - Trigger the `Publish npm package` GitHub Actions workflow.
-   - Publish locally with `npm publish ./dist/angular-django2 --access public`.
+   - Preferred: configure npm Trusted Publisher for `.github/workflows/publish.yml`, then trigger the `Publish npm package` GitHub Actions workflow.
+   - Current workflow fallback: add an `NPM_TOKEN` secret and trigger the `Publish npm package` GitHub Actions workflow.
+   - Publish locally with `npm publish ./dist/angular-django2`.
+
+   If the package name later changes to a scoped package such as `@scope/angular-django2`, publish with `--access public`.
 
 ## GitHub Actions
 
 - `CI`: installs dependencies, checks formatting, runs lint, runs tests, builds the library, and verifies an npm publish dry-run on pushes and pull requests.
-- `Publish npm package`: installs dependencies, checks formatting, runs lint and tests, builds the package, and publishes it to npm using `NPM_TOKEN`.
+- `Publish npm package`: installs dependencies, checks formatting, runs lint and tests, builds the package, and publishes it to npm.
 
-For the publish workflow, add an `NPM_TOKEN` repository secret with publish access to the npm package.
+Recommended npm setup:
+
+- use npm Trusted Publisher with GitHub Actions for token-free publishing
+- keep the workflow on GitHub-hosted runners
+
+Current workflow compatibility:
+
+- the checked-in workflow still supports `NPM_TOKEN`
+- if you keep the token path, use a granular token with only the required publish access
 
 ## References
 
@@ -234,3 +255,5 @@ For the publish workflow, add an `NPM_TOKEN` repository secret with publish acce
 - Schematics for libraries: https://angular.dev/tools/cli/schematics-for-libraries
 - Generating code using schematics: https://angular.dev/tools/cli/schematics
 - Workspace schematic collections: https://angular.dev/reference/configs/workspace-config
+- npm trusted publishers: https://docs.npmjs.com/trusted-publishers/
+- npm 2FA requirements: https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/
