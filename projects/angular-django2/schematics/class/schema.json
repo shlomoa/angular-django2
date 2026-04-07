@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Class",
+  "title": "angular-django2 class schematic",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The class name."
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "The destination path."
+    },
+    "project": {
+      "type": "string",
+      "description": "The target project."
+    }
+  },
+  "required": ["name"]
+}

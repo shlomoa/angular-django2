@@ -1,0 +1,77 @@
+{
+  "name": "angular-django2",
+  "version": "0.1.0",
+  "description": "Angular library workspace for Django-friendly integration primitives and custom Angular CLI schematics.",
+  "scripts": {
+    "ng": "ng",
+    "build": "npm run sync:package-metadata && npm run build:library && npm run build:schematics",
+    "build:library": "ng build angular-django2",
+    "build:schematics": "tsc -p projects/angular-django2/tsconfig.schematics.json && copyfiles -u 2 projects/angular-django2/schematics/collection.json projects/angular-django2/schematics/*/schema.json dist/angular-django2",
+    "build:watch": "npm run sync:package-metadata && ng build angular-django2 --watch --configuration development",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "pack:dry-run": "npm run build && npm publish ./dist/angular-django2 --dry-run",
+    "release:prepare": "npm run format:check && npm run lint && npm run test:ci && npm run pack:dry-run",
+    "sync:package-metadata": "node tools/sync-package-metadata.mjs",
+    "test": "ng test angular-django2",
+    "test:ci": "npm run test:node && ng test angular-django2 --watch=false",
+    "test:node": "vitest run --config vitest.config.mts",
+    "test:node:watch": "vitest --config vitest.config.mts"
+  },
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "license": "MIT",
+  "homepage": "https://github.com/shlomoa/angular-django2#readme",
+  "bugs": {
+    "url": "https://github.com/shlomoa/angular-django2/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shlomoa/angular-django2.git"
+  },
+  "keywords": [
+    "angular",
+    "django",
+    "csrf",
+    "http",
+    "library",
+    "npm",
+    "schematics"
+  ],
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || ^24.0.0",
+    "npm": ">=11"
+  },
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/core": "^21.2.6",
+    "@angular-devkit/schematics": "^21.2.6",
+    "@angular/build": "^21.2.6",
+    "@angular/cli": "^21.2.6",
+    "@angular/compiler-cli": "^21.2.0",
+    "@eslint/js": "^10.0.1",
+    "@schematics/angular": "^21.2.6",
+    "@types/node": "^25.5.2",
+    "angular-eslint": "^21.3.1",
+    "copyfiles": "^2.4.1",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
+    "jsdom": "^28.0.0",
+    "ng-packagr": "^21.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.58.0",
+    "vitest": "^4.0.8"
+  }
+}

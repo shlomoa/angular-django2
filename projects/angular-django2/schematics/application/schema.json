@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Application",
+  "title": "angular-django2 application schematic",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The application name."
+    },
+    "routing": {
+      "type": "boolean",
+      "default": true
+    },
+    "standalone": {
+      "type": "boolean",
+      "default": true
+    },
+    "style": {
+      "type": "string"
+    }
+  },
+  "required": ["name"]
+}

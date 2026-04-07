@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2NgAdd",
+  "title": "angular-django2 ng-add schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {}
+}

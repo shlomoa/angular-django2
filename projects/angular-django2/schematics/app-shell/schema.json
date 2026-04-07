@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2AppShell",
+  "title": "angular-django2 app-shell schematic",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "The target application project."
+    }
+  }
+}

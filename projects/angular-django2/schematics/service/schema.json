@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Service",
+  "title": "angular-django2 service schematic",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The service name."
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "The destination path."
+    },
+    "project": {
+      "type": "string",
+      "description": "The target project."
+    }
+  },
+  "required": ["name"]
+}

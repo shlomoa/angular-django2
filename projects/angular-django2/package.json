@@ -1,0 +1,38 @@
+{
+  "name": "angular-django2",
+  "version": "0.1.0",
+  "description": "Angular library workspace for Django-friendly integration primitives and custom Angular CLI schematics.",
+  "keywords": [
+    "angular",
+    "django",
+    "csrf",
+    "http",
+    "library",
+    "npm",
+    "schematics"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/shlomoa/angular-django2#readme",
+  "bugs": {
+    "url": "https://github.com/shlomoa/angular-django2/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shlomoa/angular-django2.git"
+  },
+  "schematics": "./schematics/collection.json",
+  "ng-add": {
+    "save": "devDependencies"
+  },
+  "peerDependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/core": "^21.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

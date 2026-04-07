@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "ng-add": {
+      "description": "Register angular-django2 as a schematic collection in angular.json.",
+      "factory": "./ng-add/index#ngAdd",
+      "schema": "./ng-add/schema.json"
+    },
+    "application": {
+      "description": "Generate an Angular application using the angular-django2 collection.",
+      "factory": "./application/index#application",
+      "schema": "./application/schema.json"
+    },
+    "app-shell": {
+      "description": "Generate an Angular app shell using the angular-django2 collection.",
+      "factory": "./app-shell/index#appShell",
+      "schema": "./app-shell/schema.json"
+    },
+    "class": {
+      "description": "Generate a class using the angular-django2 collection.",
+      "factory": "./class/index#classGenerator",
+      "schema": "./class/schema.json"
+    },
+    "component": {
+      "description": "Generate a standalone OnPush component using the angular-django2 collection.",
+      "factory": "./component/index#component",
+      "schema": "./component/schema.json"
+    },
+    "service": {
+      "description": "Generate a service using the angular-django2 collection.",
+      "factory": "./service/index#service",
+      "schema": "./service/schema.json"
+    }
+  }
+}
