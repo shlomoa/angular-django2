@@ -37,3 +37,5 @@ jobs:
 
       - name: Verify npm package dry run
         run: npm publish ./dist/angular-django2 --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
