@@ -1,0 +1,138 @@
+# Repository Requirements
+
+This document summarizes the requirements already established for `angular-django2`.
+It is a consolidation of the current repo guidance, not a new source of truth.
+If this file drifts, use `AGENTS.md`, the root `package.json`, `README.md`, `projects/angular-django2/README.md`, and `docs/RELEASING.md` to resolve the mismatch.
+
+## 1. Repository Identity
+
+- The repository is an Angular 21 library workspace.
+- The repository exists to produce a Django-friendly npm package named `angular-django2`.
+- Treat the project as a publishable Angular library by default, not as an Angular application, unless work explicitly targets app generation behavior.
+- The library source of truth is `projects/angular-django2`.
+- The publishable build output is `dist/angular-django2`.
+- Shared commands are defined in the root `package.json`.
+
+## 2. Product Requirements
+
+- The package must ship two main capabilities:
+  - runtime Angular utilities for Django-oriented configuration
+  - an Angular CLI schematics collection for custom `ng generate` flows
+- The public runtime API must stay narrow, typed, and intentional.
+- Standalone Angular patterns and provider-style APIs are preferred over module-centric patterns.
+- Django integration concerns must remain explicit in code and documentation, especially:
+  - configuration
+  - URL handling
+  - auth boundaries
+  - CSRF naming
+  - serialization behavior
+- Hidden behavior and speculative abstractions should be avoided.
+- Generated-looking boilerplate that does not add package value should be avoided.
+
+## 3. Current Runtime Surface
+
+The currently required runtime surface is intentionally small and centered on configuration helpers:
+
+- `provideAngularDjango2(config?)`
+- `ANGULAR_DJANGO2_CONFIG`
+- `AngularDjango2Service`
+- configuration types exported from the library entrypoint
+
+The resolved configuration defaults are currently:
+
+- `apiBaseUrl: ''`
+- `csrfCookieName: 'csrftoken'`
+- `csrfHeaderName: 'X-CSRFToken'`
+- `withCredentials: true`
+
+The service behavior currently expected by the repo docs and code is:
+
+- build API URLs from the configured base URL
+- expose a helper for building CSRF header objects
+
+## 4. Schematics Requirements
+
+- The package must publish a schematics collection.
+- The currently supported schematics are:
+  - `ng-add`
+  - `application`
+  - `app-shell`
+  - `class`
+  - `component`
+  - `service`
+- The schematics should remain thin wrappers around Angular CLI behavior until there is a concrete package-specific reason to add more customization.
+- The documented defaults currently expected are:
+  - `application`: `standalone: true`, `routing: true`
+  - `component`: `standalone: true`, `changeDetection: 'OnPush'`
+  - `service`, `class`, and `app-shell`: pass-through behavior
+  - `ng add angular-django2`: register or prepend `angular-django2` in `cli.schematicCollections`
+
+## 5. Tooling And Verification Requirements
+
+- Development should use the root package scripts instead of ad hoc commands whenever possible.
+- Only report a command as successful if it was actually run.
+- The standard verification flow should include the shared scripts already defined by the repo.
+- The most important verification commands called out in repo guidance are:
+  - `npm run format:check`
+  - `npm run lint`
+  - `npm run test:ci`
+  - `npm run build`
+  - `npm run pack:dry-run`
+- `npm run release:prepare` is the release validation command and currently runs:
+  - `npm run format:check`
+  - `npm run lint`
+  - `npm run test:ci`
+  - `npm run pack:dry-run`
+- Packaging validation should use `npm pack ./dist/angular-django2 --dry-run` rather than `npm publish --dry-run`.
+
+## 6. Environment Requirements
+
+- Supported Node.js versions: `^20.19.0 || ^22.12.0 || ^24.0.0`
+- Supported npm version: `>=11`
+
+## 7. Documentation Requirements
+
+- Documentation must stay aligned with the actual workspace and package behavior.
+- Update documentation whenever commands, package behavior, or release behavior changes.
+- At minimum, keep these files synchronized with reality:
+  - `README.md`
+  - `projects/angular-django2/README.md`
+  - `docs/RELEASING.md`
+  - `AGENTS.md`
+  - `.github/copilot-instructions.md`
+  - `CLAUDE.md`
+  - `GEMINI.md`
+  - `docs/REQUIREMENTS.md`
+- Developer-instruction files must also stay aligned with the canonical guidance:
+  - `AGENTS.md` is the canonical shared instruction file
+  - `CLAUDE.md`, `GEMINI.md`, and `.github/copilot-instructions.md` should remain aligned with it
+- Usage examples should prefer Angular.dev-style standalone setup and `provide*` APIs.
+
+## 8. Change Management Requirements
+
+- Prefer small, reviewable changes.
+- Keep the public API small unless there is a clear package-level need to expand it.
+- Use existing files and current repo behavior as the source of truth before introducing new patterns.
+
+## 9. Release Requirements
+
+- The release flow must build from the publishable output in `dist/angular-django2`.
+- The published tarball is expected to contain:
+  - the compiled runtime library
+  - the compiled schematics collection
+  - the generated package README and manifest
+- Before release, confirm the package state with the documented release flow in `docs/RELEASING.md`.
+- The current unscoped package name `angular-django2` must remain globally available on npm before first publish.
+- Preferred publishing setup:
+  - npm Trusted Publisher configured for `.github/workflows/publish.yml`
+  - GitHub-hosted runners
+- Current fallback publishing setup:
+  - use the `NPM_TOKEN` repository secret
+- Local publishing, when used, should publish `./dist/angular-django2`.
+
+## 10. Non-Goals And Boundaries
+
+- Do not treat this repo like a generic Angular app scaffold.
+- Do not widen the runtime API or schematics behavior without a concrete use case.
+- Do not hide Django-specific integration behavior behind unclear defaults.
+- Do not let docs, release instructions, and package behavior drift apart.
