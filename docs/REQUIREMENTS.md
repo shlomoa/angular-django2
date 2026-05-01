@@ -4,6 +4,11 @@ This document summarizes the requirements already established for `angular-djang
 It is a consolidation of the current repo guidance, not a new source of truth.
 If this file drifts, use `AGENTS.md`, the root `package.json`, `README.md`, `projects/angular-django2/README.md`, and `docs/RELEASING.md` to resolve the mismatch.
 
+## Terminology
+
+- **angular-django2** (also referred to as **ngdj**): This repository — an Angular 21 library workspace that produces a Django-friendly npm package.
+- **django-angular3**: A companion Django package that provides Django management commands (`django-admin`) for Angular workspace operations, including automatic invocation of `ng add angular-django2`.
+
 ## 1. Repository Identity
 
 - The repository is an Angular 21 library workspace.
@@ -67,7 +72,14 @@ The service behavior currently expected by the repo docs and code is:
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `ng add angular-django2`: register or prepend `angular-django2` in `cli.schematicCollections`
 
-## 5. Tooling And Verification Requirements
+## 5. Django Integration Requirements
+
+- This library is designed to integrate with [django-angular3](https://github.com/shlomoa/django-angular3).
+- django-angular3 provides Django management commands using `django-admin` for Angular workspace operations.
+- The `ng add angular-django2` schematic is invoked automatically by django-angular3 to register the schematic collection.
+- Documentation and code should reflect this integration relationship where relevant.
+
+## 6. Tooling And Verification Requirements
 
 - Development should use the root package scripts instead of ad hoc commands whenever possible.
 - Only report a command as successful if it was actually run.
@@ -85,12 +97,12 @@ The service behavior currently expected by the repo docs and code is:
   - `npm run pack:dry-run`
 - Packaging validation should use `npm pack ./dist/angular-django2 --dry-run` rather than `npm publish --dry-run`.
 
-## 6. Environment Requirements
+## 7. Environment Requirements
 
 - Supported Node.js versions: `^20.19.0 || ^22.12.0 || ^24.0.0`
 - Supported npm version: `>=11`
 
-## 7. Documentation Requirements
+## 8. Documentation Requirements
 
 - Documentation must stay aligned with the actual workspace and package behavior.
 - Update documentation whenever commands, package behavior, or release behavior changes.
@@ -108,13 +120,13 @@ The service behavior currently expected by the repo docs and code is:
   - `CLAUDE.md`, `GEMINI.md`, and `.github/copilot-instructions.md` should remain aligned with it
 - Usage examples should prefer Angular.dev-style standalone setup and `provide*` APIs.
 
-## 8. Change Management Requirements
+## 9. Change Management Requirements
 
 - Prefer small, reviewable changes.
 - Keep the public API small unless there is a clear package-level need to expand it.
 - Use existing files and current repo behavior as the source of truth before introducing new patterns.
 
-## 9. Release Requirements
+## 10. Release Requirements
 
 - The release flow must build from the publishable output in `dist/angular-django2`.
 - The published tarball is expected to contain:
@@ -130,7 +142,7 @@ The service behavior currently expected by the repo docs and code is:
   - use the `NPM_TOKEN` repository secret
 - Local publishing, when used, should publish `./dist/angular-django2`.
 
-## 10. Non-Goals And Boundaries
+## 11. Non-Goals And Boundaries
 
 - Do not treat this repo like a generic Angular app scaffold.
 - Do not widen the runtime API or schematics behavior without a concrete use case.
