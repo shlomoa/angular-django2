@@ -32,7 +32,7 @@ There are two main sections in this document representing two strategies for wor
 - `ng-add` — functional, with unit tests and `CONTRACT.md`
 - `app-shell`, `application`, `class`, `component`, `service` — stubs only (empty `index.ts` + `schema.json`)
 
-**Release state:** v0.1.0, pre-release; published to npm as [`angular-django2`](https://www.npmjs.com/package/angular-django2) — not production-ready
+**Release state:** v0.1.1, pre-release; published to npm as [`angular-django2`](https://www.npmjs.com/package/angular-django2) — not production-ready
 
 ## What To Optimize For
 

@@ -1,6 +1,6 @@
 {
   "name": "angular-django2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Angular library workspace for Django-friendly integration primitives and custom Angular CLI schematics.",
   "scripts": {
     "ng": "ng",
