@@ -21,7 +21,9 @@ import { appShell } from '../projects/angular-django2/schematics/app-shell/index
 import { application } from '../projects/angular-django2/schematics/application/index';
 import { classGenerator } from '../projects/angular-django2/schematics/class/index';
 import { component } from '../projects/angular-django2/schematics/component/index';
+import { materialSetup } from '../projects/angular-django2/schematics/material-setup/index';
 import { ngAdd } from '../projects/angular-django2/schematics/ng-add/index';
+import { projectStructure } from '../projects/angular-django2/schematics/project-structure/index';
 import { service } from '../projects/angular-django2/schematics/service/index';
 
 describe('angular-django2 schematics', () => {
@@ -222,5 +224,372 @@ describe('angular-django2 schematics', () => {
     if (match) {
       expect(match[1]).toBe('  ');
     }
+  });
+
+  describe('material-setup schematic', () => {
+    it('TC-M1: adds prebuilt theme CSS to angular.json styles array', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {
+              'demo-app': {
+                sourceRoot: 'projects/demo-app/src',
+                architect: {
+                  build: {
+                    options: {
+                      styles: ['projects/demo-app/src/styles.scss'],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      );
+
+      const updatedTree = materialSetup({
+        project: 'demo-app',
+        theme: 'indigo-pink',
+      })(tree, {} as never) as Tree;
+
+      const angularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
+      const styles = angularJson.projects['demo-app'].architect.build.options.styles;
+
+      expect(styles).toContain('@angular/material/prebuilt-themes/indigo-pink.css');
+      expect(styles).toContain('projects/demo-app/src/styles.scss');
+    });
+
+    it('TC-M2: adds custom theme SCSS to styles.scss', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {
+              'demo-app': {
+                sourceRoot: 'projects/demo-app/src',
+                architect: {
+                  build: {
+                    options: {
+                      styles: ['projects/demo-app/src/styles.scss'],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      );
+      tree.create('/projects/demo-app/src/styles.scss', '/* existing styles */\n');
+
+      const updatedTree = materialSetup({
+        project: 'demo-app',
+        theme: 'custom',
+      })(tree, {} as never) as Tree;
+
+      const stylesContent = updatedTree.read('/projects/demo-app/src/styles.scss')!.toString();
+
+      expect(stylesContent).toContain("@use '@angular/material' as mat");
+      expect(stylesContent).toContain('mat.define-palette');
+      expect(stylesContent).toContain('mat.define-light-theme');
+      expect(stylesContent).toContain('/* existing styles */');
+    });
+
+    it('TC-M3: omits typography config when typography is false', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {
+              'demo-app': {
+                sourceRoot: 'projects/demo-app/src',
+                architect: {
+                  build: {
+                    options: {
+                      styles: ['projects/demo-app/src/styles.scss'],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      );
+      tree.create('/projects/demo-app/src/styles.scss', '');
+
+      const updatedTree = materialSetup({
+        project: 'demo-app',
+        theme: 'custom',
+        typography: false,
+      })(tree, {} as never) as Tree;
+
+      const stylesContent = updatedTree.read('/projects/demo-app/src/styles.scss')!.toString();
+
+      expect(stylesContent).toContain("@use '@angular/material' as mat");
+      expect(stylesContent).not.toContain('mat.define-typography-config()');
+    });
+
+    it('TC-M4: is idempotent when Material is already configured with prebuilt theme', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {
+              'demo-app': {
+                sourceRoot: 'projects/demo-app/src',
+                architect: {
+                  build: {
+                    options: {
+                      styles: [
+                        '@angular/material/prebuilt-themes/indigo-pink.css',
+                        'projects/demo-app/src/styles.scss',
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      );
+
+      const updatedTree = materialSetup({
+        project: 'demo-app',
+        theme: 'indigo-pink',
+      })(tree, {} as never) as Tree;
+
+      const angularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
+      const styles = angularJson.projects['demo-app'].architect.build.options.styles;
+
+      expect(styles).toEqual([
+        '@angular/material/prebuilt-themes/indigo-pink.css',
+        'projects/demo-app/src/styles.scss',
+      ]);
+    });
+
+    it('TC-M4: is idempotent when Material custom theme is already configured', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {
+              'demo-app': {
+                sourceRoot: 'projects/demo-app/src',
+                architect: {
+                  build: {
+                    options: {
+                      styles: ['projects/demo-app/src/styles.scss'],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      );
+      tree.create(
+        '/projects/demo-app/src/styles.scss',
+        "@use '@angular/material' as mat;\n\n/* existing custom theme */\n",
+      );
+
+      const updatedTree = materialSetup({
+        project: 'demo-app',
+        theme: 'custom',
+      })(tree, {} as never) as Tree;
+
+      const stylesContent = updatedTree.read('/projects/demo-app/src/styles.scss')!.toString();
+
+      expect(stylesContent).toBe(
+        "@use '@angular/material' as mat;\n\n/* existing custom theme */\n",
+      );
+    });
+
+    it('throws when project is not found', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {},
+          },
+          null,
+          2,
+        ),
+      );
+
+      expect(() =>
+        materialSetup({
+          project: 'non-existent',
+        })(tree, {} as never),
+      ).toThrow(SchematicsException);
+      expect(() =>
+        materialSetup({
+          project: 'non-existent',
+        })(tree, {} as never),
+      ).toThrow('Project "non-existent" not found in angular.json.');
+    });
+  });
+
+  describe('project-structure schematic', () => {
+    it('TC-D1: creates all seven index.ts files in the correct directories', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {
+              'demo-app': {
+                sourceRoot: 'projects/demo-app/src',
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      );
+
+      const updatedTree = projectStructure({
+        project: 'demo-app',
+      })(tree, {} as never) as Tree;
+
+      const expectedPaths = [
+        '/projects/demo-app/src/app/core/index.ts',
+        '/projects/demo-app/src/app/shared/components/index.ts',
+        '/projects/demo-app/src/app/shared/pipes/index.ts',
+        '/projects/demo-app/src/app/features/index.ts',
+      ];
+
+      for (const path of expectedPaths) {
+        expect(updatedTree.exists(path)).toBe(true);
+      }
+    });
+
+    it('TC-D2: each index.ts contains valid export statement', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {
+              'demo-app': {
+                sourceRoot: 'projects/demo-app/src',
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      );
+
+      const updatedTree = projectStructure({
+        project: 'demo-app',
+      })(tree, {} as never) as Tree;
+
+      const expectedPaths = [
+        '/projects/demo-app/src/app/core/index.ts',
+        '/projects/demo-app/src/app/shared/components/index.ts',
+        '/projects/demo-app/src/app/shared/pipes/index.ts',
+        '/projects/demo-app/src/app/features/index.ts',
+      ];
+
+      for (const path of expectedPaths) {
+        const content = updatedTree.read(path)!.toString();
+        expect(content).toContain('export {};');
+        expect(content).toContain('// Public API for this directory');
+      }
+    });
+
+    it('TC-D3: is idempotent - does not overwrite existing index.ts files', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {
+              'demo-app': {
+                sourceRoot: 'projects/demo-app/src',
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      );
+
+      // Pre-create one index.ts with custom content
+      tree.create(
+        '/projects/demo-app/src/app/core/index.ts',
+        '// Custom content\nexport { MyService } from "./my-service";\n',
+      );
+
+      const updatedTree = projectStructure({
+        project: 'demo-app',
+      })(tree, {} as never) as Tree;
+
+      // Custom content should be preserved
+      const coreIndexContent = updatedTree
+        .read('/projects/demo-app/src/app/core/index.ts')!
+        .toString();
+      expect(coreIndexContent).toBe(
+        '// Custom content\nexport { MyService } from "./my-service";\n',
+      );
+
+      // Other files should be created
+      expect(updatedTree.exists('/projects/demo-app/src/app/shared/components/index.ts')).toBe(
+        true,
+      );
+      expect(updatedTree.exists('/projects/demo-app/src/app/shared/pipes/index.ts')).toBe(true);
+      expect(updatedTree.exists('/projects/demo-app/src/app/features/index.ts')).toBe(true);
+    });
+
+    it('throws when project is not found', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify(
+          {
+            version: 1,
+            projects: {},
+          },
+          null,
+          2,
+        ),
+      );
+
+      expect(() =>
+        projectStructure({
+          project: 'non-existent',
+        })(tree, {} as never),
+      ).toThrow(SchematicsException);
+      expect(() =>
+        projectStructure({
+          project: 'non-existent',
+        })(tree, {} as never),
+      ).toThrow('Project "non-existent" not found in angular.json.');
+    });
   });
 });

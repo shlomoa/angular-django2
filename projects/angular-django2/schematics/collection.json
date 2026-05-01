@@ -30,6 +30,16 @@
       "description": "Generate a service using the angular-django2 collection.",
       "factory": "./service/index#service",
       "schema": "./service/schema.json"
+    },
+    "material-setup": {
+      "description": "Configure Angular Material with theme and typography in an Angular project.",
+      "factory": "./material-setup/index#materialSetup",
+      "schema": "./material-setup/schema.json"
+    },
+    "project-structure": {
+      "description": "Create standard project directory structure (core/, shared/, features/) with barrel exports.",
+      "factory": "./project-structure/index#projectStructure",
+      "schema": "./project-structure/schema.json"
     }
   }
 }
