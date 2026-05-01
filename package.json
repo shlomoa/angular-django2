@@ -15,7 +15,7 @@
     "pack:dry-run": "npm run build && npm pack ./dist/angular-django2 --dry-run",
     "release:prepare": "npm run format:check && npm run lint && npm run test:ci && npm run pack:dry-run",
     "sync:package-metadata": "node tools/sync-package-metadata.mjs",
-    "test": "ng test angular-django2",
+    "test": "ng test --watch=false angular-django2",
     "test:ci": "npm run test:node && ng test angular-django2 --watch=false",
     "test:node": "vitest run --config vitest.config.mts",
     "test:node:watch": "vitest --config vitest.config.mts"
