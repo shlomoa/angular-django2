@@ -7,7 +7,7 @@ The initial package surface is intentionally small:
 - `provideAngularDjango2(...)` for root-level configuration
 - `ANGULAR_DJANGO2_CONFIG` for DI-based access to resolved config
 - `AngularDjango2Service` for URL and CSRF helper methods
-- schematics for `application`, `service`, `class`, `app-shell`, and `component`
+- schematics for `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, and `project-structure`
 
 ## Usage
 
@@ -47,6 +47,8 @@ After installing the package in another Angular workspace, you can run:
 
 ```bash
 ng generate angular-django2:application my-app
+ng generate angular-django2:material-setup --project=my-app
+ng generate angular-django2:project-structure --project=my-app
 ng generate angular-django2:app-shell --project my-app
 ng generate angular-django2:component dashboard-card
 ng generate angular-django2:service django-api
@@ -55,7 +57,10 @@ ng generate angular-django2:class api-contract
 
 Current defaults:
 
-- `application`: `standalone: true`, `routing: true`
+- `application`: `standalone: true`, `routing: true`, `style: 'scss'`
+- `material-setup`: configures Angular Material with theme and providers
+  - Options: `--theme` (indigo-pink, deeppurple-amber, pink-bluegrey, purple-green, custom), `--typography`, `--animations`
+- `project-structure`: creates standard directory structure (`core/`, `shared/`, `features/`) with barrel exports
 - `component`: `standalone: true`, `changeDetection: 'OnPush'`
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
 

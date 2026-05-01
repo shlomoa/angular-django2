@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2ProjectStructure",
+  "title": "angular-django2 project-structure schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Name of the Angular project.",
+      "$default": {
+        "$source": "projectName"
+      }
+    },
+    "prefix": {
+      "type": "string",
+      "description": "Component selector prefix (forwarded from application schematic).",
+      "default": "app"
+    }
+  },
+  "required": ["project"]
+}

@@ -25,7 +25,7 @@ This repository is already set up around that model and targets Angular 21.
 
 - Angular 21 library workspace in `projects/angular-django2`
 - npm-ready package metadata for the published library
-- custom schematics collection for `application`, `service`, `class`, `app-shell`, and `component`
+- custom schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, and `project-structure`
 - Angular runtime tests through the Angular 21 Vitest-based test builder
 - Node-side Vitest tests for schematics and tooling
 - ESLint flat-config linting for library code, schematics, tests, and tools
@@ -173,6 +173,8 @@ This package publishes an Angular CLI schematics collection. After installing it
 
 ```bash
 ng generate angular-django2:application my-app
+ng generate angular-django2:material-setup --project=my-app
+ng generate angular-django2:project-structure --project=my-app
 ng generate angular-django2:component dashboard-card
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
@@ -181,7 +183,12 @@ ng generate angular-django2:app-shell
 
 The current wrappers deliberately stay close to Angular CLI behavior while applying a few project defaults:
 
-- `application`: defaults to `standalone: true` and `routing: true`
+- `application`: defaults to `standalone: true`, `routing: true`, and `style: 'scss'`
+- `material-setup`: configures Angular Material in an existing project with theme and providers
+  - Options: `--theme` (indigo-pink, deeppurple-amber, pink-bluegrey, purple-green, custom), `--typography`, `--animations`
+  - Updates `angular.json` styles array for prebuilt themes or generates custom theme in `styles.scss`
+- `project-structure`: creates standard directory structure with barrel exports
+  - Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/` directories with `index.ts` files
 - `component`: defaults to `standalone: true` and `changeDetection: 'OnPush'`
 - `service`, `class`, and `app-shell`: forward options directly to Angular CLI
 - `ng add angular-django2`: prepends `angular-django2` to `cli.schematicCollections`

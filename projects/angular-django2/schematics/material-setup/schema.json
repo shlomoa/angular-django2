@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2MaterialSetup",
+  "title": "angular-django2 material-setup schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Name of the Angular project inside the workspace.",
+      "$default": {
+        "$source": "projectName"
+      }
+    },
+    "theme": {
+      "type": "string",
+      "description": "Angular Material prebuilt theme name.",
+      "default": "indigo-pink",
+      "enum": ["indigo-pink", "deeppurple-amber", "pink-bluegrey", "purple-green", "custom"]
+    },
+    "typography": {
+      "type": "boolean",
+      "description": "Include Material typography styles.",
+      "default": true
+    },
+    "animations": {
+      "type": "boolean",
+      "description": "Enable Angular animations.",
+      "default": true
+    }
+  },
+  "required": ["project"]
+}
