@@ -23,6 +23,7 @@ import { classGenerator } from '../projects/angular-django2/schematics/class/ind
 import { component } from '../projects/angular-django2/schematics/component/index';
 import { materialSetup } from '../projects/angular-django2/schematics/material-setup/index';
 import { ngAdd } from '../projects/angular-django2/schematics/ng-add/index';
+import { ngApi } from '../projects/angular-django2/schematics/ng-api/index';
 import { ngApp } from '../projects/angular-django2/schematics/ng-app/index';
 import { projectStructure } from '../projects/angular-django2/schematics/project-structure/index';
 import { service } from '../projects/angular-django2/schematics/service/index';
@@ -724,6 +725,219 @@ describe('angular-django2 schematics', () => {
       expect(context.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Could not find package.json'),
       );
+    });
+  });
+
+  describe('ng-api schematic', () => {
+    it('TC-API-01: adds ng-openapi-gen to devDependencies', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/package.json',
+        JSON.stringify(
+          {
+            name: 'test-app',
+            version: '1.0.0',
+            dependencies: {},
+            devDependencies: {},
+          },
+          null,
+          2,
+        ),
+      );
+
+      const context = {
+        addTask: vi.fn(),
+        logger: {
+          info: vi.fn(),
+          warn: vi.fn(),
+        },
+      } as never;
+
+      const updatedTree = ngApi({})(tree, context) as Tree;
+      const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+
+      expect(packageJson.devDependencies['ng-openapi-gen']).toBeDefined();
+      expect(packageJson.devDependencies['ng-openapi-gen']).toMatch(/^\^0\.\d+\.\d+$/);
+      expect(context.addTask).toHaveBeenCalled();
+    });
+
+    it('TC-API-02: generates ng-openapi-gen.json config file with default options', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({})(tree, context) as Tree;
+      const configContent = updatedTree.read('/ng-openapi-gen.json')!.toString();
+      const config = JSON.parse(configContent);
+
+      expect(config).toEqual({
+        $schema: 'node_modules/ng-openapi-gen/ng-openapi-gen-schema.json',
+        input: 'openapi.json',
+        output: 'src/app/api',
+      });
+    });
+
+    it('TC-API-03: generates ng-openapi-gen.json config file with custom options', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({
+        inputPath: 'schema/api.json',
+        outputPath: 'src/generated/api',
+      })(tree, context) as Tree;
+
+      const configContent = updatedTree.read('/ng-openapi-gen.json')!.toString();
+      const config = JSON.parse(configContent);
+
+      expect(config.input).toBe('schema/api.json');
+      expect(config.output).toBe('src/generated/api');
+    });
+
+    it('TC-API-04: adds generate:api script to package.json', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/package.json',
+        JSON.stringify(
+          {
+            name: 'test-app',
+            scripts: {
+              start: 'ng serve',
+            },
+          },
+          null,
+          2,
+        ),
+      );
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({})(tree, context) as Tree;
+      const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+
+      expect(packageJson.scripts['generate:api']).toBe('ng-openapi-gen');
+      expect(packageJson.scripts.start).toBe('ng serve'); // Preserves existing scripts
+    });
+
+    it('TC-API-05: is idempotent when run multiple times', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/package.json',
+        JSON.stringify(
+          {
+            name: 'test-app',
+            devDependencies: {},
+            scripts: {},
+          },
+          null,
+          2,
+        ),
+      );
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      // First run
+      let updatedTree = ngApi({})(tree, context) as Tree;
+      const firstPackageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+      const firstConfig = updatedTree.read('/ng-openapi-gen.json')!.toString();
+
+      // Second run
+      updatedTree = ngApi({})(updatedTree, context) as Tree;
+      const secondPackageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+      const secondConfig = updatedTree.read('/ng-openapi-gen.json')!.toString();
+
+      // Verify nothing changed
+      expect(secondPackageJson).toEqual(firstPackageJson);
+      expect(secondConfig).toBe(firstConfig);
+
+      // Verify logger messages indicate idempotency
+      expect(context.logger.info).toHaveBeenCalledWith(expect.stringContaining('already'));
+    });
+
+    it('TC-API-06: handles missing package.json gracefully', () => {
+      const tree = Tree.empty();
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      // Should not throw
+      expect(() => ngApi({})(tree, context)).not.toThrow();
+
+      expect(context.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not find package.json'),
+      );
+    });
+
+    it('TC-API-07: preserves existing devDependencies', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/package.json',
+        JSON.stringify(
+          {
+            name: 'test-app',
+            devDependencies: {
+              typescript: '^5.0.0',
+              '@angular/cli': '^21.0.0',
+            },
+          },
+          null,
+          2,
+        ),
+      );
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({})(tree, context) as Tree;
+      const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+
+      expect(packageJson.devDependencies.typescript).toBe('^5.0.0');
+      expect(packageJson.devDependencies['@angular/cli']).toBe('^21.0.0');
+      expect(packageJson.devDependencies['ng-openapi-gen']).toBeDefined();
+    });
+
+    it('TC-API-08: creates scripts object if it does not exist', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/package.json',
+        JSON.stringify(
+          {
+            name: 'test-app',
+            version: '1.0.0',
+          },
+          null,
+          2,
+        ),
+      );
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({})(tree, context) as Tree;
+      const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+
+      expect(packageJson.scripts).toBeDefined();
+      expect(packageJson.scripts['generate:api']).toBe('ng-openapi-gen');
     });
   });
 });

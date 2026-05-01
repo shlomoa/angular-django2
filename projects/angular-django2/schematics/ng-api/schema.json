@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2NgApi",
+  "title": "angular-django2 ng-api schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "outputPath": {
+      "type": "string",
+      "description": "Output path for generated API models and services",
+      "default": "src/app/api"
+    },
+    "inputPath": {
+      "type": "string",
+      "description": "Path to the OpenAPI schema file",
+      "default": "openapi.json"
+    }
+  }
+}
