@@ -6,6 +6,7 @@ export function application(options: JsonObject): Rule {
   return externalSchematic('@schematics/angular', 'application', {
     standalone: true,
     routing: true,
+    style: 'scss',
     ...options,
   });
 }
