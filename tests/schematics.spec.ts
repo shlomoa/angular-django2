@@ -42,6 +42,29 @@ describe('angular-django2 schematics', () => {
       name: 'demo-app',
       routing: true,
       standalone: true,
+      style: 'scss',
+    });
+  });
+
+  it('TC-01: application schematic defaults style to scss when not provided', () => {
+    application({ name: 'my-app' });
+
+    expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'application', {
+      name: 'my-app',
+      routing: true,
+      standalone: true,
+      style: 'scss',
+    });
+  });
+
+  it('TC-02: caller-supplied style overrides the scss default', () => {
+    application({ name: 'my-app', style: 'css' });
+
+    expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'application', {
+      name: 'my-app',
+      routing: true,
+      standalone: true,
+      style: 'css',
     });
   });
 
