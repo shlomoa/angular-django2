@@ -40,6 +40,11 @@
       "description": "Create standard project directory structure with barrel exports.",
       "factory": "./project-structure/index#projectStructure",
       "schema": "./project-structure/schema.json"
+    },
+    "ng-app": {
+      "description": "Generate a Django-friendly Angular application with Material UI and app shell.",
+      "factory": "./ng-app/index#ngApp",
+      "schema": "./ng-app/schema.json"
     }
   }
 }
