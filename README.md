@@ -1,5 +1,7 @@
 # angular-django2
 
+**Note:** This repository is a work in progress although published to npm, it's not even alpha. The current state of the package is v0.1.0, pre-release.
+
 `angular-django2` (also referred to as `ngdj`) is an Angular library workspace for building and publishing a Django-friendly Angular package to npm.
 
 The package is set up to ship both:
