@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2NgApp",
+  "title": "angular-django2 ng-app schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The application name.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "theme": {
+      "type": "string",
+      "description": "Angular Material prebuilt theme name.",
+      "default": "indigo-pink",
+      "enum": ["indigo-pink", "deeppurple-amber", "pink-bluegrey", "purple-green", "custom"]
+    },
+    "typography": {
+      "type": "boolean",
+      "description": "Include Material typography styles.",
+      "default": true
+    },
+    "animations": {
+      "type": "boolean",
+      "description": "Enable Angular animations.",
+      "default": true
+    },
+    "routing": {
+      "type": "boolean",
+      "description": "Enable routing.",
+      "default": true
+    },
+    "standalone": {
+      "type": "boolean",
+      "description": "Generate standalone components.",
+      "default": true
+    },
+    "style": {
+      "type": "string",
+      "description": "The stylesheet format.",
+      "default": "scss"
+    },
+    "prefix": {
+      "type": "string",
+      "description": "Component selector prefix.",
+      "default": "app"
+    }
+  },
+  "required": ["name"]
+}
