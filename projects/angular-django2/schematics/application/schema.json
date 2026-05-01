@@ -18,7 +18,9 @@
       "default": true
     },
     "style": {
-      "type": "string"
+      "type": "string",
+      "default": "scss",
+      "description": "The file extension or preprocessor to use for style files."
     }
   },
   "required": ["name"]

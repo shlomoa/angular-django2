@@ -44,6 +44,7 @@ describe('angular-django2 schematics', () => {
       name: 'demo-app',
       routing: true,
       standalone: true,
+      style: 'scss',
     });
   });
 
