@@ -93,6 +93,4 @@ All behavior is verified in `tests/schematics.spec.ts`:
 
 ## Related
 
-- djng skill: `ng-workspace` (`.claude/skills/ng-workspace/SKILL.md`)
-- djng command: `ng_add` (`django_angular3/angular.py :: build_ng_add_invocations`)
-- djng CLI: `python -m django_angular3.cli ng_add <config> [--dry-run]`
+This schematic is used by the [django-angular3](https://github.com/shlomoa/django-angular3) integration package to register `angular-django2` (ngdj) as a schematic collection. The django-angular3 package invokes this schematic using `django-admin` commands.

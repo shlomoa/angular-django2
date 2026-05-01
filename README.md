@@ -1,11 +1,13 @@
 # angular-django2
 
-`angular-django2` is an Angular library workspace for building and publishing a Django-friendly Angular package to npm.
+`angular-django2` (also referred to as `ngdj`) is an Angular library workspace for building and publishing a Django-friendly Angular package to npm.
 
 The package is set up to ship both:
 
 - runtime Angular utilities for Django-oriented configuration
 - Angular CLI schematics for custom `ng generate` flows
+
+This library is designed to integrate with [django-angular3](https://github.com/shlomoa/django-angular3), which provides Django management commands for Angular workspace operations.
 
 The workspace follows the current Angular.dev library flow:
 
@@ -191,6 +193,16 @@ After `ng add angular-django2`, you can also use the specialized commands throug
   }
 }
 ```
+
+## Django Integration
+
+This library is designed to integrate with [django-angular3](https://github.com/shlomoa/django-angular3), which provides Django management commands for Angular workspace operations. The django-angular3 package uses `django-admin` commands to:
+
+- Generate and configure Angular workspaces
+- Run `ng add angular-django2` to register this library's schematics
+- Coordinate Django and Angular project structure
+
+When using django-angular3, the `ng add angular-django2` schematic is automatically invoked to register the schematic collection in your Angular workspace.
 
 ## Release Instructions
 
