@@ -30,7 +30,10 @@ angular-django2/
 │       ├── ng-add/                  # Registration schematic
 │       ├── application/             # App generation
 │       ├── component/               # Component generation
-│       └── service/                 # Service generation
+│       ├── service/                 # Service generation
+│       ├── ng-app/                  # Full app + Material UI in one step
+│       ├── ng-api/                  # ng-openapi-gen bootstrap
+│       └── data-service/            # OpenAPI service wrapper generation
 ├── dist/angular-django2/            # Published build output
 ├── tests/                           # Node-side tests
 ├── tools/                           # Repository automation
@@ -66,8 +69,13 @@ angular-django2/
 │  Schematics:                                             │
 │  • ng-add          - register collection                │
 │  • application     - standalone + routing               │
+│  • material-setup  - Angular Material theming           │
+│  • project-structure - core/shared/features dirs        │
 │  • component       - standalone + OnPush                │
-│  • service, class  - pass-through behavior              │
+│  • service, class, app-shell - pass-through             │
+│  • ng-app          - full app + Material in one step    │
+│  • ng-api          - bootstrap ng-openapi-gen           │
+│  • data-service    - OpenAPI service wrapper            │
 └─────────────────────────────────────────────────────────┘
 ```
 

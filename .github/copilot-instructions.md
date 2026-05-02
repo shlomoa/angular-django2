@@ -29,8 +29,15 @@ There are two main sections in this document representing two strategies for wor
 
 **Schematics (`projects/angular-django2/schematics`):**
 
-- `ng-add` — functional, with unit tests and `CONTRACT.md`
-- `app-shell`, `application`, `class`, `component`, `service` — stubs only (empty `index.ts` + `schema.json`)
+- `ng-add` — registers the collection in `angular.json`; unit tests and `CONTRACT.md`
+- `application` — Angular app with `standalone: true`, `routing: true`, `style: 'scss'` defaults
+- `material-setup` — configures Angular Material theming and providers in an existing project
+- `project-structure` — creates `core/`, `shared/components/`, `shared/pipes/`, `features/` with barrel exports
+- `component` — Angular component with `standalone: true` and `changeDetection: OnPush` defaults
+- `app-shell`, `service`, `class` — pass-through to Angular CLI schematics
+- `ng-app` — combined schematic: runs `application` + installs Material deps + configures theming + creates directory structure + writes a sidenav app shell
+- `ng-api` — bootstraps ng-openapi-gen: adds devDependency, writes `ng-openapi-gen.json`, adds `generate:api` npm script
+- `data-service` — generates a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search/CRUD helpers
 
 **Release state:** v0.1.2, pre-release; published to npm as [`angular-django2`](https://www.npmjs.com/package/angular-django2) — not production-ready
 
