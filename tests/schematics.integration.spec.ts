@@ -312,7 +312,10 @@ describe('angular-django2 schematics integration tests', () => {
       tree.overwrite('/angular.json', JSON.stringify(angularJson, null, 2));
 
       // Create minimal app files that ng-app schematic expects
-      tree.create(`projects/${projectName}/src/app/app.component.ts`, 'export class AppComponent {}');
+      tree.create(
+        `projects/${projectName}/src/app/app.component.ts`,
+        'export class AppComponent {}',
+      );
       tree.create(`projects/${projectName}/src/app/app.component.html`, '<div>Hello</div>');
       tree.create(`projects/${projectName}/src/app/app.component.scss`, '');
       tree.create(`projects/${projectName}/src/styles.scss`, '');
