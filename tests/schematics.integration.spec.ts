@@ -3,7 +3,7 @@
  * These tests exercise schematics in a fully integrated way using SchematicTestRunner
  */
 import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
+import { SchematicTestRunner, type UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
 import * as path from 'path';
 
