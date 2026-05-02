@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2DataService",
+  "title": "angular-django2 data-service schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the resource (e.g., 'users' for UsersDataService)",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "The destination path for the data service (e.g., 'features/users/services' or 'core/services')"
+    },
+    "project": {
+      "type": "string",
+      "description": "The target project",
+      "$default": {
+        "$source": "projectName"
+      }
+    },
+    "apiService": {
+      "type": "string",
+      "description": "The name of the generated OpenAPI service to wrap (e.g., 'UsersApiService'). If not provided, will be inferred from the resource name."
+    },
+    "apiPath": {
+      "type": "string",
+      "description": "The import path to the generated API service",
+      "default": "../api/services"
+    },
+    "flat": {
+      "type": "boolean",
+      "description": "When true, creates the service file directly in the specified path instead of creating a subdirectory",
+      "default": false
+    },
+    "skipTests": {
+      "type": "boolean",
+      "description": "When true, does not create a spec file",
+      "default": false
+    }
+  },
+  "required": ["name"]
+}
