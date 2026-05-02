@@ -50,6 +50,11 @@
       "description": "Bootstrap ng-openapi-gen for OpenAPI client generation.",
       "factory": "./ng-api/index#ngApi",
       "schema": "./ng-api/schema.json"
+    },
+    "data-service": {
+      "description": "Generate a data service wrapper for OpenAPI-generated services with search and CRUD operations.",
+      "factory": "./data-service/index#dataService",
+      "schema": "./data-service/schema.json"
     }
   }
 }
