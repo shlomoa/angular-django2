@@ -29,11 +29,11 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-      - name: Run tests
-        run: npm run test:ci
-
       - name: Build library
         run: npm run build
+
+      - name: Run tests
+        run: npm run test:ci
 
       - name: Verify npm package tarball
         run: npm pack ./dist/angular-django2 --dry-run
