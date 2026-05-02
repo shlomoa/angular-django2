@@ -45,6 +45,11 @@
       "description": "Generate a Django-friendly Angular application with Material UI and app shell.",
       "factory": "./ng-app/index#ngApp",
       "schema": "./ng-app/schema.json"
+    },
+    "ng-api": {
+      "description": "Bootstrap ng-openapi-gen for OpenAPI client generation.",
+      "factory": "./ng-api/index#ngApi",
+      "schema": "./ng-api/schema.json"
     }
   }
 }
