@@ -757,7 +757,7 @@ describe('angular-django2 schematics', () => {
       const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
 
       expect(packageJson.devDependencies['ng-openapi-gen']).toBeDefined();
-      expect(packageJson.devDependencies['ng-openapi-gen']).toMatch(/^\^0\.\d+\.\d+$/);
+      expect(packageJson.devDependencies['ng-openapi-gen']).toMatch(/^\^\d+\.\d+\.\d+$/);
       expect(context.addTask).toHaveBeenCalled();
     });
 

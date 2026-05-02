@@ -2,7 +2,7 @@ import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import type { NgApiSchema } from './schema';
 
-const NG_OPENAPI_GEN_VERSION = '^0.51.0';
+const NG_OPENAPI_GEN_VERSION = '^1.0.5';
 
 /**
  * Default ng-openapi-gen configuration
