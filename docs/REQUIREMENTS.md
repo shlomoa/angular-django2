@@ -65,12 +65,21 @@ The service behavior currently expected by the repo docs and code is:
   - `class`
   - `component`
   - `service`
-- The schematics should remain thin wrappers around Angular CLI behavior until there is a concrete package-specific reason to add more customization.
-- The documented defaults currently expected are:
-  - `application`: `standalone: true`, `routing: true`
+  - `material-setup`
+  - `project-structure`
+  - `ng-app`
+  - `ng-api`
+  - `data-service`
+- The documented defaults and behavior currently expected are:
+  - `ng-add`: register or prepend `angular-django2` in `cli.schematicCollections`
+  - `application`: `standalone: true`, `routing: true`, `style: 'scss'`
   - `component`: `standalone: true`, `changeDetection: 'OnPush'`
   - `service`, `class`, and `app-shell`: pass-through behavior
-  - `ng add angular-django2`: register or prepend `angular-django2` in `cli.schematicCollections`
+  - `material-setup`: configure Angular Material theming (prebuilt or custom) and providers in an existing project; options: `--theme`, `--typography`, `--animations`
+  - `project-structure`: create `core/`, `shared/components/`, `shared/pipes/`, and `features/` directories with barrel `index.ts` exports
+  - `ng-app`: generate a complete Angular app with Material UI in one step — runs `application`, installs `@angular/material` and `@angular/cdk`, configures Material theming, creates the standard directory structure, and writes a responsive sidenav app shell into `app.component.*`
+  - `ng-api`: bootstrap [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds `ng-openapi-gen` to `devDependencies`, writes `ng-openapi-gen.json`, and adds a `generate:api` npm script; options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`)
+  - `data-service`: generate a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search and CRUD helpers; options: `--apiService`, `--apiPath` (default: `../api/services`), `--path`, `--flat`, `--skipTests`
 
 ## 5. Django Integration Requirements
 

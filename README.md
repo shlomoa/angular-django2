@@ -25,7 +25,7 @@ This repository is already set up around that model and targets Angular 21.
 
 - Angular 21 library workspace in `projects/angular-django2`
 - npm-ready package metadata for the published library
-- custom schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, and `project-structure`
+- custom schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-api`, and `data-service`
 - Angular runtime tests through the Angular 21 Vitest-based test builder
 - Node-side Vitest tests for schematics and tooling
 - ESLint flat-config linting for library code, schematics, tests, and tools
@@ -179,6 +179,9 @@ ng generate angular-django2:component dashboard-card
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
 ng generate angular-django2:app-shell
+ng generate angular-django2:ng-app my-app
+ng generate angular-django2:ng-api --inputPath=openapi.json
+ng generate angular-django2:data-service users
 ```
 
 The current wrappers deliberately stay close to Angular CLI behavior while applying a few project defaults:
@@ -191,7 +194,30 @@ The current wrappers deliberately stay close to Angular CLI behavior while apply
   - Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/` directories with `index.ts` files
 - `component`: defaults to `standalone: true` and `changeDetection: 'OnPush'`
 - `service`, `class`, and `app-shell`: forward options directly to Angular CLI
+- `ng-app`: generates a complete Angular app with Material UI in a single step
+  - Runs `application`, installs `@angular/material`/`@angular/cdk`, configures Material theming, creates the standard directory structure (`core/`, `shared/`, `features/`), and writes a responsive sidenav app shell into `app.component.*`
+  - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--style`, `--prefix`
+- `ng-api`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) for OpenAPI client generation
+  - Adds `ng-openapi-gen` to `devDependencies`, writes `ng-openapi-gen.json`, and adds a `generate:api` npm script
+  - Options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`)
+  - After setup, run `npm run generate:api` to produce typed Angular services and models
+- `data-service`: generates a typed wrapper around an ng-openapi-gen `*ApiService`
+  - Produces a `*DataService` with search and CRUD helpers; the wrapped API service is inferred from the resource name or supplied via `--apiService`
+  - Options: `--apiService`, `--apiPath` (default: `../api/services`), `--path`, `--flat`, `--skipTests`
 - `ng add angular-django2`: prepends `angular-django2` to `cli.schematicCollections`
+
+### OpenAPI workflow
+
+```bash
+# 1. Bootstrap ng-openapi-gen
+ng generate angular-django2:ng-api --inputPath=openapi.json
+
+# 2. Generate typed Angular services from your OpenAPI spec
+npm run generate:api
+
+# 3. Wrap a generated service with search/CRUD helpers
+ng generate angular-django2:data-service users
+```
 
 After `ng add angular-django2`, you can also use the specialized commands through the workspace collection order:
 
