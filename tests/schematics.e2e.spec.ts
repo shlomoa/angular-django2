@@ -79,6 +79,7 @@ async function startAndVerifyDevServer(
     const serverProcess = spawn('npx', ['ng', 'serve', `--port=${port}`], {
       cwd: appPath,
       stdio: ['ignore', 'pipe', 'pipe'],
+      shell: true, // Required for Windows compatibility
     });
 
     let serverStarted = false;
