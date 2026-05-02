@@ -51,10 +51,37 @@ function createTempWorkspace(): string {
 
 /**
  * Helper function to clean up test workspace
+ * Retries on Windows EPERM errors caused by file locks
  */
-function cleanupWorkspace(workspacePath: string): void {
-  if (fs.existsSync(workspacePath)) {
-    fs.rmSync(workspacePath, { recursive: true, force: true });
+async function cleanupWorkspace(workspacePath: string, maxRetries = 3): Promise<void> {
+  if (!fs.existsSync(workspacePath)) {
+    return;
+  }
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      fs.rmSync(workspacePath, { recursive: true, force: true });
+      return; // Success
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        'code' in error &&
+        error.code === 'EPERM' &&
+        attempt < maxRetries
+      ) {
+        // File is locked, wait and retry
+        console.log(`[Cleanup] Retry ${attempt}/${maxRetries} for ${workspacePath}`);
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2 seconds
+      } else if (attempt === maxRetries) {
+        // Last attempt failed, log warning but don't throw
+        console.warn(
+          `[Cleanup] Failed to delete ${workspacePath} after ${maxRetries} attempts. This is expected on Windows due to file locks. Directory will be cleaned by OS temp cleanup.`,
+        );
+        return;
+      } else {
+        throw error; // Unexpected error
+      }
+    }
   }
 }
 
@@ -133,9 +160,6 @@ async function startAndVerifyDevServer(
 }
 
 describe('angular-django2 schematics E2E tests', () => {
-  let workspacePath: string;
-  let appName: string;
-
   beforeAll(() => {
     // Verify that the library has been built
     const libraryPath = getLibraryPackagePath();
@@ -146,20 +170,13 @@ describe('angular-django2 schematics E2E tests', () => {
     }
   });
 
-  afterAll(() => {
-    // Cleanup workspace after all tests
-    if (workspacePath) {
-      cleanupWorkspace(workspacePath);
-    }
-  });
-
   it(
     'E2E-01: ng-app schematic generates a buildable Angular application',
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      workspacePath = createTempWorkspace();
-      appName = 'test-app';
+      const workspacePath = createTempWorkspace();
+      const appName = 'test-app';
       const libraryPath = getLibraryPackagePath();
 
       console.log(`\n[E2E-01] Test workspace: ${workspacePath}`);
@@ -271,10 +288,15 @@ describe('angular-django2 schematics E2E tests', () => {
         if (server) {
           console.log('[E2E-01] Stopping dev server...');
           server.kill();
-          // Wait a moment for cleanup
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          // Wait longer for process to fully terminate and release file locks
+          await new Promise((resolve) => setTimeout(resolve, 5000));
           console.log('[E2E-01] ✓ Dev server stopped');
         }
+
+        // Clean up workspace
+        console.log('[E2E-01] Cleaning up workspace...');
+        await cleanupWorkspace(workspacePath);
+        console.log('[E2E-01] ✓ Workspace cleaned up');
       }
 
       console.log('[E2E-01] ✅ E2E test completed successfully');
@@ -285,11 +307,9 @@ describe('angular-django2 schematics E2E tests', () => {
     'E2E-02: ng-app combined schematic generates a complete buildable application',
     { timeout: E2E_TIMEOUT },
     async () => {
-      // Setup - reuse workspace or create new one
-      if (!workspacePath) {
-        workspacePath = createTempWorkspace();
-      }
-      appName = 'combined-app';
+      // Setup
+      const workspacePath = createTempWorkspace();
+      const appName = 'combined-app';
       const libraryPath = getLibraryPackagePath();
 
       console.log(`\n[E2E-02] Test workspace: ${workspacePath}`);
@@ -369,6 +389,11 @@ describe('angular-django2 schematics E2E tests', () => {
       expect(fs.existsSync(path.join(distPath, 'index.html'))).toBe(true);
       console.log('[E2E-02] ✓ Build artifacts verified');
 
+      // Clean up workspace
+      console.log('[E2E-02] Cleaning up workspace...');
+      await cleanupWorkspace(workspacePath);
+      console.log('[E2E-02] ✓ Workspace cleaned up');
+
       console.log('[E2E-02] ✅ E2E test completed successfully');
     },
   );
@@ -378,10 +403,8 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      if (!workspacePath) {
-        workspacePath = createTempWorkspace();
-      }
-      appName = 'api-test-app';
+      const workspacePath = createTempWorkspace();
+      const appName = 'api-test-app';
       const libraryPath = getLibraryPackagePath();
 
       console.log(`\n[E2E-03] Test workspace: ${workspacePath}`);
@@ -441,10 +464,15 @@ describe('angular-django2 schematics E2E tests', () => {
         if (server) {
           console.log('[E2E-03] Stopping dev server...');
           server.kill();
-          // Wait a moment for cleanup
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          // Wait longer for process to fully terminate and release file locks
+          await new Promise((resolve) => setTimeout(resolve, 5000));
           console.log('[E2E-03] ✓ Dev server stopped');
         }
+
+        // Clean up workspace
+        console.log('[E2E-03] Cleaning up workspace...');
+        await cleanupWorkspace(workspacePath);
+        console.log('[E2E-03] ✓ Workspace cleaned up');
       }
 
       console.log('[E2E-03] ✅ E2E test completed successfully');
