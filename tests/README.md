@@ -160,7 +160,8 @@ The CI pipeline runs:
 
 1. `npm run format:check` - Code formatting
 2. `npm run lint` - Linting
-3. `npm run test:ci` - All tests (unit, integration, and Angular library tests)
-4. `npm run pack:dry-run` - Package verification
+3. `npm run build` - Build library (required for integration tests)
+4. `npm run test:ci` - All tests (unit, integration, and Angular library tests)
+5. `npm run pack:dry-run` - Package verification
 
 Tests run in non-blocking mode, meaning all tests execute regardless of individual failures.
