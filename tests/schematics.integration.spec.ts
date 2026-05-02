@@ -156,6 +156,8 @@ describe('angular-django2 schematics integration tests', () => {
           version: 1,
           projects: {
             'test-app': {
+              root: 'projects/test-app',
+              sourceRoot: 'projects/test-app/src',
               architect: {
                 build: {
                   options: {
@@ -217,7 +219,10 @@ describe('angular-django2 schematics integration tests', () => {
         JSON.stringify({
           version: 1,
           projects: {
-            'test-app': {},
+            'test-app': {
+              root: 'projects/test-app',
+              sourceRoot: 'projects/test-app/src',
+            },
           },
         }),
       );
@@ -449,6 +454,8 @@ export const appConfig: ApplicationConfig = {
           version: 1,
           projects: {
             'test-app': {
+              root: 'projects/test-app',
+              sourceRoot: 'projects/test-app/src',
               architect: {
                 build: {
                   options: {

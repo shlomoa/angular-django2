@@ -234,7 +234,7 @@ describe('angular-django2 schematics E2E tests', () => {
       // Step 4: Use ng-app schematic to generate complete application
       console.log('[E2E-02] Generating application with ng-app schematic...');
       execCommand(
-        'npx ng generate angular-django2:ng-app --name=demo --theme=indigo-pink --typography=true --animations=true --routing=true --standalone=true --style=scss --prefix=app',
+        'npx ng generate angular-django2:ng-app demo --theme=indigo-pink --typography=true --animations=true --routing=true --standalone=true --style=scss --prefix=app',
         workspaceRoot,
       );
       console.log('[E2E-02] ✓ ng-app schematic completed');

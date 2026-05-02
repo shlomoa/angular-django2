@@ -7,7 +7,13 @@ interface ProjectStructureOptions {
 }
 
 interface WorkspaceConfig {
-  projects: Record<string, unknown>;
+  projects: Record<
+    string,
+    {
+      root?: string;
+      sourceRoot?: string;
+    }
+  >;
 }
 
 const BARREL_CONTENT = `// Public API for this directory
@@ -32,9 +38,10 @@ export function projectStructure(options: ProjectStructureOptions): Rule {
       throw new SchematicsException(`Project "${project}" not found in angular.json.`);
     }
 
-    // Determine the project path
-    const projectRoot = `projects/${project}`;
-    const appRoot = `${projectRoot}/src/app`;
+    // Determine the project path from angular.json
+    const projectConfig = workspace.projects[project];
+    const projectRoot = projectConfig.root || '';
+    const appRoot = projectRoot ? `${projectRoot}/src/app` : 'src/app';
 
     // Create directory structure with barrel files
     for (const dir of DIRECTORIES) {

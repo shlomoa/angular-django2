@@ -95,6 +95,8 @@ interface WorkspaceConfig {
   projects: Record<
     string,
     {
+      root?: string;
+      sourceRoot?: string;
       architect?: {
         build?: {
           options?: {
@@ -209,8 +211,10 @@ function configureMaterial(
     throw new SchematicsException(`Project "${projectName}" not found in angular.json.`);
   }
 
-  const projectRoot = `projects/${projectName}`;
-  const stylesPath = `${projectRoot}/src/styles.scss`;
+  // Determine the project path from angular.json
+  const projectConfig = workspace.projects[projectName];
+  const projectRoot = projectConfig.root || '';
+  const stylesPath = projectRoot ? `${projectRoot}/src/styles.scss` : 'src/styles.scss';
 
   // Update angular.json for prebuilt themes
   if (theme !== 'custom') {
@@ -294,7 +298,11 @@ $theme: mat.define-light-theme((
     stylesContent = prebuiltComment + stylesContent;
   }
 
-  tree.overwrite(stylesPath, stylesContent);
+  if (tree.exists(stylesPath)) {
+    tree.overwrite(stylesPath, stylesContent);
+  } else {
+    tree.create(stylesPath, stylesContent);
+  }
 }
 
 function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): void {
@@ -353,8 +361,21 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
  * Create standard directory structure
  */
 function createDirectoryStructure(tree: Tree, projectName: string): void {
-  const projectRoot = `projects/${projectName}`;
-  const appRoot = `${projectRoot}/src/app`;
+  // Read angular.json to get the actual project root
+  const angularJsonPath = '/angular.json';
+  const angularJsonBuffer = tree.read(angularJsonPath);
+  if (!angularJsonBuffer) {
+    throw new SchematicsException('Could not find angular.json in the workspace.');
+  }
+
+  const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
+  const projectConfig = workspace.projects[projectName];
+  if (!projectConfig) {
+    throw new SchematicsException(`Project "${projectName}" not found in angular.json.`);
+  }
+
+  const projectRoot = projectConfig.root || '';
+  const appRoot = projectRoot ? `${projectRoot}/src/app` : 'src/app';
 
   // Create directory structure with barrel files
   for (const dir of DIRECTORIES) {
@@ -385,8 +406,21 @@ function createDirectoryStructure(tree: Tree, projectName: string): void {
  * Generate Material App Shell by updating app.component files
  */
 function generateMaterialAppShell(tree: Tree, projectName: string, style: string): void {
-  const projectRoot = `projects/${projectName}`;
-  const appRoot = `${projectRoot}/src/app`;
+  // Read angular.json to get the actual project root
+  const angularJsonPath = '/angular.json';
+  const angularJsonBuffer = tree.read(angularJsonPath);
+  if (!angularJsonBuffer) {
+    throw new SchematicsException('Could not find angular.json in the workspace.');
+  }
+
+  const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
+  const projectConfig = workspace.projects[projectName];
+  if (!projectConfig) {
+    throw new SchematicsException(`Project "${projectName}" not found in angular.json.`);
+  }
+
+  const projectRoot = projectConfig.root || '';
+  const appRoot = projectRoot ? `${projectRoot}/src/app` : 'src/app';
 
   // Update app.component.html
   const htmlPath = `${appRoot}/app.component.html`;

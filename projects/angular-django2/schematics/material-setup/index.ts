@@ -12,6 +12,8 @@ interface WorkspaceConfig {
   projects: Record<
     string,
     {
+      root?: string;
+      sourceRoot?: string;
       architect?: {
         build?: {
           options?: {
@@ -46,9 +48,10 @@ export function materialSetup(options: MaterialSetupOptions): Rule {
       throw new SchematicsException(`Project "${project}" not found in angular.json.`);
     }
 
-    // Determine the project path
-    const projectRoot = `projects/${project}`;
-    const stylesPath = `${projectRoot}/src/styles.scss`;
+    // Determine the project path from angular.json
+    const projectConfig = workspace.projects[project];
+    const projectRoot = projectConfig.root || '';
+    const stylesPath = projectRoot ? `${projectRoot}/src/styles.scss` : 'src/styles.scss';
 
     // Update angular.json for prebuilt themes
     if (theme !== 'custom') {
@@ -135,7 +138,11 @@ $theme: mat.define-light-theme((
     stylesContent = prebuiltComment + stylesContent;
   }
 
-  tree.overwrite(stylesPath, stylesContent);
+  if (tree.exists(stylesPath)) {
+    tree.overwrite(stylesPath, stylesContent);
+  } else {
+    tree.create(stylesPath, stylesContent);
+  }
 }
 
 function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): void {
