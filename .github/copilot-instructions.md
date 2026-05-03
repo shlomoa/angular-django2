@@ -143,7 +143,7 @@ Executable code includes:
   - Only report commands as passing if they were actually run and ended successfully.
 - Cross-platform OS Independence
   - All tools, scripts, paths, and implementations must support Windows, Linux, and macOS equally.
-  - Never hardcode OS-specific roots (like `C:\`) or OS-specific temporary directories without abstract cross-platform path joining tools (`path.join()`, `os.tmpdir()`).
+  - Never hardcode OS-specific roots (like `C:\`) or OS-specific temporary directories without abstract cross-platform path joining tools (`path.join()`).
 - Document:
   - rationale and context for any code change.
   - The change, considerations during change implementation.

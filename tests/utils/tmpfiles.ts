@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 /**
@@ -25,7 +25,7 @@ export function createTempDir(repoRoot: string, prefix = 'tmp-'): string {
 
   const parentDir = dirname(base);
   if (!existsSync(parentDir)) {
-    mkdirSync(parentDir, { recursive: true });
+    throw new Error(`Parent directory does not exist: ${parentDir}`);
   }
 
   return mkdtempSync(base);
@@ -51,18 +51,10 @@ export function deleteTempDir(dirPath: string, repoRoot: string): void {
   try {
     rmSync(resolvedDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 2000 });
   } catch (error) {
-    if (
-      process.platform === 'win32' &&
-      error instanceof Error &&
-      'code' in error &&
-      (error.code === 'EPERM' || error.code === 'EBUSY' || error.code === 'ENOTEMPTY')
-    ) {
-      console.error(
+    console.error(
         `[Cleanup] Failed to delete ${resolvedDir} due to a Windows file lock. Leaving temp directory behind.`,
-      );
-      return;
-    }
-
-    throw error;
+        error
+    );
+    return;
   }
 }

@@ -141,7 +141,6 @@ async function startAndVerifyDevServer(
 
 describe('angular-django2 schematics E2E tests', () => {
   const repoRoot = getRepoRoot();
-  const tmpDir = path.join(repoRoot, '.tmp');
 
   beforeAll(() => {
     // Verify that the library has been built
@@ -151,11 +150,6 @@ describe('angular-django2 schematics E2E tests', () => {
         `Library not built. Run 'npm run build' before running E2E tests. Expected path: ${libraryPath}`,
       );
     }
-
-    // Ensure .tmp directory exists for test workspaces
-    if (!fs.existsSync(tmpDir)) {
-      fs.mkdirSync(tmpDir, { recursive: true });
-    }
   });
 
   it(
@@ -163,7 +157,7 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempDir(repoRoot, path.join('.tmp', 'ngdj-e2e-'));
+      const workspacePath = createTempDir(repoRoot, 'ngdj-e2e-');
       const appName = 'test-app';
       const appPath = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
@@ -298,7 +292,7 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempDir(repoRoot, path.join('.tmp', 'ngdj-e2e-'));
+      const workspacePath = createTempDir(repoRoot, 'ngdj-e2e-');
       const appName = 'combined-app';
       const workspaceRoot = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
@@ -397,7 +391,7 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempDir(repoRoot, path.join('.tmp', 'ngdj-e2e-'));
+      const workspacePath = createTempDir(repoRoot, 'ngdj-e2e-');
       const appName = 'api-test-app';
       const appPath = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();

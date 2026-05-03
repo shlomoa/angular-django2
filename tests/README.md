@@ -50,16 +50,19 @@ Tests cover:
 End-to-end tests that generate real Angular applications, install schematics, and verify that the generated apps can be built and run. These tests:
 
 - Create actual Angular workspaces using Angular CLI
+- Resolve the repository root via `tests/utils/tmpfiles.ts`
+- Create temporary workspaces with `createTempDir()` and clean them up with `deleteTempDir()`
 - Install the built angular-django2 library from the dist directory
 - Execute schematics against real projects
 - Build the generated applications
 - Verify build artifacts and app structure
+- Verify dev server startup for the step-by-step application flow
 
 Tests cover:
 
-- **E2E-01**: Step-by-step application generation with individual schematics (ng-add, material-setup, project-structure)
-- **E2E-02**: Combined ng-app schematic generating a complete buildable application
-- **E2E-03**: ng-api schematic configuration with build verification
+- **E2E-01**: Step-by-step application generation with individual schematics (`ng-add`, `material-setup`, `project-structure`), production build verification, and dev server startup verification
+- **E2E-02**: Combined `ng-app` schematic generating a complete buildable application (**currently skipped**)
+- **E2E-03**: `ng-api` schematic configuration with generated config verification and production build verification
 
 **Important**: E2E tests require:
 
@@ -67,6 +70,7 @@ Tests cover:
 - Significantly more time (up to 5 minutes per test)
 - Network access for npm package downloads
 - Sufficient disk space for temporary workspaces
+- Available local ports for Angular dev server verification (currently 4201 for `E2E-01`)
 
 #### `sync-package-metadata.spec.ts`
 
@@ -139,9 +143,10 @@ npm run test:e2e:watch
 ### E2E Tests
 
 - Use actual Angular CLI commands via `execSync`
-- Create real Angular workspaces in temporary directories
+- Create real Angular workspaces in temporary directories resolved from the repository root
 - Install and execute schematics against real projects
 - Build applications to verify end-to-end functionality
+- Use a helper to start and stop the Angular dev server when runtime verification is required
 - Long execution time (~30s to 5min per test)
 - Require network access and disk space
 - Clean up temporary directories after execution
@@ -195,25 +200,27 @@ it('generates files correctly', async () => {
 ### E2E Test Pattern
 
 ```typescript
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
+import { createTempDir, deleteTempDir, getRepoRoot } from './utils/tmpfiles';
 
 const E2E_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 it(
   'generates a buildable application',
   async () => {
-    // Create a temporary workspace inside the project
-    const tmpBaseDir = path.join(__dirname, '..', '.tmp');
-    if (!fs.existsSync(tmpBaseDir)) fs.mkdirSync(tmpBaseDir, { recursive: true });
-    const workspacePath = fs.mkdtempSync(path.join(tmpBaseDir, 'ngdj-e2e-'));
+    const repoRoot = getRepoRoot();
+    const workspacePath = createTempDir(repoRoot, 'ngdj-e2e-');
+    const appPath = path.join(workspacePath, 'test-app');
+    const parentDir = path.dirname(repoRoot);
+    const relativeDirectory = path.relative(parentDir, appPath);
 
     // Create Angular workspace
-    execSync(`npx @angular/cli new test-app --skip-git --skip-install`, { cwd: workspacePath });
-
-    const appPath = path.join(workspacePath, 'test-app');
+    execSync(
+      `npx @angular/cli@latest new test-app --directory="${relativeDirectory}" --skip-git --skip-install --routing=true --style=scss --standalone=true --defaults`,
+      { cwd: parentDir },
+    );
 
     // Install dependencies and library
     execSync('npm install', { cwd: appPath });
@@ -229,7 +236,7 @@ it(
     expect(fs.existsSync(path.join(appPath, 'dist'))).toBe(true);
 
     // Cleanup
-    fs.rmSync(workspacePath, { recursive: true, force: true });
+    deleteTempDir(workspacePath, repoRoot);
   },
   { timeout: E2E_TIMEOUT },
 );
@@ -255,6 +262,7 @@ E2E tests have additional requirements:
 3. **Disk space**: Tests create temporary Angular workspaces (each ~200MB)
 4. **Time**: Each test can take 30 seconds to 5 minutes
 5. **Node.js and npm**: Must be available in PATH for Angular CLI execution
+6. **Port availability for runtime checks**: `E2E-01` starts `ng serve`, so its configured port must be free before the test begins
 
 ```bash
 npm run build
@@ -262,6 +270,8 @@ npm run test:e2e
 ```
 
 E2E tests automatically clean up temporary workspaces after execution.
+
+The current E2E implementation uses shared helpers from `tests/utils/tmpfiles.ts` to anchor temporary directories to the repository root and to centralize cleanup behavior.
 
 ## Continuous Integration
 

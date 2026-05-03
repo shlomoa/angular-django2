@@ -1,5 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
@@ -69,11 +68,7 @@ describe('sync-package-metadata', () => {
   });
 
   it('removes optional metadata that no longer exists in the root manifest and writes the updated file', async () => {
-    const tmpBaseDir = join(repoRoot, '.tmp');
-    if (!existsSync(tmpBaseDir)) {
-      await mkdir(tmpBaseDir, { recursive: true });
-    }
-    const tempDirectory = createTempDir(tmpBaseDir, 'angular-django2-metadata-');
+    const tempDirectory = createTempDir(repoRoot, 'angular-django2-metadata-');
     const rootManifestPath = join(tempDirectory, 'package.json');
     const libraryManifestPath = join(tempDirectory, 'library-package.json');
 

@@ -53,4 +53,3 @@ describe('deleteTempDir', () => {
     }).toThrow(/Refusing to delete outside repo root/);
   });
 });
-
