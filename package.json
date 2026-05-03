@@ -19,8 +19,8 @@
     "test:ci": "npm run test:node && ng test angular-django2 --watch=false",
     "test:node": "vitest run --config vitest.config.mts",
     "test:node:watch": "vitest --config vitest.config.mts",
-    "test:e2e": "npm run build && vitest run --config vitest.config.mts tests/schematics.e2e.spec.ts",
-    "test:e2e:watch": "npm run build && vitest --config vitest.config.mts tests/schematics.e2e.spec.ts"
+    "test:e2e": "vitest run --config vitest.e2e.config.mts",
+    "test:e2e:watch": "vitest --config vitest.e2e.config.mts"
   },
   "private": true,
   "packageManager": "npm@11.6.2",

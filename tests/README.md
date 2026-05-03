@@ -84,13 +84,19 @@ Tests for the package metadata synchronization tool.
 npm run test:ci
 ```
 
-This runs both Node-based tests (unit and integration) and Angular library tests.
+This runs Node-based tests (unit and integration) and Angular library tests.
+
+It does **not** run the E2E suite.
 
 ### Run only Node-based tests
 
 ```bash
 npm run test:node
 ```
+
+This runs the Node-based unit and integration tests only.
+
+It does **not** run `tests/schematics.e2e.spec.ts`.
 
 ### Run tests in watch mode
 
@@ -116,13 +122,19 @@ npm run test:node -- tests/schematics.spec.ts
 npm run test:e2e
 ```
 
-This builds the library and runs the E2E tests. Note: E2E tests take significantly longer (up to 5 minutes per test).
+This runs the E2E tests only. The library must already be built before running it.
+
+Note: E2E tests take significantly longer (up to 5 minutes per test).
+
+The command uses a dedicated Vitest config so the E2E suite stays separate from the default Node test run.
 
 ### Run E2E tests in watch mode
 
 ```bash
 npm run test:e2e:watch
 ```
+
+This watches only the E2E spec file.
 
 ## Test Structure
 
@@ -272,6 +284,14 @@ npm run test:e2e
 E2E tests automatically clean up temporary workspaces after execution.
 
 The current E2E implementation uses shared helpers from `tests/utils/tmpfiles.ts` to anchor temporary directories to the repository root and to centralize cleanup behavior.
+
+## Command Boundaries
+
+- `npm run test:node` → Vitest unit + integration tests only
+- `npm run test:e2e` → E2E Vitest spec only, via `vitest.e2e.config.mts`
+- `npm run test:ci` → `test:node` + Angular library test runner
+
+This separation avoids running the E2E suite twice through both `test:node` and `test:e2e`.
 
 ## Continuous Integration
 
