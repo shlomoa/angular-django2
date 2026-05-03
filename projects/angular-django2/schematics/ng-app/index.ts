@@ -1,5 +1,5 @@
 import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
-import { externalSchematic, SchematicsException } from '@angular-devkit/schematics';
+import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import type { NgAppSchema } from './schema';
 
@@ -122,35 +122,36 @@ export {};
 const DIRECTORIES = ['core', 'shared/components', 'shared/pipes', 'features'] as const;
 
 export function ngApp(options: NgAppSchema): Rule {
-  return (tree: Tree, context: SchematicContext) => {
-    const { name, theme, typography, animations, routing, standalone, style, prefix } = options;
-
+  return chain([
     // Step 1: Generate the base application via external schematic
-    const applicationRule = externalSchematic('@schematics/angular', 'application', {
-      name,
-      routing,
-      standalone,
-      style,
-      prefix,
-    });
-
-    // Apply the application schematic
-    applicationRule(tree, context);
-
+    externalSchematic('@schematics/angular', 'application', {
+      name: options.name,
+      routing: options.routing,
+      standalone: options.standalone,
+      style: options.style,
+      prefix: options.prefix,
+    }),
     // Step 2: Add @angular/material and @angular/cdk as dependencies
-    addMaterialDependencies(tree, context);
-
+    (tree: Tree, context: SchematicContext) => {
+      addMaterialDependencies(tree, context);
+      return tree;
+    },
     // Step 3: Configure Angular Material
-    configureMaterial(tree, name, theme, typography, animations);
-
+    (tree: Tree) => {
+      configureMaterial(tree, options.name, options.theme, options.typography, options.animations);
+      return tree;
+    },
     // Step 4: Create standard directory structure
-    createDirectoryStructure(tree, name);
-
+    (tree: Tree) => {
+      createDirectoryStructure(tree, options.name);
+      return tree;
+    },
     // Step 5: Generate Material App Shell
-    generateMaterialAppShell(tree, name, style);
-
-    return tree;
-  };
+    (tree: Tree) => {
+      generateMaterialAppShell(tree, options.name, options.style);
+      return tree;
+    },
+  ]);
 }
 
 /**

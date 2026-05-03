@@ -287,7 +287,7 @@ describe('angular-django2 schematics E2E tests', () => {
     },
   );
 
-  it.skip(
+  it(
     'E2E-02: ng-app combined schematic generates a complete buildable application',
     { timeout: E2E_TIMEOUT },
     async () => {
