@@ -29,6 +29,16 @@
           "options": {
             "tsConfig": "projects/angular-django2/tsconfig.spec.json"
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "**/*.ts",
+              "**/*.js",
+              "**/*.html"
+            ]
+          }
         }
       }
     }

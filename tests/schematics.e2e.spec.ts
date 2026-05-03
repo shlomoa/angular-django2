@@ -5,7 +5,7 @@
  * and verify that the generated apps can be built and run.
  */
 import { execSync, spawn } from 'child_process';
-import { describe, expect, it, beforeAll, afterAll } from 'vitest';
+import { describe, expect, it, beforeAll } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';

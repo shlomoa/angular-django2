@@ -1,5 +1,7 @@
 # Contributing
 
+Contact shlomoa@lightmoneysw.com with questions about contributing and before opening a PR and the project in general.
+
 ## Local Setup
 
 1. Install dependencies:
@@ -12,7 +14,7 @@
 
    ```bash
    npm run format:check
-   npm run lint
+   ng lint
    npm run test:node
    npm run test:ci
    npm run build

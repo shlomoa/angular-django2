@@ -123,7 +123,7 @@ export const appConfig: ApplicationConfig = {
 Use package scripts from root `package.json`:
 
 - `npm run format:check`
-- `npm run lint`
+- `npx ng lint`
 - `npm run test:ci`
 - `npm run build`
 - `npm run pack:dry-run`
