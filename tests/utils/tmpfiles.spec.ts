@@ -23,10 +23,10 @@ describe('createTempDir', () => {
     const root = getRepoRoot();
     const testDirBase = path.join(root, 'tests');
     const tempDir = createTempDir(testDirBase, 'test-prefix-');
-    
+
     expect(fs.existsSync(tempDir)).toBe(true);
     expect(path.basename(tempDir).startsWith('test-prefix-')).toBe(true);
-    
+
     // cleanup
     fs.rmSync(tempDir, { recursive: true, force: true });
   });
@@ -37,9 +37,9 @@ describe('deleteTempDir', () => {
     const root = getRepoRoot();
     const testDirBase = path.join(root, 'tests');
     const tempDir = createTempDir(testDirBase, 'test-del-prefix-');
-    
+
     expect(fs.existsSync(tempDir)).toBe(true);
-    
+
     deleteTempDir(tempDir, root);
     expect(fs.existsSync(tempDir)).toBe(false);
   });
@@ -47,7 +47,7 @@ describe('deleteTempDir', () => {
   it('throws an error when attempting to delete outside the repo root', () => {
     const root = getRepoRoot();
     const outsideDir = path.resolve(root, '..', 'some-outside-dir');
-    
+
     expect(() => {
       deleteTempDir(outsideDir, root);
     }).toThrow(/Refusing to delete outside repo root/);

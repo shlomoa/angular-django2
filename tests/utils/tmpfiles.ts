@@ -7,14 +7,12 @@ import { dirname, join, resolve } from 'node:path';
  * This provides an OS-independent way to anchor workspace paths.
  */
 export function getRepoRoot(): string {
-  return execSync('git rev-parse --show-toplevel')
-    .toString()
-    .trim();
+  return execSync('git rev-parse --show-toplevel').toString().trim();
 }
 
 /**
  * Creates a unique temporary directory inside the specified repository root.
- * 
+ *
  * @param repoRoot - The directory where the temp folder should be created.
  * @param prefix - A prefix for the temporary directory name (default: 'tmp-').
  * @returns The absolute path to the newly created temporary directory.
@@ -32,9 +30,9 @@ export function createTempDir(repoRoot: string, prefix = 'tmp-'): string {
 }
 
 /**
- * Deletes a temporary directory. Includes a safety guard to ensure 
+ * Deletes a temporary directory. Includes a safety guard to ensure
  * the deleted directory is inside the allowed repository root.
- * 
+ *
  * @param dirPath - The path of the directory to be deleted.
  * @param repoRoot - The repository root path, acting as a safety boundary.
  * @throws Error if the directory to delete is outside the specified repository root.
@@ -52,8 +50,8 @@ export function deleteTempDir(dirPath: string, repoRoot: string): void {
     rmSync(resolvedDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 2000 });
   } catch (error) {
     console.error(
-        `[Cleanup] Failed to delete ${resolvedDir} due to a Windows file lock. Leaving temp directory behind.`,
-        error
+      `[Cleanup] Failed to delete ${resolvedDir} due to a Windows file lock. Leaving temp directory behind.`,
+      error,
     );
     return;
   }
