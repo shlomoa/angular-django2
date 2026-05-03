@@ -27,7 +27,7 @@ jobs:
         run: npm run format:check
 
       - name: Run lint
-        run: ng lint
+        run: npm run lint
 
       - name: Build library
         run: npm run build
