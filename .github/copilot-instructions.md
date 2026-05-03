@@ -39,7 +39,7 @@ There are two main sections in this document representing two strategies for wor
 - `ng-api` — bootstraps ng-openapi-gen: adds devDependency, writes `ng-openapi-gen.json`, adds `generate:api` npm script
 - `data-service` — generates a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search/CRUD helpers
 
-**Release state:** v0.1.2, pre-release; published to npm as [`angular-django2`](https://www.npmjs.com/package/angular-django2) — not production-ready
+**Release state:** v0.1.3, pre-release; published to npm as [`angular-django2`](https://www.npmjs.com/package/angular-django2) — not production-ready
 
 ## What To Optimize For
 
