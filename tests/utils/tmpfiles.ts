@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 /**
@@ -23,8 +23,7 @@ export function createTempDir(repoRoot: string, prefix = 'tmp-'): string {
 
   const parentDir = dirname(base);
   if (!existsSync(parentDir)) {
-    // Create parent directory if it doesn't exist (e.g., .tmp/)
-    mkdirSync(parentDir, { recursive: true });
+    throw new Error(`Parent directory does not exist: ${parentDir}`);
   }
 
   return mkdtempSync(base);

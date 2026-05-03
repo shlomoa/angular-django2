@@ -157,7 +157,7 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempDir(repoRoot, '.tmp/ngdj-e2e-');
+      const workspacePath = createTempDir(repoRoot, 'ngdj-e2e-');
       const appName = 'test-app';
       const appPath = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
@@ -292,7 +292,7 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempDir(repoRoot, '.tmp/ngdj-e2e-');
+      const workspacePath = createTempDir(repoRoot, 'ngdj-e2e-');
       const appName = 'combined-app';
       const workspaceRoot = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
@@ -394,7 +394,7 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempDir(repoRoot, '.tmp/ngdj-e2e-');
+      const workspacePath = createTempDir(repoRoot, 'ngdj-e2e-');
       const appName = 'api-test-app';
       const appPath = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
