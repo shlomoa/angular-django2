@@ -141,6 +141,9 @@ Executable code includes:
   - Any change to executable code must include corresponding tests.
   - Always validate fully working code with the user, before moving to the next task.
   - Only report commands as passing if they were actually run and ended successfully.
+- Cross-platform OS Independence
+  - All tools, scripts, paths, and implementations must support Windows, Linux, and macOS equally.
+  - Never hardcode OS-specific roots (like `C:\`) or OS-specific temporary directories without abstract cross-platform path joining tools (`path.join()`, `os.tmpdir()`).
 - Document:
   - rationale and context for any code change.
   - The change, considerations during change implementation.
@@ -172,6 +175,8 @@ Executable code includes:
     - If not → treat as unclear and STOP
 - The user must explicitly approve each step before execution.
 - The user may request modifications to the step prior to approval.
+- Avoid trial-and-error and speculative implementation.
+- Stop after 3 failed attempts and ask for user guidance.
 
 ---
 

@@ -8,7 +8,7 @@ import { execSync, spawn } from 'child_process';
 import { describe, expect, it, beforeAll } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
+import { createTempDir, deleteTempDir, getRepoRoot } from './utils/tmpfiles';
 
 /**
  * Test timeout for operations that involve npm install and builds
@@ -42,54 +42,10 @@ function execCommand(command: string, cwd: string, throwOnError = true): string 
 }
 
 /**
- * Helper function to create a temporary test workspace
- */
-function createTempWorkspace(): string {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ngdj-e2e-'));
-  return tmpDir;
-}
-
-/**
- * Helper function to clean up test workspace
- * Retries on Windows EPERM errors caused by file locks
- */
-async function cleanupWorkspace(workspacePath: string, maxRetries = 3): Promise<void> {
-  if (!fs.existsSync(workspacePath)) {
-    return;
-  }
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      fs.rmSync(workspacePath, { recursive: true, force: true });
-      return; // Success
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        'code' in error &&
-        error.code === 'EPERM' &&
-        attempt < maxRetries
-      ) {
-        // File is locked, wait and retry
-        console.log(`[Cleanup] Retry ${attempt}/${maxRetries} for ${workspacePath}`);
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2 seconds
-      } else if (attempt === maxRetries) {
-        // Last attempt failed, log warning but don't throw
-        console.warn(
-          `[Cleanup] Failed to delete ${workspacePath} after ${maxRetries} attempts. This is expected on Windows due to file locks. Directory will be cleaned by OS temp cleanup.`,
-        );
-        return;
-      } else {
-        throw error; // Unexpected error
-      }
-    }
-  }
-}
-
-/**
  * Helper function to get the path to the built library package
  */
 function getLibraryPackagePath(): string {
-  const repoRoot = path.resolve(__dirname, '..');
+  const repoRoot = getRepoRoot();
   return path.join(repoRoot, 'dist', 'angular-django2');
 }
 
@@ -160,6 +116,8 @@ async function startAndVerifyDevServer(
 }
 
 describe('angular-django2 schematics E2E tests', () => {
+  const repoRoot = getRepoRoot();
+
   beforeAll(() => {
     // Verify that the library has been built
     const libraryPath = getLibraryPackagePath();
@@ -175,9 +133,14 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempWorkspace();
+      const workspacePath = createTempDir(repoRoot, path.join('.tmp', 'ngdj-e2e-'));
       const appName = 'test-app';
+      const appPath = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
+
+      // For executing ng new outside the workspace scope to bypass the CLI workspace check
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
 
       console.log(`\n[E2E-01] Test workspace: ${workspacePath}`);
       console.log(`[E2E-01] Library path: ${libraryPath}`);
@@ -185,11 +148,10 @@ describe('angular-django2 schematics E2E tests', () => {
       // Step 1: Create a new Angular workspace using Angular CLI
       console.log('[E2E-01] Creating Angular workspace...');
       execCommand(
-        `npx @angular/cli@latest new ${appName} --skip-git --skip-install --routing=true --style=scss --standalone=true`,
-        workspacePath,
+        `npx @angular/cli@latest new ${appName} --directory="${relativeDirectory}" --skip-git --skip-install --routing=true --style=scss --standalone=true --defaults`,
+        parentDir,
       );
 
-      const appPath = path.join(workspacePath, appName);
       expect(fs.existsSync(appPath)).toBe(true);
       console.log('[E2E-01] ✓ Angular workspace created');
 
@@ -295,7 +257,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Clean up workspace
         console.log('[E2E-01] Cleaning up workspace...');
-        await cleanupWorkspace(workspacePath);
+        deleteTempDir(workspacePath, repoRoot);
         console.log('[E2E-01] ✓ Workspace cleaned up');
       }
 
@@ -308,20 +270,24 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempWorkspace();
+      const workspacePath = createTempDir(repoRoot, path.join('.tmp', 'ngdj-e2e-'));
       const appName = 'combined-app';
+      const workspaceRoot = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
+
+      // For executing ng new outside the workspace scope to bypass the CLI workspace check
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, workspaceRoot);
 
       console.log(`\n[E2E-02] Test workspace: ${workspacePath}`);
 
       // Step 1: Create a minimal workspace with ng new (no application)
       console.log('[E2E-02] Creating minimal Angular workspace...');
       execCommand(
-        `npx @angular/cli@latest new ${appName} --skip-git --skip-install --create-application=false`,
-        workspacePath,
+        `npx @angular/cli@latest new ${appName} --directory="${relativeDirectory}" --skip-git --skip-install --create-application=false --defaults`,
+        parentDir,
       );
 
-      const workspaceRoot = path.join(workspacePath, appName);
       expect(fs.existsSync(workspaceRoot)).toBe(true);
       console.log('[E2E-02] ✓ Workspace created');
 
@@ -391,7 +357,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
       // Clean up workspace
       console.log('[E2E-02] Cleaning up workspace...');
-      await cleanupWorkspace(workspacePath);
+      deleteTempDir(workspacePath, repoRoot);
       console.log('[E2E-02] ✓ Workspace cleaned up');
 
       console.log('[E2E-02] ✅ E2E test completed successfully');
@@ -403,20 +369,24 @@ describe('angular-django2 schematics E2E tests', () => {
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
-      const workspacePath = createTempWorkspace();
+      const workspacePath = createTempDir(repoRoot, path.join('.tmp', 'ngdj-e2e-'));
       const appName = 'api-test-app';
+      const appPath = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
+
+      // For executing ng new outside the workspace scope to bypass the CLI workspace check
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
 
       console.log(`\n[E2E-03] Test workspace: ${workspacePath}`);
 
       // Step 1: Create Angular workspace
       console.log('[E2E-03] Creating Angular workspace...');
       execCommand(
-        `npx @angular/cli@latest new ${appName} --skip-git --skip-install --routing=true --style=scss`,
-        workspacePath,
+        `npx @angular/cli@latest new ${appName} --directory="${relativeDirectory}" --skip-git --skip-install --routing=true --style=scss --defaults`,
+        parentDir,
       );
 
-      const appPath = path.join(workspacePath, appName);
       console.log('[E2E-03] ✓ Workspace created');
 
       // Step 2: Install dependencies and angular-django2
@@ -471,7 +441,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Clean up workspace
         console.log('[E2E-03] Cleaning up workspace...');
-        await cleanupWorkspace(workspacePath);
+        deleteTempDir(workspacePath, repoRoot);
         console.log('[E2E-03] ✓ Workspace cleaned up');
       }
 

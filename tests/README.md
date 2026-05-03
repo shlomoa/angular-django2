@@ -205,8 +205,10 @@ const E2E_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 it(
   'generates a buildable application',
   async () => {
-    // Create temporary workspace
-    const workspacePath = fs.mkdtempSync(path.join(os.tmpdir(), 'ngdj-e2e-'));
+    // Create a temporary workspace inside the project
+    const tmpBaseDir = path.join(__dirname, '..', '.tmp');
+    if (!fs.existsSync(tmpBaseDir)) fs.mkdirSync(tmpBaseDir, { recursive: true });
+    const workspacePath = fs.mkdtempSync(path.join(tmpBaseDir, 'ngdj-e2e-'));
 
     // Create Angular workspace
     execSync(`npx @angular/cli new test-app --skip-git --skip-install`, { cwd: workspacePath });
