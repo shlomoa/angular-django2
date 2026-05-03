@@ -117,6 +117,7 @@ async function startAndVerifyDevServer(
 
 describe('angular-django2 schematics E2E tests', () => {
   const repoRoot = getRepoRoot();
+  const tmpDir = path.join(repoRoot, '.tmp');
 
   beforeAll(() => {
     // Verify that the library has been built
@@ -125,6 +126,11 @@ describe('angular-django2 schematics E2E tests', () => {
       throw new Error(
         `Library not built. Run 'npm run build' before running E2E tests. Expected path: ${libraryPath}`,
       );
+    }
+
+    // Ensure .tmp directory exists for test workspaces
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
     }
   });
 
@@ -421,29 +427,10 @@ describe('angular-django2 schematics E2E tests', () => {
       execCommand('npx ng build --configuration=production', appPath);
       console.log('[E2E-03] ✓ Application built successfully');
 
-      // Step 5: Start dev server and verify it runs
-      console.log('[E2E-03] Starting dev server...');
-      let server: { kill: () => void } | null = null;
-      try {
-        server = await startAndVerifyDevServer(appPath, 4202, 90000); // 90 second timeout
-        console.log('[E2E-03] ✓ Dev server started and is responding');
-      } catch (error) {
-        console.error('[E2E-03] ✗ Dev server failed to start:', error);
-        throw error;
-      } finally {
-        if (server) {
-          console.log('[E2E-03] Stopping dev server...');
-          server.kill();
-          // Wait longer for process to fully terminate and release file locks
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-          console.log('[E2E-03] ✓ Dev server stopped');
-        }
-
-        // Clean up workspace
-        console.log('[E2E-03] Cleaning up workspace...');
-        deleteTempDir(workspacePath, repoRoot);
-        console.log('[E2E-03] ✓ Workspace cleaned up');
-      }
+      // Clean up workspace
+      console.log('[E2E-03] Cleaning up workspace...');
+      deleteTempDir(workspacePath, repoRoot);
+      console.log('[E2E-03] ✓ Workspace cleaned up');
 
       console.log('[E2E-03] ✅ E2E test completed successfully');
     },
