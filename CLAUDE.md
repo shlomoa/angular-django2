@@ -83,7 +83,7 @@ angular-django2/
 
 - **Package name:** `angular-django2` (also known as `ngdj`)
 - **npm registry:** https://www.npmjs.com/package/angular-django2
-- **Current state:** v0.1.2, pre-release (not production-ready)
+- **Current state:** v0.1.3, pre-release (not production-ready)
 - **Build output:** `dist/angular-django2`
 - **Contents:** compiled runtime library + compiled schematics collection
 

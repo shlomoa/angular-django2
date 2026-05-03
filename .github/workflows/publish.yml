@@ -32,14 +32,14 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
+      - name: Build library
+        run: npm run build
+
       - name: Run lint
         run: npm run lint
 
       - name: Run tests
         run: npm run test:ci
-
-      - name: Build library
-        run: npm run build
 
       - name: Publish package
         run: npm publish ./dist/angular-django2 --access public --tag "${{ inputs.npm-tag }}"
