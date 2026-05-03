@@ -3,6 +3,7 @@
 # Compiled output
 /dist
 /tmp
+/.tmp
 /out-tsc
 /bazel-out
 
@@ -43,9 +44,6 @@ __screenshots__/
 
 # Temporary local scaffolds
 /_tmp_*/
-
-# E2E test workspaces
-/ngdj-e2e-*/
 
 # TypeScript cache
 *.tsbuildinfo
