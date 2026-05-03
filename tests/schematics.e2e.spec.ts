@@ -57,7 +57,7 @@ async function startAndVerifyDevServer(
   appPath: string,
   port: number = 4200,
   timeoutMs: number = 60000,
-): Promise<{ kill: () => void }> {
+): Promise<{ stop: () => Promise<void> }> {
   return new Promise((resolve, reject) => {
     const serverProcess = spawn('npx', ['ng', 'serve', `--port=${port}`], {
       cwd: appPath,
@@ -66,8 +66,14 @@ async function startAndVerifyDevServer(
     });
 
     let serverStarted = false;
+    let settled = false;
+    const waitForExit = new Promise<void>((resolveExit) => {
+      serverProcess.once('exit', () => resolveExit());
+    });
+
     const timeout = setTimeout(() => {
       if (!serverStarted) {
+        settled = true;
         serverProcess.kill();
         reject(new Error(`Dev server did not start within ${timeoutMs}ms`));
       }
@@ -82,11 +88,25 @@ async function startAndVerifyDevServer(
 
         // Give it a moment to be fully ready
         setTimeout(() => {
+          if (settled) {
+            return;
+          }
+
+          settled = true;
           resolve({
-            kill: () => {
-              serverProcess.kill('SIGTERM');
-              // Force kill after 5 seconds if graceful shutdown fails
-              setTimeout(() => serverProcess.kill('SIGKILL'), 5000);
+            stop: async () => {
+              if (serverProcess.exitCode !== null) {
+                await waitForExit;
+                return;
+              }
+
+              if (process.platform === 'win32' && serverProcess.pid) {
+                execCommand(`taskkill /PID ${serverProcess.pid} /T /F`, appPath, false);
+              } else {
+                serverProcess.kill('SIGTERM');
+              }
+
+              await waitForExit;
             },
           });
         }, 2000);
@@ -103,12 +123,16 @@ async function startAndVerifyDevServer(
 
     serverProcess.on('error', (error: Error) => {
       clearTimeout(timeout);
-      reject(error);
+      if (!settled) {
+        settled = true;
+        reject(error);
+      }
     });
 
     serverProcess.on('exit', (code: number | null) => {
       clearTimeout(timeout);
-      if (!serverStarted && code !== 0) {
+      if (!settled && !serverStarted && code !== 0) {
+        settled = true;
         reject(new Error(`Server process exited with code ${code}`));
       }
     });
@@ -245,7 +269,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
       // Step 9: Start dev server and verify it runs
       console.log('[E2E-01] Starting dev server...');
-      let server: { kill: () => void } | null = null;
+      let server: { stop: () => Promise<void> } | null = null;
       try {
         server = await startAndVerifyDevServer(appPath, 4201, 90000); // 90 second timeout
         console.log('[E2E-01] ✓ Dev server started and is responding');
@@ -255,9 +279,7 @@ describe('angular-django2 schematics E2E tests', () => {
       } finally {
         if (server) {
           console.log('[E2E-01] Stopping dev server...');
-          server.kill();
-          // Wait longer for process to fully terminate and release file locks
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await server.stop();
           console.log('[E2E-01] ✓ Dev server stopped');
         }
 

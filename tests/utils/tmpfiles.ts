@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 
 /**
  * Returns the absolute path to the root directory of the git repository.
@@ -22,6 +22,12 @@ export function getRepoRoot(): string {
 export function createTempDir(repoRoot: string, prefix = 'tmp-'): string {
   // mkdtemp requires the prefix to be part of the full path
   const base = join(repoRoot, prefix);
+
+  const parentDir = dirname(base);
+  if (!existsSync(parentDir)) {
+    mkdirSync(parentDir, { recursive: true });
+  }
+
   return mkdtempSync(base);
 }
 
@@ -42,6 +48,21 @@ export function deleteTempDir(dirPath: string, repoRoot: string): void {
     throw new Error(`Refusing to delete outside repo root: ${resolvedDir}`);
   }
 
-  // Use Node.js built-in maxRetries to handle Windows EPERM file lock errors gracefully
-  rmSync(resolvedDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 2000 });
+  try {
+    rmSync(resolvedDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 2000 });
+  } catch (error) {
+    if (
+      process.platform === 'win32' &&
+      error instanceof Error &&
+      'code' in error &&
+      (error.code === 'EPERM' || error.code === 'EBUSY' || error.code === 'ENOTEMPTY')
+    ) {
+      console.error(
+        `[Cleanup] Failed to delete ${resolvedDir} due to a Windows file lock. Leaving temp directory behind.`,
+      );
+      return;
+    }
+
+    throw error;
+  }
 }

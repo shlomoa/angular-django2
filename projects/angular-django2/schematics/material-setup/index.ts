@@ -168,9 +168,6 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
     ? "import { provideAnimations } from '@angular/platform-browser/animations';"
     : "import { provideNoopAnimations } from '@angular/platform-browser/animations';";
 
-  // Add MatNativeDateModule import
-  const dateModuleImport = "import { MatNativeDateModule } from '@angular/material/core';";
-
   // Find the imports section and add new imports
   const importRegex = /(import\s+.*?from\s+['"].*?['"];?\s*)+/;
   const match = appConfigContent.match(importRegex);
@@ -179,19 +176,18 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
     const lastImportEnd = match[0].length;
     appConfigContent =
       appConfigContent.slice(0, lastImportEnd) +
-      `\n${animationImport}\n${dateModuleImport}\n` +
+      `\n${animationImport}\n` +
       appConfigContent.slice(lastImportEnd);
   }
 
   // Add providers to the providers array
   const providerToAdd = animations ? 'provideAnimations()' : 'provideNoopAnimations()';
-  const providersToAdd = `${providerToAdd}, MatNativeDateModule`;
 
   // Find the providers array and add new providers
   const providersRegex = /providers:\s*\[/;
   appConfigContent = appConfigContent.replace(
     providersRegex,
-    `providers: [\n    ${providersToAdd},\n   `,
+    `providers: [\n    ${providerToAdd},\n   `,
   );
 
   tree.overwrite(appConfigPath, appConfigContent);

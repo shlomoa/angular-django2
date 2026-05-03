@@ -170,6 +170,15 @@ describe('angular-django2 schematics integration tests', () => {
         }),
       );
       appTree.create('projects/test-app/src/styles.scss', '/* existing styles */\n');
+      appTree.create(
+        'projects/test-app/src/app/app.config.ts',
+        `import { ApplicationConfig } from '@angular/core';
+
+export const appConfig: ApplicationConfig = {
+  providers: []
+};
+`,
+      );
     });
 
     it('INT-MAT-01: configures Material with prebuilt theme', async () => {
@@ -190,6 +199,10 @@ describe('angular-django2 schematics integration tests', () => {
 
       const stylesContent = tree.readContent('projects/test-app/src/styles.scss');
       expect(stylesContent).toContain('Angular Material theme is loaded via angular.json');
+
+      const appConfigContent = tree.readContent('projects/test-app/src/app/app.config.ts');
+      expect(appConfigContent).toContain('provideAnimations()');
+      expect(appConfigContent).not.toContain('MatNativeDateModule');
     });
 
     it('INT-MAT-02: configures Material with custom theme', async () => {
@@ -371,6 +384,10 @@ export const appConfig: ApplicationConfig = {
       const styles = angularJson.projects['demo-app'].architect.build.options.styles;
       expect(styles).toContain('@angular/material/prebuilt-themes/indigo-pink.css');
 
+      const appConfigContent = tree.readContent('/projects/demo-app/src/app/app.config.ts');
+      expect(appConfigContent).toContain('provideAnimations()');
+      expect(appConfigContent).not.toContain('MatNativeDateModule');
+
       // Verify app component was generated with Material
       const appComponentTs = tree.readContent('/projects/demo-app/src/app/app.component.ts');
       expect(appComponentTs).toContain('MatToolbarModule');
@@ -413,6 +430,7 @@ export const appConfig: ApplicationConfig = {
       // Verify app config has noopAnimations
       const appConfigContent = tree.readContent('/projects/custom-app/src/app/app.config.ts');
       expect(appConfigContent).toContain('provideNoopAnimations');
+      expect(appConfigContent).not.toContain('MatNativeDateModule');
     });
   });
 
