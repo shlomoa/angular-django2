@@ -35,5 +35,10 @@ jobs:
       - name: Run tests
         run: npm run test:ci
 
+      # E2E tests are skipped in CI by default due to long execution time (5+ minutes)
+      # To enable, uncomment the following step or run manually with: npm run test:e2e
+      # - name: Run E2E tests
+      #   run: npm run test:e2e
+
       - name: Verify npm package tarball
         run: npm pack ./dist/angular-django2 --dry-run

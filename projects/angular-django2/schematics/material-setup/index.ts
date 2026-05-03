@@ -12,6 +12,8 @@ interface WorkspaceConfig {
   projects: Record<
     string,
     {
+      root?: string;
+      sourceRoot?: string;
       architect?: {
         build?: {
           options?: {
@@ -46,9 +48,10 @@ export function materialSetup(options: MaterialSetupOptions): Rule {
       throw new SchematicsException(`Project "${project}" not found in angular.json.`);
     }
 
-    // Determine the project path
-    const projectRoot = `projects/${project}`;
-    const stylesPath = `${projectRoot}/src/styles.scss`;
+    // Determine the project path from angular.json
+    const projectConfig = workspace.projects[project];
+    const projectRoot = projectConfig.root || '';
+    const stylesPath = projectRoot ? `${projectRoot}/src/styles.scss` : 'src/styles.scss';
 
     // Update angular.json for prebuilt themes
     if (theme !== 'custom') {
@@ -135,7 +138,11 @@ $theme: mat.define-light-theme((
     stylesContent = prebuiltComment + stylesContent;
   }
 
-  tree.overwrite(stylesPath, stylesContent);
+  if (tree.exists(stylesPath)) {
+    tree.overwrite(stylesPath, stylesContent);
+  } else {
+    tree.create(stylesPath, stylesContent);
+  }
 }
 
 function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): void {
@@ -161,9 +168,6 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
     ? "import { provideAnimations } from '@angular/platform-browser/animations';"
     : "import { provideNoopAnimations } from '@angular/platform-browser/animations';";
 
-  // Add MatNativeDateModule import
-  const dateModuleImport = "import { MatNativeDateModule } from '@angular/material/core';";
-
   // Find the imports section and add new imports
   const importRegex = /(import\s+.*?from\s+['"].*?['"];?\s*)+/;
   const match = appConfigContent.match(importRegex);
@@ -172,19 +176,18 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
     const lastImportEnd = match[0].length;
     appConfigContent =
       appConfigContent.slice(0, lastImportEnd) +
-      `\n${animationImport}\n${dateModuleImport}\n` +
+      `\n${animationImport}\n` +
       appConfigContent.slice(lastImportEnd);
   }
 
   // Add providers to the providers array
   const providerToAdd = animations ? 'provideAnimations()' : 'provideNoopAnimations()';
-  const providersToAdd = `${providerToAdd}, MatNativeDateModule`;
 
   // Find the providers array and add new providers
   const providersRegex = /providers:\s*\[/;
   appConfigContent = appConfigContent.replace(
     providersRegex,
-    `providers: [\n    ${providersToAdd},\n   `,
+    `providers: [\n    ${providerToAdd},\n   `,
   );
 
   tree.overwrite(appConfigPath, appConfigContent);

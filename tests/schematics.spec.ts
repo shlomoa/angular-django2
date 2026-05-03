@@ -259,6 +259,8 @@ describe('angular-django2 schematics', () => {
         version: 1,
         projects: {
           'test-app': {
+            root: 'projects/test-app',
+            sourceRoot: 'projects/test-app/src',
             architect: {
               build: {
                 options: {
@@ -292,6 +294,8 @@ describe('angular-django2 schematics', () => {
         version: 1,
         projects: {
           'test-app': {
+            root: 'projects/test-app',
+            sourceRoot: 'projects/test-app/src',
             architect: {
               build: {
                 options: {
@@ -326,6 +330,8 @@ describe('angular-django2 schematics', () => {
         version: 1,
         projects: {
           'test-app': {
+            root: 'projects/test-app',
+            sourceRoot: 'projects/test-app/src',
             architect: {
               build: {
                 options: {
@@ -358,6 +364,8 @@ describe('angular-django2 schematics', () => {
         version: 1,
         projects: {
           'test-app': {
+            root: 'projects/test-app',
+            sourceRoot: 'projects/test-app/src',
             architect: {
               build: {
                 options: {
@@ -432,7 +440,10 @@ describe('angular-django2 schematics', () => {
       const angularJson = {
         version: 1,
         projects: {
-          'test-app': {},
+          'test-app': {
+            root: 'projects/test-app',
+            sourceRoot: 'projects/test-app/src',
+          },
         },
       };
       tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
@@ -460,7 +471,10 @@ describe('angular-django2 schematics', () => {
       const angularJson = {
         version: 1,
         projects: {
-          'test-app': {},
+          'test-app': {
+            root: 'projects/test-app',
+            sourceRoot: 'projects/test-app/src',
+          },
         },
       };
       tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
@@ -490,7 +504,10 @@ describe('angular-django2 schematics', () => {
       const angularJson = {
         version: 1,
         projects: {
-          'test-app': {},
+          'test-app': {
+            root: 'projects/test-app',
+            sourceRoot: 'projects/test-app/src',
+          },
         },
       };
       tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
@@ -555,6 +572,8 @@ describe('angular-django2 schematics', () => {
           version: 1,
           projects: {
             'my-app': {
+              root: 'projects/my-app',
+              sourceRoot: 'projects/my-app/src',
               architect: {
                 build: {
                   options: {
@@ -631,6 +650,8 @@ describe('angular-django2 schematics', () => {
           version: 1,
           projects: {
             'test-app': {
+              root: 'projects/test-app',
+              sourceRoot: 'projects/test-app/src',
               architect: {
                 build: {
                   options: {
@@ -683,6 +704,8 @@ describe('angular-django2 schematics', () => {
           version: 1,
           projects: {
             'my-app': {
+              root: 'projects/my-app',
+              sourceRoot: 'projects/my-app/src',
               architect: {
                 build: {
                   options: {

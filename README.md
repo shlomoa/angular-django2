@@ -28,7 +28,7 @@ This repository is already set up around that model and targets Angular 21.
 - custom schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-api`, and `data-service`
 - Angular runtime tests through the Angular 21 Vitest-based test builder
 - Node-side Vitest tests for schematics and tooling
-- ESLint flat-config linting for library code, schematics, tests, and tools
+- ESLint flat-config linting for library code, schematics, tests, and tools (via `ng lint`)
 - Prettier formatting configuration
 - GitHub Actions for CI and npm publishing
 - build and release documentation for local and CI-driven publishing
@@ -124,13 +124,13 @@ npm run test:ci
 Run ESLint across the library source, schematics, tests, and tooling:
 
 ```bash
-npm run lint
+ng lint
 ```
 
 Apply fixable ESLint changes:
 
 ```bash
-npm run lint:fix
+ng lint --fix
 ```
 
 ## Format

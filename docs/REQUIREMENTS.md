@@ -95,13 +95,13 @@ The service behavior currently expected by the repo docs and code is:
 - The standard verification flow should include the shared scripts already defined by the repo.
 - The most important verification commands called out in repo guidance are:
   - `npm run format:check`
-  - `npm run lint`
+  - `ng lint`
   - `npm run test:ci`
   - `npm run build`
   - `npm run pack:dry-run`
 - `npm run release:prepare` is the release validation command and currently runs:
   - `npm run format:check`
-  - `npm run lint`
+  - `ng lint`
   - `npm run test:ci`
   - `npm run pack:dry-run`
 - Packaging validation should use `npm pack ./dist/angular-django2 --dry-run` rather than `npm publish --dry-run`.

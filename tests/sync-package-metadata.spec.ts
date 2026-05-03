@@ -1,18 +1,17 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { syncPackageMetadata, syncPackageMetadataFiles } from '../tools/sync-package-metadata.mjs';
+import { createTempDir, deleteTempDir, getRepoRoot } from './utils/tmpfiles';
 
 describe('sync-package-metadata', () => {
   const tempDirectories: string[] = [];
+  const repoRoot = getRepoRoot();
 
   afterEach(async () => {
-    await Promise.all(
-      tempDirectories.map((directory) => rm(directory, { force: true, recursive: true })),
-    );
+    tempDirectories.forEach((directory) => deleteTempDir(directory, repoRoot));
     tempDirectories.length = 0;
   });
 
@@ -69,7 +68,7 @@ describe('sync-package-metadata', () => {
   });
 
   it('removes optional metadata that no longer exists in the root manifest and writes the updated file', async () => {
-    const tempDirectory = await mkdtemp(join(tmpdir(), 'angular-django2-metadata-'));
+    const tempDirectory = createTempDir(repoRoot, 'angular-django2-metadata-');
     const rootManifestPath = join(tempDirectory, 'package.json');
     const libraryManifestPath = join(tempDirectory, 'library-package.json');
 
