@@ -1,5 +1,5 @@
 import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
-import { externalSchematic, SchematicsException } from '@angular-devkit/schematics';
+import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import type { NgAppSchema } from './schema';
 
@@ -83,10 +83,10 @@ import { MatIconModule } from '@angular/material/icon';
     MatListModule,
     MatIconModule,
   ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  templateUrl: './TEMPLATE_FILE',
+  styleUrl: './STYLE_FILE',
 })
-export class AppComponent {
+export class CLASS_NAME {
   title = 'REPLACE_APP_NAME';
 }
 `;
@@ -138,39 +138,50 @@ export function ngApp(options: NgAppSchema): Rule {
       }
     }
 
+    const rules: Rule[] = [];
+
     // Step 1: Generate the base application via external schematic (only if project doesn't exist)
     if (!projectExists) {
-      const applicationRule = externalSchematic('@schematics/angular', 'application', {
-        name: options.name,
-        routing: options.routing,
-        standalone: options.standalone,
-        style: options.style,
-        prefix: options.prefix,
-      });
-
-      // Apply the application schematic
-      const result = applicationRule(tree, context);
-      // If the result is a Tree, use it; otherwise continue with the original tree
-      if (result && typeof result === 'object' && 'read' in result) {
-        tree = result as Tree;
-      }
+      rules.push(
+        externalSchematic('@schematics/angular', 'application', {
+          name: options.name,
+          routing: options.routing,
+          standalone: options.standalone,
+          style: options.style,
+          prefix: options.prefix,
+        }),
+      );
     } else {
       context.logger.info(`Project '${options.name}' already exists, skipping application generation`);
     }
 
     // Step 2: Add @angular/material and @angular/cdk as dependencies
-    addMaterialDependencies(tree, context);
+    rules.push((innerTree: Tree, innerContext: SchematicContext) => {
+      addMaterialDependencies(innerTree, innerContext);
+      return innerTree;
+    });
 
     // Step 3: Configure Angular Material
-    configureMaterial(tree, options.name, options.theme, options.typography, options.animations);
+    rules.push((innerTree: Tree) => {
+      configureMaterial(innerTree, options.name, options.theme, options.typography, options.animations);
+      return innerTree;
+    });
 
     // Step 4: Create standard directory structure
-    createDirectoryStructure(tree, options.name);
+    rules.push((innerTree: Tree) => {
+      createDirectoryStructure(innerTree, options.name);
+      return innerTree;
+    });
 
     // Step 5: Generate Material App Shell
-    generateMaterialAppShell(tree, options.name, options.style);
+    rules.push((innerTree: Tree) => {
+      generateMaterialAppShell(innerTree, options.name, options.style);
+      return innerTree;
+    });
 
-    return tree;
+    // Use chain to properly sequence all rules
+    // This ensures the external schematic completes before subsequent rules run
+    return chain(rules)(tree, context);
   };
 }
 
@@ -202,6 +213,10 @@ function addMaterialDependencies(tree: Tree, context: SchematicContext): void {
 
   if (!packageJson.dependencies['@angular/cdk']) {
     packageJson.dependencies['@angular/cdk'] = angularVersion;
+  }
+
+  if (!packageJson.dependencies['@angular/animations']) {
+    packageJson.dependencies['@angular/animations'] = angularVersion;
   }
 
   tree.overwrite(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
@@ -439,23 +454,40 @@ function generateMaterialAppShell(tree: Tree, projectName: string, style: string
   const projectRoot = projectConfig.root || '';
   const appRoot = projectRoot ? `${projectRoot}/src/app` : 'src/app';
 
-  // Update app.component.html
-  const htmlPath = `${appRoot}/app.component.html`;
-  if (tree.exists(htmlPath)) {
+  // Try both old and new naming conventions
+  // Angular 21+ uses app.html, app.ts, app.scss
+  // Older versions use app.component.html, app.component.ts, app.component.scss
+  const htmlPaths = [`${appRoot}/app.html`, `${appRoot}/app.component.html`];
+  const htmlPath = htmlPaths.find((p) => tree.exists(p));
+  if (htmlPath) {
     tree.overwrite(htmlPath, APP_SHELL_TEMPLATE);
   }
 
-  // Update app.component.scss (or other style format)
+  // Update app style file
   const styleExtension = style === 'scss' ? 'scss' : style === 'sass' ? 'sass' : 'css';
-  const stylePath = `${appRoot}/app.component.${styleExtension}`;
-  if (tree.exists(stylePath)) {
+  const stylePaths = [
+    `${appRoot}/app.${styleExtension}`,
+    `${appRoot}/app.component.${styleExtension}`,
+  ];
+  const stylePath = stylePaths.find((p) => tree.exists(p));
+  if (stylePath) {
     tree.overwrite(stylePath, APP_SHELL_STYLES);
   }
 
-  // Update app.component.ts
-  const tsPath = `${appRoot}/app.component.ts`;
-  if (tree.exists(tsPath)) {
-    const componentContent = APP_SHELL_COMPONENT_TS.replace('REPLACE_APP_NAME', projectName);
+  // Update app TypeScript file
+  const tsPaths = [`${appRoot}/app.ts`, `${appRoot}/app.component.ts`];
+  const tsPath = tsPaths.find((p) => tree.exists(p));
+  if (tsPath) {
+    // Determine the template and style file names based on which TypeScript file exists
+    const templateFile = tsPath.endsWith('app.ts') ? 'app.html' : 'app.component.html';
+    const styleFile = tsPath.endsWith('app.ts') ? `app.${styleExtension}` : `app.component.${styleExtension}`;
+    const className = tsPath.endsWith('app.ts') ? 'App' : 'AppComponent';
+
+    const componentContent = APP_SHELL_COMPONENT_TS
+      .replace('REPLACE_APP_NAME', projectName)
+      .replace('TEMPLATE_FILE', templateFile)
+      .replace('STYLE_FILE', styleFile)
+      .replace('CLASS_NAME', className);
     tree.overwrite(tsPath, componentContent);
   }
 }

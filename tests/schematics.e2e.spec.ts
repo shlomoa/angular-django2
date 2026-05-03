@@ -360,7 +360,11 @@ describe('angular-django2 schematics E2E tests', () => {
       console.log('[E2E-02] ✓ Project structure verified');
 
       // Verify app component has Material imports
-      const appComponentPath = path.join(appRoot, 'app.component.ts');
+      // Angular 21+ uses app.ts, older versions use app.component.ts
+      const appComponentPath =
+        fs.existsSync(path.join(appRoot, 'app.ts'))
+          ? path.join(appRoot, 'app.ts')
+          : path.join(appRoot, 'app.component.ts');
       const appComponentContent = fs.readFileSync(appComponentPath, 'utf8');
       expect(appComponentContent).toContain('MatToolbarModule');
       expect(appComponentContent).toContain('MatSidenavModule');
