@@ -123,7 +123,6 @@ const DIRECTORIES = ['core', 'shared/components', 'shared/pipes', 'features'] as
 
 export function ngApp(options: NgAppSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    // Check if the project already exists in angular.json
     const angularJsonPath = '/angular.json';
     const angularJsonBuffer = tree.read(angularJsonPath);
 
@@ -133,16 +132,13 @@ export function ngApp(options: NgAppSchema): Rule {
         const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
         projectExists = !!workspace.projects[options.name];
       } catch {
-        // If we can't parse angular.json, assume project doesn't exist
         projectExists = false;
       }
     }
 
-    const rules: Rule[] = [];
-
-    // Step 1: Generate the base application via external schematic (only if project doesn't exist)
     if (!projectExists) {
-      rules.push(
+      // externalSchematic is async — chain() ensures it completes before material setup runs
+      return chain([
         externalSchematic('@schematics/angular', 'application', {
           name: options.name,
           routing: options.routing,
@@ -150,39 +146,26 @@ export function ngApp(options: NgAppSchema): Rule {
           style: options.style,
           prefix: options.prefix,
         }),
-      );
-    } else {
-      context.logger.info(`Project '${options.name}' already exists, skipping application generation`);
+        (innerTree: Tree, innerContext: SchematicContext) => {
+          applyMaterialSetup(innerTree, innerContext, options);
+          return innerTree;
+        },
+      ])(tree, context);
     }
 
-    // Step 2: Add @angular/material and @angular/cdk as dependencies
-    rules.push((innerTree: Tree, innerContext: SchematicContext) => {
-      addMaterialDependencies(innerTree, innerContext);
-      return innerTree;
-    });
-
-    // Step 3: Configure Angular Material
-    rules.push((innerTree: Tree) => {
-      configureMaterial(innerTree, options.name, options.theme, options.typography, options.animations);
-      return innerTree;
-    });
-
-    // Step 4: Create standard directory structure
-    rules.push((innerTree: Tree) => {
-      createDirectoryStructure(innerTree, options.name);
-      return innerTree;
-    });
-
-    // Step 5: Generate Material App Shell
-    rules.push((innerTree: Tree) => {
-      generateMaterialAppShell(innerTree, options.name, options.style);
-      return innerTree;
-    });
-
-    // Use chain to properly sequence all rules
-    // This ensures the external schematic completes before subsequent rules run
-    return chain(rules)(tree, context);
+    context.logger.info(
+      `Project '${options.name}' already exists, skipping application generation`,
+    );
+    applyMaterialSetup(tree, context, options);
+    return tree;
   };
+}
+
+function applyMaterialSetup(tree: Tree, context: SchematicContext, options: NgAppSchema): void {
+  addMaterialDependencies(tree, context);
+  configureMaterial(tree, options.name, options.theme, options.typography, options.animations);
+  createDirectoryStructure(tree, options.name);
+  generateMaterialAppShell(tree, options.name, options.style);
 }
 
 /**
@@ -480,11 +463,12 @@ function generateMaterialAppShell(tree: Tree, projectName: string, style: string
   if (tsPath) {
     // Determine the template and style file names based on which TypeScript file exists
     const templateFile = tsPath.endsWith('app.ts') ? 'app.html' : 'app.component.html';
-    const styleFile = tsPath.endsWith('app.ts') ? `app.${styleExtension}` : `app.component.${styleExtension}`;
+    const styleFile = tsPath.endsWith('app.ts')
+      ? `app.${styleExtension}`
+      : `app.component.${styleExtension}`;
     const className = tsPath.endsWith('app.ts') ? 'App' : 'AppComponent';
 
-    const componentContent = APP_SHELL_COMPONENT_TS
-      .replace('REPLACE_APP_NAME', projectName)
+    const componentContent = APP_SHELL_COMPONENT_TS.replace('REPLACE_APP_NAME', projectName)
       .replace('TEMPLATE_FILE', templateFile)
       .replace('STYLE_FILE', styleFile)
       .replace('CLASS_NAME', className);
