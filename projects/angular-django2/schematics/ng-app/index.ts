@@ -1,5 +1,5 @@
 import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
-import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
+import { externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import type { NgAppSchema } from './schema';
 
@@ -122,36 +122,56 @@ export {};
 const DIRECTORIES = ['core', 'shared/components', 'shared/pipes', 'features'] as const;
 
 export function ngApp(options: NgAppSchema): Rule {
-  return chain([
-    // Step 1: Generate the base application via external schematic
-    externalSchematic('@schematics/angular', 'application', {
-      name: options.name,
-      routing: options.routing,
-      standalone: options.standalone,
-      style: options.style,
-      prefix: options.prefix,
-    }),
+  return (tree: Tree, context: SchematicContext) => {
+    // Check if the project already exists in angular.json
+    const angularJsonPath = '/angular.json';
+    const angularJsonBuffer = tree.read(angularJsonPath);
+
+    let projectExists = false;
+    if (angularJsonBuffer) {
+      try {
+        const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
+        projectExists = !!workspace.projects[options.name];
+      } catch {
+        // If we can't parse angular.json, assume project doesn't exist
+        projectExists = false;
+      }
+    }
+
+    // Step 1: Generate the base application via external schematic (only if project doesn't exist)
+    if (!projectExists) {
+      const applicationRule = externalSchematic('@schematics/angular', 'application', {
+        name: options.name,
+        routing: options.routing,
+        standalone: options.standalone,
+        style: options.style,
+        prefix: options.prefix,
+      });
+
+      // Apply the application schematic
+      const result = applicationRule(tree, context);
+      // If the result is a Tree, use it; otherwise continue with the original tree
+      if (result && typeof result === 'object' && 'read' in result) {
+        tree = result as Tree;
+      }
+    } else {
+      context.logger.info(`Project '${options.name}' already exists, skipping application generation`);
+    }
+
     // Step 2: Add @angular/material and @angular/cdk as dependencies
-    (tree: Tree, context: SchematicContext) => {
-      addMaterialDependencies(tree, context);
-      return tree;
-    },
+    addMaterialDependencies(tree, context);
+
     // Step 3: Configure Angular Material
-    (tree: Tree) => {
-      configureMaterial(tree, options.name, options.theme, options.typography, options.animations);
-      return tree;
-    },
+    configureMaterial(tree, options.name, options.theme, options.typography, options.animations);
+
     // Step 4: Create standard directory structure
-    (tree: Tree) => {
-      createDirectoryStructure(tree, options.name);
-      return tree;
-    },
+    createDirectoryStructure(tree, options.name);
+
     // Step 5: Generate Material App Shell
-    (tree: Tree) => {
-      generateMaterialAppShell(tree, options.name, options.style);
-      return tree;
-    },
-  ]);
+    generateMaterialAppShell(tree, options.name, options.style);
+
+    return tree;
+  };
 }
 
 /**
