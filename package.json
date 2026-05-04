@@ -14,6 +14,7 @@
     "lint:fix": "ng lint --fix",
     "pack:dry-run": "npm run build && npm pack ./dist/angular-django2 --dry-run",
     "release:prepare": "npm run format:check && npm run lint && npm run test:ci && npm run pack:dry-run",
+    "release:version": "node tools/release-version.mjs",
     "sync:package-metadata": "node tools/sync-package-metadata.mjs",
     "test": "ng test --watch=false angular-django2",
     "test:ci": "npm run test:node && ng test angular-django2 --watch=false",
