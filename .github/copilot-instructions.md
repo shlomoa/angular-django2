@@ -2,8 +2,6 @@
 
 Read [these instructions first](https://github.com/shlomoa/internal/blob/main/github/copilot-instructions.md)
 
-> Note: this upstream instructions URL may be private/inaccessible outside authorized environments.
-
 ## Repository Status
 
 **Library (`projects/angular-django2/src/lib`) — implemented:**
