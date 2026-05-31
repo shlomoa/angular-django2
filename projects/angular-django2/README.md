@@ -7,7 +7,7 @@ The initial package surface is intentionally small:
 - `provideAngularDjango2(...)` for root-level configuration
 - `ANGULAR_DJANGO2_CONFIG` for DI-based access to resolved config
 - `AngularDjango2Service` for URL and CSRF helper methods
-- schematics for `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-api`, and `data-service`
+- schematics for `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
 
 ## Usage
 
@@ -54,6 +54,7 @@ ng generate angular-django2:component dashboard-card
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
 ng generate angular-django2:ng-app my-app
+ng generate angular-django2:ng-workspace my-app
 ng generate angular-django2:ng-api --inputPath=openapi.json
 ng generate angular-django2:data-service users
 ```
@@ -68,10 +69,26 @@ Current defaults:
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
 - `ng-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav app shell
   - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--style`, `--prefix`
+- `ng-workspace`: writes workspace-wide bootstrap files for an empty Angular workspace
+  - Writes `.github/copilot-instructions.md` with repo instructions for the generated app name
+  - Replaces the workspace root `README.md` with this guide so the generated repo includes the build recipes below
 - `ng-api`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds the package to `devDependencies`, writes `ng-openapi-gen.json`, and adds a `generate:api` npm script
   - Options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`)
 - `data-service`: generates a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search and CRUD helpers
   - Options: `--apiService`, `--apiPath` (default: `../api/services`), `--path`, `--flat`, `--skipTests`
+
+### Empty workspace bootstrap
+
+For a workspace created with `ng new demo-workspace --no-create-application`, the end-to-end bootstrap flow is:
+
+```bash
+ng add angular-django2
+ng generate angular-django2:ng-workspace my-app
+ng generate angular-django2:ng-app my-app
+ng build my-app
+```
+
+`ng-workspace` sets up the workspace-level files first, and `ng-app` then generates the Angular application itself.
 
 ### OpenAPI workflow
 

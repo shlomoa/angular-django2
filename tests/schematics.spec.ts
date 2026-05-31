@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import * as path from 'node:path';
 import type * as SchematicsModule from '@angular-devkit/schematics';
 import { Tree, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -26,6 +28,7 @@ import { materialSetup } from '../projects/angular-django2/schematics/material-s
 import { ngAdd } from '../projects/angular-django2/schematics/ng-add/index';
 import { ngApi } from '../projects/angular-django2/schematics/ng-api/index';
 import { ngApp } from '../projects/angular-django2/schematics/ng-app/index';
+import { ngWorkspace } from '../projects/angular-django2/schematics/ng-workspace/index';
 import { projectStructure } from '../projects/angular-django2/schematics/project-structure/index';
 import { service } from '../projects/angular-django2/schematics/service/index';
 
@@ -39,6 +42,11 @@ describe('angular-django2 schematics', () => {
   afterEach(() => {
     mockedExternalSchematic.mockReset();
   });
+
+  const workspaceReadme = readFileSync(
+    path.join(__dirname, '../projects/angular-django2/README.md'),
+    'utf8',
+  );
 
   it('wraps the Angular application schematic with standalone and routing defaults', () => {
     application({ name: 'demo-app' });
@@ -250,6 +258,42 @@ describe('angular-django2 schematics', () => {
     if (match) {
       expect(match[1]).toBe('  ');
     }
+  });
+
+  it('TC-WS-01: writes workspace bootstrap files for the requested app name', () => {
+    const tree = Tree.empty();
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, {} as never) as Tree;
+
+    expect(updatedTree.read('/.github/copilot-instructions.md')!.toString()).toBe(`# demo-app Repo Instructions
+
+Read [these instructions first](https://github.com/shlomoa/internal/blob/main/github/copilot-instructions.md)
+
+---
+`);
+    expect(updatedTree.read('/README.md')!.toString()).toBe(workspaceReadme);
+  });
+
+  it('TC-WS-02: overwrites existing workspace bootstrap files', () => {
+    const tree = Tree.empty();
+    tree.create('/README.md', 'old readme');
+    tree.create('/.github/copilot-instructions.md', 'old instructions');
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, {} as never) as Tree;
+
+    expect(updatedTree.read('/README.md')!.toString()).toBe(workspaceReadme);
+    expect(updatedTree.read('/.github/copilot-instructions.md')!.toString()).toContain(
+      '# demo-app Repo Instructions',
+    );
+  });
+
+  it('TC-WS-03: throws when name is missing', () => {
+    const tree = Tree.empty();
+
+    expect(() => ngWorkspace({ name: '' })(tree, {} as never)).toThrow(SchematicsException);
+    expect(() => ngWorkspace({ name: '' })(tree, {} as never)).toThrow(
+      'Option "name" is required.',
+    );
   });
 
   describe('material-setup schematic', () => {
