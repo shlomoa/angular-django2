@@ -74,14 +74,14 @@ temp-area harness behavior, which is part of the repo's testing toolbox.
 
 ## Which command runs what
 
-| Command | Coverage |
-| --- | --- |
-| `npm test` | Angular library tests only |
-| `npm run test:node` | Node-side unit + integration specs in `tests/**/*.spec.ts`, excluding `tests/schematics.e2e.spec.ts` |
-| `npm run test:node:watch` | Watch mode for the same Node-side unit + integration specs |
-| `npm run test:e2e` | Only `tests/schematics.e2e.spec.ts` |
-| `npm run test:e2e:watch` | Watch mode for only `tests/schematics.e2e.spec.ts` |
-| `npm run test:ci` | `npm run test:node` + Angular library tests |
+| Command                   | Coverage                                                                                              |
+| ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `npm test`                | Angular library tests only                                                                            |
+| `npm run test:node`       | Node-side unit + integration specs in `tests/**/*.spec.ts`, excluding `tests/schematics.e2e.spec.ts` |
+| `npm run test:node:watch` | Watch mode for the same Node-side unit + integration specs                                            |
+| `npm run test:e2e`        | Only `tests/schematics.e2e.spec.ts`                                                                   |
+| `npm run test:e2e:watch`  | Watch mode for only `tests/schematics.e2e.spec.ts`                                                    |
+| `npm run test:ci`         | `npm run test:node` + Angular library tests                                                           |
 
 `npm run test:ci` does **not** run the E2E suite.
 
