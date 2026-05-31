@@ -5,9 +5,14 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, type UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
 import * as path from 'path';
 
 const collectionPath = path.join(__dirname, '../dist/angular-django2/schematics/collection.json');
+const workspaceReadme = readFileSync(
+  path.join(__dirname, '../projects/angular-django2/README.md'),
+  'utf8',
+);
 
 describe('angular-django2 schematics integration tests', () => {
   let runner: SchematicTestRunner;
@@ -71,6 +76,27 @@ describe('angular-django2 schematics integration tests', () => {
 
       const angularJson = JSON.parse(tree2.readContent('/angular.json'));
       expect(angularJson.cli.schematicCollections).toEqual(['angular-django2']);
+    });
+  });
+
+  describe('ng-workspace schematic integration', () => {
+    it('INT-WS-01: writes workspace bootstrap files from the packaged README template', async () => {
+      const tree = await runner.runSchematic(
+        'ng-workspace',
+        {
+          name: 'demo-app',
+        },
+        appTree,
+      );
+
+      expect(tree.readContent('/.github/copilot-instructions.md'))
+        .toBe(`# demo-app Repo Instructions
+
+Read [these instructions first](https://github.com/shlomoa/internal/blob/main/github/copilot-instructions.md)
+
+---
+`);
+      expect(tree.readContent('/README.md')).toBe(workspaceReadme);
     });
   });
 

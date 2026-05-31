@@ -20,7 +20,7 @@ Django-side workspace lifecycle and can register this package automatically.
 - `projects/angular-django2/src`: the runtime library and public API
 - `projects/angular-django2/schematics`: the schematics collection source
 - `tests`: unit, integration, and end-to-end validation for schematics and
-   tooling
+  tooling
 - `tools`: repository automation such as release/version helpers
 - `docs`: release and testing documentation
 - `dist/angular-django2`: the publishable build output after `npm run build`
@@ -56,18 +56,18 @@ import { ApplicationConfig } from '@angular/core';
 import { provideAngularDjango2 } from 'angular-django2';
 
 export const appConfig: ApplicationConfig = {
-   providers: [
-      provideHttpClient(
-         withXsrfConfiguration({
-            cookieName: 'csrftoken',
-            headerName: 'X-CSRFToken',
-         }),
-      ),
-      provideAngularDjango2({
-         apiBaseUrl: 'https://api.example.com',
-         withCredentials: true,
+  providers: [
+    provideHttpClient(
+      withXsrfConfiguration({
+        cookieName: 'csrftoken',
+        headerName: 'X-CSRFToken',
       }),
-   ],
+    ),
+    provideAngularDjango2({
+      apiBaseUrl: 'https://api.example.com',
+      withCredentials: true,
+    }),
+  ],
 };
 ```
 
@@ -93,17 +93,17 @@ npm install
 
 #### Common repository commands
 
-| Command | What it does |
-| --- | --- |
-| `npm run build` | Syncs package metadata, builds the Angular library, and compiles schematics into `dist/angular-django2` |
-| `npm run build:watch` | Watches the Angular library build for iterative development |
-| `npm run lint` | Runs ESLint across library code, schematics, tests, and tools |
-| `npm run lint:fix` | Applies fixable ESLint changes |
-| `npm run format:check` | Checks formatting with Prettier |
-| `npm run format` | Writes formatting changes with Prettier |
-| `npm run pack:dry-run` | Rebuilds and verifies the npm tarball without publishing |
-| `npm run sync:package-metadata` | Syncs library package metadata from the root manifest |
-| `npm run release:prepare` | Runs the release verification flow |
+| Command                         | What it does                                                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `npm run build`                 | Syncs package metadata, builds the Angular library, and compiles schematics into `dist/angular-django2` |
+| `npm run build:watch`           | Watches the Angular library build for iterative development                                             |
+| `npm run lint`                  | Runs ESLint across library code, schematics, tests, and tools                                           |
+| `npm run lint:fix`              | Applies fixable ESLint changes                                                                          |
+| `npm run format:check`          | Checks formatting with Prettier                                                                         |
+| `npm run format`                | Writes formatting changes with Prettier                                                                 |
+| `npm run pack:dry-run`          | Rebuilds and verifies the npm tarball without publishing                                                |
+| `npm run sync:package-metadata` | Syncs library package metadata from the root manifest                                                   |
+| `npm run release:prepare`       | Runs the release verification flow                                                                      |
 
 `npm run build` produces the publishable output in `dist/angular-django2`,
 including the compiled schematics collection.
@@ -113,23 +113,23 @@ including the compiled schematics collection.
 This repository has four distinct layers of validation:
 
 1. **Angular library tests**
-    - Run by `npm test`
-    - Uses Angular's test builder against the `angular-django2` library project
+   - Run by `npm test`
+   - Uses Angular's test builder against the `angular-django2` library project
 
 2. **Node-side unit tests**
-    - Run by `npm run test:node`
-    - Fast Vitest specs that mock external schematics and verify wrapper
-       behavior
+   - Run by `npm run test:node`
+   - Fast Vitest specs that mock external schematics and verify wrapper
+     behavior
 
 3. **Node-side integration tests**
-    - Also run by `npm run test:node`
-    - Execute real schematic logic with `SchematicTestRunner`
-    - Depend on the built schematics output in `dist/angular-django2/schematics`
+   - Also run by `npm run test:node`
+   - Execute real schematic logic with `SchematicTestRunner`
+   - Depend on the built schematics output in `dist/angular-django2/schematics`
 
 4. **End-to-end schematic tests**
-    - Run by `npm run test:e2e`
-    - Create real Angular workspaces, install the built package, run schematics,
-       and verify builds
+   - Run by `npm run test:e2e`
+   - Create real Angular workspaces, install the built package, run schematics,
+     and verify builds
 
 The CI-friendly test command is:
 
@@ -151,27 +151,27 @@ Before release:
 
 1. Update the version without creating a git tag:
 
-    ```bash
-    npm version patch --no-git-tag-version
-    ```
+   ```bash
+   npm version patch --no-git-tag-version
+   ```
 
 2. Sync package metadata:
 
-    ```bash
-    npm run sync:package-metadata
-    ```
+   ```bash
+   npm run sync:package-metadata
+   ```
 
 3. Run the release verification flow:
 
-    ```bash
-    npm run release:prepare
-    ```
+   ```bash
+   npm run release:prepare
+   ```
 
 4. Publish from the build output when ready:
 
-    ```bash
-    npm publish ./dist/angular-django2
-    ```
+   ```bash
+   npm publish ./dist/angular-django2
+   ```
 
 Preferred publishing uses npm Trusted Publisher with GitHub Actions. The
 checked-in workflow still supports `NPM_TOKEN` as a fallback.
@@ -238,19 +238,19 @@ npm install ../angular-django2/dist/angular-django2
 After `angular-django2` is installed in a workspace, these commands are
 available:
 
-| Command | Purpose | Notes |
-| --- | --- | --- |
-| `ng add angular-django2` | Registers the collection in `angular.json` | Automatically done by `django-angular3` |
-| `ng generate angular-django2:application <name>` | Creates an Angular application | Defaults to standalone routing + SCSS |
-| `ng generate angular-django2:material-setup --project=<name>` | Configures Angular Material in an existing project | Supports `--theme`, `--typography`, `--animations` |
-| `ng generate angular-django2:project-structure --project=<name>` | Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/` | Writes barrel `index.ts` files |
-| `ng generate angular-django2:component <name>` | Creates a component with package defaults | Uses standalone + `OnPush` defaults |
-| `ng generate angular-django2:service <name>` | Creates a service | Pass-through to Angular CLI service schematic |
-| `ng generate angular-django2:class <name>` | Creates a class | Pass-through to Angular CLI class schematic |
-| `ng generate angular-django2:app-shell --project=<name>` | Creates or updates the app shell | Pass-through schematic for app shell generation |
-| `ng generate angular-django2:ng-app <name>` | Creates a complete app in one flow | Best “get me running quickly” option |
-| `ng generate angular-django2:ng-api --inputPath=<file>` | Bootstraps `ng-openapi-gen` | Adds `generate:api` script |
-| `ng generate angular-django2:data-service <resource>` | Creates a typed `*DataService` wrapper | Designed for generated OpenAPI services |
+| Command                                                          | Purpose                                                                 | Notes                                              |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------- |
+| `ng add angular-django2`                                         | Registers the collection in `angular.json`                              | Automatically done by `django-angular3`            |
+| `ng generate angular-django2:application <name>`                 | Creates an Angular application                                          | Defaults to standalone routing + SCSS              |
+| `ng generate angular-django2:material-setup --project=<name>`    | Configures Angular Material in an existing project                      | Supports `--theme`, `--typography`, `--animations` |
+| `ng generate angular-django2:project-structure --project=<name>` | Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/` | Writes barrel `index.ts` files                     |
+| `ng generate angular-django2:component <name>`                   | Creates a component with package defaults                               | Uses standalone + `OnPush` defaults                |
+| `ng generate angular-django2:service <name>`                     | Creates a service                                                       | Pass-through to Angular CLI service schematic      |
+| `ng generate angular-django2:class <name>`                       | Creates a class                                                         | Pass-through to Angular CLI class schematic        |
+| `ng generate angular-django2:app-shell --project=<name>`         | Creates or updates the app shell                                        | Pass-through schematic for app shell generation    |
+| `ng generate angular-django2:ng-app <name>`                      | Creates a complete app in one flow                                      | Best “get me running quickly” option               |
+| `ng generate angular-django2:ng-api --inputPath=<file>`          | Bootstraps `ng-openapi-gen`                                             | Adds `generate:api` script                         |
+| `ng generate angular-django2:data-service <resource>`            | Creates a typed `*DataService` wrapper                                  | Designed for generated OpenAPI services            |
 
 ### Recipes for a running Angular app
 
@@ -299,10 +299,10 @@ This flow:
 
 - Angular libraries: https://angular.dev/tools/libraries
 - Angular schematics for libraries:
-   https://angular.dev/tools/cli/schematics-for-libraries
+  https://angular.dev/tools/cli/schematics-for-libraries
 - Angular CLI schematics: https://angular.dev/tools/cli/schematics
 - Workspace schematic collections:
-   https://angular.dev/reference/configs/workspace-config
+  https://angular.dev/reference/configs/workspace-config
 - npm trusted publishers: https://docs.npmjs.com/trusted-publishers/
 - npm 2FA requirements:
-   https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/
+  https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/

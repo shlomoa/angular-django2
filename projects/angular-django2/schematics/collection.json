@@ -46,6 +46,11 @@
       "factory": "./ng-app/index#ngApp",
       "schema": "./ng-app/schema.json"
     },
+    "ng-workspace": {
+      "description": "Initialize workspace-level files for an empty Angular workspace.",
+      "factory": "./ng-workspace/index#ngWorkspace",
+      "schema": "./ng-workspace/schema.json"
+    },
     "ng-api": {
       "description": "Bootstrap ng-openapi-gen for OpenAPI client generation.",
       "factory": "./ng-api/index#ngApi",
