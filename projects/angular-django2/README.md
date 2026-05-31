@@ -89,6 +89,7 @@ ng build my-app
 ```
 
 `ng-workspace` sets up the workspace-level files first, and `ng-app` then generates the Angular application itself.
+In the common case, pass the same name to both commands so the generated repo instructions and Angular app stay aligned.
 
 ### OpenAPI workflow
 

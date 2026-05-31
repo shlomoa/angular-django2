@@ -32,6 +32,9 @@ import { ngWorkspace } from '../projects/angular-django2/schematics/ng-workspace
 import { projectStructure } from '../projects/angular-django2/schematics/project-structure/index';
 import { service } from '../projects/angular-django2/schematics/service/index';
 
+const workspaceReadmePath = path.resolve(__dirname, '../projects/angular-django2/README.md');
+const workspaceReadme = readFileSync(workspaceReadmePath, 'utf8');
+
 describe('angular-django2 schematics', () => {
   const mockedExternalSchematic = vi.mocked(externalSchematic);
 
@@ -42,11 +45,6 @@ describe('angular-django2 schematics', () => {
   afterEach(() => {
     mockedExternalSchematic.mockReset();
   });
-
-  const workspaceReadme = readFileSync(
-    path.join(__dirname, '../projects/angular-django2/README.md'),
-    'utf8',
-  );
 
   it('wraps the Angular application schematic with standalone and routing defaults', () => {
     application({ name: 'demo-app' });
