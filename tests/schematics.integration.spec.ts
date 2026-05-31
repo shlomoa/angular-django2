@@ -9,7 +9,10 @@ import { readFileSync } from 'node:fs';
 import * as path from 'path';
 
 const collectionPath = path.join(__dirname, '../dist/angular-django2/schematics/collection.json');
-const workspaceReadme = readFileSync(path.join(__dirname, '../projects/angular-django2/README.md'), 'utf8');
+const workspaceReadme = readFileSync(
+  path.join(__dirname, '../projects/angular-django2/README.md'),
+  'utf8',
+);
 
 describe('angular-django2 schematics integration tests', () => {
   let runner: SchematicTestRunner;
@@ -86,7 +89,8 @@ describe('angular-django2 schematics integration tests', () => {
         appTree,
       );
 
-      expect(tree.readContent('/.github/copilot-instructions.md')).toBe(`# demo-app Repo Instructions
+      expect(tree.readContent('/.github/copilot-instructions.md'))
+        .toBe(`# demo-app Repo Instructions
 
 Read [these instructions first](https://github.com/shlomoa/internal/blob/main/github/copilot-instructions.md)
 

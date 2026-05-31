@@ -44,34 +44,34 @@ ng build my-app
 ## What each step does
 
 1. `npm install -g @angular/cli@21`
-	- Installs Angular CLI 21 globally so the `ng` command is available.
+   - Installs Angular CLI 21 globally so the `ng` command is available.
 
 2. `ng version`
-	- Verifies that Angular CLI is installed and available on `PATH` as `ng`.
+   - Verifies that Angular CLI is installed and available on `PATH` as `ng`.
 
 3. `ng new demo-workspace --no-create-application`
-	- Creates an Angular workspace with `angular.json`, `package.json`, and the standard Angular config files.
-	- `--no-create-application` matters because the app will be created by `angular-django2`.
+   - Creates an Angular workspace with `angular.json`, `package.json`, and the standard Angular config files.
+   - `--no-create-application` matters because the app will be created by `angular-django2`.
 
 4. `npm install angular-django2`
-	- Adds the `angular-django2` package to the workspace.
-	- In this repo, the local validation variant installs from `../angular-django2/dist/angular-django2`.
+   - Adds the `angular-django2` package to the workspace.
+   - In this repo, the local validation variant installs from `../angular-django2/dist/angular-django2`.
 
 5. `ng add angular-django2`
-	- Registers `angular-django2` in `angular.json` under `cli.schematicCollections`.
-	- After this, Angular CLI can resolve the collection cleanly as part of normal `ng generate` usage.
+   - Registers `angular-django2` in `angular.json` under `cli.schematicCollections`.
+   - After this, Angular CLI can resolve the collection cleanly as part of normal `ng generate` usage.
 
 6. `ng generate angular-django2:application my-app`
-	- Creates `projects/my-app`.
-	- This schematic delegates to Angular's built-in `@schematics/angular:application` schematic.
-	- The wrapper defaults are:
-	  - `standalone: true`
-	  - `routing: true`
-	  - `style: 'scss'`
+   - Creates `projects/my-app`.
+   - This schematic delegates to Angular's built-in `@schematics/angular:application` schematic.
+   - The wrapper defaults are:
+     - `standalone: true`
+     - `routing: true`
+     - `style: 'scss'`
 
 7. `ng build my-app`
-	- Builds the generated application.
-	- The output is written to `dist/my-app`.
+   - Builds the generated application.
+   - The output is written to `dist/my-app`.
 
 ## Generated application layout
 
@@ -144,13 +144,13 @@ The suite uses a temp-area harness for E2E-style tests such as `tests/test_appli
 Tests can run in two modes:
 
 - **Non-persistent** (default)
-	- creates a new temp area
-	- runs the test in that temp area
-	- deletes the temp area when the test finishes
+  - creates a new temp area
+  - runs the test in that temp area
+  - deletes the temp area when the test finishes
 - **Persistent**
-	- creates a new temp area unless an explicit temp area name is provided
-	- runs the test in that temp area
-	- keeps the temp area after the test finishes
+  - creates a new temp area unless an explicit temp area name is provided
+  - runs the test in that temp area
+  - keeps the temp area after the test finishes
 
 The temp-area helper is implemented in `tests/utils/temp_areas.ts`.
 
@@ -159,11 +159,11 @@ The temp-area helper is implemented in `tests/utils/temp_areas.ts`.
 The temp-area harness recognizes these environment variables:
 
 - `ANGULAR_DJANGO2_TEST_MODE`
-	- allowed values: `persistent`, `non-persistent`
-	- default: `non-persistent`
+  - allowed values: `persistent`, `non-persistent`
+  - default: `non-persistent`
 - `ANGULAR_DJANGO2_TEST_AREA_NAME`
-	- optional explicit temp area name
-	- when set together with `persistent`, the same temp area can be reused across several test runs
+  - optional explicit temp area name
+  - when set together with `persistent`, the same temp area can be reused across several test runs
 
 By default, temp areas are created under the OS temp directory in an `angular-django2-test` folder.
 

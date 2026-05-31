@@ -265,7 +265,8 @@ describe('angular-django2 schematics', () => {
 
     const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, {} as never) as Tree;
 
-    expect(updatedTree.read('/.github/copilot-instructions.md')!.toString()).toBe(`# demo-app Repo Instructions
+    expect(updatedTree.read('/.github/copilot-instructions.md')!.toString())
+      .toBe(`# demo-app Repo Instructions
 
 Read [these instructions first](https://github.com/shlomoa/internal/blob/main/github/copilot-instructions.md)
 
