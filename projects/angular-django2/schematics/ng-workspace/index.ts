@@ -1,4 +1,3 @@
-import { normalize } from '@angular-devkit/core';
 import type { Rule, Tree } from '@angular-devkit/schematics';
 import { SchematicsException } from '@angular-devkit/schematics';
 import { readFileSync } from 'node:fs';
@@ -31,12 +30,10 @@ export function ngWorkspace(options: NgWorkspaceSchema): Rule {
       throw new SchematicsException('Option "name" is required.');
     }
 
-    const appName = normalize(name).split('/').pop() ?? name;
-
     writeOrOverwrite(
       tree,
       '/.github/copilot-instructions.md',
-      `# ${appName} Repo Instructions
+      `# ${name} Repo Instructions
 
 Read [these instructions first](https://github.com/shlomoa/internal/blob/main/github/copilot-instructions.md)
 
