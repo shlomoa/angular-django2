@@ -43,6 +43,7 @@ The current schematics collection includes:
 - `material-setup`
 - `project-structure`
 - `ng-app`
+- `ng-workspace`
 - `ng-api`
 - `data-service`
 
@@ -78,6 +79,13 @@ Resolved defaults:
 - `csrfHeaderName: 'X-CSRFToken'`
 - `withCredentials: true`
 
+Current HTTP/CSRF boundaries:
+
+- the package does not currently ship its own `HttpClient` interceptor or automatic request wiring
+- `withCredentials` is stored in config but is not automatically applied to requests
+- there is no built-in CSRF cookie reader beyond the manual `csrfHeader()` helper on `AngularDjango2Service`
+- today, examples should prefer Angular's own `provideHttpClient(...)` and `withXsrfConfiguration(...)` alongside `provideAngularDjango2(...)`
+
 ### Build, lint, and package this repository
 
 #### Prerequisites
@@ -110,26 +118,16 @@ including the compiled schematics collection.
 
 ### Testing in this repository
 
-This repository has four distinct layers of validation:
+This repository includes Angular library tests plus Node-side schematic
+validation.
 
-1. **Angular library tests**
-   - Run by `npm test`
-   - Uses Angular's test builder against the `angular-django2` library project
+Common commands:
 
-2. **Node-side unit tests**
-   - Run by `npm run test:node`
-   - Fast Vitest specs that mock external schematics and verify wrapper
-     behavior
-
-3. **Node-side integration tests**
-   - Also run by `npm run test:node`
-   - Execute real schematic logic with `SchematicTestRunner`
-   - Depend on the built schematics output in `dist/angular-django2/schematics`
-
-4. **End-to-end schematic tests**
-   - Run by `npm run test:e2e`
-   - Create real Angular workspaces, install the built package, run schematics,
-     and verify builds
+- `npm test` — Angular library tests
+- `npm run test:node` — Node-side unit coverage plus the schematic integration
+  suite
+- `npm run test:ci` — CI-friendly default test command
+- `npm run test:e2e` — slower end-to-end schematic validation
 
 The CI-friendly test command is:
 
@@ -142,8 +140,13 @@ That runs:
 - `npm run test:node`
 - `ng test angular-django2 --watch=false`
 
-It does **not** run the E2E suite. For the full test breakdown, see
-`tests/README.md`.
+It does **not** run the E2E suite.
+
+For the canonical integration-testing guide — including `SchematicTestRunner`
+coverage, E2E scenarios, build prerequisites, temp-workspace helpers, and
+platform caveats — see `docs/INTEGRATION_TESTING.md`.
+
+For the broader repository test index, see `tests/README.md`.
 
 ### Release and publish notes
 
@@ -173,8 +176,10 @@ Before release:
    npm publish ./dist/angular-django2
    ```
 
-Preferred publishing uses npm Trusted Publisher with GitHub Actions. The
-checked-in workflow still supports `NPM_TOKEN` as a fallback.
+The checked-in GitHub Actions publish workflow currently authenticates with
+`NPM_TOKEN`. Although the workflow already declares `id-token: write`, npm
+Trusted Publisher is not the active publish path yet. See `docs/RELEASING.md`
+for the current release and publishing procedure.
 
 ## HOWTO
 
@@ -197,6 +202,7 @@ Once your Angular workspace exists and `angular-django2` is registered, the
 shortest path to a running app is:
 
 ```bash
+ng generate angular-django2:ng-workspace my-app
 ng generate angular-django2:ng-app my-app
 npm install
 ng build my-app
@@ -210,6 +216,10 @@ Use `ng-app` when you want the package to generate:
 - a standard `core/`, `shared/`, and `features/` structure
 - a responsive Material app shell
 
+If the workspace was created empty with `--no-create-application`, run
+`ng-workspace` first so the workspace-level bootstrap files are written before
+the application is generated.
+
 ### Manual Angular-only setup
 
 If you are not using `django-angular3`, create a minimal Angular workspace
@@ -220,6 +230,7 @@ npx -y @angular/cli@21 new demo-workspace --no-create-application --package-mana
 cd demo-workspace
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
+npx ng generate angular-django2:ng-workspace my-app
 npx ng generate angular-django2:ng-app my-app
 npm install
 npx ng build my-app
@@ -249,6 +260,7 @@ available:
 | `ng generate angular-django2:class <name>`                       | Creates a class                                                         | Pass-through to Angular CLI class schematic        |
 | `ng generate angular-django2:app-shell --project=<name>`         | Creates or updates the app shell                                        | Pass-through schematic for app shell generation    |
 | `ng generate angular-django2:ng-app <name>`                      | Creates a complete app in one flow                                      | Best “get me running quickly” option               |
+| `ng generate angular-django2:ng-workspace <name>`                | Writes workspace-wide bootstrap files                                   | Use before `ng-app` in an empty workspace          |
 | `ng generate angular-django2:ng-api --inputPath=<file>`          | Bootstraps `ng-openapi-gen`                                             | Adds `generate:api` script                         |
 | `ng generate angular-django2:data-service <resource>`            | Creates a typed `*DataService` wrapper                                  | Designed for generated OpenAPI services            |
 
@@ -264,6 +276,19 @@ ng serve my-app
 ```
 
 Use this when you want the package to do most of the wiring for you.
+
+#### Empty workspace bootstrap
+
+Use this when you created the workspace with `--no-create-application` and
+want both workspace-level bootstrap files and a running Angular app:
+
+```bash
+ng generate angular-django2:ng-workspace my-app
+ng generate angular-django2:ng-app my-app --theme=indigo-pink --typography=true --animations=true
+npm install
+ng build my-app
+ng serve my-app
+```
 
 #### Step-by-step app setup
 

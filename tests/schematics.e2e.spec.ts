@@ -288,7 +288,7 @@ describe('angular-django2 schematics E2E tests', () => {
   );
 
   it(
-    'E2E-02: ng-app combined schematic generates a complete buildable application',
+    'E2E-02: ng-workspace and ng-app generate a complete buildable application',
     { timeout: E2E_TIMEOUT },
     async () => {
       // Setup
@@ -324,7 +324,27 @@ describe('angular-django2 schematics E2E tests', () => {
       execCommand('npx ng add angular-django2 --skip-confirmation', workspaceRoot);
       console.log('[E2E-02] ✓ angular-django2 installed');
 
-      // Step 4: Use ng-app schematic to generate complete application
+      // Step 4: Bootstrap workspace-level files
+      console.log('[E2E-02] Bootstrapping workspace files with ng-workspace...');
+      execCommand('npx ng generate angular-django2:ng-workspace demo', workspaceRoot);
+      console.log('[E2E-02] ✓ ng-workspace schematic completed');
+
+      // Verify workspace bootstrap files
+      const workspaceReadmePath = path.join(workspaceRoot, 'README.md');
+      const copilotInstructionsPath = path.join(
+        workspaceRoot,
+        '.github',
+        'copilot-instructions.md',
+      );
+      expect(fs.existsSync(workspaceReadmePath)).toBe(true);
+      expect(fs.existsSync(copilotInstructionsPath)).toBe(true);
+      expect(fs.readFileSync(workspaceReadmePath, 'utf8')).toContain('angular-django2');
+      expect(fs.readFileSync(copilotInstructionsPath, 'utf8')).toContain(
+        '# demo Repo Instructions',
+      );
+      console.log('[E2E-02] ✓ Workspace bootstrap files verified');
+
+      // Step 5: Use ng-app schematic to generate complete application
       console.log('[E2E-02] Generating application with ng-app schematic...');
       execCommand(
         'npx ng generate angular-django2:ng-app demo --theme=indigo-pink --typography=true --animations=true --routing=true --standalone=true --style=scss --prefix=app',
@@ -332,7 +352,7 @@ describe('angular-django2 schematics E2E tests', () => {
       );
       console.log('[E2E-02] ✓ ng-app schematic completed');
 
-      // Step 5: Install Material dependencies (ng-app adds them to package.json)
+      // Step 6: Install Material dependencies (ng-app adds them to package.json)
       console.log('[E2E-02] Installing added dependencies...');
       execCommand('npm install', workspaceRoot);
       console.log('[E2E-02] ✓ Dependencies updated');
@@ -369,7 +389,7 @@ describe('angular-django2 schematics E2E tests', () => {
       expect(appComponentContent).toContain('MatSidenavModule');
       console.log('[E2E-02] ✓ Material imports verified');
 
-      // Step 6: Build the application
+      // Step 7: Build the application
       console.log('[E2E-02] Building application...');
       execCommand('npx ng build demo --configuration=production', workspaceRoot);
       console.log('[E2E-02] ✓ Application built successfully');

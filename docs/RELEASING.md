@@ -18,7 +18,7 @@ Current checked-in automation:
 The published tarball contains:
 
 - the compiled runtime library from `projects/angular-django2/src`
-- the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `app-shell`, `service`, `class`, `ng-app`, `ng-api`, and `data-service`
+- the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `app-shell`, `service`, `class`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
 - the package README and manifest generated into `dist/angular-django2`
 
 ## Local Release Flow
@@ -79,6 +79,9 @@ The published tarball contains:
    npm run test:e2e
    ```
 
+   See `docs/INTEGRATION_TESTING.md` for build prerequisites, E2E scope, and
+   platform caveats.
+
 6. Review the generated release artifacts:
    - `projects/angular-django2/package.json`
    - `dist/angular-django2/package.json`
@@ -128,6 +131,8 @@ If the package is later renamed to a scoped package, use `npm publish ./dist/ang
 2. Update changelog and release-facing docs.
 3. Run `npm run release:prepare`.
 4. Optionally run `npm run test:e2e` when schematics changed.
+   See `docs/INTEGRATION_TESTING.md` for the canonical integration/E2E testing
+   guide.
 5. Confirm the generated package contents look correct.
 6. Commit and tag.
 7. Publish locally or via GitHub Actions.

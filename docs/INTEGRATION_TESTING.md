@@ -1,178 +1,201 @@
-# Integration Schematics Testing - Implementation Summary
+# Integration Testing
 
-## Overview
+This document is the canonical guide for integration-related testing in
+`angular-django2`.
 
-This implementation adds comprehensive integration tests for the angular-django2 schematics using Angular's `SchematicTestRunner`. These tests exercise schematics in a fully integrated way, validating that they work correctly in realistic workspace scenarios.
+Use this document for:
 
-## What Was Implemented
+- node-side schematic integration tests
+- end-to-end schematic tests
+- smoke-style temp-area harnesses
+- build prerequisites, command coverage, and platform caveats related to those
+  flows
 
-### Integration Test Suite (`tests/schematics.integration.spec.ts`)
+Other repository docs should link here instead of duplicating integration or
+E2E testing details.
 
-A comprehensive suite of 14 integration tests covering all major schematics:
+## Scope and source files
 
-#### 1. ng-add Schematic Integration (3 tests)
+The current integration-testing surface lives in these files:
 
-- **INT-01**: Registers collection in a minimal workspace
-- **INT-02**: Registers collection in workspace with existing collections
-- **INT-03**: Verifies idempotency - running twice produces same result
+- `tests/schematics.integration.spec.ts` — node-side schematic integration
+  tests using `SchematicTestRunner`
+- `tests/schematics.e2e.spec.ts` — end-to-end schematic tests against real
+  Angular workspaces
+- `tests/test_application.ts` — smoke-style application generation validation
+  using the temp-area harness
+- `tests/test_temp_areas.ts` — smoke-style validation of persistent and
+  non-persistent temp areas
+- `tests/utils/tmpfiles.ts` — repository-root temp workspace helpers used by
+  the E2E suite
+- `tests/utils/temp_areas.ts` — OS temp-root helpers used by the smoke harness
 
-#### 2. ng-api Schematic Integration (3 tests)
+## Node-side schematic integration tests
 
-- **INT-API-01**: Generates complete ng-openapi-gen configuration
-- **INT-API-02**: Handles custom paths correctly
-- **INT-API-03**: Preserves existing package.json content
+The node-side integration suite is in
+`tests/schematics.integration.spec.ts`.
 
-#### 3. material-setup Schematic Integration (2 tests)
+These tests:
 
-- **INT-MAT-01**: Configures Material with prebuilt theme
-- **INT-MAT-02**: Configures Material with custom theme
+- run under `npm run test:node`
+- use `SchematicTestRunner` from `@angular-devkit/schematics/testing`
+- execute compiled schematics from `dist/angular-django2/schematics/collection.json`
+- validate real file generation, workspace mutations, idempotency, and
+  schematic chaining without creating a full on-disk Angular workspace
 
-#### 4. project-structure Schematic Integration (2 tests)
+Current integration suites cover:
 
-- **INT-STRUCT-01**: Creates complete directory structure
-- **INT-STRUCT-02**: Preserves existing barrel file content
+- `ng-add`
+- `ng-workspace`
+- `ng-api`
+- `material-setup`
+- `project-structure`
+- `ng-app`
+- schematic chaining scenarios
 
-#### 5. ng-app Schematic Integration (2 tests)
+When a schematic delegates to `externalSchematic` — for example `ng-app`
+relying on the Angular application schematic — the current pattern is to
+pre-create the expected project structure inside the virtual tree and then
+validate the package-owned behavior layered on top.
 
-- **INT-APP-01**: Generates complete application with Material setup
-- **INT-APP-02**: Handles custom configuration options
+## End-to-end schematic tests
 
-#### 6. Schematic Chaining Integration (2 tests)
+The end-to-end suite is in `tests/schematics.e2e.spec.ts`.
 
-- **INT-CHAIN-01**: ng-add followed by ng-api works correctly
-- **INT-CHAIN-02**: Multiple schematic runs maintain consistency
+These tests:
 
-### Test Documentation (`tests/README.md`)
+- run under `npm run test:e2e`
+- create real Angular workspaces on disk
+- install the built package from `dist/angular-django2`
+- execute real `ng add` and `ng generate` flows
+- verify generated projects can build successfully
+- include a live `ng serve` validation path in the first E2E scenario
 
-Comprehensive documentation covering:
+Current E2E coverage includes:
 
-- Overview of all test files (unit and integration)
-- How to run tests
-- Test structure and patterns
-- Prerequisites for integration tests
-- Writing new tests (with examples)
-- CI pipeline information
+- `E2E-01` — step-by-step app generation with individual schematics
+- `E2E-02` — `ng-workspace` + `ng-app` flow in a minimal workspace
+- `E2E-03` — `ng-api` setup and build verification
 
-## Key Technical Decisions
+The E2E suite uses `tests/utils/tmpfiles.ts` to anchor temporary workspaces to
+the repository root and centralize cleanup behavior.
 
-### Using SchematicTestRunner
+## Additional smoke-style harnesses
 
-The integration tests use `SchematicTestRunner` from `@angular-devkit/schematics/testing`:
+The repository also contains smoke-style helpers and scripts related to
+integration-oriented validation:
 
-```typescript
-const collectionPath = path.join(__dirname, '../dist/angular-django2/schematics/collection.json');
-const runner = new SchematicTestRunner('angular-django2', collectionPath);
-```
+- `tests/test_application.ts` creates a throwaway Angular workspace, installs
+  the built package, runs `ng add angular-django2`, generates `my-app`, and
+  verifies the generated app can build
+- `tests/test_temp_areas.ts` validates temp-area persistence and cleanup
+  behavior
+- `tests/utils/temp_areas.ts` provides reusable temp-area helpers under the OS
+  temp root
 
-This approach:
+These smoke-style files are useful for ad hoc validation, but they are **not**
+part of the default `npm run test:node`, `npm run test:e2e`, or
+`npm run test:ci` flows.
 
-- Executes actual schematic code (no mocking)
-- Works with a virtual file tree (UnitTestTree)
-- Validates real file generation and modifications
-- Tests schematic interactions and chaining
+## Command guide
 
-### Handling External Schematics
+| Command                       | Coverage                                                                                           |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| `npm run build`               | Required prerequisite for integration and E2E flows that consume compiled schematics               |
+| `npm run test:node`           | Node-side unit specs plus the schematic integration suite                                          |
+| `npm run test:node:watch`     | Watch mode for the same Node-side unit and integration specs                                       |
+| `npm run test:e2e`            | End-to-end schematic suite in `tests/schematics.e2e.spec.ts`                                       |
+| `npm run test:e2e:watch`      | Watch mode for the E2E suite                                                                       |
+| `npm run test:ci`             | `npm run test:node` plus Angular library tests; does **not** run the E2E suite                     |
+| `npm run test:node -- <spec>` | Useful for running only a specific integration spec such as `tests/schematics.integration.spec.ts` |
 
-For schematics that call `externalSchematic` (like ng-app calling @schematics/angular:application), we:
+## Prerequisites and caveats
 
-1. Pre-create the expected project structure manually in tests
-2. Document this pattern for future test development
-3. Focus on testing the schematic's own logic and integrations
+### Build first for integration and E2E flows
 
-### Build Requirement
-
-Integration tests require the library to be built first:
-
-```bash
-npm run build     # Compiles schematics to dist/
-npm run test:node # Runs integration tests
-```
-
-This ensures tests run against the actual compiled schematics that users will consume.
-
-## Test Coverage
-
-The integration tests validate:
-
-✅ File generation and modification
-✅ JSON configuration (package.json, angular.json, ng-openapi-gen.json)
-✅ Idempotency (running schematics multiple times)
-✅ Schematic chaining (multiple schematics working together)
-✅ Custom options and configuration
-✅ Preservation of existing content
-✅ Error handling (missing files, invalid configurations)
-
-## Validation Results
-
-All tests pass successfully:
-
-```
-Test Files  3 passed (3)
-Tests       49 passed (49)
-  - Unit tests: 35 passed
-  - Integration tests: 14 passed
-Duration    ~1.5s
-```
-
-Tests run in non-blocking mode, meaning:
-
-- All tests execute regardless of individual failures
-- CI pipeline gets complete test results
-- Developers see all test failures at once
-
-## Usage Examples
-
-### Run all tests
+Run a build before integration-oriented validation:
 
 ```bash
-npm run test:ci
+npm run build
 ```
 
-### Run only integration tests
+Why this matters:
+
+- `tests/schematics.integration.spec.ts` loads the compiled collection from
+  `dist/angular-django2/schematics/collection.json`
+- `tests/schematics.e2e.spec.ts` installs the built package from
+  `dist/angular-django2`
+
+### E2E prerequisites
+
+The E2E suite additionally expects:
+
+1. network access for npm package downloads
+2. enough disk space for temporary Angular workspaces
+3. Node.js and npm available in `PATH`
+4. a free port for the `ng serve` step used by `E2E-01`
+
+### Windows cleanup note
+
+On Windows, `ng serve` teardown can leave process-tree cleanup slightly behind
+directory deletion. The current E2E cleanup code compensates for this with
+defensive retries and may intentionally leave a temp directory behind rather
+than deleting the wrong path.
+
+## Temp-area harness configuration
+
+`tests/utils/temp_areas.ts` supports persistent and non-persistent temp areas.
+
+Environment variables:
+
+- `ANGULAR_DJANGO2_TEST_MODE`
+  - allowed values: `persistent`, `non-persistent`
+  - default: `non-persistent`
+- `ANGULAR_DJANGO2_TEST_AREA_NAME`
+  - optional explicit temp-area name
+  - useful when reusing the same persistent area across repeated runs
+
+By default, temp areas are created under the OS temp directory inside
+`angular-django2-test`.
+
+### Bash examples
 
 ```bash
-npm run test:node -- tests/schematics.integration.spec.ts
+export ANGULAR_DJANGO2_TEST_MODE=persistent
+export ANGULAR_DJANGO2_TEST_AREA_NAME=my-e2e-flow
 ```
 
-### Run with verbose output
+Clear them afterward:
 
 ```bash
-npm run test:node -- tests/schematics.integration.spec.ts --reporter=verbose
+unset ANGULAR_DJANGO2_TEST_MODE
+unset ANGULAR_DJANGO2_TEST_AREA_NAME
 ```
 
-## Future Enhancements
+### PowerShell examples
 
-Potential improvements for future work:
+```powershell
+$env:ANGULAR_DJANGO2_TEST_MODE = 'persistent'
+$env:ANGULAR_DJANGO2_TEST_AREA_NAME = 'my-e2e-flow'
+```
 
-1. **End-to-end tests**: Create actual Angular workspaces and run `ng` commands
-2. **Performance tests**: Measure schematic execution time
-3. **Snapshot tests**: Capture and compare generated file content
-4. **Error scenario tests**: More comprehensive error handling validation
-5. **Cross-version tests**: Test compatibility with different Angular versions
+Clear them afterward:
 
-## Files Modified/Created
+```powershell
+Remove-Item Env:ANGULAR_DJANGO2_TEST_MODE
+Remove-Item Env:ANGULAR_DJANGO2_TEST_AREA_NAME
+```
 
-### Created
+Those environment variables affect the `temp_areas` harness only. They do not
+change the default `*.spec.ts` include patterns used by the current npm test
+scripts.
 
-- `tests/schematics.integration.spec.ts` - Integration test suite (643 lines)
-- `tests/README.md` - Test documentation (174 lines)
+## When to update this document
 
-### No Changes Required
+Update this file when any of the following change:
 
-- Existing schematics work correctly as-is
-- No breaking changes to schematic APIs
-- Build process unchanged
-
-## Compliance with Requirements
-
-✅ **Build tests based on valid use cases**: Tests cover all major schematics with realistic scenarios
-
-✅ **Instantiate schematics to fully integrated app**: Tests use SchematicTestRunner to execute actual schematic code
-
-✅ **App can be run and tested**: Tests validate that generated configurations and files are correct
-
-✅ **Run tests in non-blocking mode**: All tests execute to completion, reporting all results
-
-## Conclusion
-
-The integration test suite provides comprehensive validation of angular-django2 schematics in realistic workspace scenarios. Tests execute actual schematic code, validate file generation and modification, and ensure schematics work correctly both individually and in combination.
+- integration or E2E spec coverage
+- temp workspace helpers or environment variables
+- build prerequisites for integration-oriented validation
+- command coverage for `test:node`, `test:e2e`, or `test:ci`
+- platform-specific cleanup caveats related to these flows
