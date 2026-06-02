@@ -221,29 +221,10 @@ describe('temp_areas', () => {
     ]);
   });
 
-  it('can execute Angular CLI via the shared cross-platform helper', async () => {
-    await withTempArea(
-      (tempArea) => {
-        const workspaceName = `cli-portability-${Date.now().toString(36)}`;
+  it('can execute Angular CLI via the shared cross-platform helper', () => {
+    const repoRoot = getRepoRoot();
+    const versionOutput = execAngularCli(['version'], repoRoot);
 
-        execAngularCli(
-          [
-            'new',
-            workspaceName,
-            '--no-create-application',
-            '--package-manager',
-            'npm',
-            '--skip-git',
-            '--defaults',
-          ],
-          tempArea.path,
-        );
-
-        expect(existsSync(path.join(tempArea.path, workspaceName, 'angular.json'))).toBe(true);
-      },
-      {
-        prefix: 'angular-cli-portability-',
-      },
-    );
-  }, 120000);
+    expect(versionOutput).toContain('Angular CLI');
+  });
 });

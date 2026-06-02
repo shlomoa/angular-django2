@@ -21,6 +21,7 @@ describe('angular-django2 application schematic', () => {
     async () => {
       await withTempArea(
         (tempArea) => {
+          const parentDir = path.dirname(repoRoot);
           const workspaceName = `validation-workspace-${Date.now().toString(36)}`;
           const workspaceRoot = path.join(tempArea.path, workspaceName);
 
@@ -30,13 +31,14 @@ describe('angular-django2 application schematic', () => {
             [
               'new',
               workspaceName,
+              `--directory=${path.relative(parentDir, workspaceRoot)}`,
               '--no-create-application',
               '--package-manager',
               'npm',
               '--skip-git',
               '--defaults',
             ],
-            tempArea.path,
+            parentDir,
           );
           execCommand(`npm install "${angularDjango2PackagePath}"`, workspaceRoot);
           execAngularCli(
@@ -88,6 +90,7 @@ describe('angular-django2 application schematic', () => {
         },
         {
           prefix: 'ngdj-application-',
+          tempRoot: repoRoot,
         },
       );
     },
