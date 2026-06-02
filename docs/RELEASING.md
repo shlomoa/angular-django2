@@ -21,80 +21,118 @@ The published tarball contains:
 - the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `app-shell`, `service`, `class`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
 - the package README and manifest generated into `dist/angular-django2`
 
-## Local Release Flow
+## Detailed Release Plan
 
-1. Confirm the unscoped package name is still available:
+1. Confirm package state and release prerequisites.
+   - **1.1** Confirm the unscoped package name is still available:
 
-   ```bash
-   npm view angular-django2
-   ```
+     ```bash
+     npm view angular-django2
+     ```
 
-2. Bump or set the release version:
+   - **1.2** Confirm you have npm publish access to the `angular-django2` package.
+   - **1.3** Confirm the working tree is clean, or that the only pending changes are the intentional release changes.
+   - **1.4** Confirm npm 2FA is enabled, or that you have a granular access token with bypass 2FA for non-interactive publishing.
+   - **1.5** If you plan to publish through the checked-in GitHub Actions workflow, confirm the repository has `NPM_TOKEN` configured.
 
-   ```bash
-   npm run release:version -- patch
-   ```
+2. Bump or set the release version.
+   - **2.1** Run the versioning script with the appropriate bump:
 
-   Supported inputs:
-   - `patch`
-   - `minor`
-   - `major`
-   - `prerelease`
-   - an explicit version such as `0.2.0`
+     ```bash
+     npm run release:version -- patch
+     ```
 
-   Prerelease example:
+   - **2.2** Supported inputs are:
+     - `patch`
+     - `minor`
+     - `major`
+     - `prerelease`
+     - an explicit version such as `0.2.0`
 
-   ```bash
-   npm run release:version -- prerelease --preid next
-   ```
+   - **2.3** For a prerelease, use:
+
+     ```bash
+     npm run release:version -- prerelease --preid next
+     ```
+
+   - **2.4** Confirm the root `package.json` version changed to the intended release version.
+   - **2.5** Confirm `projects/angular-django2/package.json` stayed aligned after the metadata synchronization step.
 
    The script updates the root `package.json` version and then runs the same
    metadata synchronization flow used elsewhere in the repository so
    `projects/angular-django2/package.json` stays aligned.
 
-3. Update release-facing docs if needed:
-   - `CHANGELOG.md`
-   - `README.md`
-   - `projects/angular-django2/README.md`
-   - `docs/RELEASING.md`
+3. Update release-facing documentation if needed.
+   - **3.1** Review and update `CHANGELOG.md`.
+   - **3.2** Review and update `README.md` if user-facing behavior or examples changed.
+   - **3.3** Review and update `projects/angular-django2/README.md` if package-facing behavior or examples changed.
+   - **3.4** Review and update `docs/RELEASING.md` if the release procedure itself changed.
 
-4. Validate the release candidate:
+4. Validate the release candidate.
+   - **4.1** Run the release preparation command:
 
-   ```bash
-   npm run release:prepare
-   ```
+     ```bash
+     npm run release:prepare
+     ```
 
-   `npm run release:prepare` runs:
-   - `npm run format:check`
-   - `npm run lint`
-   - `npm run test:ci`
-   - `npm run pack:dry-run`
+   - **4.2** Confirm all included checks pass:
+     - `npm run format:check`
+     - `npm run lint`
+     - `npm run test:ci`
+     - `npm run pack:dry-run`
+   - **4.3** Confirm the dry-run package contents look correct.
 
    The dry-run step uses `npm pack --dry-run`, not `npm publish --dry-run`, so it validates the package contents without failing just because the current version is already on npm.
 
-5. If you changed schematics behavior, optionally run the slower end-to-end
-   schematic validation before publishing:
+5. Run additional schematic validation if needed.
+   - **5.1** If you changed schematics behavior, run the slower end-to-end validation before publishing:
 
-   ```bash
-   npm run test:e2e
-   ```
+     ```bash
+     npm run test:e2e
+     ```
 
-   See `docs/INTEGRATION_TESTING.md` for build prerequisites, E2E scope, and
-   platform caveats.
+   - **5.2** Use `docs/INTEGRATION_TESTING.md` for build prerequisites, E2E scope, and platform caveats.
 
-6. Review the generated release artifacts:
-   - `projects/angular-django2/package.json`
-   - `dist/angular-django2/package.json`
-   - `dist/angular-django2/README.md`
+6. Review the generated release artifacts.
+   - **6.1** Review `projects/angular-django2/package.json`.
+   - **6.2** Review `dist/angular-django2/package.json`.
+   - **6.3** Review `dist/angular-django2/README.md`.
+   - **6.4** Confirm the generated version, metadata, and README contents match the intended release.
 
-7. Commit the changed manifests, docs, and lockfile, tag the release, and push:
+7. Commit, tag, and push the release.
+   - **7.1** Stage the changed manifests, docs, and lockfile:
 
-   ```bash
-   git add package.json package-lock.json CHANGELOG.md README.md projects/angular-django2/package.json projects/angular-django2/README.md docs/RELEASING.md
-   git commit -m "Release vX.Y.Z"
-   git tag vX.Y.Z
-   git push origin main --follow-tags
-   ```
+     ```bash
+     git add package.json package-lock.json CHANGELOG.md README.md projects/angular-django2/package.json projects/angular-django2/README.md docs/RELEASING.md
+     ```
+
+   - **7.2** Commit the release:
+
+     ```bash
+     git commit -m "Release vX.Y.Z"
+     ```
+
+   - **7.3** Create the release tag:
+
+     ```bash
+     git tag vX.Y.Z
+     ```
+
+   - **7.4** Push the branch and tag:
+
+     ```bash
+     git push origin main --follow-tags
+     ```
+
+8. Publish the package.
+   - **8.1** Preferred method: publish with the checked-in GitHub Actions workflow described below.
+   - **8.2** Choose the appropriate `npm-tag` workflow input, such as `latest` for a stable release or `next` for a prerelease.
+   - **8.3** If you prefer to publish locally after validation, use the local publish alternative described below.
+
+9. Verify the published release.
+   - **9.1** Confirm the new version appears on npm.
+   - **9.2** Confirm the package was published under the intended dist-tag.
+   - **9.3** Spot-check the published package README and metadata if needed.
 
 ## GitHub Actions Publish Flow
 
@@ -124,18 +162,6 @@ npm publish ./dist/angular-django2 --access public
 ```
 
 If the package is later renamed to a scoped package, use `npm publish ./dist/angular-django2 --access public`.
-
-## Recommended Order Of Operations
-
-1. Bump the version.
-2. Update changelog and release-facing docs.
-3. Run `npm run release:prepare`.
-4. Optionally run `npm run test:e2e` when schematics changed.
-   See `docs/INTEGRATION_TESTING.md` for the canonical integration/E2E testing
-   guide.
-5. Confirm the generated package contents look correct.
-6. Commit and tag.
-7. Publish locally or via GitHub Actions.
 
 ## Notes
 
