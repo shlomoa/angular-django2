@@ -30,7 +30,8 @@ Primary files:
 - `tests/schematics.spec.ts`
 - `tests/release-version.spec.ts`
 - `tests/sync-package-metadata.spec.ts`
-- `tests/utils/tmpfiles.spec.ts`
+- `tests/test_application.spec.ts`
+- `tests/utils/temp_areas.spec.ts`
 
 ### Node-side integration tests
 
@@ -40,20 +41,22 @@ See `docs/INTEGRATION_TESTING.md`.
 
 See `docs/INTEGRATION_TESTING.md`.
 
-### Additional temp-area smoke harness files
+### Temp-area helper coverage
 
 See `docs/INTEGRATION_TESTING.md`.
 
 ## Which command runs what
 
-| Command                   | Coverage                                                                                             |
-| ------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `npm test`                | Angular library tests only                                                                           |
-| `npm run test:node`       | Node-side unit + integration specs in `tests/**/*.spec.ts`, excluding `tests/schematics.e2e.spec.ts` |
-| `npm run test:node:watch` | Watch mode for the same Node-side unit + integration specs                                           |
-| `npm run test:e2e`        | Only `tests/schematics.e2e.spec.ts`                                                                  |
-| `npm run test:e2e:watch`  | Watch mode for only `tests/schematics.e2e.spec.ts`                                                   |
-| `npm run test:ci`         | `npm run test:node` + Angular library tests                                                          |
+| Command                         | Coverage                                                                                             |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm test`                      | Angular library tests only                                                                           |
+| `npm run test:node`             | Node-side unit + integration specs in `tests/**/*.spec.ts`, excluding `tests/schematics.e2e.spec.ts` |
+| `npm run test:node:watch`       | Watch mode for the same Node-side unit + integration specs                                           |
+| `npm run cleanup:e2e:tmp-areas` | Removes stale repo-root E2E temp workspaces from previous runs                                       |
+| `npm run test:e2e`              | Only `tests/schematics.e2e.spec.ts`, after cleaning stale repo-root E2E temp workspaces              |
+| `npm run test:e2e:watch`        | Watch mode for the E2E suite, after cleaning stale repo-root E2E temp workspaces                     |
+| `npm run test:e2e:debug`        | Only `tests/schematics.e2e.spec.ts`, while preserving temp workspaces for failure debugging          |
+| `npm run test:ci`               | `npm run test:node` + Angular library tests                                                          |
 
 `npm run test:ci` does **not** run the E2E suite.
 
@@ -79,22 +82,27 @@ See `docs/INTEGRATION_TESTING.md`.
 - `tests/sync-package-metadata.spec.ts`
   - validates package metadata synchronization
 
-- `tests/utils/tmpfiles.spec.ts`
-  - tests the repo-root temp-directory helper
+- `tests/test_application.spec.ts`
+  - validates that a temp-area-backed Angular workspace can install the built
+    package, run `ng add angular-django2`, generate `my-app`, and build
+
+- `tests/utils/temp_areas.spec.ts`
+  - tests the single shared temp-area implementation used for OS temp roots,
+    repo-root E2E workspaces, stale workspace cleanup, and debug-mode
+    detection
 
 ### Helper utilities
 
-- `tests/utils/tmpfiles.ts`
-  - integration-oriented temp workspace helper; see
-    `docs/INTEGRATION_TESTING.md`
-
 - `tests/utils/temp_areas.ts`
-  - integration-oriented temp area helper; see
+  - single shared temp-area helper used by temp-area specs, repo-root E2E
+    workspace creation, stale E2E cleanup, and the E2E command entrypoint; see
     `docs/INTEGRATION_TESTING.md`
 
 ### Additional smoke harness files
 
-See `docs/INTEGRATION_TESTING.md`.
+None at the moment; the former application harness now lives in
+`tests/test_application.spec.ts` and participates in the normal Node-side spec
+flow.
 
 ## How to run the major test flows
 
@@ -120,6 +128,10 @@ npm run test:node:watch
 
 See `docs/INTEGRATION_TESTING.md`.
 
+Regular E2E runs clean stale repo-root temp workspaces before the suite starts
+and clean the current workspace after each scenario. Use `npm run test:e2e:debug`
+when you want to preserve temp workspaces for failure debugging.
+
 ### CI-friendly repo validation
 
 ```bash
@@ -133,6 +145,10 @@ This runs Node-side specs and Angular library tests, but not the E2E suite.
 See `docs/INTEGRATION_TESTING.md`.
 
 ## CI and validation boundaries
+
+`npm run format:check` checks file formatting as part of the default validation
+flow. If it reports formatting differences, run `npm run format` to fix file
+formatting locally before rerunning validation.
 
 The main CI flow runs:
 

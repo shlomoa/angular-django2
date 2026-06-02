@@ -10,7 +10,17 @@ Contact shlomoa@lightmoneysw.com with questions about contributing and before op
    npm install
    ```
 
-2. Run the main verification commands as needed:
+2. Use the formatting commands as needed:
+
+   ```bash
+   npm run format:check
+   npm run format
+   ```
+
+   `npm run format:check` checks file formatting. `npm run format` fixes file
+   formatting.
+
+3. Run the main verification commands as needed:
 
    ```bash
    npm run format:check

@@ -1,7 +1,7 @@
 # angular-django2
 
 **Note:** `angular-django2` is published to npm, but it is still pre-release
-software and not yet alpha. The current package version is `0.1.3`.
+software and not yet alpha. The current package version is `0.1.4`.
 
 `angular-django2` (also referred to as `ngdj`) is an Angular 21 library
 workspace for a Django-friendly npm package. It ships two things:
@@ -107,8 +107,8 @@ npm install
 | `npm run build:watch`           | Watches the Angular library build for iterative development                                             |
 | `npm run lint`                  | Runs ESLint across library code, schematics, tests, and tools                                           |
 | `npm run lint:fix`              | Applies fixable ESLint changes                                                                          |
-| `npm run format:check`          | Checks formatting with Prettier                                                                         |
-| `npm run format`                | Writes formatting changes with Prettier                                                                 |
+| `npm run format:check`          | Checks file formatting with Prettier                                                                    |
+| `npm run format`                | Fixes file formatting with Prettier                                                                     |
 | `npm run pack:dry-run`          | Rebuilds and verifies the npm tarball without publishing                                                |
 | `npm run sync:package-metadata` | Syncs library package metadata from the root manifest                                                   |
 | `npm run release:prepare`       | Runs the release verification flow                                                                      |
@@ -127,7 +127,10 @@ Common commands:
 - `npm run test:node` — Node-side unit coverage plus the schematic integration
   suite
 - `npm run test:ci` — CI-friendly default test command
-- `npm run test:e2e` — slower end-to-end schematic validation
+- `npm run test:e2e` — slower end-to-end schematic validation with automatic
+  tmp-area cleanup
+- `npm run test:e2e:debug` — the same E2E suite without tmp-area cleanup,
+  useful for failure debugging
 
 The CI-friendly test command is:
 
@@ -152,17 +155,19 @@ For the broader repository test index, see `tests/README.md`.
 
 Before release:
 
-1. Update the version without creating a git tag:
+1. Bump or set the release version with the checked-in versioning flow:
 
    ```bash
-   npm version patch --no-git-tag-version
+   npm run release:version -- patch
    ```
 
-2. Sync package metadata:
+2. Sync checked-in version references and release-facing docs as needed:
 
-   ```bash
-   npm run sync:package-metadata
-   ```
+- `package-lock.json`
+- `CHANGELOG.md`
+- `README.md`
+- `projects/angular-django2/README.md`
+- `docs/RELEASING.md`
 
 3. Run the release verification flow:
 
@@ -170,16 +175,27 @@ Before release:
    npm run release:prepare
    ```
 
-4. Publish from the build output when ready:
+`npm run format:check` checks file formatting during this step. If it
+fails, run `npm run format` to fix file formatting before rerunning the
+release verification flow.
+
+4. If schematics changed, run the slower end-to-end schematic validation:
 
    ```bash
-   npm publish ./dist/angular-django2
+   npm run test:e2e
+   ```
+
+5. Prefer the checked-in GitHub Actions publish workflow, or publish locally
+   from the build output when ready:
+
+   ```bash
+   npm publish ./dist/angular-django2 --access public
    ```
 
 The checked-in GitHub Actions publish workflow currently authenticates with
 `NPM_TOKEN`. Although the workflow already declares `id-token: write`, npm
 Trusted Publisher is not the active publish path yet. See `docs/RELEASING.md`
-for the current release and publishing procedure.
+for the canonical release checklist and publishing procedure.
 
 ## HOWTO
 

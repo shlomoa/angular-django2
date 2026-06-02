@@ -153,6 +153,8 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
 - Development should use the root package scripts instead of ad hoc commands
   whenever possible.
 - Only report a command as successful if it was actually run.
+- `npm run format:check` checks file formatting.
+- `npm run format` fixes file formatting.
 - The standard verification flow should include the shared scripts already
   defined by the repo.
 - The most important verification commands called out in repo guidance are:

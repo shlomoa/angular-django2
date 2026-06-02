@@ -62,11 +62,20 @@ The published tarball contains:
    metadata synchronization flow used elsewhere in the repository so
    `projects/angular-django2/package.json` stays aligned.
 
-3. Update release-facing documentation if needed.
-   - **3.1** Review and update `CHANGELOG.md`.
-   - **3.2** Review and update `README.md` if user-facing behavior or examples changed.
-   - **3.3** Review and update `projects/angular-django2/README.md` if package-facing behavior or examples changed.
-   - **3.4** Review and update `docs/RELEASING.md` if the release procedure itself changed.
+3. Sync checked-in version references and release-facing documentation.
+   - **3.1** Confirm `package-lock.json` top-level version entries match the
+     intended release version.
+   - **3.2** Review and update `README.md` for any explicit current-version
+     references, such as the package version shown near the top of the
+     repository overview.
+   - **3.3** Review `tests/release-version.spec.ts` and update checked-in
+     version fixtures if the test is intended to track the current repository
+     release version.
+   - **3.4** Review and update `CHANGELOG.md`.
+   - **3.5** Review and update `projects/angular-django2/README.md` if
+     package-facing behavior or examples changed.
+   - **3.6** Review and update `docs/RELEASING.md` if the release procedure
+     itself changed.
 
 4. Validate the release candidate.
    - **4.1** Run the release preparation command:
@@ -76,16 +85,21 @@ The published tarball contains:
      ```
 
    - **4.2** Confirm all included checks pass:
-     - `npm run format:check`
+     - `npm run format:check` (checks file formatting)
      - `npm run lint`
      - `npm run test:ci`
      - `npm run pack:dry-run`
-   - **4.3** Confirm the dry-run package contents look correct.
+   - **4.3** If `npm run format:check` fails, run `npm run format` to fix file
+     formatting and then rerun `npm run release:prepare`.
+   - **4.4** Confirm the dry-run package contents look correct.
 
-   The dry-run step uses `npm pack --dry-run`, not `npm publish --dry-run`, so it validates the package contents without failing just because the current version is already on npm.
+The dry-run step uses `npm pack --dry-run`, not `npm publish --dry-run`, so
+it validates the package contents without failing just because the current
+version is already on npm.
 
 5. Run additional schematic validation if needed.
-   - **5.1** If you changed schematics behavior, run the slower end-to-end validation before publishing:
+   - **5.1** If you changed schematics behavior, run the slower end-to-end
+     validation before publishing:
 
      ```bash
      npm run test:e2e
@@ -100,10 +114,11 @@ The published tarball contains:
    - **6.4** Confirm the generated version, metadata, and README contents match the intended release.
 
 7. Commit, tag, and push the release.
-   - **7.1** Stage the changed manifests, docs, and lockfile:
+   - **7.1** Stage the changed manifests, docs, lockfile, and any
+     release-version test updates:
 
      ```bash
-     git add package.json package-lock.json CHANGELOG.md README.md projects/angular-django2/package.json projects/angular-django2/README.md docs/RELEASING.md
+     git add package.json package-lock.json CHANGELOG.md README.md projects/angular-django2/package.json projects/angular-django2/README.md docs/RELEASING.md tests/release-version.spec.ts
      ```
 
    - **7.2** Commit the release:
@@ -139,7 +154,7 @@ The published tarball contains:
 The `Publish npm package` workflow:
 
 - installs dependencies with `npm ci`
-- checks formatting
+- checks file formatting with `npm run format:check`
 - builds the runtime library and schematics collection
 - runs lint
 - runs tests

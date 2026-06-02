@@ -1,6 +1,8 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { execSync, spawnSync } from 'node:child_process';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, join, resolve } from 'node:path';
+import { basename, isAbsolute, join, relative, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 export type TestTempAreaMode = 'persistent' | 'non-persistent';
 
@@ -27,9 +29,33 @@ export interface TestTempAreaHandle {
 
 export const TEST_TEMP_AREA_MODE_ENV = 'ANGULAR_DJANGO2_TEST_MODE';
 export const TEST_TEMP_AREA_NAME_ENV = 'ANGULAR_DJANGO2_TEST_AREA_NAME';
+export const E2E_DEBUG_ENV = 'ANGULAR_DJANGO2_E2E_DEBUG';
+export const E2E_TEMP_AREA_PREFIX = 'ngdj-e2e-';
+export const DEFAULT_EXEC_COMMAND_MAX_BUFFER = 10 * 1024 * 1024;
+export const DEFAULT_E2E_TIMEOUT = 5 * 60 * 1000;
+export const VITEST_E2E_CONFIG = 'vitest.e2e.config.mts';
 
 const DEFAULT_TEMP_ROOT = join(tmpdir(), 'angular-django2-test');
 const DEFAULT_PREFIX = 'tmp-area-';
+
+type TempAreaCliCommand = 'cleanup' | 'debug' | 'run' | 'watch';
+
+export interface ExecCommandOptions {
+  throwOnError?: boolean;
+  stdio?: 'ignore' | 'inherit' | 'pipe';
+  maxBuffer?: number;
+}
+
+export interface VitestInvocation {
+  command: string;
+  args: string[];
+}
+
+function isWithinRoot(targetPath: string, rootPath: string): boolean {
+  const relativePath = relative(rootPath, targetPath);
+
+  return relativePath === '' || (!relativePath.startsWith('..') && !isAbsolute(relativePath));
+}
 
 function isValidMode(mode: string): mode is TestTempAreaMode {
   return mode === 'persistent' || mode === 'non-persistent';
@@ -78,11 +104,18 @@ export function deleteTempArea(dirPath: string, tempRoot = DEFAULT_TEMP_ROOT): v
   const resolvedDirPath = resolve(dirPath);
   const resolvedTempRoot = resolve(tempRoot);
 
-  if (!resolvedDirPath.startsWith(resolvedTempRoot)) {
+  if (!isWithinRoot(resolvedDirPath, resolvedTempRoot)) {
     throw new Error(`Refusing to delete outside temp root: ${resolvedDirPath}`);
   }
 
-  rmSync(resolvedDirPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 });
+  try {
+    rmSync(resolvedDirPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 2000 });
+  } catch (error) {
+    console.error(
+      `[Cleanup] Failed to delete ${resolvedDirPath} due to a Windows file lock. Leaving temp directory behind.`,
+      error,
+    );
+  }
 }
 
 export function createTempArea(options: TestTempAreaOptions = {}): TestTempAreaHandle {
@@ -114,6 +147,161 @@ export function createTempArea(options: TestTempAreaOptions = {}): TestTempAreaH
   };
 }
 
+export function getRepoRoot(): string {
+  return execSync('git rev-parse --show-toplevel').toString().trim();
+}
+
+export function execCommand(
+  command: string,
+  cwd: string,
+  options: ExecCommandOptions = {},
+): string {
+  const throwOnError = options.throwOnError ?? true;
+
+  try {
+    return execSync(command, {
+      cwd,
+      encoding: 'utf8',
+      stdio: options.stdio ?? (throwOnError ? 'pipe' : 'ignore'),
+      maxBuffer: options.maxBuffer ?? DEFAULT_EXEC_COMMAND_MAX_BUFFER,
+    });
+  } catch (error) {
+    if (throwOnError) {
+      console.error(`Command failed: ${command}`);
+      console.error(`Working directory: ${cwd}`);
+
+      if (error instanceof Error && 'stdout' in error && 'stderr' in error) {
+        console.error('stdout:', (error as Error & { stdout: unknown }).stdout);
+        console.error('stderr:', (error as Error & { stderr: unknown }).stderr);
+      }
+
+      throw error;
+    }
+
+    return '';
+  }
+}
+
+export function createTempDir(tempRoot: string, prefix = DEFAULT_PREFIX): string {
+  return createTempArea({ mode: 'non-persistent', prefix, tempRoot }).path;
+}
+
+export function deleteTempDir(dirPath: string, tempRoot: string): void {
+  deleteTempArea(dirPath, tempRoot);
+}
+
+export function cleanupTempAreas(
+  tempRoot: string,
+  prefixes: readonly string[] = [E2E_TEMP_AREA_PREFIX],
+): string[] {
+  if (!existsSync(tempRoot)) {
+    return [];
+  }
+
+  const deletedDirectories: string[] = [];
+
+  for (const entry of readdirSync(tempRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !prefixes.some((prefix) => entry.name.startsWith(prefix))) {
+      continue;
+    }
+
+    const dirPath = join(tempRoot, entry.name);
+    deleteTempArea(dirPath, tempRoot);
+
+    if (!existsSync(dirPath)) {
+      deletedDirectories.push(dirPath);
+    }
+  }
+
+  return deletedDirectories;
+}
+
+export function isE2EDebugMode(env: Record<string, string | undefined> = process.env): boolean {
+  const value = env[E2E_DEBUG_ENV]?.trim().toLowerCase();
+
+  return value === '1' || value === 'true' || value === 'yes' || value === 'on';
+}
+
+export function createE2ETempArea(
+  repoRoot: string,
+  debugMode = isE2EDebugMode(),
+): TestTempAreaHandle {
+  return createTempArea({
+    mode: debugMode ? 'persistent' : 'non-persistent',
+    prefix: E2E_TEMP_AREA_PREFIX,
+    tempRoot: repoRoot,
+  });
+}
+
+export function getVitestInvocation(
+  command: Exclude<TempAreaCliCommand, 'cleanup'>,
+  repoRoot = getRepoRoot(),
+): VitestInvocation {
+  const vitestEntrypoint = join(repoRoot, 'node_modules', 'vitest', 'vitest.mjs');
+
+  if (!existsSync(vitestEntrypoint)) {
+    throw new Error(`Vitest entrypoint not found at ${vitestEntrypoint}. Run npm install first.`);
+  }
+
+  return {
+    command: process.execPath,
+    args:
+      command === 'watch'
+        ? [vitestEntrypoint, '--config', VITEST_E2E_CONFIG]
+        : [vitestEntrypoint, 'run', '--config', VITEST_E2E_CONFIG],
+  };
+}
+
+function runVitest(command: Exclude<TempAreaCliCommand, 'cleanup'>, env = process.env): number {
+  const invocation = getVitestInvocation(command);
+
+  const result = spawnSync(invocation.command, invocation.args, {
+    cwd: getRepoRoot(),
+    env: { ...process.env, ...env },
+    stdio: 'inherit',
+  });
+
+  if (result.error) {
+    console.error('[E2E] Failed to launch Vitest:', result.error);
+    return 1;
+  }
+
+  return result.status ?? 1;
+}
+
+export function main(args: string[] = process.argv.slice(2)): number {
+  const command = (args[0] ?? 'run') as TempAreaCliCommand;
+  const repoRoot = getRepoRoot();
+
+  switch (command) {
+    case 'cleanup': {
+      const deletedDirectories = cleanupTempAreas(repoRoot);
+
+      if (deletedDirectories.length > 0) {
+        console.log(`[E2E] Removed ${deletedDirectories.length} stale temp area(s).`);
+      } else {
+        console.log('[E2E] No stale temp areas found.');
+      }
+
+      return 0;
+    }
+
+    case 'run':
+    case 'watch': {
+      cleanupTempAreas(repoRoot);
+      return runVitest(command);
+    }
+
+    case 'debug': {
+      return runVitest('run', { ...process.env, [E2E_DEBUG_ENV]: '1' });
+    }
+
+    default:
+      console.error(`Unsupported temp-area command "${command}".`);
+      return 1;
+  }
+}
+
 export async function withTempArea<T>(
   run: (tempArea: TestTempAreaHandle) => Promise<T> | T,
   options: TestTempAreaOptions = {},
@@ -125,4 +313,8 @@ export async function withTempArea<T>(
   } finally {
     tempArea.cleanup();
   }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  process.exitCode = main();
 }

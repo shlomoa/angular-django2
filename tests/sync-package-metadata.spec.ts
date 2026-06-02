@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { syncPackageMetadata, syncPackageMetadataFiles } from '../tools/sync-package-metadata.mjs';
-import { createTempDir, deleteTempDir, getRepoRoot } from './utils/tmpfiles';
+import { createTempDir, deleteTempDir, getRepoRoot } from './utils/temp_areas';
 
 describe('sync-package-metadata', () => {
   const tempDirectories: string[] = [];

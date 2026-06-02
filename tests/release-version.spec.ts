@@ -8,7 +8,7 @@ import {
   parseCommandLineArgs,
   updateReleaseVersionFiles,
 } from '../tools/release-version.mjs';
-import { createTempDir, deleteTempDir, getRepoRoot } from './utils/tmpfiles';
+import { createTempDir, deleteTempDir, getRepoRoot } from './utils/temp_areas';
 
 describe('release-version', () => {
   const tempDirectories: string[] = [];

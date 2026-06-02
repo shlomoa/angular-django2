@@ -1,34 +1,17 @@
-import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
-import { withTempArea } from './utils/temp_areas';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const angularDjango2PackagePath = path.resolve(
-  repoRoot,
-  '..',
-  'angular-django2',
-  'dist',
-  'angular-django2',
-);
-const E2E_TIMEOUT = 5 * 60 * 1000;
+import { execCommand, getRepoRoot, withTempArea, DEFAULT_E2E_TIMEOUT } from './utils/temp_areas';
 
-function execCommand(command: string, cwd: string): string {
-  return execSync(command, {
-    cwd,
-    encoding: 'utf8',
-    stdio: 'pipe',
-    maxBuffer: 10 * 1024 * 1024,
-  });
-}
+const repoRoot = getRepoRoot();
+const angularDjango2PackagePath = path.join(repoRoot, 'dist', 'angular-django2');
 
 describe('angular-django2 application schematic', () => {
   it(
     'generates and builds the Angular app scaffold for my-app in a temp area',
-    { timeout: E2E_TIMEOUT },
+    { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {
       await withTempArea(
         (tempArea) => {

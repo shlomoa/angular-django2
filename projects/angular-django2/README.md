@@ -126,12 +126,15 @@ npm run pack:dry-run
 
 ## Publishing
 
-Build the library and publish the generated package from `dist/angular-django2`.
+Build the library and publish the generated package from `dist/angular-django2`
+after completing the repository release checklist in `docs/RELEASING.md`.
 
 For the current unscoped package name:
 
 ```bash
-npm publish ./dist/angular-django2
+npm publish ./dist/angular-django2 --access public
 ```
 
-The first successful publish creates the npm package page automatically.
+The checked-in GitHub Actions workflow can also publish the package with
+`NPM_TOKEN`. The first successful publish creates the npm package page
+automatically.
