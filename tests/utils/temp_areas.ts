@@ -1,5 +1,5 @@
 import { execFileSync, execSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -54,6 +54,18 @@ export interface NodeScriptInvocation {
 
 export type VitestInvocation = NodeScriptInvocation;
 export type AngularCliInvocation = NodeScriptInvocation;
+
+function quoteShellArgument(argument: string): string {
+  if (!argument) {
+    return '""';
+  }
+
+  if (!/[\s"]/.test(argument)) {
+    return argument;
+  }
+
+  return `"${argument.replace(/"/g, '\\"')}"`;
+}
 
 function isWithinRoot(targetPath: string, rootPath: string): boolean {
   const relativePath = relative(rootPath, targetPath);
@@ -284,12 +296,47 @@ export function getAngularCliInvocation(repoRoot = getRepoRoot()): AngularCliInv
   };
 }
 
+function getAngularCliPackageSpecifier(repoRoot = getRepoRoot()): string {
+  const angularCliPackageJsonPath = join(
+    repoRoot,
+    'node_modules',
+    '@angular',
+    'cli',
+    'package.json',
+  );
+
+  if (!existsSync(angularCliPackageJsonPath)) {
+    throw new Error(
+      `Angular CLI package metadata not found at ${angularCliPackageJsonPath}. Run npm install first.`,
+    );
+  }
+
+  const angularCliPackageJson = JSON.parse(readFileSync(angularCliPackageJsonPath, 'utf8')) as {
+    version?: string;
+  };
+
+  if (!angularCliPackageJson.version) {
+    throw new Error(`Angular CLI package version missing in ${angularCliPackageJsonPath}.`);
+  }
+
+  return `@angular/cli@${angularCliPackageJson.version}`;
+}
+
 export function execAngularCli(
   args: readonly string[],
   cwd: string,
   options: ExecCommandOptions = {},
   repoRoot = getRepoRoot(),
 ): string {
+  if (args[0] === 'new') {
+    const packageSpecifier = getAngularCliPackageSpecifier(repoRoot);
+    const command = ['npx', '--yes', packageSpecifier, ...args]
+      .map(quoteShellArgument)
+      .join(' ');
+
+    return execCommand(command, cwd, options);
+  }
+
   const invocation = getAngularCliInvocation(repoRoot);
 
   return execFileCommand(invocation.command, [...invocation.args, ...args], cwd, options);
