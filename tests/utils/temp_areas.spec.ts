@@ -12,7 +12,9 @@ import {
   deleteTempDir,
   E2E_DEBUG_ENV,
   E2E_TEMP_AREA_PREFIX,
+  execAngularCli,
   getRepoRoot,
+  getAngularCliInvocation,
   getVitestInvocation,
   isE2EDebugMode,
   VITEST_E2E_CONFIG,
@@ -208,4 +210,40 @@ describe('temp_areas', () => {
       VITEST_E2E_CONFIG,
     ]);
   });
+
+  it('launches Angular CLI through the local Node entrypoint instead of shell wrappers', () => {
+    const repoRoot = getRepoRoot();
+    const invocation = getAngularCliInvocation(repoRoot);
+
+    expect(invocation.command).toBe(process.execPath);
+    expect(invocation.args).toEqual([
+      path.join(repoRoot, 'node_modules', '@angular', 'cli', 'bin', 'ng.js'),
+    ]);
+  });
+
+  it('can execute Angular CLI via the shared cross-platform helper', async () => {
+    await withTempArea(
+      (tempArea) => {
+        const workspaceName = `cli-portability-${Date.now().toString(36)}`;
+
+        execAngularCli(
+          [
+            'new',
+            workspaceName,
+            '--no-create-application',
+            '--package-manager',
+            'npm',
+            '--skip-git',
+            '--defaults',
+          ],
+          tempArea.path,
+        );
+
+        expect(existsSync(path.join(tempArea.path, workspaceName, 'angular.json'))).toBe(true);
+      },
+      {
+        prefix: 'angular-cli-portability-',
+      },
+    );
+  }, 120000);
 });

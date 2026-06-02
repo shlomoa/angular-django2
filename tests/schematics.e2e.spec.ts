@@ -13,7 +13,9 @@ import {
   createE2ETempArea,
   E2E_TEMP_AREA_PREFIX,
   DEFAULT_E2E_TIMEOUT,
+  execAngularCli,
   execCommand,
+  getAngularCliInvocation,
   getRepoRoot,
   isE2EDebugMode,
   type TestTempAreaHandle,
@@ -55,11 +57,15 @@ async function startAndVerifyDevServer(
   timeoutMs: number = 60000,
 ): Promise<{ stop: () => Promise<void> }> {
   return new Promise((resolve, reject) => {
-    const serverProcess = spawn('npx', ['ng', 'serve', `--port=${port}`], {
-      cwd: appPath,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: true, // Required for Windows compatibility
-    });
+    const angularCli = getAngularCliInvocation();
+    const serverProcess = spawn(
+      angularCli.command,
+      [...angularCli.args, 'serve', `--port=${port}`],
+      {
+        cwd: appPath,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      },
+    );
 
     let serverStarted = false;
     let settled = false;
@@ -96,15 +102,24 @@ async function startAndVerifyDevServer(
                 return;
               }
 
-              if (process.platform === 'win32' && serverProcess.pid) {
-                execCommand(`taskkill /PID ${serverProcess.pid} /T /F`, appPath, {
-                  throwOnError: false,
-                });
+              if (serverProcess.stdin && !serverProcess.stdin.destroyed) {
+                serverProcess.stdin.write('\u0003');
+                serverProcess.stdin.end();
               } else {
-                serverProcess.kill('SIGTERM');
+                serverProcess.kill();
               }
 
-              await waitForExit;
+              const forceKillTimer = setTimeout(() => {
+                if (serverProcess.exitCode === null) {
+                  serverProcess.kill();
+                }
+              }, 10000);
+
+              try {
+                await waitForExit;
+              } finally {
+                clearTimeout(forceKillTimer);
+              }
             },
           });
         }, 2000);
@@ -197,8 +212,18 @@ describe('angular-django2 schematics E2E tests', () => {
       try {
         // Step 1: Create a new Angular workspace using Angular CLI
         console.log('[E2E-01] Creating Angular workspace...');
-        execCommand(
-          `npx @angular/cli@latest new ${appName} --directory="${relativeDirectory}" --skip-git --skip-install --routing=true --style=scss --standalone=true --defaults`,
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=true',
+            '--style=scss',
+            '--standalone=true',
+            '--defaults',
+          ],
           parentDir,
         );
 
@@ -212,7 +237,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Step 3: Install angular-django2 from the built library
         console.log('[E2E-01] Installing angular-django2 library...');
-        execCommand(`npm install ${libraryPath}`, appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
 
         // Verify angular-django2 is in package.json
         const packageJsonPath = path.join(appPath, 'package.json');
@@ -222,7 +247,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Step 4: Run ng add angular-django2
         console.log('[E2E-01] Running ng add angular-django2...');
-        execCommand('npx ng add angular-django2 --skip-confirmation', appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
 
         // Verify ng-add registered the collection
         const angularJsonPath = path.join(appPath, 'angular.json');
@@ -237,16 +262,23 @@ describe('angular-django2 schematics E2E tests', () => {
         execCommand('npm install @angular/material @angular/cdk @angular/animations', appPath);
 
         // Run material-setup schematic
-        execCommand(
-          'npx ng generate angular-django2:material-setup --project=test-app --theme=indigo-pink --typography=true --animations=true',
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:material-setup',
+            '--project=test-app',
+            '--theme=indigo-pink',
+            '--typography=true',
+            '--animations=true',
+          ],
           appPath,
         );
         console.log('[E2E-01] ✓ Material UI configured');
 
         // Step 6: Create project structure
         console.log('[E2E-01] Creating project structure...');
-        execCommand(
-          'npx ng generate angular-django2:project-structure --project=test-app --prefix=app',
+        execAngularCli(
+          ['generate', 'angular-django2:project-structure', '--project=test-app', '--prefix=app'],
           appPath,
         );
         console.log('[E2E-01] ✓ Project structure created');
@@ -267,7 +299,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Step 7: Build the application
         console.log('[E2E-01] Building application...');
-        const buildOutput = execCommand('npx ng build --configuration=production', appPath);
+        const buildOutput = execAngularCli(['build', '--configuration=production'], appPath);
         expect(buildOutput).toBeTruthy();
         console.log('[E2E-01] ✓ Application built successfully');
 
@@ -278,16 +310,9 @@ describe('angular-django2 schematics E2E tests', () => {
         console.log('[E2E-01] ✓ Build artifacts verified');
 
         // Step 8: Run tests (if they exist and pass)
-        console.log('[E2E-01] Running tests...');
-        try {
-          execCommand('npx ng test --watch=false --browsers=ChromeHeadless', appPath, {
-            throwOnError: false,
-          });
-          console.log('[E2E-01] ✓ Tests passed');
-        } catch {
-          // Tests might not be configured or might fail - this is acceptable for E2E validation
-          console.log('[E2E-01] ℹ Tests skipped or failed (acceptable for E2E validation)');
-        }
+        console.log(
+          '[E2E-01] Skipping browser-based ng test step to keep E2E validation OS agnostic',
+        );
 
         // Step 9: Start dev server and verify it runs
         console.log('[E2E-01] Starting dev server...');
@@ -330,8 +355,16 @@ describe('angular-django2 schematics E2E tests', () => {
       try {
         // Step 1: Create a minimal workspace with ng new (no application)
         console.log('[E2E-02] Creating minimal Angular workspace...');
-        execCommand(
-          `npx @angular/cli@latest new ${appName} --directory="${relativeDirectory}" --skip-git --skip-install --create-application=false --defaults`,
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--create-application=false',
+            '--defaults',
+          ],
           parentDir,
         );
 
@@ -345,13 +378,13 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Step 3: Install angular-django2
         console.log('[E2E-02] Installing angular-django2 library...');
-        execCommand(`npm install ${libraryPath}`, workspaceRoot);
-        execCommand('npx ng add angular-django2 --skip-confirmation', workspaceRoot);
+        execCommand(`npm install "${libraryPath}"`, workspaceRoot);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], workspaceRoot);
         console.log('[E2E-02] ✓ angular-django2 installed');
 
         // Step 4: Bootstrap workspace-level files
         console.log('[E2E-02] Bootstrapping workspace files with ng-workspace...');
-        execCommand('npx ng generate angular-django2:ng-workspace demo', workspaceRoot);
+        execAngularCli(['generate', 'angular-django2:ng-workspace', 'demo'], workspaceRoot);
         console.log('[E2E-02] ✓ ng-workspace schematic completed');
 
         // Verify workspace bootstrap files
@@ -371,8 +404,19 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Step 5: Use ng-app schematic to generate complete application
         console.log('[E2E-02] Generating application with ng-app schematic...');
-        execCommand(
-          'npx ng generate angular-django2:ng-app demo --theme=indigo-pink --typography=true --animations=true --routing=true --standalone=true --style=scss --prefix=app',
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:ng-app',
+            'demo',
+            '--theme=indigo-pink',
+            '--typography=true',
+            '--animations=true',
+            '--routing=true',
+            '--standalone=true',
+            '--style=scss',
+            '--prefix=app',
+          ],
           workspaceRoot,
         );
         console.log('[E2E-02] ✓ ng-app schematic completed');
@@ -416,7 +460,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Step 7: Build the application
         console.log('[E2E-02] Building application...');
-        execCommand('npx ng build demo --configuration=production', workspaceRoot);
+        execAngularCli(['build', 'demo', '--configuration=production'], workspaceRoot);
         console.log('[E2E-02] ✓ Application built successfully');
 
         // Verify build output
@@ -452,8 +496,17 @@ describe('angular-django2 schematics E2E tests', () => {
       try {
         // Step 1: Create Angular workspace
         console.log('[E2E-03] Creating Angular workspace...');
-        execCommand(
-          `npx @angular/cli@latest new ${appName} --directory="${relativeDirectory}" --skip-git --skip-install --routing=true --style=scss --defaults`,
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=true',
+            '--style=scss',
+            '--defaults',
+          ],
           parentDir,
         );
 
@@ -462,13 +515,13 @@ describe('angular-django2 schematics E2E tests', () => {
         // Step 2: Install dependencies and angular-django2
         console.log('[E2E-03] Installing dependencies...');
         execCommand('npm install', appPath);
-        execCommand(`npm install ${libraryPath}`, appPath);
-        execCommand('npx ng add angular-django2 --skip-confirmation', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
         console.log('[E2E-03] ✓ Dependencies installed');
 
         // Step 3: Run ng-api schematic
         console.log('[E2E-03] Configuring OpenAPI code generation...');
-        execCommand('npx ng generate angular-django2:ng-api', appPath);
+        execAngularCli(['generate', 'angular-django2:ng-api'], appPath);
         console.log('[E2E-03] ✓ ng-api schematic completed');
 
         // Verify ng-openapi-gen.json was created
@@ -494,7 +547,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
         // Step 4: Build the application to ensure no breaking changes
         console.log('[E2E-03] Building application...');
-        execCommand('npx ng build --configuration=production', appPath);
+        execAngularCli(['build', '--configuration=production'], appPath);
         console.log('[E2E-03] ✓ Application built successfully');
 
         console.log('[E2E-03] ✅ E2E test completed successfully');

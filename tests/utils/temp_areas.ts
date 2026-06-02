@@ -1,8 +1,8 @@
-import { execSync, spawnSync } from 'node:child_process';
+import { execFileSync, execSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, isAbsolute, join, relative, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export type TestTempAreaMode = 'persistent' | 'non-persistent';
 
@@ -37,6 +37,7 @@ export const VITEST_E2E_CONFIG = 'vitest.e2e.config.mts';
 
 const DEFAULT_TEMP_ROOT = join(tmpdir(), 'angular-django2-test');
 const DEFAULT_PREFIX = 'tmp-area-';
+const REPO_ROOT = resolve(fileURLToPath(new URL('../../', import.meta.url)));
 
 type TempAreaCliCommand = 'cleanup' | 'debug' | 'run' | 'watch';
 
@@ -46,10 +47,13 @@ export interface ExecCommandOptions {
   maxBuffer?: number;
 }
 
-export interface VitestInvocation {
+export interface NodeScriptInvocation {
   command: string;
   args: string[];
 }
+
+export type VitestInvocation = NodeScriptInvocation;
+export type AngularCliInvocation = NodeScriptInvocation;
 
 function isWithinRoot(targetPath: string, rootPath: string): boolean {
   const relativePath = relative(rootPath, targetPath);
@@ -148,7 +152,7 @@ export function createTempArea(options: TestTempAreaOptions = {}): TestTempAreaH
 }
 
 export function getRepoRoot(): string {
-  return execSync('git rev-parse --show-toplevel').toString().trim();
+  return REPO_ROOT;
 }
 
 export function execCommand(
@@ -168,6 +172,38 @@ export function execCommand(
   } catch (error) {
     if (throwOnError) {
       console.error(`Command failed: ${command}`);
+      console.error(`Working directory: ${cwd}`);
+
+      if (error instanceof Error && 'stdout' in error && 'stderr' in error) {
+        console.error('stdout:', (error as Error & { stdout: unknown }).stdout);
+        console.error('stderr:', (error as Error & { stderr: unknown }).stderr);
+      }
+
+      throw error;
+    }
+
+    return '';
+  }
+}
+
+export function execFileCommand(
+  command: string,
+  args: readonly string[],
+  cwd: string,
+  options: ExecCommandOptions = {},
+): string {
+  const throwOnError = options.throwOnError ?? true;
+
+  try {
+    return execFileSync(command, args, {
+      cwd,
+      encoding: 'utf8',
+      stdio: options.stdio ?? (throwOnError ? 'pipe' : 'ignore'),
+      maxBuffer: options.maxBuffer ?? DEFAULT_EXEC_COMMAND_MAX_BUFFER,
+    });
+  } catch (error) {
+    if (throwOnError) {
+      console.error(`Command failed: ${command} ${args.join(' ')}`);
       console.error(`Working directory: ${cwd}`);
 
       if (error instanceof Error && 'stdout' in error && 'stderr' in error) {
@@ -231,6 +267,32 @@ export function createE2ETempArea(
     prefix: E2E_TEMP_AREA_PREFIX,
     tempRoot: repoRoot,
   });
+}
+
+export function getAngularCliInvocation(repoRoot = getRepoRoot()): AngularCliInvocation {
+  const angularCliEntrypoint = join(repoRoot, 'node_modules', '@angular', 'cli', 'bin', 'ng.js');
+
+  if (!existsSync(angularCliEntrypoint)) {
+    throw new Error(
+      `Angular CLI entrypoint not found at ${angularCliEntrypoint}. Run npm install first.`,
+    );
+  }
+
+  return {
+    command: process.execPath,
+    args: [angularCliEntrypoint],
+  };
+}
+
+export function execAngularCli(
+  args: readonly string[],
+  cwd: string,
+  options: ExecCommandOptions = {},
+  repoRoot = getRepoRoot(),
+): string {
+  const invocation = getAngularCliInvocation(repoRoot);
+
+  return execFileCommand(invocation.command, [...invocation.args, ...args], cwd, options);
 }
 
 export function getVitestInvocation(

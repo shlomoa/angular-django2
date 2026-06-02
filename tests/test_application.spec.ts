@@ -3,7 +3,13 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { execCommand, getRepoRoot, withTempArea, DEFAULT_E2E_TIMEOUT } from './utils/temp_areas';
+import {
+  DEFAULT_E2E_TIMEOUT,
+  execAngularCli,
+  execCommand,
+  getRepoRoot,
+  withTempArea,
+} from './utils/temp_areas';
 
 const repoRoot = getRepoRoot();
 const angularDjango2PackagePath = path.join(repoRoot, 'dist', 'angular-django2');
@@ -20,17 +26,28 @@ describe('angular-django2 application schematic', () => {
 
           expect(existsSync(angularDjango2PackagePath)).toBe(true);
 
-          execCommand(
-            `npx -y @angular/cli@21 new ${workspaceName} --no-create-application --package-manager npm --skip-git --defaults`,
+          execAngularCli(
+            [
+              'new',
+              workspaceName,
+              '--no-create-application',
+              '--package-manager',
+              'npm',
+              '--skip-git',
+              '--defaults',
+            ],
             tempArea.path,
           );
           execCommand(`npm install "${angularDjango2PackagePath}"`, workspaceRoot);
-          execCommand('npx ng add angular-django2 --skip-confirmation --defaults', workspaceRoot);
-          execCommand(
-            'npx ng generate angular-django2:application my-app --defaults',
+          execAngularCli(
+            ['add', 'angular-django2', '--skip-confirmation', '--defaults'],
             workspaceRoot,
           );
-          const buildOutput = execCommand('npx ng build my-app', workspaceRoot);
+          execAngularCli(
+            ['generate', 'angular-django2:application', 'my-app', '--defaults'],
+            workspaceRoot,
+          );
+          const buildOutput = execAngularCli(['build', 'my-app'], workspaceRoot);
 
           for (const relativePath of [
             'angular.json',
