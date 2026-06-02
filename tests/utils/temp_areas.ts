@@ -330,9 +330,7 @@ export function execAngularCli(
 ): string {
   if (args[0] === 'new') {
     const packageSpecifier = getAngularCliPackageSpecifier(repoRoot);
-    const command = ['npx', '--yes', packageSpecifier, ...args]
-      .map(quoteShellArgument)
-      .join(' ');
+    const command = ['npx', '--yes', packageSpecifier, ...args].map(quoteShellArgument).join(' ');
 
     return execCommand(command, cwd, options);
   }
