@@ -327,28 +327,28 @@ documented at
 https://angular.dev/reference/configs/file-structure#application-source-files.
 Each hook supports exactly one of three modes:
 
-| Mode       | Field      | Behavior                                                                                                  |
-| ---------- | ---------- | --------------------------------------------------------------------------------------------------------- |
-| Inline     | `content`  | Write the supplied string verbatim to the target path (overwrites any existing file).                     |
-| Local link | `path`     | Read content from a local filesystem path (absolute, or relative to the working directory) at schematic execution time. |
+| Mode       | Field      | Behavior                                                                                                                                                                              |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Inline     | `content`  | Write the supplied string verbatim to the target path (overwrites any existing file).                                                                                                 |
+| Local link | `path`     | Read content from a local filesystem path (absolute, or relative to the working directory) at schematic execution time.                                                               |
 | Template   | `template` | Write the supplied literal body, substituting any `{{key}}` placeholders with the matching `params` value. Optional whitespace inside the braces (e.g. `{{ key }}`) is also accepted. |
 
 Recognized file keys and their target paths (under `/src` by default, or under
 the selected project's `sourceRoot` when `--project` is provided):
 
-| Key                  | Target path                  |
-| -------------------- | ---------------------------- |
-| `favicon`            | `favicon.ico`                |
-| `indexHtml`          | `index.html`                 |
-| `mainTs`             | `main.ts`                    |
-| `stylesCss`          | `styles.css`                 |
-| `appConfigTs`        | `app/app.config.ts`          |
-| `appComponentTs`     | `app/app.component.ts`       |
-| `appComponentHtml`   | `app/app.component.html`     |
-| `appComponentCss`    | `app/app.component.css`      |
-| `appComponentSpecTs` | `app/app.component.spec.ts`  |
-| `appModuleTs`        | `app/app.module.ts`          |
-| `appRoutesTs`        | `app/app.routes.ts`          |
+| Key                  | Target path                 |
+| -------------------- | --------------------------- |
+| `favicon`            | `favicon.ico`               |
+| `indexHtml`          | `index.html`                |
+| `mainTs`             | `main.ts`                   |
+| `stylesCss`          | `styles.css`                |
+| `appConfigTs`        | `app/app.config.ts`         |
+| `appComponentTs`     | `app/app.component.ts`      |
+| `appComponentHtml`   | `app/app.component.html`    |
+| `appComponentCss`    | `app/app.component.css`     |
+| `appComponentSpecTs` | `app/app.component.spec.ts` |
+| `appModuleTs`        | `app/app.module.ts`         |
+| `appRoutesTs`        | `app/app.routes.ts`         |
 
 Because the CLI does not pass nested object options on the command line, drive
 `ng-workspace` programmatically via the schematics test runner, a custom
