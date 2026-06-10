@@ -148,6 +148,9 @@ function resolveHookContent(hook: FileHook, fileKey: AppSourceFileKey): string {
   }
 
   if (hook.path !== undefined) {
+    // Relative paths are resolved against the schematic's current working
+    // directory. Prefer absolute paths for predictable behavior across
+    // invocation contexts.
     const resolvedPath = isAbsolute(hook.path) ? hook.path : resolve(process.cwd(), hook.path);
     try {
       return readFileSync(resolvedPath, 'utf8');

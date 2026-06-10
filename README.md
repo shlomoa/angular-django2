@@ -331,7 +331,7 @@ Each hook supports exactly one of three modes:
 | ---------- | ---------- | --------------------------------------------------------------------------------------------------------- |
 | Inline     | `content`  | Write the supplied string verbatim to the target path (overwrites any existing file).                     |
 | Local link | `path`     | Read content from a local filesystem path (absolute, or relative to the working directory) at schematic execution time. |
-| Template   | `template` | Write the supplied literal body, substituting any `{{key}}` placeholders with the matching `params` value. |
+| Template   | `template` | Write the supplied literal body, substituting any `{{key}}` placeholders with the matching `params` value. Optional whitespace inside the braces (e.g. `{{ key }}`) is also accepted. |
 
 Recognized file keys and their target paths (under `/src` by default, or under
 the selected project's `sourceRoot` when `--project` is provided):
