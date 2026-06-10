@@ -295,6 +295,140 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     );
   });
 
+  it('TC-WS-04: writes application source files from inline content hooks under /src by default', () => {
+    const tree = Tree.empty();
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      files: {
+        indexHtml: { content: '<!doctype html><html><body><app-root></app-root></body></html>' },
+        mainTs: { content: "import 'zone.js';\n" },
+        appComponentTs: {
+          content: "export class AppComponent { title = 'demo-app'; }\n",
+        },
+      },
+    })(tree, {} as never) as Tree;
+
+    expect(updatedTree.read('/src/index.html')!.toString()).toBe(
+      '<!doctype html><html><body><app-root></app-root></body></html>',
+    );
+    expect(updatedTree.read('/src/main.ts')!.toString()).toBe("import 'zone.js';\n");
+    expect(updatedTree.read('/src/app/app.component.ts')!.toString()).toBe(
+      "export class AppComponent { title = 'demo-app'; }\n",
+    );
+  });
+
+  it('TC-WS-05: overrides existing application source files via the inline content hook', () => {
+    const tree = Tree.empty();
+    tree.create('/src/styles.css', '/* original */\n');
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      files: {
+        stylesCss: { content: '/* overridden */\n' },
+      },
+    })(tree, {} as never) as Tree;
+
+    expect(updatedTree.read('/src/styles.css')!.toString()).toBe('/* overridden */\n');
+  });
+
+  it('TC-WS-06: reads application source file content from a local filesystem path', () => {
+    const tree = Tree.empty();
+    const fixturePath = path.resolve(__dirname, '../projects/angular-django2/README.md');
+    const fixtureContent = readFileSync(fixturePath, 'utf8');
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      files: {
+        indexHtml: { path: fixturePath },
+      },
+    })(tree, {} as never) as Tree;
+
+    expect(updatedTree.read('/src/index.html')!.toString()).toBe(fixtureContent);
+  });
+
+  it('TC-WS-07: instantiates a predefined template by substituting `{{key}}` placeholders from params', () => {
+    const tree = Tree.empty();
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      files: {
+        appComponentTs: {
+          template:
+            "import { Component } from '@angular/core';\n\n@Component({ selector: '{{selector}}', template: '<h1>{{title}}</h1>' })\nexport class {{className}} {}\n",
+          params: { selector: 'app-root', title: 'Hello', className: 'AppComponent' },
+        },
+      },
+    })(tree, {} as never) as Tree;
+
+    expect(updatedTree.read('/src/app/app.component.ts')!.toString()).toBe(
+      "import { Component } from '@angular/core';\n\n@Component({ selector: 'app-root', template: '<h1>Hello</h1>' })\nexport class AppComponent {}\n",
+    );
+  });
+
+  it('TC-WS-08: resolves the source root from angular.json when `project` is provided', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/angular.json',
+      JSON.stringify({
+        version: 1,
+        projects: {
+          'demo-app': {
+            root: 'projects/demo-app',
+            sourceRoot: 'projects/demo-app/src',
+          },
+        },
+      }),
+    );
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      project: 'demo-app',
+      files: {
+        mainTs: { content: "import 'zone.js';\n" },
+      },
+    })(tree, {} as never) as Tree;
+
+    expect(updatedTree.read('/projects/demo-app/src/main.ts')!.toString()).toBe(
+      "import 'zone.js';\n",
+    );
+  });
+
+  it('TC-WS-09: throws when a file hook specifies neither content nor path nor template', () => {
+    const tree = Tree.empty();
+
+    expect(() =>
+      ngWorkspace({
+        name: 'demo-app',
+        files: { mainTs: {} },
+      })(tree, {} as never),
+    ).toThrow(/must specify exactly one of "content", "path", or "template"/);
+  });
+
+  it('TC-WS-10: throws when a file hook specifies more than one mode', () => {
+    const tree = Tree.empty();
+
+    expect(() =>
+      ngWorkspace({
+        name: 'demo-app',
+        files: { mainTs: { content: 'a', template: 'b' } },
+      })(tree, {} as never),
+    ).toThrow(/must specify only one of "content", "path", or "template"/);
+  });
+
+  it('TC-WS-11: throws when `project` is not found in angular.json', () => {
+    const tree = Tree.empty();
+    tree.create('/angular.json', JSON.stringify({ version: 1, projects: {} }));
+
+    expect(() =>
+      ngWorkspace({
+        name: 'demo-app',
+        project: 'missing',
+        files: { mainTs: { content: '' } },
+      })(tree, {} as never),
+    ).toThrow('Project "missing" not found in angular.json.');
+  });
+
   describe('material-setup schematic', () => {
     it('TC-M1: adds prebuilt theme CSS to angular.json styles array', () => {
       const tree = Tree.empty();
