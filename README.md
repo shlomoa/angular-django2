@@ -276,7 +276,7 @@ available:
 | `ng generate angular-django2:class <name>`                       | Creates a class                                                         | Pass-through to Angular CLI class schematic        |
 | `ng generate angular-django2:app-shell --project=<name>`         | Creates or updates the app shell                                        | Pass-through schematic for app shell generation    |
 | `ng generate angular-django2:ng-app <name>`                      | Creates a complete app in one flow                                      | Best “get me running quickly” option               |
-| `ng generate angular-django2:ng-workspace <name>`                | Writes workspace-wide bootstrap files                                   | Use before `ng-app` in an empty workspace          |
+| `ng generate angular-django2:ng-workspace <name>`                | Writes workspace-wide bootstrap files and configures vitest             | Use before `ng-app` in an empty workspace          |
 | `ng generate angular-django2:ng-api --inputPath=<file>`          | Bootstraps `ng-openapi-gen`                                             | Adds `generate:api` script                         |
 | `ng generate angular-django2:data-service <resource>`            | Creates a typed `*DataService` wrapper                                  | Designed for generated OpenAPI services            |
 

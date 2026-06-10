@@ -98,6 +98,30 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
 `);
       expect(tree.readContent('/README.md')).toBe(workspaceReadme);
     });
+
+    it('INT-WS-02: adds vitest dev dependency, config file, and scripts to package.json', async () => {
+      appTree.create(
+        '/package.json',
+        JSON.stringify({
+          name: 'demo-app',
+          version: '1.0.0',
+          scripts: {},
+          devDependencies: {},
+        }),
+      );
+
+      const tree = await runner.runSchematic('ng-workspace', { name: 'demo-app' }, appTree);
+
+      const packageJson = JSON.parse(tree.readContent('/package.json'));
+      expect(packageJson.devDependencies.vitest).toBeDefined();
+      expect(packageJson.scripts['test:node']).toBe('vitest run --config vitest.config.mts');
+      expect(packageJson.scripts['test:node:watch']).toBe('vitest --config vitest.config.mts');
+
+      expect(tree.files).toContain('/vitest.config.mts');
+      const vitestConfig = tree.readContent('/vitest.config.mts');
+      expect(vitestConfig).toContain("from 'vitest/config'");
+      expect(vitestConfig).toContain("environment: 'node'");
+    });
   });
 
   describe('ng-api schematic integration', () => {

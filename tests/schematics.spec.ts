@@ -258,10 +258,16 @@ describe('angular-django2 schematics', () => {
     }
   });
 
+  const createMockContext = () =>
+    ({
+      logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      addTask: vi.fn(),
+    }) as never;
+
   it('TC-WS-01: writes workspace bootstrap files for the requested app name', () => {
     const tree = Tree.empty();
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, {} as never) as Tree;
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
 
     expect(updatedTree.read('/.github/copilot-instructions.md')!.toString())
       .toBe(`# demo-app Repo Instructions
@@ -278,7 +284,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     tree.create('/README.md', 'old readme');
     tree.create('/.github/copilot-instructions.md', 'old instructions');
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, {} as never) as Tree;
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
 
     expect(updatedTree.read('/README.md')!.toString()).toBe(workspaceReadme);
     expect(updatedTree.read('/.github/copilot-instructions.md')!.toString()).toContain(
@@ -289,10 +295,94 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
   it('TC-WS-03: throws when name is missing', () => {
     const tree = Tree.empty();
 
-    expect(() => ngWorkspace({ name: '' })(tree, {} as never)).toThrow(SchematicsException);
-    expect(() => ngWorkspace({ name: '' })(tree, {} as never)).toThrow(
+    expect(() => ngWorkspace({ name: '' })(tree, createMockContext())).toThrow(SchematicsException);
+    expect(() => ngWorkspace({ name: '' })(tree, createMockContext())).toThrow(
       'Option "name" is required.',
     );
+  });
+
+  it('TC-WS-04: adds vitest dev dependency, config file, and test scripts to package.json', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/package.json',
+      JSON.stringify(
+        {
+          name: 'demo-app',
+          version: '1.0.0',
+          scripts: { ng: 'ng' },
+          devDependencies: {},
+        },
+        null,
+        2,
+      ),
+    );
+
+    const context = createMockContext();
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+
+    const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+    expect(packageJson.devDependencies.vitest).toBeDefined();
+    expect(packageJson.scripts['test:node']).toBe('vitest run --config vitest.config.mts');
+    expect(packageJson.scripts['test:node:watch']).toBe('vitest --config vitest.config.mts');
+    // Pre-existing scripts are preserved
+    expect(packageJson.scripts.ng).toBe('ng');
+
+    const vitestConfig = updatedTree.read('/vitest.config.mts')!.toString();
+    expect(vitestConfig).toContain("from 'vitest/config'");
+    expect(vitestConfig).toContain("environment: 'node'");
+    expect(vitestConfig).toContain("'tests/**/*.spec.ts'");
+
+    // npm install task is scheduled when a new dep is added
+    expect(
+      (context as unknown as { addTask: ReturnType<typeof vi.fn> }).addTask,
+    ).toHaveBeenCalled();
+  });
+
+  it('TC-WS-05: vitest setup is idempotent and preserves existing values', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/package.json',
+      JSON.stringify(
+        {
+          name: 'demo-app',
+          version: '1.0.0',
+          scripts: {
+            'test:node': 'echo custom',
+            'test:node:watch': 'echo custom-watch',
+          },
+          devDependencies: { vitest: '^3.0.0' },
+        },
+        null,
+        2,
+      ),
+    );
+    tree.create('/vitest.config.mts', '// existing config\n');
+
+    const context = createMockContext();
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+
+    const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+    expect(packageJson.devDependencies.vitest).toBe('^3.0.0');
+    expect(packageJson.scripts['test:node']).toBe('echo custom');
+    expect(packageJson.scripts['test:node:watch']).toBe('echo custom-watch');
+    expect(updatedTree.read('/vitest.config.mts')!.toString()).toBe('// existing config\n');
+
+    // No install task scheduled when nothing new was added
+    expect(
+      (context as unknown as { addTask: ReturnType<typeof vi.fn> }).addTask,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('TC-WS-06: gracefully skips vitest setup when package.json is missing', () => {
+    const tree = Tree.empty();
+
+    const context = createMockContext();
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+
+    expect(updatedTree.exists('/vitest.config.mts')).toBe(false);
+    expect(
+      (context as unknown as { logger: { warn: ReturnType<typeof vi.fn> } }).logger.warn,
+    ).toHaveBeenCalledWith(expect.stringContaining('package.json'));
   });
 
   describe('material-setup schematic', () => {
