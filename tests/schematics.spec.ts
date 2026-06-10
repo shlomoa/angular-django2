@@ -258,10 +258,24 @@ describe('angular-django2 schematics', () => {
     }
   });
 
+  function createNgWorkspaceContext() {
+    return {
+      addTask: vi.fn(),
+      logger: {
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
+      },
+    } as never;
+  }
+
   it('TC-WS-01: writes workspace bootstrap files for the requested app name', () => {
     const tree = Tree.empty();
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, {} as never) as Tree;
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(
+      tree,
+      createNgWorkspaceContext(),
+    ) as Tree;
 
     expect(updatedTree.read('/.github/copilot-instructions.md')!.toString())
       .toBe(`# demo-app Repo Instructions
@@ -278,7 +292,10 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     tree.create('/README.md', 'old readme');
     tree.create('/.github/copilot-instructions.md', 'old instructions');
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, {} as never) as Tree;
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(
+      tree,
+      createNgWorkspaceContext(),
+    ) as Tree;
 
     expect(updatedTree.read('/README.md')!.toString()).toBe(workspaceReadme);
     expect(updatedTree.read('/.github/copilot-instructions.md')!.toString()).toContain(
@@ -288,11 +305,163 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
 
   it('TC-WS-03: throws when name is missing', () => {
     const tree = Tree.empty();
+    const context = createNgWorkspaceContext();
 
-    expect(() => ngWorkspace({ name: '' })(tree, {} as never)).toThrow(SchematicsException);
-    expect(() => ngWorkspace({ name: '' })(tree, {} as never)).toThrow(
-      'Option "name" is required.',
+    expect(() => ngWorkspace({ name: '' })(tree, context)).toThrow(SchematicsException);
+    expect(() => ngWorkspace({ name: '' })(tree, context)).toThrow('Option "name" is required.');
+  });
+
+  it('TC-WS-04: generates eslint.config.mjs at the workspace root', () => {
+    const tree = Tree.empty();
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(
+      tree,
+      createNgWorkspaceContext(),
+    ) as Tree;
+
+    const eslintConfig = updatedTree.read('/eslint.config.mjs')?.toString();
+    expect(eslintConfig).toBeDefined();
+    expect(eslintConfig).toContain("import angular from 'angular-eslint'");
+    expect(eslintConfig).toContain("import tseslint from 'typescript-eslint'");
+    expect(eslintConfig).toContain('@angular-eslint/component-selector');
+  });
+
+  it('TC-WS-05: leaves an existing eslint.config.mjs untouched (idempotent)', () => {
+    const tree = Tree.empty();
+    const existing = '// custom user eslint config\nexport default [];\n';
+    tree.create('/eslint.config.mjs', existing);
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(
+      tree,
+      createNgWorkspaceContext(),
+    ) as Tree;
+
+    expect(updatedTree.read('/eslint.config.mjs')!.toString()).toBe(existing);
+  });
+
+  it('TC-WS-06: adds lint scripts and ESLint devDependencies to package.json', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/package.json',
+      JSON.stringify(
+        {
+          name: 'demo-app',
+          version: '0.0.0',
+          scripts: { start: 'ng serve' },
+          devDependencies: {},
+        },
+        null,
+        2,
+      ),
     );
+
+    const context = createNgWorkspaceContext();
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+
+    const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+    expect(packageJson.scripts.lint).toBe('ng lint');
+    expect(packageJson.scripts['lint:fix']).toBe('ng lint --fix');
+    expect(packageJson.scripts.start).toBe('ng serve');
+    expect(packageJson.devDependencies.eslint).toBeDefined();
+    expect(packageJson.devDependencies['@eslint/js']).toBeDefined();
+    expect(packageJson.devDependencies['angular-eslint']).toBeDefined();
+    expect(packageJson.devDependencies['@angular-eslint/builder']).toBeDefined();
+    expect(packageJson.devDependencies['typescript-eslint']).toBeDefined();
+    expect(packageJson.devDependencies.globals).toBeDefined();
+    expect(context.addTask).toHaveBeenCalled();
+  });
+
+  it('TC-WS-07: preserves existing lint scripts and devDependency versions in package.json', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/package.json',
+      JSON.stringify(
+        {
+          name: 'demo-app',
+          version: '0.0.0',
+          scripts: { lint: 'custom-lint', 'lint:fix': 'custom-lint --fix' },
+          devDependencies: { eslint: '^9.0.0' },
+        },
+        null,
+        2,
+      ),
+    );
+
+    const context = createNgWorkspaceContext();
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+
+    const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+    expect(packageJson.scripts.lint).toBe('custom-lint');
+    expect(packageJson.scripts['lint:fix']).toBe('custom-lint --fix');
+    expect(packageJson.devDependencies.eslint).toBe('^9.0.0');
+    // Other deps were still missing and should have been added.
+    expect(packageJson.devDependencies['angular-eslint']).toBeDefined();
+  });
+
+  it('TC-WS-08: adds a lint architect target to every project in angular.json', () => {
+    const tree = Tree.empty();
+    const angularJson = {
+      version: 1,
+      projects: {
+        'app-a': {
+          root: 'projects/app-a',
+          sourceRoot: 'projects/app-a/src',
+          architect: { build: { builder: '@angular/build:application' } },
+        },
+        'app-b': {
+          root: 'projects/app-b',
+          sourceRoot: 'projects/app-b/src',
+        },
+      },
+    };
+    tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(
+      tree,
+      createNgWorkspaceContext(),
+    ) as Tree;
+
+    const updated = JSON.parse(updatedTree.read('/angular.json')!.toString());
+    expect(updated.projects['app-a'].architect.lint).toEqual({
+      builder: '@angular-eslint/builder:lint',
+      options: { lintFilePatterns: ['**/*.ts', '**/*.html'] },
+    });
+    expect(updated.projects['app-b'].architect.lint).toEqual({
+      builder: '@angular-eslint/builder:lint',
+      options: { lintFilePatterns: ['**/*.ts', '**/*.html'] },
+    });
+    // Build target must be preserved.
+    expect(updated.projects['app-a'].architect.build.builder).toBe('@angular/build:application');
+  });
+
+  it('TC-WS-09: leaves an existing lint architect target untouched', () => {
+    const tree = Tree.empty();
+    const angularJson = {
+      version: 1,
+      projects: {
+        'app-a': {
+          root: 'projects/app-a',
+          architect: {
+            lint: {
+              builder: '@some-custom/builder:lint',
+              options: { lintFilePatterns: ['custom/**/*.ts'] },
+            },
+          },
+        },
+      },
+    };
+    tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(
+      tree,
+      createNgWorkspaceContext(),
+    ) as Tree;
+
+    const updated = JSON.parse(updatedTree.read('/angular.json')!.toString());
+    expect(updated.projects['app-a'].architect.lint.builder).toBe('@some-custom/builder:lint');
+    expect(updated.projects['app-a'].architect.lint.options.lintFilePatterns).toEqual([
+      'custom/**/*.ts',
+    ]);
   });
 
   describe('material-setup schematic', () => {
