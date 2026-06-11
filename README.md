@@ -320,6 +320,69 @@ ng build my-app
 ng serve my-app
 ```
 
+#### Provisioning application source files from `ng-workspace`
+
+`ng-workspace` exposes per-file hooks for the application source files
+documented at
+https://angular.dev/reference/configs/file-structure#application-source-files.
+Each hook supports exactly one of three modes:
+
+| Mode       | Field      | Behavior                                                                                                                                                                              |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Inline     | `content`  | Write the supplied string verbatim to the target path (overwrites any existing file).                                                                                                 |
+| Local link | `path`     | Read content from a local filesystem path (absolute, or relative to the working directory) at schematic execution time.                                                               |
+| Template   | `template` | Write the supplied literal body, substituting any `{{key}}` placeholders with the matching `params` value. Optional whitespace inside the braces (e.g. `{{ key }}`) is also accepted. |
+
+Recognized file keys and their target paths (under `/src` by default, or under
+the selected project's `sourceRoot` when `--project` is provided):
+
+| Key                  | Target path                 |
+| -------------------- | --------------------------- |
+| `favicon`            | `favicon.ico`               |
+| `indexHtml`          | `index.html`                |
+| `mainTs`             | `main.ts`                   |
+| `stylesCss`          | `styles.css`                |
+| `appConfigTs`        | `app/app.config.ts`         |
+| `appComponentTs`     | `app/app.component.ts`      |
+| `appComponentHtml`   | `app/app.component.html`    |
+| `appComponentCss`    | `app/app.component.css`     |
+| `appComponentSpecTs` | `app/app.component.spec.ts` |
+| `appModuleTs`        | `app/app.module.ts`         |
+| `appRoutesTs`        | `app/app.routes.ts`         |
+
+Because the CLI does not pass nested object options on the command line, drive
+`ng-workspace` programmatically via the schematics test runner, a custom
+schematic that delegates to it, or by invoking the exported `ngWorkspace`
+factory directly. Example (Node script):
+
+```ts
+import { ngWorkspace } from 'angular-django2/schematics/ng-workspace';
+
+const rule = ngWorkspace({
+  name: 'my-app',
+  project: 'my-app',
+  files: {
+    indexHtml: { path: './templates/index.html' },
+    appComponentTs: {
+      template:
+        "import { Component } from '@angular/core';\n@Component({ selector: '{{selector}}', template: '<h1>{{title}}</h1>' })\nexport class AppComponent {}\n",
+      params: { selector: 'app-root', title: 'Hello' },
+    },
+    stylesCss: { content: 'body { margin: 0; }\n' },
+  },
+});
+```
+
+Notes:
+
+- Omitting `files` (or passing an empty object) preserves the original
+  workspace-only behavior: only `/README.md` and
+  `/.github/copilot-instructions.md` are written.
+- When `project` names a project missing from `angular.json`, the schematic
+  throws a `SchematicsException` so misconfigured names fail fast.
+- Each hook entry must specify exactly one of `content`, `path`, or
+  `template`; supplying zero or multiple modes is an error.
+
 #### OpenAPI client workflow
 
 ```bash

@@ -12,7 +12,56 @@
         "$source": "argv",
         "index": 0
       }
+    },
+    "project": {
+      "type": "string",
+      "description": "Optional Angular project whose sourceRoot should be used to resolve application source-file targets. When omitted, files are written under /src."
+    },
+    "files": {
+      "type": "object",
+      "description": "Per-file hooks for the Angular application source files described at https://angular.dev/reference/configs/file-structure#application-source-files. Each entry accepts exactly one of: `content` (inline body), `path` (local filesystem path read at schematic time), or `template` (literal body whose `{{key}}` placeholders are replaced from `params`).",
+      "additionalProperties": false,
+      "properties": {
+        "favicon": { "$ref": "#/definitions/fileHook" },
+        "indexHtml": { "$ref": "#/definitions/fileHook" },
+        "mainTs": { "$ref": "#/definitions/fileHook" },
+        "stylesCss": { "$ref": "#/definitions/fileHook" },
+        "appConfigTs": { "$ref": "#/definitions/fileHook" },
+        "appComponentTs": { "$ref": "#/definitions/fileHook" },
+        "appComponentHtml": { "$ref": "#/definitions/fileHook" },
+        "appComponentCss": { "$ref": "#/definitions/fileHook" },
+        "appComponentSpecTs": { "$ref": "#/definitions/fileHook" },
+        "appModuleTs": { "$ref": "#/definitions/fileHook" },
+        "appRoutesTs": { "$ref": "#/definitions/fileHook" }
+      }
     }
   },
-  "required": ["name"]
+  "required": ["name"],
+  "definitions": {
+    "fileHook": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Inline file content. Overrides any existing file at the target path."
+        },
+        "path": {
+          "type": "string",
+          "description": "Absolute or relative filesystem path read at schematic execution time. Relative paths are resolved against the current working directory."
+        },
+        "template": {
+          "type": "string",
+          "description": "Literal template body. Occurrences of `{{key}}` are replaced with the corresponding value from `params`."
+        },
+        "params": {
+          "type": "object",
+          "description": "Values used to substitute `{{key}}` placeholders inside `template`. Only used when `template` is provided.",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean"]
+          }
+        }
+      }
+    }
+  }
 }

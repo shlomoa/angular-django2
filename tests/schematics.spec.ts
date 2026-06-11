@@ -301,7 +301,141 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     );
   });
 
-  it('TC-WS-04: adds vitest dev dependency, config file, and test scripts to package.json', () => {
+  it('TC-WS-04: writes application source files from inline content hooks under /src by default', () => {
+    const tree = Tree.empty();
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      files: {
+        indexHtml: { content: '<!doctype html><html><body><app-root></app-root></body></html>' },
+        mainTs: { content: "import 'zone.js';\n" },
+        appComponentTs: {
+          content: "export class AppComponent { title = 'demo-app'; }\n",
+        },
+      },
+    })(tree, createMockContext()) as Tree;
+
+    expect(updatedTree.read('/src/index.html')!.toString()).toBe(
+      '<!doctype html><html><body><app-root></app-root></body></html>',
+    );
+    expect(updatedTree.read('/src/main.ts')!.toString()).toBe("import 'zone.js';\n");
+    expect(updatedTree.read('/src/app/app.component.ts')!.toString()).toBe(
+      "export class AppComponent { title = 'demo-app'; }\n",
+    );
+  });
+
+  it('TC-WS-05: overrides existing application source files via the inline content hook', () => {
+    const tree = Tree.empty();
+    tree.create('/src/styles.css', '/* original */\n');
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      files: {
+        stylesCss: { content: '/* overridden */\n' },
+      },
+    })(tree, createMockContext()) as Tree;
+
+    expect(updatedTree.read('/src/styles.css')!.toString()).toBe('/* overridden */\n');
+  });
+
+  it('TC-WS-06: reads application source file content from a local filesystem path', () => {
+    const tree = Tree.empty();
+    const fixturePath = path.resolve(__dirname, '../projects/angular-django2/README.md');
+    const fixtureContent = readFileSync(fixturePath, 'utf8');
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      files: {
+        indexHtml: { path: fixturePath },
+      },
+    })(tree, createMockContext()) as Tree;
+
+    expect(updatedTree.read('/src/index.html')!.toString()).toBe(fixtureContent);
+  });
+
+  it('TC-WS-07: instantiates a predefined template by substituting `{{key}}` placeholders from params', () => {
+    const tree = Tree.empty();
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      files: {
+        appComponentTs: {
+          template:
+            "import { Component } from '@angular/core';\n\n@Component({ selector: '{{selector}}', template: '<h1>{{title}}</h1>' })\nexport class {{className}} {}\n",
+          params: { selector: 'app-root', title: 'Hello', className: 'AppComponent' },
+        },
+      },
+    })(tree, createMockContext()) as Tree;
+
+    expect(updatedTree.read('/src/app/app.component.ts')!.toString()).toBe(
+      "import { Component } from '@angular/core';\n\n@Component({ selector: 'app-root', template: '<h1>Hello</h1>' })\nexport class AppComponent {}\n",
+    );
+  });
+
+  it('TC-WS-08: resolves the source root from angular.json when `project` is provided', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/angular.json',
+      JSON.stringify({
+        version: 1,
+        projects: {
+          'demo-app': {
+            root: 'projects/demo-app',
+            sourceRoot: 'projects/demo-app/src',
+          },
+        },
+      }),
+    );
+
+    const updatedTree = ngWorkspace({
+      name: 'demo-app',
+      project: 'demo-app',
+      files: {
+        mainTs: { content: "import 'zone.js';\n" },
+      },
+    })(tree, createMockContext()) as Tree;
+
+    expect(updatedTree.read('/projects/demo-app/src/main.ts')!.toString()).toBe(
+      "import 'zone.js';\n",
+    );
+  });
+
+  it('TC-WS-09: throws when a file hook specifies neither content nor path nor template', () => {
+    const tree = Tree.empty();
+
+    expect(() =>
+      ngWorkspace({
+        name: 'demo-app',
+        files: { mainTs: {} },
+      })(tree, createMockContext()),
+    ).toThrow(/must specify exactly one of "content", "path", or "template"/);
+  });
+
+  it('TC-WS-10: throws when a file hook specifies more than one mode', () => {
+    const tree = Tree.empty();
+
+    expect(() =>
+      ngWorkspace({
+        name: 'demo-app',
+        files: { mainTs: { content: 'a', template: 'b' } },
+      })(tree, createMockContext()),
+    ).toThrow(/must specify only one of "content", "path", or "template"/);
+  });
+
+  it('TC-WS-11: throws when `project` is not found in angular.json', () => {
+    const tree = Tree.empty();
+    tree.create('/angular.json', JSON.stringify({ version: 1, projects: {} }));
+
+    expect(() =>
+      ngWorkspace({
+        name: 'demo-app',
+        project: 'missing',
+        files: { mainTs: { content: '' } },
+      })(tree, createMockContext()),
+    ).toThrow('Project "missing" not found in angular.json.');
+  });
+
+  it('TC-WS-12: adds vitest dev dependency, config file, and test scripts to package.json', () => {
     const tree = Tree.empty();
     tree.create(
       '/package.json',
@@ -338,7 +472,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     ).toHaveBeenCalled();
   });
 
-  it('TC-WS-05: vitest setup is idempotent and preserves existing values', () => {
+  it('TC-WS-13: vitest setup is idempotent and preserves existing values', () => {
     const tree = Tree.empty();
     tree.create(
       '/package.json',
@@ -373,7 +507,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     ).not.toHaveBeenCalled();
   });
 
-  it('TC-WS-06: gracefully skips vitest setup when package.json is missing', () => {
+  it('TC-WS-14: gracefully skips vitest setup when package.json is missing', () => {
     const tree = Tree.empty();
 
     const context = createMockContext();
