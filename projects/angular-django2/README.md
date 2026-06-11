@@ -72,6 +72,7 @@ Current defaults:
 - `ng-workspace`: writes workspace-wide bootstrap files for an empty Angular workspace
   - Writes `.github/copilot-instructions.md` with repo instructions for the generated app name
   - Replaces the workspace root `README.md` with this guide so the generated repo includes the build recipes below
+  - Adds `vitest` to `devDependencies`, writes a `vitest.config.mts`, and adds `test:node` / `test:node:watch` npm scripts so the generated package uses vitest for validation
 - `ng-api`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds the package to `devDependencies`, writes `ng-openapi-gen.json`, and adds a `generate:api` npm script
   - Options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`)
 - `data-service`: generates a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search and CRUD helpers
