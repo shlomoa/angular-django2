@@ -73,9 +73,9 @@ const README_TEMPLATE_PATH = join(__dirname, '../../README.md');
  * verified-compatible toolchain.
  */
 const LINT_DEV_DEPENDENCIES: Record<string, string> = {
-  '@angular-eslint/builder': '^21.3.1',
+  '@angular-eslint/builder': '^22.0.0',
   '@eslint/js': '^10.0.1',
-  'angular-eslint': '^21.3.1',
+  'angular-eslint': '^22.0.0',
   eslint: '^10.2.0',
   globals: '^17.4.0',
   'typescript-eslint': '^8.58.0',

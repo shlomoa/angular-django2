@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This repository is `angular-django2`, an Angular 21 library workspace for a Django-friendly npm package.
+This repository is `angular-django2`, an Angular 22 library workspace for a Django-friendly npm package.
 
 ## Required Reading
 
