@@ -82,6 +82,19 @@ Current E2E coverage includes:
 The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.
 
+It also centralizes the validated cross-platform command-launch behavior used by
+the integration-oriented harnesses:
+
+- Vitest E2E entrypoints are launched through `process.execPath` and the local
+  `node_modules/vitest/vitest.mjs` entrypoint instead of shelling through
+  `npx`
+- Angular CLI commands that run inside an existing workspace (`ng add`,
+  `ng generate`, `ng build`, `ng serve`, and similar flows) run through the
+  local `node_modules/@angular/cli/bin/ng.js` entrypoint
+- `ng new` is intentionally launched through `npx @angular/cli@<installed-version>`
+  so the command is treated as an outside-workspace flow even when the
+  repository itself is an Angular workspace
+
 ## Additional smoke-style harnesses
 
 The repository also contains helper utilities related to integration-oriented
@@ -138,6 +151,22 @@ On Windows, `ng serve` teardown can leave process-tree cleanup slightly behind
 directory deletion. The current E2E cleanup code compensates for this with
 defensive retries and may intentionally leave a temp directory behind rather
 than deleting the wrong path.
+
+The harness no longer relies on Windows-only `taskkill`, and it no longer
+depends on `npx.cmd` launch behavior for the E2E Vitest wrapper.
+
+### Cross-platform execution note
+
+The current integration and E2E harnesses are designed to stay OS agnostic:
+
+- repository-root discovery is path-based, not `git rev-parse`-based
+- temporary-workspace creation and cleanup work across OS temp roots and
+  repo-root E2E workspaces
+- the `ng serve` verification path uses normal process startup and shutdown
+  rather than shell-specific wrappers
+- the default E2E path intentionally skips a browser-specific
+  `ng test --watch=false --browsers=ChromeHeadless` step so the suite does not
+  assume a preinstalled browser on every platform
 
 ### E2E temp workspace cleanup and debug mode
 

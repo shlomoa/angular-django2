@@ -146,10 +146,15 @@ That runs:
 It does **not** run the E2E suite.
 
 For the canonical integration-testing guide — including `SchematicTestRunner`
-coverage, E2E scenarios, build prerequisites, temp-workspace helpers, and
-platform caveats — see `docs/INTEGRATION_TESTING.md`.
+coverage, E2E scenarios, build prerequisites, temp-workspace helpers,
+cross-platform command-launch behavior, and platform caveats — see
+`docs/INTEGRATION_TESTING.md`.
 
 For the broader repository test index, see `tests/README.md`.
+
+The current integration and E2E harnesses are intended to be OS agnostic. In
+particular, the shared test helper owns the Angular CLI/Vitest launch strategy,
+repo-root temp-workspace cleanup, and the browser-agnostic default E2E path.
 
 ### Release and publish notes
 

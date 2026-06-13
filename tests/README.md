@@ -41,6 +41,10 @@ See `docs/INTEGRATION_TESTING.md`.
 
 See `docs/INTEGRATION_TESTING.md`.
 
+That guide also owns the documented cross-platform behavior for the E2E and
+temp-area-backed flows, including the OS-agnostic Angular CLI/Vitest launch
+strategy, repo-root temp-workspace cleanup, and debug-mode preservation rules.
+
 ### Temp-area helper coverage
 
 See `docs/INTEGRATION_TESTING.md`.
@@ -132,6 +136,10 @@ Regular E2E runs clean stale repo-root temp workspaces before the suite starts
 and clean the current workspace after each scenario. Use `npm run test:e2e:debug`
 when you want to preserve temp workspaces for failure debugging.
 
+The default E2E path is intentionally browser-agnostic: it validates schematic
+generation, buildability, and a live `ng serve` path without requiring a
+platform-specific `ChromeHeadless` setup.
+
 ### CI-friendly repo validation
 
 ```bash
@@ -143,6 +151,10 @@ This runs Node-side specs and Angular library tests, but not the E2E suite.
 ## Integration-specific prerequisites and caveats
 
 See `docs/INTEGRATION_TESTING.md`.
+
+That includes the current portability notes for command launching,
+cross-platform cleanup behavior, and why `ng new` is handled differently from
+in-workspace Angular CLI commands.
 
 ## CI and validation boundaries
 
