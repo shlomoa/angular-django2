@@ -24,14 +24,14 @@ sources over lower-priority ones.
 ## Terminology
 
 - **angular-django2** (also referred to as **ngdj**): This repository — an
-  Angular 21 library workspace that produces a Django-friendly npm package.
+  Angular 22 library workspace that produces a Django-friendly npm package.
 - **django-angular3**: A companion Django package that provides Django
   management commands (`django-admin`) for Angular workspace operations,
   including automatic invocation of `ng add angular-django2`.
 
 ## 1. Repository Identity
 
-- The repository is an Angular 21 library workspace.
+- The repository is an Angular 22 library workspace.
 - The repository exists to produce a Django-friendly npm package named
   `angular-django2`.
 - Treat the project as a publishable Angular library by default, not as an
@@ -174,7 +174,7 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
 
 ## 7. Environment Requirements
 
-- Supported Node.js versions: `^20.19.0 || ^22.12.0 || ^24.0.0`
+- Supported Node.js versions: `^22.22.3 || ^24.15.0 || >=26.0.0`
 - Supported npm version: `>=11`
 
 ## 8. Documentation Requirements

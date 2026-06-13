@@ -3,7 +3,7 @@
 **Note:** `angular-django2` is published to npm, but it is still pre-release
 software and not yet alpha. The current package version is `0.1.4`.
 
-`angular-django2` (also referred to as `ngdj`) is an Angular 21 library
+`angular-django2` (also referred to as `ngdj`) is an Angular 22 library
 workspace for a Django-friendly npm package. It ships two things:
 
 - runtime Angular utilities for Django-oriented configuration
@@ -90,7 +90,7 @@ Current HTTP/CSRF boundaries:
 
 #### Prerequisites
 
-- Node.js `^20.19.0 || ^22.12.0 || ^24.0.0`
+- Node.js `^22.22.3 || ^24.15.0 || >=26.0.0`
 - npm `>=11`
 
 #### Install dependencies
