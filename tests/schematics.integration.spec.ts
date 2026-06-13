@@ -99,7 +99,58 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       expect(tree.readContent('/README.md')).toBe(workspaceReadme);
     });
 
-    it('INT-WS-02: adds vitest dev dependency, config file, and scripts to package.json', async () => {
+    it('INT-WS-02: generates lint workspace files (eslint config, scripts, deps, architect target)', async () => {
+      appTree.create(
+        '/package.json',
+        JSON.stringify(
+          {
+            name: 'demo-app',
+            version: '0.0.0',
+            scripts: { start: 'ng serve' },
+            devDependencies: {},
+          },
+          null,
+          2,
+        ),
+      );
+      appTree.create(
+        '/angular.json',
+        JSON.stringify({
+          version: 1,
+          projects: {
+            'demo-app': {
+              root: '',
+              sourceRoot: 'src',
+              architect: { build: { builder: '@angular/build:application' } },
+            },
+          },
+        }),
+      );
+
+      const tree = await runner.runSchematic('ng-workspace', { name: 'demo-app' }, appTree);
+
+      // eslint.config.mjs created
+      expect(tree.files).toContain('/eslint.config.mjs');
+      const eslintConfig = tree.readContent('/eslint.config.mjs');
+      expect(eslintConfig).toContain("import angular from 'angular-eslint'");
+
+      // package.json updated with lint scripts and devDependencies
+      const packageJson = JSON.parse(tree.readContent('/package.json'));
+      expect(packageJson.scripts.lint).toBe('ng lint');
+      expect(packageJson.scripts['lint:fix']).toBe('ng lint --fix');
+      expect(packageJson.devDependencies.eslint).toBeDefined();
+      expect(packageJson.devDependencies['angular-eslint']).toBeDefined();
+      expect(packageJson.devDependencies['@angular-eslint/builder']).toBeDefined();
+
+      // angular.json got a lint architect target for the project
+      const angularJson = JSON.parse(tree.readContent('/angular.json'));
+      expect(angularJson.projects['demo-app'].architect.lint).toEqual({
+        builder: '@angular-eslint/builder:lint',
+        options: { lintFilePatterns: ['**/*.ts', '**/*.html'] },
+      });
+    });
+
+    it('INT-WS-03: adds vitest dev dependency, config file, and scripts to package.json', async () => {
       appTree.create(
         '/package.json',
         JSON.stringify({

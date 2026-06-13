@@ -301,6 +301,147 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     );
   });
 
+  it('TC-WS-15: generates eslint.config.mjs at the workspace root', () => {
+    const tree = Tree.empty();
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+
+    const eslintConfig = updatedTree.read('/eslint.config.mjs')?.toString();
+    expect(eslintConfig).toBeDefined();
+    expect(eslintConfig).toContain("import angular from 'angular-eslint'");
+    expect(eslintConfig).toContain("import tseslint from 'typescript-eslint'");
+    expect(eslintConfig).toContain('@angular-eslint/component-selector');
+  });
+
+  it('TC-WS-16: leaves an existing eslint.config.mjs untouched (idempotent)', () => {
+    const tree = Tree.empty();
+    const existing = '// custom user eslint config\nexport default [];\n';
+    tree.create('/eslint.config.mjs', existing);
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+
+    expect(updatedTree.read('/eslint.config.mjs')!.toString()).toBe(existing);
+  });
+
+  it('TC-WS-17: adds lint scripts and ESLint devDependencies to package.json', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/package.json',
+      JSON.stringify(
+        {
+          name: 'demo-app',
+          version: '0.0.0',
+          scripts: { start: 'ng serve' },
+          devDependencies: {},
+        },
+        null,
+        2,
+      ),
+    );
+
+    const context = createMockContext();
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+
+    const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+    expect(packageJson.scripts.lint).toBe('ng lint');
+    expect(packageJson.scripts['lint:fix']).toBe('ng lint --fix');
+    expect(packageJson.scripts.start).toBe('ng serve');
+    expect(packageJson.devDependencies.eslint).toBeDefined();
+    expect(packageJson.devDependencies['@eslint/js']).toBeDefined();
+    expect(packageJson.devDependencies['angular-eslint']).toBeDefined();
+    expect(packageJson.devDependencies['@angular-eslint/builder']).toBeDefined();
+    expect(packageJson.devDependencies['typescript-eslint']).toBeDefined();
+    expect(packageJson.devDependencies.globals).toBeDefined();
+    expect(context.addTask).toHaveBeenCalled();
+  });
+
+  it('TC-WS-18: preserves existing lint scripts and devDependency versions in package.json', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/package.json',
+      JSON.stringify(
+        {
+          name: 'demo-app',
+          version: '0.0.0',
+          scripts: { lint: 'custom-lint', 'lint:fix': 'custom-lint --fix' },
+          devDependencies: { eslint: '^9.0.0' },
+        },
+        null,
+        2,
+      ),
+    );
+
+    const context = createMockContext();
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+
+    const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
+    expect(packageJson.scripts.lint).toBe('custom-lint');
+    expect(packageJson.scripts['lint:fix']).toBe('custom-lint --fix');
+    expect(packageJson.devDependencies.eslint).toBe('^9.0.0');
+    // Other deps were still missing and should have been added.
+    expect(packageJson.devDependencies['angular-eslint']).toBeDefined();
+  });
+
+  it('TC-WS-19: adds a lint architect target to every project in angular.json', () => {
+    const tree = Tree.empty();
+    const angularJson = {
+      version: 1,
+      projects: {
+        'app-a': {
+          root: 'projects/app-a',
+          sourceRoot: 'projects/app-a/src',
+          architect: { build: { builder: '@angular/build:application' } },
+        },
+        'app-b': {
+          root: 'projects/app-b',
+          sourceRoot: 'projects/app-b/src',
+        },
+      },
+    };
+    tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+
+    const updated = JSON.parse(updatedTree.read('/angular.json')!.toString());
+    expect(updated.projects['app-a'].architect.lint).toEqual({
+      builder: '@angular-eslint/builder:lint',
+      options: { lintFilePatterns: ['**/*.ts', '**/*.html'] },
+    });
+    expect(updated.projects['app-b'].architect.lint).toEqual({
+      builder: '@angular-eslint/builder:lint',
+      options: { lintFilePatterns: ['**/*.ts', '**/*.html'] },
+    });
+    // Build target must be preserved.
+    expect(updated.projects['app-a'].architect.build.builder).toBe('@angular/build:application');
+  });
+
+  it('TC-WS-20: leaves an existing lint architect target untouched', () => {
+    const tree = Tree.empty();
+    const angularJson = {
+      version: 1,
+      projects: {
+        'app-a': {
+          root: 'projects/app-a',
+          architect: {
+            lint: {
+              builder: '@some-custom/builder:lint',
+              options: { lintFilePatterns: ['custom/**/*.ts'] },
+            },
+          },
+        },
+      },
+    };
+    tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
+
+    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+
+    const updated = JSON.parse(updatedTree.read('/angular.json')!.toString());
+    expect(updated.projects['app-a'].architect.lint.builder).toBe('@some-custom/builder:lint');
+    expect(updated.projects['app-a'].architect.lint.options.lintFilePatterns).toEqual([
+      'custom/**/*.ts',
+    ]);
+  });
+
   it('TC-WS-04: writes application source files from inline content hooks under /src by default', () => {
     const tree = Tree.empty();
 
@@ -484,13 +625,25 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
             'test:node': 'echo custom',
             'test:node:watch': 'echo custom-watch',
           },
-          devDependencies: { vitest: '^3.0.0' },
+          devDependencies: {
+            vitest: '^3.0.0',
+            // Pre-seed lint devDependencies so ng-workspace's lint setup
+            // does not schedule its own NodePackageInstallTask, letting this
+            // test stay focused on vitest idempotency.
+            '@angular-eslint/builder': '^21.3.1',
+            '@eslint/js': '^10.0.1',
+            'angular-eslint': '^21.3.1',
+            eslint: '^10.2.0',
+            globals: '^17.4.0',
+            'typescript-eslint': '^8.58.0',
+          },
         },
         null,
         2,
       ),
     );
     tree.create('/vitest.config.mts', '// existing config\n');
+    tree.create('/eslint.config.mjs', '// existing eslint config\n');
 
     const context = createMockContext();
     const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
