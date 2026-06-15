@@ -1,5 +1,7 @@
 # angular-django2
 
+[![Documentation Status](https://readthedocs.org/projects/angular-django2/badge/?version=latest)](https://angular-django2.readthedocs.io/)
+
 **Note:** `angular-django2` is published to npm, but it is still pre-release
 software and not yet alpha. The current package version is `0.1.4`.
 

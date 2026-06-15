@@ -1,6 +1,10 @@
 # angular-django2
 
+[![Documentation Status](https://readthedocs.org/projects/angular-django2/badge/?version=latest)](https://angular-django2.readthedocs.io/)
+
 `angular-django2` provides Angular-friendly configuration primitives for Django-backed applications and a schematics collection for custom `ng generate` flows.
+
+Full documentation: <https://angular-django2.readthedocs.io/>
 
 The initial package surface is intentionally small:
 

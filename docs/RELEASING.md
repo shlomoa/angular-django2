@@ -148,6 +148,10 @@ version is already on npm.
    - **9.1** Confirm the new version appears on npm.
    - **9.2** Confirm the package was published under the intended dist-tag.
    - **9.3** Spot-check the published package README and metadata if needed.
+   - **9.4** Confirm the ReadTheDocs build passed and the hosted docs reflect the
+     new version at <https://angular-django2.readthedocs.io/>. ReadTheDocs
+     triggers automatically on pushes to `main`; check the build status at
+     <https://readthedocs.org/projects/angular-django2/builds/>.
 
 ## GitHub Actions Publish Flow
 

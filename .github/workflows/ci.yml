@@ -32,6 +32,9 @@ jobs:
       - name: Build library
         run: npm run build
 
+      - name: Verify docs build (TypeDoc)
+        run: npm run docs:api
+
       - name: Run tests
         run: npm run test:ci
 
