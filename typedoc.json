@@ -1,0 +1,11 @@
+{
+  "entryPoints": ["projects/angular-django2/src/public-api.ts"],
+  "tsconfig": "projects/angular-django2/tsconfig.lib.json",
+  "out": "docs/api",
+  "name": "angular-django2",
+  "includeVersion": true,
+  "readme": "projects/angular-django2/README.md",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "githubPages": false
+}

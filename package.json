@@ -24,7 +24,8 @@
     "test:e2e": "node --no-warnings --experimental-strip-types tests/utils/temp_areas.ts run",
     "test:e2e:watch": "node --no-warnings --experimental-strip-types tests/utils/temp_areas.ts watch",
     "test:e2e:debug": "node --no-warnings --experimental-strip-types tests/utils/temp_areas.ts debug",
-    "generate:api": "ng-openapi-gen"
+    "generate:api": "ng-openapi-gen",
+    "docs:api": "typedoc"
   },
   "private": true,
   "packageManager": "npm@11.6.2",
@@ -79,6 +80,7 @@
     "ng-openapi-gen": "^1.0.5",
     "ng-packagr": "^22.0.0",
     "prettier": "^3.8.1",
+    "typedoc": "^0.28.19",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.58.0",
     "vitest": "^4.0.8"
