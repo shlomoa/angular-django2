@@ -30,6 +30,7 @@ yarn-error.log
 
 # Generated docs
 /docs/api
+/site
 
 # Miscellaneous
 /.angular/cache

@@ -1,0 +1,42 @@
+site_name: angular-django2
+site_description: Angular library for Django-friendly HTTP integration primitives and custom schematics
+site_url: https://angular-django2.readthedocs.io/
+repo_url: https://github.com/shlomoa/angular-django2
+repo_name: shlomoa/angular-django2
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+
+nav:
+  - Home: index.md
+  - Requirements: REQUIREMENTS.md
+  - Integration Testing: INTEGRATION_TESTING.md
+  - Releasing: RELEASING.md
+  - API Reference:
+    - Overview: api/README.md
+    - All Exports: api/globals.md
+    - Classes:
+      - AngularDjango2Service: api/classes/AngularDjango2Service.md
+    - Functions:
+      - provideAngularDjango2: api/functions/provideAngularDjango2.md
+    - Interfaces:
+      - AngularDjango2Config: api/interfaces/AngularDjango2Config.md
+    - Type Aliases:
+      - AngularDjango2ResolvedConfig: api/type-aliases/AngularDjango2ResolvedConfig.md
+    - Variables:
+      - ANGULAR_DJANGO2_CONFIG: api/variables/ANGULAR_DJANGO2_CONFIG.md
+      - DEFAULT_ANGULAR_DJANGO2_CONFIG: api/variables/DEFAULT_ANGULAR_DJANGO2_CONFIG.md
+
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: deep purple
+    accent: indigo
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - toc:
+      permalink: true
