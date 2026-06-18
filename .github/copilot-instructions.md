@@ -1,8 +1,9 @@
-# angular django2 repo Repo Instructions
+# Repo Instructions
 
-Read [these instructions first](https://github.com/shlomoa/internal/blob/main/github/copilot-instructions.md)
-User shlomoa owns shlomoa/internal repo enabling access to the document above.
-If, for any reason it is not accessible, stop, report and ask user for guidance before proceeding.
+## General instructions
+
+The source of truth for the general instructions is [here](https://github.com/shlomoa/shlomoa/blob/main/.github/copilot-instructions.md).
+
 Treat this file as the canonical repository-specific instruction file.
 Keep `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` aligned with it.
 
@@ -15,7 +16,9 @@ Expected instruction-file chain:
 - `AGENTS.md` should only reference this file
 - `CLAUDE.md` and `GEMINI.md` should only reference `AGENTS.md` and keep only model-specific notes
 
-## Source Priority
+## angular django2 repo Repo Instructions
+
+### Source Priority
 
 When validating repository-specific facts, use sources in this order and stop
 as soon as a higher-priority source answers the question:
@@ -44,7 +47,7 @@ as soon as a higher-priority source answers the question:
 When sources conflict, prefer code/config over prose, and prefer higher-priority
 sources over lower-priority ones.
 
-## Documentation Map
+### Documentation Map
 
 Use the existing repository documents instead of restating their contents here:
 
@@ -64,7 +67,7 @@ Instruction-file priority:
 - `AGENTS.md` — reference-only pointer to the canonical repository-specific guidance
 - `CLAUDE.md` and `GEMINI.md` — model-specific companion files that should reference `AGENTS.md` and avoid duplicating shared repo guidance
 
-## Working Agreement
+### Working Agreement
 
 - Prefer small, reviewable changes.
 - Treat this as an Angular library package unless the user explicitly asks for an application.
@@ -79,7 +82,7 @@ Instruction-file priority:
   `projects/angular-django2/README.md`, `docs/REQUIREMENTS.md`,
   `tests/README.md`, or `docs/RELEASING.md` instead of expanding this file.
 
-## Testing And Verification
+### Testing And Verification
 
 Use root `package.json` scripts as the canonical verification command list.
 Use `tests/README.md` for the general testing index and
@@ -92,7 +95,7 @@ Use `docs/RELEASING.md` as the canonical release procedure and
 `.github/workflows/publish.yml` as the executable source of truth for the
 checked-in publish automation.
 
-## Documentation Alignment
+### Documentation Alignment
 
 Keep these files aligned with the actual workspace state:
 
@@ -107,7 +110,7 @@ Keep these files aligned with the actual workspace state:
 - `docs/REQUIREMENTS.md`
 - `docs/RELEASING.md`
 
-## What To Optimize For
+### What To Optimize For
 
 - Treat this as an Angular library package unless the user explicitly asks for an application.
 - Keep changes small and reviewable.
