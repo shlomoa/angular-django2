@@ -1,8 +1,8 @@
 # angular django2 repo Repo Instructions
 
 Read [these instructions first](https://github.com/shlomoa/internal/blob/main/github/copilot-instructions.md)
-There should be no access issues as shlomoa/internal is owned by shlomoa the same user as this repo owner
-
+User shlomoa owns shlomoa/internal repo enabling access to the document above.
+If, for any reason it is not accessible, stop, report and ask user for guidance before proceeding.
 Treat this file as the canonical repository-specific instruction file.
 Keep `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` aligned with it.
 
