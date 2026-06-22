@@ -47,7 +47,26 @@ describe('App', () => {
     expect(compiled.querySelector('.primary-nav')?.textContent).toContain('UI');
     expect(compiled.querySelector('.primary-nav')?.textContent).toContain('Documentation');
     expect(compiled.textContent).toContain('GitHub');
-    expect(compiled.textContent).toContain('Schematic');
+    expect(compiled.querySelector('.color-scheme-select')?.textContent).toContain('Color scheme');
+    expect(compiled.querySelector('.theme-status')).toBeNull();
+    expect(compiled.querySelector('.github-icon')).toBeTruthy();
+  });
+
+  it('should offer Material color schemes instead of schematics in the toolbar selector', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as unknown as {
+      colorSchemes: readonly { label: string; value: string }[];
+      selectedColorScheme: () => string;
+    };
+
+    expect(app.colorSchemes.map((scheme) => scheme.label)).toEqual([
+      'Rose & Red',
+      'Azure & Blue',
+      'Magenta & Violet',
+      'Cyan & Orange',
+    ]);
+    expect(app.colorSchemes.map((scheme) => scheme.value)).not.toContain('ng-app');
+    expect(app.selectedColorScheme()).toBe('azure-blue');
   });
 
   it('should render three main page frames with selected UI and guide entries', async () => {

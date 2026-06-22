@@ -9,8 +9,16 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterOutlet } from '@angular/router';
 import { AngularDjango2Service } from 'angular-django2';
 
+type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-orange';
+
 @Component({
   selector: 'app-root',
+  host: {
+    '[class.theme-rose-red]': "selectedColorScheme() === 'rose-red'",
+    '[class.theme-azure-blue]': "selectedColorScheme() === 'azure-blue'",
+    '[class.theme-magenta-violet]': "selectedColorScheme() === 'magenta-violet'",
+    '[class.theme-cyan-orange]': "selectedColorScheme() === 'cyan-orange'",
+  },
   imports: [
     MatButtonModule,
     MatCardModule,
@@ -30,7 +38,13 @@ export class App {
   protected readonly title = signal('angular-django2');
   protected readonly packageApi = this.angularDjango2.buildUrl('/api/');
   protected readonly csrfHeaderName = this.angularDjango2.resolvedConfig.csrfHeaderName;
-  protected readonly selectedSchematic = signal('ng-app');
+  protected readonly selectedColorScheme = signal<MaterialColorScheme>('azure-blue');
+  protected readonly colorSchemes: readonly { value: MaterialColorScheme; label: string }[] = [
+    { value: 'rose-red', label: 'Rose & Red' },
+    { value: 'azure-blue', label: 'Azure & Blue' },
+    { value: 'magenta-violet', label: 'Magenta & Violet' },
+    { value: 'cyan-orange', label: 'Cyan & Orange' },
+  ];
   protected readonly uiItems = [
     {
       name: 'Provider setup',
@@ -58,10 +72,5 @@ export class App {
       name: 'Django integration',
       description: 'Keep API URLs, credentials, and CSRF behavior visible in code.',
     },
-  ];
-  protected readonly schematics = [
-    { value: 'ng-app', label: 'ng-app' },
-    { value: 'ng-workspace', label: 'ng-workspace' },
-    { value: 'data-service', label: 'data-service' },
   ];
 }

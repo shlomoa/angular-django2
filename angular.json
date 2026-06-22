@@ -62,10 +62,7 @@
                 "input": "projects/angular-django2-reference/public"
               }
             ],
-            "styles": [
-              "@angular/material/prebuilt-themes/indigo-pink.css",
-              "projects/angular-django2-reference/src/styles.scss"
-            ]
+            "styles": ["projects/angular-django2-reference/src/styles.scss"]
           },
           "configurations": {
             "production": {

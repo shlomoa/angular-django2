@@ -1,19 +1,25 @@
-@use 'sass:color';
-
 :host {
   display: block;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at top left, rgba(103, 58, 183, 0.16), transparent 30rem), #f8f8ff;
-  color: #172033;
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--mat-sys-tertiary-container) 70%, transparent),
+      transparent 30rem
+    ),
+    var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
 }
 
 .app-toolbar {
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  flex-wrap: nowrap;
+  gap: 1rem;
+  min-height: 4.5rem;
   position: sticky;
   top: 0;
   z-index: 1;
-  gap: 1rem;
-  min-height: 4.5rem;
 }
 
 .toolbar-spacer {
@@ -32,14 +38,23 @@
   gap: 0.25rem;
 }
 
-.schematic-select {
+.color-scheme-select {
   --mat-form-field-container-height: 2.75rem;
   --mat-form-field-container-vertical-padding: 0.5rem;
-  width: 12rem;
+  width: 13.5rem;
 }
 
-.schematic-select ::ng-deep .mat-mdc-text-field-wrapper {
-  background: rgba(255, 255, 255, 0.14);
+.github-link {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.github-icon {
+  display: inline-block;
+  fill: currentColor;
+  height: 1rem;
+  width: 1rem;
 }
 
 .reference-shell {
@@ -51,12 +66,12 @@
 }
 
 .hero {
-  border-radius: 28px;
   background:
-    linear-gradient(135deg, rgba(63, 81, 181, 0.98), rgba(103, 58, 183, 0.88)),
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.48), transparent 42%);
-  box-shadow: 0 24px 72px rgba(42, 28, 101, 0.2);
-  color: white;
+    linear-gradient(135deg, var(--mat-sys-primary-container), var(--mat-sys-tertiary-container)),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.42), transparent 42%);
+  border-radius: 28px;
+  box-shadow: 0 24px 72px color-mix(in srgb, var(--mat-sys-shadow) 22%, transparent);
+  color: var(--mat-sys-on-primary-container);
   padding: clamp(2rem, 6vw, 4rem);
 }
 
@@ -95,7 +110,7 @@ h1 {
 }
 
 .main-frame {
-  background: white;
+  background: var(--mat-sys-surface-container-low);
   border-radius: 24px;
   min-height: 100%;
 }
@@ -103,7 +118,7 @@ h1 {
 mat-card-content {
   display: grid;
   gap: 1rem;
-  color: color.adjust(#172033, $lightness: 18%);
+  color: var(--mat-sys-on-surface-variant);
   line-height: 1.6;
 }
 
@@ -121,12 +136,13 @@ mat-card-content {
 }
 
 .feature-list strong {
-  color: #172033;
+  color: var(--mat-sys-on-surface);
 }
 
 code {
-  background: rgba(63, 81, 181, 0.1);
+  background: var(--mat-sys-secondary-container);
   border-radius: 0.35rem;
+  color: var(--mat-sys-on-secondary-container);
   padding: 0.1rem 0.3rem;
 }
 
@@ -148,7 +164,7 @@ code {
 
 @media (width < 600px) {
   .primary-nav,
-  .schematic-select {
+  .color-scheme-select {
     width: 100%;
   }
 }
