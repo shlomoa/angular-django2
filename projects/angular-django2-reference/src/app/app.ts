@@ -2,7 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterOutlet } from '@angular/router';
 import { AngularDjango2Service } from 'angular-django2';
@@ -13,7 +15,9 @@ import { AngularDjango2Service } from 'angular-django2';
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
+    MatFormFieldModule,
     MatIconModule,
+    MatSelectModule,
     MatToolbarModule,
     RouterOutlet,
   ],
@@ -26,4 +30,38 @@ export class App {
   protected readonly title = signal('angular-django2');
   protected readonly packageApi = this.angularDjango2.buildUrl('/api/');
   protected readonly csrfHeaderName = this.angularDjango2.resolvedConfig.csrfHeaderName;
+  protected readonly selectedSchematic = signal('ng-app');
+  protected readonly uiItems = [
+    {
+      name: 'Provider setup',
+      description: 'Show the standalone providers that make Django boundaries explicit.',
+    },
+    {
+      name: 'Material shell',
+      description: 'Demonstrate a responsive toolbar, cards, chips, and selection controls.',
+    },
+    {
+      name: 'Runtime values',
+      description: 'Display resolved API and CSRF values users can compare with their app.',
+    },
+  ];
+  protected readonly guides = [
+    {
+      name: 'Getting started',
+      description: 'Install the package and wire the standalone Angular providers.',
+    },
+    {
+      name: 'Schematics workflow',
+      description: 'Generate workspaces, apps, project structure, and data services.',
+    },
+    {
+      name: 'Django integration',
+      description: 'Keep API URLs, credentials, and CSRF behavior visible in code.',
+    },
+  ];
+  protected readonly schematics = [
+    { value: 'ng-app', label: 'ng-app' },
+    { value: 'ng-workspace', label: 'ng-workspace' },
+    { value: 'data-service', label: 'data-service' },
+  ];
 }

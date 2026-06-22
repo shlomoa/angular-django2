@@ -3,7 +3,8 @@
 :host {
   display: block;
   min-height: 100dvh;
-  background: #f7f8fc;
+  background:
+    radial-gradient(circle at top left, rgba(103, 58, 183, 0.16), transparent 30rem), #f8f8ff;
   color: #172033;
 }
 
@@ -11,10 +12,34 @@
   position: sticky;
   top: 0;
   z-index: 1;
+  gap: 1rem;
+  min-height: 4.5rem;
 }
 
 .toolbar-spacer {
   flex: 1 1 auto;
+}
+
+.brand-link {
+  color: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.primary-nav {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.schematic-select {
+  --mat-form-field-container-height: 2.75rem;
+  --mat-form-field-container-vertical-padding: 0.5rem;
+  width: 12rem;
+}
+
+.schematic-select ::ng-deep .mat-mdc-text-field-wrapper {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .reference-shell {
@@ -28,8 +53,9 @@
 .hero {
   border-radius: 28px;
   background:
-    linear-gradient(135deg, rgba(63, 81, 181, 0.94), rgba(103, 58, 183, 0.86)),
+    linear-gradient(135deg, rgba(63, 81, 181, 0.98), rgba(103, 58, 183, 0.88)),
     radial-gradient(circle at top right, rgba(255, 255, 255, 0.48), transparent 42%);
+  box-shadow: 0 24px 72px rgba(42, 28, 101, 0.2);
   color: white;
   padding: clamp(2rem, 6vw, 4rem);
 }
@@ -62,23 +88,67 @@ h1 {
   margin-top: 2rem;
 }
 
-.card-grid {
+.main-grid {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-mat-card {
+.main-frame {
   background: white;
+  border-radius: 24px;
+  min-height: 100%;
 }
 
 mat-card-content {
+  display: grid;
+  gap: 1rem;
   color: color.adjust(#172033, $lightness: 18%);
   line-height: 1.6;
+}
+
+.feature-list {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.feature-list li {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.feature-list strong {
+  color: #172033;
 }
 
 code {
   background: rgba(63, 81, 181, 0.1);
   border-radius: 0.35rem;
   padding: 0.1rem 0.3rem;
+}
+
+@media (width < 900px) {
+  .app-toolbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding-block: 0.75rem;
+  }
+
+  .toolbar-spacer {
+    display: none;
+  }
+
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (width < 600px) {
+  .primary-nav,
+  .schematic-select {
+    width: 100%;
+  }
 }

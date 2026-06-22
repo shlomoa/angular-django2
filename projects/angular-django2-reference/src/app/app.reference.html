@@ -1,12 +1,26 @@
 <mat-toolbar color="primary" class="app-toolbar">
-  <span>{{ title() }}</span>
+  <a class="brand-link" href="#home" aria-label="angular-django2 home">
+    {{ title() }}
+  </a>
+  <nav class="primary-nav" aria-label="Primary navigation">
+    <a mat-button href="#ui">UI</a>
+    <a mat-button href="#documentation">Documentation</a>
+  </nav>
   <span class="toolbar-spacer"></span>
+  <mat-form-field class="schematic-select" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Schematic</mat-label>
+    <mat-select [value]="selectedSchematic()" aria-label="Select schematic">
+      @for (schematic of schematics; track schematic.value) {
+        <mat-option [value]="schematic.value">{{ schematic.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
   <a mat-button href="https://github.com/shlomoa/angular-django2" rel="noopener" target="_blank">
     GitHub
   </a>
 </mat-toolbar>
 
-<main class="reference-shell">
+<main id="home" class="reference-shell">
   <section class="hero">
     <p class="eyebrow">Angular Material tutorial and online reference</p>
     <h1>{{ title() }}</h1>
@@ -35,17 +49,17 @@
     </div>
   </section>
 
-  <section class="card-grid" aria-label="Reference app status">
-    <mat-card appearance="outlined">
+  <section class="main-grid" aria-label="Reference app main page sections">
+    <mat-card appearance="outlined" class="main-frame">
       <mat-card-header>
         <mat-icon mat-card-avatar aria-hidden="true">settings</mat-icon>
-        <mat-card-title>Package providers</mat-card-title>
-        <mat-card-subtitle>Explicit Django integration boundaries</mat-card-subtitle>
+        <mat-card-title>Package reference</mat-card-title>
+        <mat-card-subtitle>Description of the package</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <p>
-          The app config uses <code>provideAngularDjango2()</code> alongside Angular's HTTP XSRF
-          configuration instead of hiding request behavior behind package magic.
+          <code>angular-django2</code> provides Django-friendly Angular configuration primitives and
+          schematics while keeping URL, credential, and CSRF behavior explicit in the app.
         </p>
         <mat-chip-set aria-label="Configured package values">
           <mat-chip>API base: {{ packageApi }}</mat-chip>
@@ -54,17 +68,41 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card appearance="outlined">
+    <mat-card id="ui" appearance="outlined" class="main-frame">
       <mat-card-header>
-        <mat-icon mat-card-avatar aria-hidden="true">construction</mat-icon>
-        <mat-card-title>Workspace infrastructure</mat-card-title>
-        <mat-card-subtitle>Build, lint, test, and run targets</mat-card-subtitle>
+        <mat-icon mat-card-avatar aria-hidden="true">widgets</mat-icon>
+        <mat-card-title>Selected UI</mat-card-title>
+        <mat-card-subtitle>Three examples for the UI page</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <p>
-          The reference app has dedicated Angular targets and root npm scripts so docs and future
-          tutorial content can be validated without changing the library project name.
-        </p>
+        <ul class="feature-list">
+          @for (item of uiItems; track item.name) {
+            <li>
+              <strong>{{ item.name }}</strong>
+              <span>{{ item.description }}</span>
+            </li>
+          }
+        </ul>
+        <a mat-button href="#ui" aria-label="Open UI page">View UI page</a>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card id="documentation" appearance="outlined" class="main-frame">
+      <mat-card-header>
+        <mat-icon mat-card-avatar aria-hidden="true">menu_book</mat-icon>
+        <mat-card-title>Selected guides</mat-card-title>
+        <mat-card-subtitle>Three entry points for documentation</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <ul class="feature-list">
+          @for (guide of guides; track guide.name) {
+            <li>
+              <strong>{{ guide.name }}</strong>
+              <span>{{ guide.description }}</span>
+            </li>
+          }
+        </ul>
+        <a mat-button href="#documentation" aria-label="Open guides page">View guides</a>
       </mat-card-content>
     </mat-card>
   </section>
