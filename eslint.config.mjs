@@ -28,6 +28,30 @@ export default tseslint.config(
     },
   },
   {
+    files: ['projects/angular-django2-reference/src/**/*.ts'],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended,
+      ...angular.configs.tsRecommended,
+    ],
+    processor: angular.processInlineTemplates,
+    languageOptions: {
+      globals: globals.browser,
+    },
+    rules: {
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+        },
+      ],
+    },
+  },
+  {
+    files: ['projects/angular-django2-reference/src/**/*.html'],
+    extends: [...angular.configs.templateRecommended],
+  },
+  {
     files: ['projects/angular-django2/schematics/**/*.ts', 'tests/**/*.ts'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {

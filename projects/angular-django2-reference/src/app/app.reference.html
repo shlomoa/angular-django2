@@ -1,0 +1,73 @@
+<mat-toolbar color="primary" class="app-toolbar">
+  <span>{{ title() }}</span>
+  <span class="toolbar-spacer"></span>
+  <a mat-button href="https://github.com/shlomoa/angular-django2" rel="noopener" target="_blank">
+    GitHub
+  </a>
+</mat-toolbar>
+
+<main class="reference-shell">
+  <section class="hero">
+    <p class="eyebrow">Angular Material tutorial and online reference</p>
+    <h1>{{ title() }}</h1>
+    <p class="hero-copy">
+      A runnable workspace app for showing Django-friendly Angular configuration, Material UI
+      patterns, and the package behavior users should expect.
+    </p>
+    <div class="hero-actions">
+      <a
+        mat-flat-button
+        color="primary"
+        href="https://github.com/shlomoa/angular-django2#howto"
+        rel="noopener"
+        target="_blank"
+      >
+        Read HOWTO
+      </a>
+      <a
+        mat-stroked-button
+        href="https://github.com/shlomoa/django-angular3"
+        rel="noopener"
+        target="_blank"
+      >
+        Django companion
+      </a>
+    </div>
+  </section>
+
+  <section class="card-grid" aria-label="Reference app status">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar aria-hidden="true">settings</mat-icon>
+        <mat-card-title>Package providers</mat-card-title>
+        <mat-card-subtitle>Explicit Django integration boundaries</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          The app config uses <code>provideAngularDjango2()</code> alongside Angular's HTTP XSRF
+          configuration instead of hiding request behavior behind package magic.
+        </p>
+        <mat-chip-set aria-label="Configured package values">
+          <mat-chip>API base: {{ packageApi }}</mat-chip>
+          <mat-chip>CSRF header: {{ csrfHeaderName }}</mat-chip>
+        </mat-chip-set>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar aria-hidden="true">construction</mat-icon>
+        <mat-card-title>Workspace infrastructure</mat-card-title>
+        <mat-card-subtitle>Build, lint, test, and run targets</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          The reference app has dedicated Angular targets and root npm scripts so docs and future
+          tutorial content can be validated without changing the library project name.
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </section>
+</main>
+
+<router-outlet />

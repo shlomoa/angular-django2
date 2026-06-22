@@ -37,6 +37,10 @@ sources over lower-priority ones.
 - Treat the project as a publishable Angular library by default, not as an
   Angular application, unless work explicitly targets app generation behavior.
 - The library source of truth is `projects/angular-django2`.
+- The repo-owned Angular Material tutorial/reference app lives in
+  `projects/angular-django2-reference`; its displayed app name is
+  `angular-django2`, while the workspace project key remains distinct from the
+  publishable library project.
 - The publishable build output is `dist/angular-django2`.
 - Shared commands are defined in the root `package.json`.
 
@@ -157,6 +161,9 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
 - `npm run format` fixes file formatting.
 - The standard verification flow should include the shared scripts already
   defined by the repo.
+- The reference app infrastructure must keep finite build, lint, test, and
+  dev-server scripts available without making the library project an
+  application.
 - The most important verification commands called out in repo guidance are:
   - `npm run format:check`
   - `npm run lint`

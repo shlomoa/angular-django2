@@ -17,6 +17,14 @@ behavior, and platform caveats.
 - Executed through Angular's test builder for the `angular-django2` library
 - Validate the runtime library code under `projects/angular-django2/src/lib`
 
+### Angular Material reference app tests
+
+- Run by `npm run test:reference-app`
+- Executed through Angular's test builder for the `angular-django2-reference`
+  application project
+- Validate the repo-owned tutorial/reference app under
+  `projects/angular-django2-reference`
+
 ### Node-side unit tests
 
 - Run by `npm run test:node`
@@ -54,13 +62,14 @@ See `docs/INTEGRATION_TESTING.md`.
 | Command                         | Coverage                                                                                             |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `npm test`                      | Angular library tests only                                                                           |
+| `npm run test:reference-app`    | Angular Material reference app tests                                                                 |
 | `npm run test:node`             | Node-side unit + integration specs in `tests/**/*.spec.ts`, excluding `tests/schematics.e2e.spec.ts` |
 | `npm run test:node:watch`       | Watch mode for the same Node-side unit + integration specs                                           |
 | `npm run cleanup:e2e:tmp-areas` | Removes stale repo-root E2E temp workspaces from previous runs                                       |
 | `npm run test:e2e`              | Only `tests/schematics.e2e.spec.ts`, after cleaning stale repo-root E2E temp workspaces              |
 | `npm run test:e2e:watch`        | Watch mode for the E2E suite, after cleaning stale repo-root E2E temp workspaces                     |
 | `npm run test:e2e:debug`        | Only `tests/schematics.e2e.spec.ts`, while preserving temp workspaces for failure debugging          |
-| `npm run test:ci`               | `npm run test:node` + Angular library tests                                                          |
+| `npm run test:ci`               | `npm run test:node` + Angular library tests + reference app tests                                    |
 
 `npm run test:ci` does **not** run the E2E suite.
 
@@ -90,6 +99,10 @@ See `docs/INTEGRATION_TESTING.md`.
   - validates that a temp-area-backed Angular workspace can install the built
     package, run `ng add angular-django2`, generate `my-app`, and build
 
+- `tests/reference_app_workspace.spec.ts`
+  - validates the checked-in reference app workspace infrastructure and npm
+    scripts
+
 - `tests/utils/temp_areas.spec.ts`
   - tests the single shared temp-area implementation used for OS temp roots,
     repo-root E2E workspaces, stale workspace cleanup, and debug-mode
@@ -114,6 +127,12 @@ flow.
 
 ```bash
 npm test
+```
+
+### Angular Material reference app tests only
+
+```bash
+npm run test:reference-app
 ```
 
 ### Node-side unit and integration tests
@@ -146,7 +165,8 @@ platform-specific `ChromeHeadless` setup.
 npm run test:ci
 ```
 
-This runs Node-side specs and Angular library tests, but not the E2E suite.
+This runs Node-side specs, Angular library tests, and checked-in Angular
+Material reference app tests, but not the E2E suite.
 
 ## Integration-specific prerequisites and caveats
 
