@@ -9,6 +9,9 @@ The initial package surface is intentionally small:
 - `AngularDjango2Service` — URL and CSRF helper methods
 - Schematics: `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, `data-service`
 
+See the [CLI guide](CLI.md) for install, `ng add`, `ng generate`, app setup,
+and OpenAPI workflow examples.
+
 ## Quick start
 
 ```ts

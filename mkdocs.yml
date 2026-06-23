@@ -7,10 +7,13 @@ edit_uri: edit/main/docs/
 
 docs_dir: docs
 
+exclude_docs: |
+  REQUIREMENTS.md
+  INTEGRATION_TESTING.md
+
 nav:
   - Home: index.md
-  - Requirements: REQUIREMENTS.md
-  - Integration Testing: INTEGRATION_TESTING.md
+  - CLI: CLI.md
   - Releasing: RELEASING.md
   - API Reference:
       - Overview: api/README.md
