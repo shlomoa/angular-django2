@@ -1,0 +1,75 @@
+<section class="ui-command-category" aria-labelledby="ui-command-category-title">
+  <a class="ui-command-category__back-link" routerLink="/ui">Back to UI categories</a>
+
+  @if (category(); as selectedCategory) {
+    <header class="ui-command-category__header">
+      <p class="eyebrow">{{ selectedCategory.name }}</p>
+      <h2 id="ui-command-category-title">{{ selectedCategory.name }} commands</h2>
+      <p>{{ selectedCategory.summary }}</p>
+    </header>
+
+    <div class="ui-command-category__layout">
+      <aside class="ui-command-category__command-list" aria-labelledby="ui-command-list-title">
+        <h3 id="ui-command-list-title">Commands</h3>
+        <nav aria-label="Commands in this category">
+          @for (command of commands(); track command.id) {
+            <button
+              class="ui-command-category__command-button"
+              [class.ui-command-category__command-button--active]="isSelectedCommand(command)"
+              type="button"
+              [attr.aria-controls]="'ui-command-detail-panel'"
+              [attr.aria-pressed]="isSelectedCommand(command)"
+              [attr.data-command-id]="command.id"
+              (click)="selectCommand(command)"
+            >
+              <span class="ui-command-category__command-name">{{ command.name }}</span>
+              <code>{{ command.command }}</code>
+            </button>
+          }
+        </nav>
+      </aside>
+
+      <article
+        id="ui-command-detail-panel"
+        class="ui-command-category__detail-panel"
+        aria-live="polite"
+      >
+        @if (selectedCommand(); as command) {
+          <p class="ui-command-category__detail-kicker">Selected command</p>
+          <h3>{{ command.name }}</h3>
+          <code class="ui-command-category__command-example">{{ command.command }}</code>
+          <p>{{ command.summary }}</p>
+          <dl class="ui-command-category__metadata">
+            <div>
+              <dt>Effect</dt>
+              <dd>
+                {{
+                  command.effect === 'visual' ? 'Visual UI change' : 'Configuration or code change'
+                }}
+              </dd>
+            </div>
+          </dl>
+          <div class="ui-command-category__state-grid">
+            <section aria-label="Before running this command">
+              <h4>Before</h4>
+              <p>{{ command.before.title }}</p>
+              <p>{{ command.before.description }}</p>
+            </section>
+            <section aria-label="After running this command">
+              <h4>After</h4>
+              <p>{{ command.after.title }}</p>
+              <p>{{ command.after.description }}</p>
+            </section>
+          </div>
+        }
+      </article>
+    </div>
+  } @else {
+    <section class="ui-command-category__unknown" aria-labelledby="ui-command-category-title">
+      <p class="eyebrow">Command explorer</p>
+      <h2 id="ui-command-category-title">Unknown UI command category</h2>
+      <p>The requested category is not part of the angular-django2 command catalog.</p>
+      <a routerLink="/ui">Return to UI command categories</a>
+    </section>
+  }
+</section>

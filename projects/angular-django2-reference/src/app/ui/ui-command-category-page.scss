@@ -1,0 +1,186 @@
+:host {
+  display: block;
+}
+
+.ui-command-category {
+  display: grid;
+  gap: 1.5rem;
+  margin: 0 auto;
+  max-width: 1120px;
+  padding: 3rem 1rem;
+}
+
+.ui-command-category__back-link,
+.ui-command-category__unknown a {
+  color: var(--mat-sys-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ui-command-category__back-link:hover,
+.ui-command-category__back-link:focus-visible,
+.ui-command-category__unknown a:hover,
+.ui-command-category__unknown a:focus-visible {
+  text-decoration: underline;
+}
+
+.ui-command-category__header,
+.ui-command-category__unknown {
+  display: grid;
+  gap: 1rem;
+}
+
+.ui-command-category__header h2,
+.ui-command-category__unknown h2 {
+  color: var(--mat-sys-on-surface);
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.ui-command-category__header p:not(.eyebrow),
+.ui-command-category__unknown p:not(.eyebrow) {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 760px;
+}
+
+.ui-command-category__layout {
+  align-items: start;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+}
+
+.ui-command-category__command-list,
+.ui-command-category__detail-panel,
+.ui-command-category__unknown {
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 24px;
+  padding: 1.25rem;
+}
+
+.ui-command-category__command-list {
+  position: sticky;
+  top: 5.75rem;
+}
+
+.ui-command-category__command-list h3,
+.ui-command-category__detail-panel h3,
+.ui-command-category__state-grid h4 {
+  color: var(--mat-sys-on-surface);
+  margin: 0;
+}
+
+.ui-command-category__command-list nav,
+.ui-command-category__detail-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.ui-command-category__command-button {
+  background: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 16px;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  text-align: left;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease;
+  width: 100%;
+}
+
+.ui-command-category__command-button:hover,
+.ui-command-category__command-button:focus-visible,
+.ui-command-category__command-button--active {
+  background: var(--mat-sys-primary-container);
+  border-color: var(--mat-sys-primary);
+}
+
+.ui-command-category__command-button:focus-visible {
+  outline: 3px solid var(--mat-sys-primary);
+  outline-offset: 3px;
+}
+
+.ui-command-category__command-name {
+  color: var(--mat-sys-on-surface);
+  font-weight: 700;
+}
+
+code,
+.ui-command-category__command-example {
+  background: var(--mat-sys-secondary-container);
+  border-radius: 0.45rem;
+  color: var(--mat-sys-on-secondary-container);
+  display: inline-block;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.45rem;
+}
+
+.ui-command-category__detail-kicker {
+  color: var(--mat-sys-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.ui-command-category__detail-panel p,
+.ui-command-category__metadata,
+.ui-command-category__state-grid p {
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ui-command-category__metadata {
+  display: grid;
+}
+
+.ui-command-category__metadata div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ui-command-category__metadata dt {
+  color: var(--mat-sys-on-surface);
+  font-weight: 700;
+}
+
+.ui-command-category__metadata dd {
+  margin: 0;
+}
+
+.ui-command-category__state-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ui-command-category__state-grid section {
+  background: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 18px;
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+}
+
+@media (width < 860px) {
+  .ui-command-category__layout,
+  .ui-command-category__state-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ui-command-category__command-list {
+    position: static;
+  }
+}
