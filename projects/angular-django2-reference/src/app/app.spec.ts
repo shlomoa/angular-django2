@@ -147,8 +147,12 @@ describe('App', () => {
       'https://github.com/shlomoa/angular-django2',
       'GitHub',
     );
-    expect(compiled.querySelector('.github-icon')?.getAttribute('aria-hidden')).toBe('true');
-    expect(compiled.querySelector('.github-icon')?.getAttribute('focusable')).toBe('false');
+    const githubIcon = requireElement<HTMLImageElement>(compiled, '.github-icon');
+
+    expect(githubIcon.getAttribute('ng-reflect-ng-src')).toBe('/GitHub_Invertocat_Black.svg');
+    expect(githubIcon.getAttribute('alt')).toBe('');
+    expect(githubIcon.getAttribute('aria-hidden')).toBe('true');
+    expect(compiled.querySelector('.github-link svg')).toBeNull();
   });
 
   it('offers Material color schemes instead of schematics in the toolbar selector', async () => {
