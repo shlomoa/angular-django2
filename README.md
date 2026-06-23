@@ -156,10 +156,15 @@ It does **not** run the E2E suite.
 
 ### Reference app workspace
 
-Issue #46 introduces a repo-owned Angular Material reference app at
+This repository includes a repo-owned Angular Material reference app at
 `projects/angular-django2-reference`. The app's displayed product name is
 `angular-django2`; the workspace project key uses the `-reference` suffix so it
 does not collide with the publishable library project named `angular-django2`.
+
+The reference app includes a routed UI command explorer at `/ui`. It groups the
+package schematics into category cards and detail pages, uses static
+illustrations for visual commands, and uses text-first before/after panels for
+commands without meaningful browser screenshots.
 
 Use these finite validation commands for the app infrastructure:
 

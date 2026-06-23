@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -16,7 +16,6 @@ import {
   imports: [NgOptimizedImage, RouterLink],
   templateUrl: './ui-command-category-page.html',
   styleUrl: './ui-command-category-page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UiCommandCategoryPage {
   private readonly route = inject(ActivatedRoute);
