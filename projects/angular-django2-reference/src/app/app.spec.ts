@@ -1,9 +1,60 @@
 import { TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { provideAngularDjango2 } from 'angular-django2';
+import type { WritableSignal } from '@angular/core';
+import { AngularDjango2Service, provideAngularDjango2 } from 'angular-django2';
 
 import { App } from './app';
+import { appConfig } from './app.config';
+import { routes } from './app.routes';
+
+type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-orange';
+
+interface AppValidationState {
+  colorSchemes: readonly { label: string; value: MaterialColorScheme }[];
+  guides: readonly { name: string; description: string }[];
+  selectedColorScheme: WritableSignal<MaterialColorScheme>;
+  uiItems: readonly { name: string; description: string }[];
+}
+
+interface RenderedApp {
+  compiled: HTMLElement;
+  fixture: ComponentFixture<App>;
+}
+
+async function renderApp(): Promise<RenderedApp> {
+  const fixture = TestBed.createComponent(App);
+  fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
+
+  return {
+    compiled: fixture.nativeElement as HTMLElement,
+    fixture,
+  };
+}
+
+function requireElement<T extends Element>(root: ParentNode, selector: string): T {
+  const element = root.querySelector<T>(selector);
+  expect(element, `Expected to find ${selector}`).not.toBeNull();
+
+  return element as T;
+}
+
+function expectExternalLink(
+  root: ParentNode,
+  selector: string,
+  expectedHref: string,
+  expectedText: string,
+): void {
+  const link = requireElement<HTMLAnchorElement>(root, selector);
+
+  expect(link.href).toBe(expectedHref);
+  expect(link.rel).toBe('noopener');
+  expect(link.target).toBe('_blank');
+  expect(link.textContent).toContain(expectedText);
+}
 
 describe('App', () => {
   beforeEach(async () => {
@@ -17,47 +68,92 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+  it('creates the only reference app component and renders its root shell', async () => {
+    const { compiled, fixture } = await renderApp();
+
+    expect(fixture.componentInstance).toBeTruthy();
+    expect(compiled.querySelector('main#home.reference-shell')).toBeTruthy();
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 
-  it('should render title', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
+  it('renders the home page hero with expected title, copy, and calls to action', async () => {
+    const { compiled } = await renderApp();
+
     expect(compiled.querySelector('h1')?.textContent).toContain('angular-django2');
+    expect(compiled.querySelector('.eyebrow')?.textContent).toContain(
+      'Angular Material tutorial and online reference',
+    );
+    expect(compiled.querySelector('.hero-copy')?.textContent).toContain(
+      'A runnable workspace app for showing Django-friendly Angular configuration',
+    );
+    expectExternalLink(
+      compiled,
+      '.hero-actions a[href="https://github.com/shlomoa/angular-django2#howto"]',
+      'https://github.com/shlomoa/angular-django2#howto',
+      'Read HOWTO',
+    );
+    expectExternalLink(
+      compiled,
+      '.hero-actions a[href="https://github.com/shlomoa/django-angular3"]',
+      'https://github.com/shlomoa/django-angular3',
+      'Django companion',
+    );
   });
 
-  it('should show the configured Django integration values', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
+  it('renders the package reference page section with configured Django integration values', async () => {
+    const { compiled } = await renderApp();
 
-    expect(compiled.textContent).toContain('API base: /api/');
-    expect(compiled.textContent).toContain('CSRF header: X-CSRFToken');
+    const packageCard = requireElement<HTMLElement>(compiled, '.main-frame:first-child');
+
+    expect(packageCard.textContent).toContain('Package reference');
+    expect(packageCard.textContent).toContain('Description of the package');
+    expect(packageCard.textContent).toContain('angular-django2');
+    expect(packageCard.textContent).toContain('Django-friendly Angular configuration primitives');
+    expect(packageCard.querySelector('mat-chip-set')?.getAttribute('aria-label')).toBe(
+      'Configured package values',
+    );
+    expect(packageCard.textContent).toContain('API base: /api/');
+    expect(packageCard.textContent).toContain('CSRF header: X-CSRFToken');
   });
 
-  it('should render the main page navigation', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
+  it('renders accessible navigation for every in-page section', async () => {
+    const { compiled } = await renderApp();
 
-    expect(compiled.querySelector('.primary-nav')?.textContent).toContain('UI');
-    expect(compiled.querySelector('.primary-nav')?.textContent).toContain('Documentation');
-    expect(compiled.textContent).toContain('GitHub');
-    expect(compiled.querySelector('.color-scheme-select')?.textContent).toContain('Color scheme');
-    expect(compiled.querySelector('.theme-status')).toBeNull();
-    expect(compiled.querySelector('.github-icon')).toBeTruthy();
+    const brandLink = requireElement<HTMLAnchorElement>(compiled, '.brand-link');
+    const primaryNav = requireElement<HTMLElement>(compiled, '.primary-nav');
+    const mainGrid = requireElement<HTMLElement>(compiled, '.main-grid');
+
+    expect(brandLink.getAttribute('aria-label')).toBe('angular-django2 home');
+    expect(brandLink.getAttribute('href')).toBe('#home');
+    expect(primaryNav.getAttribute('aria-label')).toBe('Primary navigation');
+    expect(primaryNav.querySelector<HTMLAnchorElement>('a[href="#ui"]')?.textContent).toContain(
+      'UI',
+    );
+    expect(
+      primaryNav.querySelector<HTMLAnchorElement>('a[href="#documentation"]')?.textContent,
+    ).toContain('Documentation');
+    expect(mainGrid.getAttribute('aria-label')).toBe('Reference app main page sections');
+    expect(compiled.querySelector('#home')).toBeTruthy();
+    expect(compiled.querySelector('#ui')).toBeTruthy();
+    expect(compiled.querySelector('#documentation')).toBeTruthy();
   });
 
-  it('should offer Material color schemes instead of schematics in the toolbar selector', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance as unknown as {
-      colorSchemes: readonly { label: string; value: string }[];
-      selectedColorScheme: () => string;
-    };
+  it('renders the GitHub toolbar link with decorative icon hidden from assistive tech', async () => {
+    const { compiled } = await renderApp();
+
+    expectExternalLink(
+      compiled,
+      '.github-link',
+      'https://github.com/shlomoa/angular-django2',
+      'GitHub',
+    );
+    expect(compiled.querySelector('.github-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(compiled.querySelector('.github-icon')?.getAttribute('focusable')).toBe('false');
+  });
+
+  it('offers Material color schemes instead of schematics in the toolbar selector', async () => {
+    const { compiled, fixture } = await renderApp();
+    const app = fixture.componentInstance as unknown as AppValidationState;
 
     expect(app.colorSchemes.map((scheme) => scheme.label)).toEqual([
       'Rose & Red',
@@ -67,17 +163,104 @@ describe('App', () => {
     ]);
     expect(app.colorSchemes.map((scheme) => scheme.value)).not.toContain('ng-app');
     expect(app.selectedColorScheme()).toBe('azure-blue');
+    expect(compiled.querySelector('.color-scheme-select')?.textContent).toContain('Color scheme');
+    expect(compiled.querySelector('mat-select')?.getAttribute('aria-label')).toBe(
+      'Select Material color scheme',
+    );
+    expect(compiled.querySelector('.theme-status')).toBeNull();
   });
 
-  it('should render three main page frames with selected UI and guide entries', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
+  it('applies the host theme class for every supported Material color scheme', async () => {
+    const { compiled, fixture } = await renderApp();
+    const app = fixture.componentInstance as unknown as AppValidationState;
 
-    expect(compiled.querySelectorAll('.main-frame').length).toBe(3);
-    expect(compiled.querySelector('#ui')?.querySelectorAll('li').length).toBe(3);
-    expect(compiled.querySelector('#documentation')?.querySelectorAll('li').length).toBe(3);
-    expect(compiled.textContent).toContain('View UI page');
-    expect(compiled.textContent).toContain('View guides');
+    for (const scheme of app.colorSchemes) {
+      app.selectedColorScheme.set(scheme.value);
+      fixture.detectChanges();
+
+      expect(compiled.classList.contains(`theme-${scheme.value}`)).toBe(true);
+      expect(
+        app.colorSchemes
+          .filter((candidate) => candidate.value !== scheme.value)
+          .some((candidate) => compiled.classList.contains(`theme-${candidate.value}`)),
+      ).toBe(false);
+    }
+  });
+
+  it('renders every selected UI page entry with its description', async () => {
+    const { compiled, fixture } = await renderApp();
+    const app = fixture.componentInstance as unknown as AppValidationState;
+    const uiPage = requireElement<HTMLElement>(compiled, '#ui');
+    const entries = uiPage.querySelectorAll('li');
+
+    expect(uiPage.textContent).toContain('Selected UI');
+    expect(uiPage.textContent).toContain('Three examples for the UI page');
+    expect(entries.length).toBe(app.uiItems.length);
+    for (const item of app.uiItems) {
+      expect(uiPage.textContent).toContain(item.name);
+      expect(uiPage.textContent).toContain(item.description);
+    }
+    expect(
+      uiPage.querySelector<HTMLAnchorElement>('a[href="#ui"]')?.getAttribute('aria-label'),
+    ).toBe('Open UI page');
+    expect(uiPage.textContent).toContain('View UI page');
+  });
+
+  it('renders every selected documentation page entry with its description', async () => {
+    const { compiled, fixture } = await renderApp();
+    const app = fixture.componentInstance as unknown as AppValidationState;
+    const documentationPage = requireElement<HTMLElement>(compiled, '#documentation');
+    const entries = documentationPage.querySelectorAll('li');
+
+    expect(documentationPage.textContent).toContain('Selected guides');
+    expect(documentationPage.textContent).toContain('Three entry points for documentation');
+    expect(entries.length).toBe(app.guides.length);
+    for (const guide of app.guides) {
+      expect(documentationPage.textContent).toContain(guide.name);
+      expect(documentationPage.textContent).toContain(guide.description);
+    }
+    expect(
+      documentationPage
+        .querySelector<HTMLAnchorElement>('a[href="#documentation"]')
+        ?.getAttribute('aria-label'),
+    ).toBe('Open guides page');
+    expect(documentationPage.textContent).toContain('View guides');
+  });
+
+  it('keeps the current reference app page surface to three in-page frames', async () => {
+    const { compiled } = await renderApp();
+    const frames = [...compiled.querySelectorAll<HTMLElement>('.main-frame')];
+
+    expect(frames.length).toBe(3);
+    expect(frames.map((frame) => frame.id || 'package-reference')).toEqual([
+      'package-reference',
+      'ui',
+      'documentation',
+    ]);
+  });
+});
+
+describe('reference app route contract', () => {
+  it('declares no routed pages until real page components are added', () => {
+    expect(routes).toEqual([]);
+  });
+});
+
+describe('reference app configuration', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: appConfig.providers,
+    });
+  });
+
+  it('provides the same Django integration defaults rendered by the app shell', () => {
+    const angularDjango2 = TestBed.inject(AngularDjango2Service);
+
+    expect(angularDjango2.resolvedConfig).toEqual({
+      apiBaseUrl: '/api',
+      csrfCookieName: 'csrftoken',
+      csrfHeaderName: 'X-CSRFToken',
+      withCredentials: true,
+    });
   });
 });
