@@ -52,6 +52,28 @@
           </div>
           <code class="ui-command-category__command-example">{{ command.command }}</code>
           <p>{{ command.summary }}</p>
+          @if (command.illustration; as illustration) {
+            <figure class="ui-command-category__visual-frame">
+              <img
+                [ngSrc]="illustration.imagePath"
+                width="560"
+                height="312"
+                [alt]="illustration.imageAlt"
+              />
+              <figcaption>{{ illustration.imageAlt }}</figcaption>
+            </figure>
+          } @else {
+            <aside
+              class="ui-command-category__text-fallback"
+              aria-label="Text-only command preview"
+            >
+              <p>Text-only preview</p>
+              <p>
+                This command has no browser screenshot. Its before and after panels describe the
+                configuration, source, or generated-code effect instead.
+              </p>
+            </aside>
+          }
           <dl class="ui-command-category__metadata">
             <div>
               <dt>Effect</dt>

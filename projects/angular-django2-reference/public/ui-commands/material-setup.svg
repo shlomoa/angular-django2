@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="312" viewBox="0 0 560 312" role="img" aria-labelledby="title desc">
+  <title id="title">Angular Material theme setup illustration</title>
+  <desc id="desc">Material color palettes and provider configuration represented as cards.</desc>
+  <rect width="560" height="312" rx="28" fill="#e6f4ea" />
+  <rect x="64" y="58" width="432" height="196" rx="24" fill="#ffffff" stroke="#00a36c" stroke-width="6" />
+  <circle cx="142" cy="142" r="48" fill="#5b7cfa" />
+  <circle cx="224" cy="142" r="48" fill="#6f42c1" />
+  <circle cx="306" cy="142" r="48" fill="#00a36c" />
+  <rect x="372" y="100" width="78" height="22" rx="11" fill="#c8f2dc" />
+  <rect x="372" y="146" width="78" height="22" rx="11" fill="#c8f2dc" />
+  <rect x="112" y="214" width="336" height="16" rx="8" fill="#a8dab5" />
+</svg>

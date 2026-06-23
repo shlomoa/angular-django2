@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
@@ -12,7 +13,7 @@ import {
 
 @Component({
   selector: 'app-ui-command-category-page',
-  imports: [RouterLink],
+  imports: [NgOptimizedImage, RouterLink],
   templateUrl: './ui-command-category-page.html',
   styleUrl: './ui-command-category-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

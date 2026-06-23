@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="312" viewBox="0 0 560 312" role="img" aria-labelledby="title desc">
+  <title id="title">New Angular application project illustration</title>
+  <desc id="desc">A generated Angular application window with route and source indicators.</desc>
+  <rect width="560" height="312" rx="28" fill="#e8f0fe" />
+  <rect x="54" y="52" width="452" height="208" rx="22" fill="#ffffff" stroke="#5b7cfa" stroke-width="6" />
+  <rect x="54" y="52" width="452" height="46" rx="22" fill="#d7e2ff" />
+  <rect x="88" y="126" width="120" height="108" rx="18" fill="#eef3ff" />
+  <rect x="236" y="128" width="104" height="28" rx="14" fill="#5b7cfa" />
+  <rect x="236" y="176" width="214" height="18" rx="9" fill="#9fb2ff" />
+  <rect x="236" y="212" width="164" height="18" rx="9" fill="#c3cffd" />
+  <path d="M124 196l30-58 30 58h-22l-8-18-8 18z" fill="#5b7cfa" />
+</svg>

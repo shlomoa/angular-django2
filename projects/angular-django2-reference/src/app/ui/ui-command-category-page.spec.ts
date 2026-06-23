@@ -177,6 +177,35 @@ describe('UiCommandCategoryPage', () => {
     );
   });
 
+  it('uses optimized illustrations for commands with visual effects', async () => {
+    const { compiled } = await renderCategoryPage('application-creation');
+    const detailPanel = requireElement<HTMLElement>(compiled, '#ui-command-detail-panel');
+    const image = requireElement<HTMLImageElement>(
+      detailPanel,
+      '.ui-command-category__visual-frame img',
+    );
+
+    expect(image.getAttribute('src')).toContain('/ui-commands/application.svg');
+    expect(image.getAttribute('alt')).toBe('New Angular application project illustration');
+    expect(image.getAttribute('width')).toBe('560');
+    expect(image.getAttribute('height')).toBe('312');
+    expect(detailPanel.querySelector('.ui-command-category__text-fallback')).toBeNull();
+  });
+
+  it('uses a text-only fallback for commands without meaningful screenshots', async () => {
+    const { compiled } = await renderCategoryPage('workspace-setup');
+    const detailPanel = requireElement<HTMLElement>(compiled, '#ui-command-detail-panel');
+    const fallback = requireElement<HTMLElement>(
+      detailPanel,
+      '.ui-command-category__text-fallback',
+    );
+
+    expect(fallback.getAttribute('aria-label')).toBe('Text-only command preview');
+    expect(fallback.textContent).toContain('Text-only preview');
+    expect(fallback.textContent).toContain('This command has no browser screenshot');
+    expect(detailPanel.querySelector('.ui-command-category__visual-frame img')).toBeNull();
+  });
+
   it('renders a friendly fallback for unknown category ids', async () => {
     const { compiled } = await renderCategoryPage('missing-category');
 

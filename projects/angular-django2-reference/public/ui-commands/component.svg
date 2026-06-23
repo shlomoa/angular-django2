@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="312" viewBox="0 0 560 312" role="img" aria-labelledby="title desc">
+  <title id="title">Generated component card illustration</title>
+  <desc id="desc">A generated standalone component represented as a reusable card.</desc>
+  <rect width="560" height="312" rx="28" fill="#e0f7fa" />
+  <rect x="134" y="54" width="292" height="204" rx="26" fill="#ffffff" stroke="#00a3a3" stroke-width="6" />
+  <rect x="166" y="92" width="228" height="72" rx="18" fill="#b2ebf2" />
+  <rect x="166" y="190" width="174" height="18" rx="9" fill="#80deea" />
+  <rect x="166" y="222" width="120" height="18" rx="9" fill="#4dd0e1" />
+  <path d="M238 132h84M280 90v84" stroke="#00838f" stroke-width="14" stroke-linecap="round" />
+</svg>

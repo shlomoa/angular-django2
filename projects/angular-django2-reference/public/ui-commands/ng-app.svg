@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="312" viewBox="0 0 560 312" role="img" aria-labelledby="title desc">
+  <title id="title">Complete generated Angular Material app illustration</title>
+  <desc id="desc">A full app shell with Material toolbar, navigation, and feature cards.</desc>
+  <rect width="560" height="312" rx="28" fill="#f0e7ff" />
+  <rect x="52" y="46" width="456" height="220" rx="24" fill="#ffffff" stroke="#6f42c1" stroke-width="6" />
+  <rect x="52" y="46" width="456" height="52" rx="24" fill="#6f42c1" />
+  <rect x="82" y="66" width="126" height="14" rx="7" fill="#ffffff" />
+  <rect x="78" y="124" width="86" height="116" rx="18" fill="#efe6ff" />
+  <rect x="190" y="124" width="120" height="52" rx="16" fill="#e6f4ea" />
+  <rect x="334" y="124" width="120" height="52" rx="16" fill="#e8f0fe" />
+  <rect x="190" y="204" width="264" height="20" rx="10" fill="#c8b7f6" />
+  <path d="M104 166h34M104 194h34M104 222h34" stroke="#6f42c1" stroke-width="10" stroke-linecap="round" />
+</svg>
