@@ -1,0 +1,49 @@
+<section class="ui-command-overview" aria-labelledby="ui-command-overview-title">
+  <header class="ui-command-overview__header">
+    <p class="eyebrow">Command explorer</p>
+    <h2 id="ui-command-overview-title">UI command categories</h2>
+    <p>
+      Browse angular-django2 schematic commands by category, then open a category page to compare
+      what each command changes before and after it runs.
+    </p>
+  </header>
+
+  <nav class="ui-command-overview__grid" aria-label="UI command categories">
+    @for (category of categories; track category.id) {
+      <a
+        class="ui-command-overview__card"
+        [routerLink]="['/ui', category.id]"
+        [attr.aria-label]="'Open ' + category.name + ' command category'"
+        [attr.data-category-id]="category.id"
+        matRipple
+      >
+        @if (category.card.kind === 'image') {
+          <span class="ui-command-overview__image-frame">
+            <img
+              [ngSrc]="category.card.imagePath"
+              width="280"
+              height="156"
+              [alt]="category.card.imageAlt"
+            />
+          </span>
+        } @else {
+          <span class="ui-command-overview__text-frame" aria-hidden="true">
+            <mat-icon>terminal</mat-icon>
+          </span>
+        }
+
+        <span class="ui-command-overview__card-body">
+          <span class="ui-command-overview__card-title">{{ category.name }}</span>
+          <span class="ui-command-overview__card-summary">{{ category.summary }}</span>
+          <span class="ui-command-overview__card-description">
+            {{ category.card.description }}
+          </span>
+          <span class="ui-command-overview__card-action">
+            View category
+            <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+          </span>
+        </span>
+      </a>
+    }
+  </nav>
+</section>

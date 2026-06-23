@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="312" viewBox="0 0 560 312" role="img" aria-labelledby="title desc">
+  <title id="title">Material toolbar and navigation shell illustration</title>
+  <desc id="desc">A stylized Material app shell with toolbar, navigation rail, and content panels.</desc>
+  <rect width="560" height="312" rx="28" fill="#f0e7ff" />
+  <rect x="50" y="46" width="460" height="220" rx="24" fill="#fff" stroke="#6f42c1" stroke-width="6" />
+  <rect x="50" y="46" width="460" height="54" rx="24" fill="#6f42c1" />
+  <rect x="82" y="66" width="108" height="14" rx="7" fill="#ffffff" opacity="0.92" />
+  <circle cx="458" cy="73" r="12" fill="#ffb74d" />
+  <rect x="74" y="126" width="78" height="116" rx="18" fill="#efe6ff" />
+  <rect x="176" y="126" width="132" height="48" rx="16" fill="#e6f4ea" />
+  <rect x="332" y="126" width="104" height="48" rx="16" fill="#e8f0fe" />
+  <rect x="176" y="196" width="260" height="18" rx="9" fill="#c8b7f6" />
+  <rect x="176" y="230" width="188" height="18" rx="9" fill="#dfd2ff" />
+  <path d="M102 164h24M102 188h24M102 212h24" stroke="#6f42c1" stroke-width="10" stroke-linecap="round" />
+  <path d="M462 138v74M425 175h74" stroke="#00a3a3" stroke-width="12" stroke-linecap="round" />
+</svg>

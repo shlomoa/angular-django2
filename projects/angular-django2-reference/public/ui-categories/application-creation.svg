@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="312" viewBox="0 0 560 312" role="img" aria-labelledby="title desc">
+  <title id="title">Application window layout illustration</title>
+  <desc id="desc">A stylized Angular application window with header, sidebar, and content cards.</desc>
+  <rect width="560" height="312" rx="28" fill="#e8f0fe" />
+  <rect x="52" y="48" width="456" height="216" rx="22" fill="#ffffff" stroke="#5b7cfa" stroke-width="6" />
+  <rect x="52" y="48" width="456" height="46" rx="22" fill="#d7e2ff" />
+  <circle cx="86" cy="71" r="7" fill="#5b7cfa" />
+  <circle cx="112" cy="71" r="7" fill="#7c4dff" />
+  <circle cx="138" cy="71" r="7" fill="#00a3a3" />
+  <rect x="82" y="122" width="112" height="112" rx="16" fill="#eef3ff" />
+  <rect x="224" y="122" width="110" height="38" rx="12" fill="#5b7cfa" />
+  <rect x="224" y="178" width="204" height="18" rx="9" fill="#9fb2ff" />
+  <rect x="224" y="212" width="154" height="18" rx="9" fill="#c3cffd" />
+  <path d="M118 188l24-48 24 48h-18l-6-14-6 14z" fill="#5b7cfa" />
+  <path d="M410 128l44 44-44 44" fill="none" stroke="#00a3a3" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

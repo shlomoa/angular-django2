@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import type { WritableSignal } from '@angular/core';
 import { AngularDjango2Service, provideAngularDjango2 } from 'angular-django2';
 
@@ -35,6 +35,14 @@ async function renderApp(): Promise<RenderedApp> {
   };
 }
 
+async function renderAppAt(url: string): Promise<RenderedApp> {
+  const router = TestBed.inject(Router);
+
+  await router.navigateByUrl(url);
+
+  return renderApp();
+}
+
 function requireElement<T extends Element>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);
   expect(element, `Expected to find ${selector}`).not.toBeNull();
@@ -62,7 +70,7 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideNoopAnimations(),
-        provideRouter([]),
+        provideRouter(routes),
         provideAngularDjango2({ apiBaseUrl: '/api' }),
       ],
     }).compileComponents();
@@ -124,13 +132,13 @@ describe('App', () => {
     const mainGrid = requireElement<HTMLElement>(compiled, '.main-grid');
 
     expect(brandLink.getAttribute('aria-label')).toBe('angular-django2 home');
-    expect(brandLink.getAttribute('href')).toBe('#home');
+    expect(brandLink.getAttribute('href')).toBe('/');
     expect(primaryNav.getAttribute('aria-label')).toBe('Primary navigation');
-    expect(primaryNav.querySelector<HTMLAnchorElement>('a[href="#ui"]')?.textContent).toContain(
+    expect(primaryNav.querySelector<HTMLAnchorElement>('a[href="/ui"]')?.textContent).toContain(
       'UI',
     );
     expect(
-      primaryNav.querySelector<HTMLAnchorElement>('a[href="#documentation"]')?.textContent,
+      primaryNav.querySelector<HTMLAnchorElement>('a[href="/#documentation"]')?.textContent,
     ).toContain('Documentation');
     expect(mainGrid.getAttribute('aria-label')).toBe('Reference app main page sections');
     expect(compiled.querySelector('#home')).toBeTruthy();
@@ -143,16 +151,16 @@ describe('App', () => {
 
     expectExternalLink(
       compiled,
-      '.github-link',
+      'a[href="https://github.com/shlomoa/angular-django2"]',
       'https://github.com/shlomoa/angular-django2',
       'GitHub',
     );
-    const githubIcon = requireElement<HTMLImageElement>(compiled, '.github-icon');
+    const githubIcon = requireElement<HTMLImageElement>(compiled, '.github-link-content img');
 
-    expect(githubIcon.getAttribute('ng-reflect-ng-src')).toBe('/GitHub_Invertocat_Black.svg');
+    expect(githubIcon.getAttribute('src')).toContain('/GitHub_Invertocat_Black.svg');
     expect(githubIcon.getAttribute('alt')).toBe('');
     expect(githubIcon.getAttribute('aria-hidden')).toBe('true');
-    expect(compiled.querySelector('.github-link svg')).toBeNull();
+    expect(compiled.querySelector('.github-link-content svg')).toBeNull();
   });
 
   it('offers Material color schemes instead of schematics in the toolbar selector', async () => {
@@ -205,7 +213,7 @@ describe('App', () => {
       expect(uiPage.textContent).toContain(item.description);
     }
     expect(
-      uiPage.querySelector<HTMLAnchorElement>('a[href="#ui"]')?.getAttribute('aria-label'),
+      uiPage.querySelector<HTMLAnchorElement>('a[href="/ui"]')?.getAttribute('aria-label'),
     ).toBe('Open UI page');
     expect(uiPage.textContent).toContain('View UI page');
   });
@@ -225,7 +233,7 @@ describe('App', () => {
     }
     expect(
       documentationPage
-        .querySelector<HTMLAnchorElement>('a[href="#documentation"]')
+        .querySelector<HTMLAnchorElement>('a[href="/#documentation"]')
         ?.getAttribute('aria-label'),
     ).toBe('Open guides page');
     expect(documentationPage.textContent).toContain('View guides');
@@ -242,11 +250,16 @@ describe('App', () => {
       'documentation',
     ]);
   });
-});
 
-describe('reference app route contract', () => {
-  it('declares no routed pages until real page components are added', () => {
-    expect(routes).toEqual([]);
+  it('renders the routed UI overview as the visible page at /ui', async () => {
+    const { compiled } = await renderAppAt('/ui');
+
+    expect(compiled.querySelector('main#home.reference-shell')).toBeNull();
+    expect(compiled.querySelector('.hero')).toBeNull();
+    expect(compiled.querySelector('.ui-command-overview')).toBeTruthy();
+    expect(compiled.querySelector('#ui-command-overview-title')?.textContent).toContain(
+      'UI command categories',
+    );
   });
 });
 

@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Location, NgOptimizedImage } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -7,8 +8,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AngularDjango2Service } from 'angular-django2';
+import { filter } from 'rxjs';
 
 type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-orange';
 
@@ -29,6 +31,7 @@ type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-
     MatSelectModule,
     MatToolbarModule,
     NgOptimizedImage,
+    RouterLink,
     RouterOutlet,
   ],
   templateUrl: './app.reference.html',
@@ -36,6 +39,9 @@ type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-
 })
 export class App {
   private readonly angularDjango2 = inject(AngularDjango2Service);
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
+  private readonly currentUrl = signal(this.location.path() || this.router.url);
 
   protected readonly title = signal('angular-django2');
   protected readonly packageApi = this.angularDjango2.buildUrl('/api/');
@@ -75,4 +81,19 @@ export class App {
       description: 'Keep API URLs, credentials, and CSRF behavior visible in code.',
     },
   ];
+
+  protected readonly isHomeRoute = computed(() => {
+    const url = this.currentUrl();
+
+    return url === '/' || url === '' || url.startsWith('/#') || url.startsWith('/?');
+  });
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
+  }
 }
