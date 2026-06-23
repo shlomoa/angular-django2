@@ -14,14 +14,6 @@
 .ui-command-category__unknown a {
   color: var(--mat-sys-primary);
   font-weight: 600;
-  text-decoration: none;
-}
-
-.ui-command-category__back-link:hover,
-.ui-command-category__back-link:focus-visible,
-.ui-command-category__unknown a:hover,
-.ui-command-category__unknown a:focus-visible {
-  text-decoration: underline;
 }
 
 .ui-command-category__header,
@@ -75,6 +67,34 @@
   margin: 0;
 }
 
+.ui-command-category__detail-heading {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.ui-command-category__apply-button {
+  background: var(--mat-sys-primary);
+  border: 0;
+  border-radius: 999px;
+  color: var(--mat-sys-on-primary);
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  white-space: nowrap;
+}
+
+.ui-command-category__apply-button:hover,
+.ui-command-category__apply-button:focus-visible {
+  background: var(--mat-sys-tertiary);
+}
+
+.ui-command-category__apply-button:focus-visible {
+  outline: 3px solid var(--mat-sys-primary);
+  outline-offset: 3px;
+}
+
 .ui-command-category__command-list nav,
 .ui-command-category__detail-panel {
   display: grid;
@@ -91,9 +111,6 @@
   gap: 0.45rem;
   padding: 1rem;
   text-align: left;
-  transition:
-    background 180ms ease,
-    border-color 180ms ease;
   width: 100%;
 }
 
@@ -106,7 +123,6 @@
 
 .ui-command-category__command-button:focus-visible {
   outline: 3px solid var(--mat-sys-primary);
-  outline-offset: 3px;
 }
 
 .ui-command-category__command-name {
@@ -133,14 +149,6 @@ code,
   text-transform: uppercase;
 }
 
-.ui-command-category__detail-panel p,
-.ui-command-category__metadata,
-.ui-command-category__state-grid p {
-  color: var(--mat-sys-on-surface-variant);
-  line-height: 1.6;
-  margin: 0;
-}
-
 .ui-command-category__metadata {
   display: grid;
 }
@@ -159,6 +167,14 @@ code,
   margin: 0;
 }
 
+.ui-command-category__detail-panel p,
+.ui-command-category__metadata,
+.ui-command-category__state-grid p,
+.ui-command-category__state-grid li {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}
+
 .ui-command-category__state-grid {
   display: grid;
   gap: 1rem;
@@ -174,6 +190,17 @@ code,
   padding: 1rem;
 }
 
+.ui-command-category__state-grid ul {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding-inline-start: 1.2rem;
+}
+
+.ui-command-category__state-section--pending {
+  border-style: dashed;
+}
+
 @media (width < 860px) {
   .ui-command-category__layout,
   .ui-command-category__state-grid {
@@ -182,5 +209,9 @@ code,
 
   .ui-command-category__command-list {
     position: static;
+  }
+
+  .ui-command-category__detail-heading {
+    display: grid;
   }
 }

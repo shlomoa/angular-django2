@@ -78,7 +78,9 @@ describe('UiCommandCategoryPage', () => {
     expect(detailPanel.textContent).toContain('Register schematic collection');
     expect(detailPanel.textContent).toContain('ng add angular-django2');
     expect(detailPanel.textContent).toContain('Collection not registered');
-    expect(detailPanel.textContent).toContain('Collection registered');
+    expect(detailPanel.textContent).not.toContain('Collection registered');
+    expect(detailPanel.textContent).toContain('Apply Command');
+    expect(detailPanel.textContent).toContain('Apply this command to reveal the resulting state.');
   });
 
   it('updates the right panel when a command is clicked', async () => {
@@ -97,6 +99,81 @@ describe('UiCommandCategoryPage', () => {
     expect(ngWorkspaceButton.getAttribute('aria-pressed')).toBe('true');
     expect(compiled.querySelector('#ui-command-detail-panel')?.textContent).toContain(
       'Initialize workspace files',
+    );
+    expect(compiled.querySelector('#ui-command-detail-panel')?.textContent).toContain(
+      'Apply this command to reveal the resulting state.',
+    );
+  });
+
+  it('reveals the after state when Apply Command is clicked', async () => {
+    const { compiled, fixture } = await renderCategoryPage('workspace-setup');
+    const detailPanel = requireElement<HTMLElement>(compiled, '#ui-command-detail-panel');
+    const applyButton = requireElement<HTMLButtonElement>(
+      compiled,
+      '.ui-command-category__apply-button',
+    );
+
+    expect(applyButton.textContent).toContain('Apply Command');
+    expect(applyButton.getAttribute('aria-pressed')).toBe('false');
+    expect(detailPanel.textContent).not.toContain('Collection registered');
+
+    applyButton.click();
+    fixture.detectChanges();
+
+    expect(applyButton.textContent).toContain('Command applied');
+    expect(applyButton.getAttribute('aria-pressed')).toBe('true');
+    expect(detailPanel.textContent).toContain('Collection registered');
+    expect(detailPanel.textContent).toContain('angular.json includes angular-django2');
+    expect(detailPanel.textContent).toContain(
+      'Applied command result is shown in the after panel.',
+    );
+  });
+
+  it('resets the applied state when another command is selected', async () => {
+    const { compiled, fixture } = await renderCategoryPage('workspace-setup');
+    const applyButton = requireElement<HTMLButtonElement>(
+      compiled,
+      '.ui-command-category__apply-button',
+    );
+    const ngWorkspaceButton = requireElement<HTMLButtonElement>(
+      compiled,
+      '.ui-command-category__command-button[data-command-id="ng-workspace"]',
+    );
+
+    applyButton.click();
+    fixture.detectChanges();
+    expect(applyButton.textContent).toContain('Command applied');
+
+    ngWorkspaceButton.click();
+    fixture.detectChanges();
+
+    expect(applyButton.textContent).toContain('Apply Command');
+    expect(applyButton.getAttribute('aria-pressed')).toBe('false');
+    expect(compiled.querySelector('#ui-command-detail-panel')?.textContent).not.toContain(
+      'Workspace initialized',
+    );
+  });
+
+  it('describes visual command results only after applying the command', async () => {
+    const { compiled, fixture } = await renderCategoryPage('application-creation');
+    const detailPanel = requireElement<HTMLElement>(compiled, '#ui-command-detail-panel');
+    const applyButton = requireElement<HTMLButtonElement>(
+      compiled,
+      '.ui-command-category__apply-button',
+    );
+
+    expect(detailPanel.textContent).toContain('Visual UI change');
+    expect(detailPanel.textContent).toContain(
+      'The visual change remains hidden until the command is applied.',
+    );
+    expect(detailPanel.textContent).not.toContain('Application project created');
+
+    applyButton.click();
+    fixture.detectChanges();
+
+    expect(detailPanel.textContent).toContain('Application project created');
+    expect(detailPanel.textContent).toContain(
+      'A standalone Angular application project is available',
     );
   });
 

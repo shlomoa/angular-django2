@@ -25,6 +25,7 @@ export class UiCommandCategoryPage {
   );
 
   protected readonly selectedCommandId = signal<UiCommandId | null>(null);
+  protected readonly appliedCommandId = signal<UiCommandId | null>(null);
   protected readonly category = computed(() =>
     UI_COMMAND_CATEGORIES.find((candidate) => candidate.id === this.categoryId()),
   );
@@ -42,9 +43,24 @@ export class UiCommandCategoryPage {
 
   protected selectCommand(command: UiCommand): void {
     this.selectedCommandId.set(command.id);
+    this.appliedCommandId.set(null);
   }
 
   protected isSelectedCommand(command: UiCommand): boolean {
     return this.selectedCommand()?.id === command.id;
+  }
+
+  protected isSelectedCommandApplied(): boolean {
+    const selectedCommand = this.selectedCommand();
+
+    return !!selectedCommand && this.appliedCommandId() === selectedCommand.id;
+  }
+
+  protected applySelectedCommand(): void {
+    const selectedCommand = this.selectedCommand();
+
+    if (selectedCommand) {
+      this.appliedCommandId.set(selectedCommand.id);
+    }
   }
 }
