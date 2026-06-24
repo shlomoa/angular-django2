@@ -77,6 +77,11 @@ Current defaults:
   - Writes `.github/copilot-instructions.md` with repo instructions for the generated app name
   - Replaces the workspace root `README.md` with this guide so the generated repo includes the build recipes below
   - Adds `vitest` to `devDependencies`, writes a `vitest.config.mts`, and adds `test:node` / `test:node:watch` npm scripts so the generated package uses vitest for validation
+  - Adds ESLint setup, lint scripts, and missing lint targets for generated workspace projects
+  - Supports optional application source-file hooks for Angular's documented application files (`index.html`, `main.ts`, styles, root component files, routes, app config, and the optional app module)
+    - Each hook accepts exactly one of `content`, `path`, or `template`
+    - Template hooks replace `{{key}}` placeholders from `params`
+    - File targets use the selected project's `sourceRoot` when `--project` is provided; otherwise they use `/src`
 - `ng-api`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds the package to `devDependencies`, writes `ng-openapi-gen.json`, and adds a `generate:api` npm script
   - Options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`)
 - `data-service`: generates a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search and CRUD helpers
@@ -95,6 +100,36 @@ ng build my-app
 
 `ng-workspace` sets up the workspace-level files first, and `ng-app` then generates the Angular application itself.
 In the common case, pass the same name to both commands so the generated repo instructions and Angular app stay aligned.
+
+### Application source-file hooks
+
+For programmatic workspace provisioning, `ng-workspace` exposes file hooks for the application source files documented by Angular at <https://angular.dev/reference/configs/file-structure#application-source-files>.
+
+Recognized hook keys and target paths are:
+
+| Key                  | Target path                 |
+| -------------------- | --------------------------- |
+| `favicon`            | `favicon.ico`               |
+| `indexHtml`          | `index.html`                |
+| `mainTs`             | `main.ts`                   |
+| `stylesCss`          | `styles.css`                |
+| `appConfigTs`        | `app/app.config.ts`         |
+| `appComponentTs`     | `app/app.component.ts`      |
+| `appComponentHtml`   | `app/app.component.html`    |
+| `appComponentCss`    | `app/app.component.css`     |
+| `appComponentSpecTs` | `app/app.component.spec.ts` |
+| `appModuleTs`        | `app/app.module.ts`         |
+| `appRoutesTs`        | `app/app.routes.ts`         |
+
+Each hook must specify exactly one source mode:
+
+- `content`: write inline content verbatim
+- `path`: read content from an absolute path, or from a path relative to the current working directory
+- `template`: write a literal template after replacing `{{key}}` placeholders from `params`
+
+When `project` is provided, targets resolve under that project's `sourceRoot`; otherwise targets resolve under `/src`.
+
+Because Angular CLI command-line options do not pass nested objects conveniently, use these hooks from a schematic test runner, a custom delegating schematic, or the exported `ngWorkspace` factory.
 
 ### OpenAPI workflow
 

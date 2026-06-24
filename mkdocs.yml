@@ -13,6 +13,7 @@ exclude_docs: |
 
 nav:
   - Home: index.md
+  - Tutorial: TUTORIAL.md
   - CLI: CLI.md
   - Releasing: RELEASING.md
   - API Reference:

@@ -129,8 +129,12 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
     configures Material theming, creates the standard directory structure, and
     writes a responsive sidenav app shell into `app.component.*`
   - `ng-workspace`: write workspace-wide bootstrap files for an empty Angular
-    workspace, currently `.github/copilot-instructions.md` and the workspace
-    root `README.md`
+    workspace, currently `.github/copilot-instructions.md`, the workspace root
+    `README.md`, ESLint setup, Vitest setup, lint/test package scripts, and
+    missing lint targets in `angular.json`; it also supports optional
+    application source-file hooks for the Angular application files documented
+    at <https://angular.dev/reference/configs/file-structure#application-source-files>
+    using exactly one of `content`, `path`, or `template` per file hook
   - `ng-api`: bootstrap
     [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds
     `ng-openapi-gen` to `devDependencies`, writes `ng-openapi-gen.json`, and

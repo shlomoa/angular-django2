@@ -2,6 +2,11 @@
 
 `angular-django2` ships an Angular CLI schematics collection. Use it from an
 Angular workspace after installing the package and registering the collection.
+`ngdj` is the short name for `angular-django2`; in commands, use the collection
+name `angular-django2:<schematic>`.
+
+If you want a step-by-step path from an empty directory to a running app, start
+with the [tutorial](TUTORIAL.md).
 
 > **Django workspace lifecycle:** `angular-django2` is not the top-level
 > Django/Angular workspace bootstrapper. When you use `django-angular3`, that
