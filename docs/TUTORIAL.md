@@ -7,6 +7,11 @@ In this guide:
 
 - `ng` means the Angular CLI. Commands use `npx ng` so they work without a
   global Angular CLI install.
+  - This could be resolved by one of two ways:
+    - adding `./node_modules/.bin` to your PATH:
+      - \$env:Path = "$((Get-Location).Path)\node_modules\.bin;$env:Path"
+    - installing Angular CLI globally with:
+      - `npm install -g @angular/cli`.
 - `ngdj` is shorthand for `angular-django2`. In Angular CLI commands, the
   shorthand appears as the schematics collection name
   `angular-django2:<schematic>`.

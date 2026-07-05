@@ -1,13 +1,9 @@
 # CLAUDE.md
 
-This repository is `angular-django2`, an Angular 22 library workspace for a Django-friendly npm package.
-
 ## Required Reading
 
 Read [AGENTS.md](./AGENTS.md) first.
 
 ## Claude-Specific Notes
 
-There are currently no additional Claude-only repository rules beyond the
-shared guidance above. If this file grows again, keep only Claude-specific
-implementation details here.
+There are currently no additional Claude-only repository rules.s

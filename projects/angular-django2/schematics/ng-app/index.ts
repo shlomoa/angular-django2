@@ -188,7 +188,7 @@ function addMaterialDependencies(tree: Tree, context: SchematicContext): void {
   }
 
   // Use the same version as the Angular version if possible
-  const angularVersion = packageJson.dependencies['@angular/core'] || '^21.0.0';
+  const angularVersion = packageJson.dependencies['@angular/core'] || '^22.0.0';
 
   if (!packageJson.dependencies['@angular/material']) {
     packageJson.dependencies['@angular/material'] = angularVersion;

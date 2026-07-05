@@ -278,7 +278,7 @@ If you are not using `django-angular3`, create a minimal Angular workspace
 first, then add `angular-django2`:
 
 ```bash
-npx -y @angular/cli@21 new demo-workspace --no-create-application --package-manager npm --skip-git --defaults
+npx -y @angular/cli@22 new demo-workspace --no-create-application --package-manager npm --skip-git --defaults
 cd demo-workspace
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
