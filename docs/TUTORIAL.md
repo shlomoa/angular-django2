@@ -26,6 +26,7 @@ You will create an Angular workspace with no initial application, register
 - Angular Material setup
 - a standard `core/`, `shared/`, and `features/` source layout
 - a responsive application shell
+- a feature component embedded into the application shell
 
 ## Prerequisites
 
@@ -141,13 +142,21 @@ npx ng serve ngdj-tutorial
 Open the local URL printed by Angular CLI. You should see the generated
 Material-based application shell.
 
-## 9. Generate a feature component
+## 9. Generate and embed a feature component
 
 Use the ngdj component schematic when you want a standalone OnPush component
-that follows the package defaults:
+that follows the package defaults. Generated components include embedding hooks
+that make later composition predictable:
 
 ```bash
 npx ng generate angular-django2:component dashboard-card --project=ngdj-tutorial --path=src/app/features/dashboard
+```
+
+Use `embed-component` to wire the generated component into the root app
+component:
+
+```bash
+npx ng generate angular-django2:embed-component --component=projects/ngdj-tutorial/src/app/features/dashboard/dashboard-card/dashboard-card.ts --parent=projects/ngdj-tutorial/src/app/app.ts
 ```
 
 Then rebuild to verify the generated code still compiles:
@@ -196,6 +205,7 @@ npx ng serve ngdj-tutorial
 ## What to try next
 
 - Read the [CLI guide](CLI.md) for the full command reference.
-- Generate a component with `angular-django2:component`.
+- Compose more components with `angular-django2:component` and
+  `angular-django2:embed-component`.
 - Add OpenAPI client generation with `angular-django2:ng-api`.
 - Add a data-service wrapper with `angular-django2:data-service`.
