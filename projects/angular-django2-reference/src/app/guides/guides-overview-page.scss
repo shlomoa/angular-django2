@@ -1,0 +1,131 @@
+:host {
+  display: block;
+}
+
+.guides-overview {
+  display: grid;
+  gap: 2rem;
+  margin: 0 auto;
+  max-width: 1120px;
+  padding: 3rem 1rem;
+}
+
+.guides-overview__header {
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.guides-overview__header h2 {
+  color: var(--mat-sys-on-surface);
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.guides-overview__header p:not(.eyebrow) {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 760px;
+}
+
+.guides-overview__grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.guides-overview__card {
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 24px;
+  color: inherit;
+  display: grid;
+  overflow: hidden;
+  text-decoration: none;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.guides-overview__card:hover,
+.guides-overview__card:focus-visible {
+  background: var(--mat-sys-surface-container-high);
+  border-color: var(--mat-sys-primary);
+  transform: translateY(-2px);
+}
+
+.guides-overview__card:focus-visible {
+  outline: 3px solid var(--mat-sys-primary);
+  outline-offset: 3px;
+}
+
+.guides-overview__icon-frame {
+  align-items: center;
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--mat-sys-primary-container) 80%, transparent),
+      transparent 60%
+    ),
+    var(--mat-sys-surface-container);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  display: flex;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.guides-overview__icon-frame mat-icon {
+  color: var(--mat-sys-primary);
+  font-size: 3rem;
+  height: 3rem;
+  width: 3rem;
+}
+
+.guides-overview__card-body {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.25rem;
+}
+
+.guides-overview__card-order {
+  color: var(--mat-sys-primary);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.guides-overview__card-title {
+  color: var(--mat-sys-on-surface);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.guides-overview__card-summary {
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.5;
+}
+
+.guides-overview__card-action {
+  align-items: center;
+  color: var(--mat-sys-primary);
+  display: inline-flex;
+  font-weight: 600;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.guides-overview__card-action mat-icon {
+  font-size: 1.15rem;
+  height: 1.15rem;
+  width: 1.15rem;
+}
+
+@media (width < 640px) {
+  .guides-overview {
+    padding-block: 2rem;
+  }
+}

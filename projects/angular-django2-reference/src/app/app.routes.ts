@@ -11,4 +11,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./ui/ui-command-category-page').then((module) => module.UiCommandCategoryPage),
   },
+  {
+    path: 'guides',
+    loadComponent: () =>
+      import('./guides/guides-overview-page').then((module) => module.GuidesOverviewPage),
+  },
+  {
+    path: 'guides/:guideId',
+    loadComponent: () =>
+      import('./guides/guides-detail-page').then((module) => module.GuidesDetailPage),
+  },
 ];
