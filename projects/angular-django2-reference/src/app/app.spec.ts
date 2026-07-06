@@ -137,6 +137,9 @@ describe('App', () => {
     expect(primaryNav.querySelector<HTMLAnchorElement>('a[href="/ui"]')?.textContent).toContain(
       'UI',
     );
+    expect(primaryNav.querySelector<HTMLAnchorElement>('a[href="/guides"]')?.textContent).toContain(
+      'Guides',
+    );
     expect(
       primaryNav.querySelector<HTMLAnchorElement>('a[href="/#documentation"]')?.textContent,
     ).toContain('Documentation');
@@ -233,7 +236,7 @@ describe('App', () => {
     }
     expect(
       documentationPage
-        .querySelector<HTMLAnchorElement>('a[href="/#documentation"]')
+        .querySelector<HTMLAnchorElement>('a[href="/guides"]')
         ?.getAttribute('aria-label'),
     ).toBe('Open guides page');
     expect(documentationPage.textContent).toContain('View guides');
@@ -259,6 +262,17 @@ describe('App', () => {
     expect(compiled.querySelector('.ui-command-overview')).toBeTruthy();
     expect(compiled.querySelector('#ui-command-overview-title')?.textContent).toContain(
       'UI command categories',
+    );
+  });
+
+  it('renders the routed guides overview as the visible page at /guides', async () => {
+    const { compiled } = await renderAppAt('/guides');
+
+    expect(compiled.querySelector('main#home.reference-shell')).toBeNull();
+    expect(compiled.querySelector('.hero')).toBeNull();
+    expect(compiled.querySelector('.guides-overview')).toBeTruthy();
+    expect(compiled.querySelector('#guides-overview-title')?.textContent).toContain(
+      'Reference app guides',
     );
   });
 });

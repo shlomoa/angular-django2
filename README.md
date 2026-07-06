@@ -168,6 +168,11 @@ package schematics into category cards and detail pages, uses static
 illustrations for visual commands, and uses text-first before/after panels for
 commands without meaningful browser screenshots.
 
+The app also includes a routed guides section at `/guides`. It lists guide cards
+for the basic tutorial, complex components, data flow and binding, forms and
+their interactions, quality, and security, and opens a detail page per guide
+that explains how to use the package and what to expect.
+
 Use these finite validation commands for the app infrastructure:
 
 - `npm run build:reference-app`
