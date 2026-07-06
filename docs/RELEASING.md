@@ -6,6 +6,7 @@
 - a clean working tree or a deliberate release commit in progress
 - npm 2FA enabled, or a granular access token with bypass 2FA for non-interactive publishing
 - `NPM_TOKEN` configured for the repository if you publish through the checked-in GitHub Actions workflow
+- `docs/index.md` aligned with `README.md` for the hosted documentation landing page
 
 Current checked-in automation:
 
