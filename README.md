@@ -321,7 +321,7 @@ available:
 | `ng generate angular-django2:app-shell --project=<name>`                         | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation                                               |
 | `ng generate angular-django2:ng-app <name>`                                      | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults                                    |
 | `ng generate angular-django2:ng-workspace <name>`                                | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `ng-app` in an empty workspace                                                     |
-| `ng generate angular-django2:ng-api --inputPath=<file>`                          | Bootstraps `ng-openapi-gen`                                                                          | Adds `generate:api` script                                                                    |
+| `ng generate angular-django2:ng-api --inputPath=<file>`                          | Bootstraps `ng-openapi-gen` and Django integration helpers                                           | Adds `generate:api` script and auth/CSRF/transport + resource adapter helpers                 |
 | `ng generate angular-django2:data-service <resource>`                            | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services                                                       |
 
 ### Recipes for a running Angular app
@@ -419,7 +419,15 @@ This flow:
 - adds `ng-openapi-gen` to `devDependencies`
 - writes `ng-openapi-gen.json`
 - adds `npm run generate:api`
+- generates Django integration helpers under `--helpersPath` (default
+  `src/app/api-integration`): auth/CSRF/transport helpers
+  (`provideDjangoApiTransport`, `readCsrfCookie`, `djangoAuthInterceptor`,
+  `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) and a CRM-oriented
+  `ResourceAdapter` with a DRF-style `PaginatedResult`
 - lets you wrap a generated `*ApiService` in a typed `*DataService`
+
+Pass `--skipHelpers` to bootstrap `ng-openapi-gen` only, or `--skipTests` to
+omit the generated helper spec files.
 
 #### Composing components with embedding hooks
 

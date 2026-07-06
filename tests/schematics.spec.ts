@@ -1625,6 +1625,140 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       expect(packageJson.scripts).toBeDefined();
       expect(packageJson.scripts['generate:api']).toBe('ng-openapi-gen');
     });
+
+    it('TC-API-09: generates Django integration helper artifacts', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({})(tree, context) as Tree;
+
+      expect(updatedTree.exists('/src/app/api-integration/django-transport.ts')).toBe(true);
+      expect(updatedTree.exists('/src/app/api-integration/resource-adapter.ts')).toBe(true);
+      expect(updatedTree.exists('/src/app/api-integration/index.ts')).toBe(true);
+      expect(updatedTree.exists('/src/app/api-integration/django-transport.spec.ts')).toBe(true);
+      expect(updatedTree.exists('/src/app/api-integration/resource-adapter.spec.ts')).toBe(true);
+    });
+
+    it('TC-API-10: transport helper exposes auth, CSRF, and transport composition points', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({})(tree, context) as Tree;
+      const transport = updatedTree
+        .read('/src/app/api-integration/django-transport.ts')!
+        .toString();
+
+      expect(transport).toContain('export function provideDjangoApiTransport(');
+      expect(transport).toContain('export function readCsrfCookie(');
+      expect(transport).toContain('export const djangoAuthInterceptor');
+      expect(transport).toContain('export function djangoCredentialsInterceptor(');
+      expect(transport).toContain('export const DJANGO_AUTH_TOKEN');
+      expect(transport).toContain('withXsrfConfiguration');
+      expect(transport).toContain('withCredentials: true');
+      expect(transport).toContain('Authorization: authorization');
+    });
+
+    it('TC-API-11: resource adapter helper exposes CRM CRUD composition points', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({})(tree, context) as Tree;
+      const adapter = updatedTree.read('/src/app/api-integration/resource-adapter.ts')!.toString();
+      const barrel = updatedTree.read('/src/app/api-integration/index.ts')!.toString();
+
+      expect(adapter).toContain('export interface PaginatedResult<T>');
+      expect(adapter).toContain('export abstract class ResourceAdapter<');
+      for (const method of ['list', 'retrieve', 'create', 'update', 'delete']) {
+        expect(adapter).toContain(`abstract ${method}(`);
+      }
+      expect(adapter).toContain('catchError');
+      expect(barrel).toContain("export * from './django-transport'");
+      expect(barrel).toContain("export * from './resource-adapter'");
+    });
+
+    it('TC-API-12: honors custom helpersPath', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({ helpersPath: 'src/app/core/api' })(tree, context) as Tree;
+
+      expect(updatedTree.exists('/src/app/core/api/django-transport.ts')).toBe(true);
+      expect(updatedTree.exists('/src/app/api-integration/django-transport.ts')).toBe(false);
+    });
+
+    it('TC-API-13: skipHelpers suppresses helper generation', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({ skipHelpers: true })(tree, context) as Tree;
+
+      expect(updatedTree.exists('/src/app/api-integration/django-transport.ts')).toBe(false);
+      // Bootstrap artifacts are still generated.
+      expect(updatedTree.exists('/ng-openapi-gen.json')).toBe(true);
+    });
+
+    it('TC-API-14: skipTests omits generated spec files', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const updatedTree = ngApi({ skipTests: true })(tree, context) as Tree;
+
+      expect(updatedTree.exists('/src/app/api-integration/django-transport.ts')).toBe(true);
+      expect(updatedTree.exists('/src/app/api-integration/django-transport.spec.ts')).toBe(false);
+      expect(updatedTree.exists('/src/app/api-integration/resource-adapter.spec.ts')).toBe(false);
+    });
+
+    it('TC-API-15: helper generation is idempotent', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      let updatedTree = ngApi({})(tree, context) as Tree;
+      const firstContent = updatedTree
+        .read('/src/app/api-integration/django-transport.ts')!
+        .toString();
+
+      updatedTree = ngApi({})(updatedTree, context) as Tree;
+      const secondContent = updatedTree
+        .read('/src/app/api-integration/django-transport.ts')!
+        .toString();
+
+      expect(secondContent).toBe(firstContent);
+    });
   });
 
   describe('data-service schematic', () => {
