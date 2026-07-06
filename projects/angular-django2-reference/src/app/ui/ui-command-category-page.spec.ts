@@ -154,6 +154,35 @@ describe('UiCommandCategoryPage', () => {
     );
   });
 
+  it('switches command highlights without triggering an NG0956 tracking warning', async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    try {
+      const { compiled, fixture } = await renderCategoryPage('workspace-setup');
+      const ngWorkspaceButton = requireElement<HTMLButtonElement>(
+        compiled,
+        '.ui-command-category__command-button[data-command-id="ng-workspace"]',
+      );
+
+      ngWorkspaceButton.click();
+      fixture.detectChanges();
+
+      expect(compiled.querySelector('#ui-command-detail-panel')?.textContent).toContain(
+        'Root documentation may be missing.',
+      );
+
+      const loggedMessages = [...consoleWarn.mock.calls, ...consoleError.mock.calls]
+        .flat()
+        .map((argument) => String(argument));
+
+      expect(loggedMessages.some((message) => message.includes('NG0956'))).toBe(false);
+    } finally {
+      consoleWarn.mockRestore();
+      consoleError.mockRestore();
+    }
+  });
+
   it('describes visual command results only after applying the command', async () => {
     const { compiled, fixture } = await renderCategoryPage('application-creation');
     const detailPanel = requireElement<HTMLElement>(compiled, '#ui-command-detail-panel');
