@@ -14,5 +14,6 @@
         "copilot/gpt-5.5"
       ]
     }
-  }
+  },
+  "git.ignoreLimitWarning": true
 }
