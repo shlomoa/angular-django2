@@ -115,7 +115,8 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
 - The documented defaults and behavior currently expected are:
   - `ng-add`: register or prepend `angular-django2` in
     `cli.schematicCollections`
-  - `application`: `standalone: true`, `routing: true`, `style: 'scss'`
+  - `application`: `standalone: true`, `routing: true`, `ssr: false`,
+    `zoneless: true`, `style: 'scss'`
   - `component`: `standalone: true`, `changeDetection: 'OnPush'`
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `material-setup`: configure Angular Material theming (prebuilt or custom)
@@ -127,7 +128,9 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
   - `ng-app`: generate a complete Angular app with Material UI in one step —
     runs `application`, installs `@angular/material` and `@angular/cdk`,
     configures Material theming, creates the standard directory structure, and
-    writes a responsive sidenav app shell into `app.component.*`
+    writes a responsive sidenav app shell into `app.component.*`; defaults the
+    delegated Angular application generation to `--ssr=false`,
+    `--zoneless=true`, and `--defaults`
   - `ng-workspace`: write workspace-wide bootstrap files for an empty Angular
     workspace, currently `.github/copilot-instructions.md`, the workspace root
     `README.md`, ESLint setup, Vitest setup, lint/test package scripts, and

@@ -52,8 +52,10 @@ describe('angular-django2 schematics', () => {
     expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'application', {
       name: 'demo-app',
       routing: true,
+      ssr: false,
       standalone: true,
       style: 'scss',
+      zoneless: true,
     });
   });
 
@@ -63,8 +65,10 @@ describe('angular-django2 schematics', () => {
     expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'application', {
       name: 'my-app',
       routing: true,
+      ssr: false,
       standalone: true,
       style: 'scss',
+      zoneless: true,
     });
   });
 
@@ -74,8 +78,10 @@ describe('angular-django2 schematics', () => {
     expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'application', {
       name: 'my-app',
       routing: true,
+      ssr: false,
       standalone: true,
       style: 'css',
+      zoneless: true,
     });
   });
 
@@ -976,6 +982,75 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
   });
 
   describe('ng-app schematic', () => {
+    it('passes Angular 22 application defaults when generating a missing project', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/package.json',
+        JSON.stringify({
+          dependencies: {
+            '@angular/core': '^22.0.0',
+          },
+        }),
+      );
+      tree.create(
+        '/angular.json',
+        JSON.stringify({
+          version: 1,
+          projects: {},
+        }),
+      );
+
+      mockedExternalSchematic.mockImplementationOnce(() => (innerTree: Tree) => {
+        const angularJson = JSON.parse(innerTree.read('/angular.json')!.toString());
+        angularJson.projects['generated-app'] = {
+          root: 'projects/generated-app',
+          sourceRoot: 'projects/generated-app/src',
+          architect: {
+            build: {
+              options: {
+                styles: ['projects/generated-app/src/styles.scss'],
+              },
+            },
+          },
+        };
+        innerTree.overwrite('/angular.json', JSON.stringify(angularJson, null, 2));
+        innerTree.create(
+          'projects/generated-app/src/app/app.component.ts',
+          'export class AppComponent {}',
+        );
+        innerTree.create('projects/generated-app/src/app/app.component.html', '<div>Hello</div>');
+        innerTree.create('projects/generated-app/src/app/app.component.scss', '');
+        innerTree.create('projects/generated-app/src/styles.scss', '');
+        innerTree.create(
+          'projects/generated-app/src/app/app.config.ts',
+          'export const appConfig = { providers: [] };',
+        );
+
+        return innerTree;
+      });
+
+      const context = {
+        addTask: vi.fn(),
+        logger: {
+          info: vi.fn(),
+          warn: vi.fn(),
+          error: vi.fn(),
+        },
+      } as never;
+
+      ngApp({ name: 'generated-app' })(tree, context);
+
+      expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'application', {
+        name: 'generated-app',
+        routing: true,
+        standalone: true,
+        ssr: false,
+        zoneless: true,
+        style: 'scss',
+        prefix: 'app',
+      });
+    });
+
     it('TC-APP-01: generates application with Material setup and directory structure', () => {
       const tree = Tree.empty();
       tree.create(

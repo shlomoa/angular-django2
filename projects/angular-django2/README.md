@@ -57,7 +57,7 @@ ng generate angular-django2:app-shell --project my-app
 ng generate angular-django2:component dashboard-card
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
-ng generate angular-django2:ng-app my-app
+ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
 ng generate angular-django2:ng-workspace my-app
 ng generate angular-django2:ng-api --inputPath=openapi.json
 ng generate angular-django2:data-service users
@@ -65,14 +65,14 @@ ng generate angular-django2:data-service users
 
 Current defaults:
 
-- `application`: `standalone: true`, `routing: true`, `style: 'scss'`
+- `application`: `standalone: true`, `routing: true`, `ssr: false`, `zoneless: true`, `style: 'scss'`
 - `material-setup`: configures Angular Material with theme and providers
   - Options: `--theme` (indigo-pink, deeppurple-amber, pink-bluegrey, purple-green, custom), `--typography`, `--animations`
 - `project-structure`: creates standard directory structure (`core/`, `shared/`, `features/`) with barrel exports
 - `component`: `standalone: true`, `changeDetection: 'OnPush'`
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
 - `ng-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav app shell
-  - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--style`, `--prefix`
+  - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--defaults`, `--style`, `--prefix`
 - `ng-workspace`: writes workspace-wide bootstrap files for an empty Angular workspace
   - Writes `.github/copilot-instructions.md` with repo instructions for the generated app name
   - Replaces the workspace root `README.md` with this guide so the generated repo includes the build recipes below
@@ -94,7 +94,7 @@ For a workspace created with `ng new demo-workspace --no-create-application`, th
 ```bash
 ng add angular-django2
 ng generate angular-django2:ng-workspace my-app
-ng generate angular-django2:ng-app my-app
+ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
 ng build my-app
 ```
 

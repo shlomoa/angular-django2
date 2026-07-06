@@ -104,7 +104,7 @@ Now generate the Angular application, Material setup, project structure, and app
 shell in one flow:
 
 ```bash
-npx ng generate angular-django2:ng-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true
+npx ng generate angular-django2:ng-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
 ```
 
 The `ng-app` schematic is the fastest path to a runnable app. It composes the
@@ -187,7 +187,7 @@ npx -y @angular/cli@22 new ngdj-tutorial --directory . --no-create-application -
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
 npx ng generate angular-django2:ng-workspace ngdj-tutorial
-npx ng generate angular-django2:ng-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true
+npx ng generate angular-django2:ng-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
 npm install
 npx ng build ngdj-tutorial
 npx ng serve ngdj-tutorial

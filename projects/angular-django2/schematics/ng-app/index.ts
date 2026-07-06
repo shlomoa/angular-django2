@@ -121,8 +121,31 @@ export {};
 
 const DIRECTORIES = ['core', 'shared/components', 'shared/pipes', 'features'] as const;
 
+type ResolvedNgAppSchema = Required<NgAppSchema>;
+
+const DEFAULT_NG_APP_OPTIONS = {
+  theme: 'indigo-pink',
+  typography: true,
+  animations: true,
+  routing: true,
+  standalone: true,
+  ssr: false,
+  zoneless: true,
+  defaults: true,
+  style: 'scss',
+  prefix: 'app',
+} as const satisfies Omit<ResolvedNgAppSchema, 'name'>;
+
+function resolveNgAppOptions(options: NgAppSchema): ResolvedNgAppSchema {
+  return {
+    ...DEFAULT_NG_APP_OPTIONS,
+    ...options,
+  };
+}
+
 export function ngApp(options: NgAppSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
+    const resolvedOptions = resolveNgAppOptions(options);
     const angularJsonPath = '/angular.json';
     const angularJsonBuffer = tree.read(angularJsonPath);
 
@@ -130,7 +153,7 @@ export function ngApp(options: NgAppSchema): Rule {
     if (angularJsonBuffer) {
       try {
         const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
-        projectExists = !!workspace.projects[options.name];
+        projectExists = !!workspace.projects[resolvedOptions.name];
       } catch {
         projectExists = false;
       }
@@ -140,28 +163,34 @@ export function ngApp(options: NgAppSchema): Rule {
       // externalSchematic is async — chain() ensures it completes before material setup runs
       return chain([
         externalSchematic('@schematics/angular', 'application', {
-          name: options.name,
-          routing: options.routing,
-          standalone: options.standalone,
-          style: options.style,
-          prefix: options.prefix,
+          name: resolvedOptions.name,
+          routing: resolvedOptions.routing,
+          standalone: resolvedOptions.standalone,
+          ssr: resolvedOptions.ssr,
+          zoneless: resolvedOptions.zoneless,
+          style: resolvedOptions.style,
+          prefix: resolvedOptions.prefix,
         }),
         (innerTree: Tree, innerContext: SchematicContext) => {
-          applyMaterialSetup(innerTree, innerContext, options);
+          applyMaterialSetup(innerTree, innerContext, resolvedOptions);
           return innerTree;
         },
       ])(tree, context);
     }
 
     context.logger.info(
-      `Project '${options.name}' already exists, skipping application generation`,
+      `Project '${resolvedOptions.name}' already exists, skipping application generation`,
     );
-    applyMaterialSetup(tree, context, options);
+    applyMaterialSetup(tree, context, resolvedOptions);
     return tree;
   };
 }
 
-function applyMaterialSetup(tree: Tree, context: SchematicContext, options: NgAppSchema): void {
+function applyMaterialSetup(
+  tree: Tree,
+  context: SchematicContext,
+  options: ResolvedNgAppSchema,
+): void {
   addMaterialDependencies(tree, context);
   configureMaterial(tree, options.name, options.theme, options.typography, options.animations);
   createDirectoryStructure(tree, options.name);

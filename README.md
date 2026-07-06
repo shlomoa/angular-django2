@@ -256,7 +256,7 @@ shortest path to a running app is:
 
 ```bash
 ng generate angular-django2:ng-workspace my-app
-ng generate angular-django2:ng-app my-app
+ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
 npm install
 ng build my-app
 ng serve my-app
@@ -284,7 +284,7 @@ cd demo-workspace
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
 npx ng generate angular-django2:ng-workspace my-app
-npx ng generate angular-django2:ng-app my-app
+npx ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
 npm install
 npx ng build my-app
 npx ng serve my-app
@@ -302,27 +302,27 @@ npm install ../angular-django2/dist/angular-django2
 After `angular-django2` is installed in a workspace, these commands are
 available:
 
-| Command                                                          | Purpose                                                                                              | Notes                                              |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `ng add angular-django2`                                         | Registers the collection in `angular.json`                                                           | Automatically done by `django-angular3`            |
-| `ng generate angular-django2:application <name>`                 | Creates an Angular application                                                                       | Defaults to standalone routing + SCSS              |
-| `ng generate angular-django2:material-setup --project=<name>`    | Configures Angular Material in an existing project                                                   | Supports `--theme`, `--typography`, `--animations` |
-| `ng generate angular-django2:project-structure --project=<name>` | Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/`                              | Writes barrel `index.ts` files                     |
-| `ng generate angular-django2:component <name>`                   | Creates a component with package defaults                                                            | Uses standalone + `OnPush` defaults                |
-| `ng generate angular-django2:service <name>`                     | Creates a service                                                                                    | Pass-through to Angular CLI service schematic      |
-| `ng generate angular-django2:class <name>`                       | Creates a class                                                                                      | Pass-through to Angular CLI class schematic        |
-| `ng generate angular-django2:app-shell --project=<name>`         | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation    |
-| `ng generate angular-django2:ng-app <name>`                      | Creates a complete app in one flow                                                                   | Best “get me running quickly” option               |
-| `ng generate angular-django2:ng-workspace <name>`                | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `ng-app` in an empty workspace          |
-| `ng generate angular-django2:ng-api --inputPath=<file>`          | Bootstraps `ng-openapi-gen`                                                                          | Adds `generate:api` script                         |
-| `ng generate angular-django2:data-service <resource>`            | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services            |
+| Command                                                          | Purpose                                                                                              | Notes                                                      |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `ng add angular-django2`                                         | Registers the collection in `angular.json`                                                           | Automatically done by `django-angular3`                    |
+| `ng generate angular-django2:application <name>`                 | Creates an Angular application                                                                       | Defaults to standalone routing, no SSR, zoneless, and SCSS |
+| `ng generate angular-django2:material-setup --project=<name>`    | Configures Angular Material in an existing project                                                   | Supports `--theme`, `--typography`, `--animations`         |
+| `ng generate angular-django2:project-structure --project=<name>` | Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/`                              | Writes barrel `index.ts` files                             |
+| `ng generate angular-django2:component <name>`                   | Creates a component with package defaults                                                            | Uses standalone + `OnPush` defaults                        |
+| `ng generate angular-django2:service <name>`                     | Creates a service                                                                                    | Pass-through to Angular CLI service schematic              |
+| `ng generate angular-django2:class <name>`                       | Creates a class                                                                                      | Pass-through to Angular CLI class schematic                |
+| `ng generate angular-django2:app-shell --project=<name>`         | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation            |
+| `ng generate angular-django2:ng-app <name>`                      | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults |
+| `ng generate angular-django2:ng-workspace <name>`                | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `ng-app` in an empty workspace                  |
+| `ng generate angular-django2:ng-api --inputPath=<file>`          | Bootstraps `ng-openapi-gen`                                                                          | Adds `generate:api` script                                 |
+| `ng generate angular-django2:data-service <resource>`            | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services                    |
 
 ### Recipes for a running Angular app
 
 #### Fastest path: generate a complete app in one step
 
 ```bash
-ng generate angular-django2:ng-app my-app --theme=indigo-pink --typography=true --animations=true
+ng generate angular-django2:ng-app my-app --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
 npm install
 ng build my-app
 ng serve my-app
@@ -337,7 +337,7 @@ want both workspace-level bootstrap files and a running Angular app:
 
 ```bash
 ng generate angular-django2:ng-workspace my-app
-ng generate angular-django2:ng-app my-app --theme=indigo-pink --typography=true --animations=true
+ng generate angular-django2:ng-app my-app --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
 npm install
 ng build my-app
 ng serve my-app

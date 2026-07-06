@@ -39,6 +39,21 @@
       "description": "Generate standalone components.",
       "default": true
     },
+    "ssr": {
+      "type": "boolean",
+      "description": "Configure the generated application for Server-Side Rendering (SSR) and Static Site Generation (SSG/Prerendering). Defaults to false.",
+      "default": false
+    },
+    "zoneless": {
+      "type": "boolean",
+      "description": "Generate an application that does not use zone.js. Defaults to true.",
+      "default": true
+    },
+    "defaults": {
+      "type": "boolean",
+      "description": "Disable interactive input prompts for options with a default.",
+      "default": true
+    },
     "style": {
       "type": "string",
       "description": "The stylesheet format.",

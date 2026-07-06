@@ -186,7 +186,7 @@ export const UI_COMMANDS: readonly UiCommand[] = [
     name: 'Generate Angular application',
     command: 'ng generate angular-django2:application my-app',
     summary:
-      'Creates an Angular application with the collection defaults for standalone routing and SCSS.',
+      'Creates an Angular application with standalone routing, no SSR, zoneless mode, and SCSS.',
     effect: 'visual',
     before: {
       title: 'No application project',
@@ -197,7 +197,7 @@ export const UI_COMMANDS: readonly UiCommand[] = [
       title: 'Application project created',
       description:
         'A standalone Angular application project is available for package setup and UI work.',
-      highlights: ['Routing is enabled.', 'SCSS styling is configured.'],
+      highlights: ['Routing is enabled.', 'SSR is disabled.', 'Zoneless mode is enabled.'],
     },
     illustration: {
       imagePath: '/ui-commands/application.svg',
@@ -208,7 +208,7 @@ export const UI_COMMANDS: readonly UiCommand[] = [
     id: 'ng-app',
     categoryId: 'application-creation',
     name: 'Generate Django-friendly app',
-    command: 'ng generate angular-django2:ng-app my-app',
+    command: 'ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults',
     summary:
       'Creates a complete Django-friendly Angular app with Material setup, structure, and shell.',
     effect: 'visual',

@@ -21,6 +21,16 @@
       "type": "boolean",
       "default": true
     },
+    "ssr": {
+      "type": "boolean",
+      "description": "Configure the application for Server-Side Rendering (SSR) and Static Site Generation (SSG/Prerendering). Defaults to false.",
+      "default": false
+    },
+    "zoneless": {
+      "type": "boolean",
+      "description": "Generate an application that does not use zone.js. Defaults to true.",
+      "default": true
+    },
     "style": {
       "type": "string",
       "default": "scss",
