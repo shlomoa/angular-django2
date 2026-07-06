@@ -1,0 +1,39 @@
+<section class="guides-detail" aria-labelledby="guides-detail-title">
+  <a class="guides-detail__back-link" routerLink="/guides">Back to guides</a>
+
+  @if (guide(); as selectedGuide) {
+    <header class="guides-detail__header">
+      <p class="eyebrow">
+        <mat-icon aria-hidden="true">{{ selectedGuide.icon }}</mat-icon>
+        Guide {{ selectedGuide.order }}
+      </p>
+      <h2 id="guides-detail-title">{{ selectedGuide.name }}</h2>
+      <p>{{ selectedGuide.summary }}</p>
+    </header>
+
+    <div class="guides-detail__sections">
+      @for (section of selectedGuide.sections; track section.title) {
+        <article class="guides-detail__section" [attr.data-section-title]="section.title">
+          <h3>{{ section.title }}</h3>
+          @for (paragraph of section.body; track paragraph) {
+            <p>{{ paragraph }}</p>
+          }
+          @if (section.steps; as steps) {
+            <ol class="guides-detail__steps">
+              @for (step of steps; track step) {
+                <li>{{ step }}</li>
+              }
+            </ol>
+          }
+        </article>
+      }
+    </div>
+  } @else {
+    <section class="guides-detail__unknown" aria-labelledby="guides-detail-title">
+      <p class="eyebrow">Guides</p>
+      <h2 id="guides-detail-title">Unknown guide</h2>
+      <p>The requested guide is not part of the angular-django2 reference guides.</p>
+      <a routerLink="/guides">Return to guides</a>
+    </section>
+  }
+</section>

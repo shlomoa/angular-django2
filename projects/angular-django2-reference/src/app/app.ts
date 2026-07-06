@@ -12,6 +12,8 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { AngularDjango2Service } from 'angular-django2';
 import { filter } from 'rxjs';
 
+import { GUIDES } from './guides/guides-catalog';
+
 type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-orange';
 
 @Component({
@@ -67,20 +69,10 @@ export class App {
       description: 'Display resolved API and CSRF values users can compare with their app.',
     },
   ];
-  protected readonly guides = [
-    {
-      name: 'Getting started',
-      description: 'Install the package and wire the standalone Angular providers.',
-    },
-    {
-      name: 'Schematics workflow',
-      description: 'Generate workspaces, apps, project structure, and data services.',
-    },
-    {
-      name: 'Django integration',
-      description: 'Keep API URLs, credentials, and CSRF behavior visible in code.',
-    },
-  ];
+  protected readonly guides = GUIDES.slice(0, 3).map((guide) => ({
+    name: guide.name,
+    description: guide.summary,
+  }));
 
   protected readonly isHomeRoute = computed(() => {
     const url = this.currentUrl();
