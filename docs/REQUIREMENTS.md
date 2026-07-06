@@ -105,6 +105,7 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
   - `app-shell`
   - `class`
   - `component`
+  - `embed-component`
   - `service`
   - `material-setup`
   - `project-structure`
@@ -117,7 +118,17 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
     `cli.schematicCollections`
   - `application`: `standalone: true`, `routing: true`, `ssr: false`,
     `zoneless: true`, `style: 'scss'`
-  - `component`: `standalone: true`, `changeDetection: 'OnPush'`
+  - `component`: `standalone: true`, `changeDetection: 'OnPush'`; also seeds
+    begin/end embedding hooks into the generated files — TypeScript `import`,
+    `injected services`, `input signals`, and `output signals` sections plus a
+    template `children` section — so components can be embedded later
+  - `embed-component`: wire a generated child component into a parent using the
+    embedding hooks; options: `--component` (child component `.ts` path),
+    `--parent` (parent component `.ts` path); it adds the child element after
+    the parent template `children` marker (feeding input signals and binding
+    output signals to `on<Output>()` handlers), imports the child class,
+    registers it in the parent `imports` array, and adds not-implemented
+    `on<Output>()` handler stubs
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `material-setup`: configure Angular Material theming (prebuilt or custom)
     and providers in an existing project; options: `--theme`, `--typography`,

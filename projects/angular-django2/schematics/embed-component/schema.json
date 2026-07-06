@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2EmbedComponent",
+  "title": "angular-django2 embed-component schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "component": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to the child component TypeScript file to embed (e.g. 'projects/app/src/app/hero-card/hero-card.ts').",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "parent": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to the parent component TypeScript file that hosts the embedded child (e.g. 'projects/app/src/app/app.ts').",
+      "$default": {
+        "$source": "argv",
+        "index": 1
+      }
+    }
+  },
+  "required": ["component", "parent"]
+}

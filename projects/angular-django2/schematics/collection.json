@@ -22,9 +22,14 @@
       "schema": "./class/schema.json"
     },
     "component": {
-      "description": "Generate a standalone OnPush component using the angular-django2 collection.",
+      "description": "Generate a standalone OnPush component with embedding hooks using the angular-django2 collection.",
       "factory": "./component/index#component",
       "schema": "./component/schema.json"
+    },
+    "embed-component": {
+      "description": "Embed a generated component into a parent component using its embedding hooks.",
+      "factory": "./embed-component/index#embedComponent",
+      "schema": "./embed-component/schema.json"
     },
     "service": {
       "description": "Generate a service using the angular-django2 collection.",
