@@ -41,6 +41,9 @@ jobs:
       - name: Run tests
         run: npm run test:ci
 
+      - name: Rebuild for publish
+        run: npm run build
+
       - name: Publish package
         run: npm publish ./dist/angular-django2 --access public --tag "${{ inputs.npm-tag }}"
         env:
