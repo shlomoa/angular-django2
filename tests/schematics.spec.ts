@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
 import type * as SchematicsModule from '@angular-devkit/schematics';
+import type { SchematicContext } from '@angular-devkit/schematics';
 import { Tree, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -45,6 +46,19 @@ const workspaceReadme = readFileSync(workspaceReadmePath, 'utf8');
 
 describe('angular-django2 schematics', () => {
   const mockedExternalSchematic = vi.mocked(externalSchematic);
+
+  function createSchematicContext(): SchematicContext {
+    return {
+      addTask: vi.fn(),
+      logger: {
+        debug: vi.fn(),
+        error: vi.fn(),
+        fatal: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+      },
+    } as unknown as SchematicContext;
+  }
 
   beforeEach(() => {
     mockedExternalSchematic.mockClear();
@@ -214,7 +228,7 @@ describe('angular-django2 schematics', () => {
       ),
     );
 
-    const updatedTree = ngAdd()(tree, {} as never) as Tree;
+    const updatedTree = ngAdd()(tree, createSchematicContext()) as Tree;
     const angularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
 
     expect(angularJson.cli).toBeDefined();
@@ -238,7 +252,7 @@ describe('angular-django2 schematics', () => {
       ),
     );
 
-    const updatedTree = ngAdd()(tree, {} as never) as Tree;
+    const updatedTree = ngAdd()(tree, createSchematicContext()) as Tree;
     const angularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
 
     expect(angularJson.cli.schematicCollections).toEqual([
@@ -264,7 +278,7 @@ describe('angular-django2 schematics', () => {
       ),
     );
 
-    const updatedTree = ngAdd()(tree, {} as never) as Tree;
+    const updatedTree = ngAdd()(tree, createSchematicContext()) as Tree;
     const angularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
 
     expect(angularJson.cli.schematicCollections).toEqual([
@@ -276,8 +290,8 @@ describe('angular-django2 schematics', () => {
   it('TC-04: throws when angular.json is missing', () => {
     const tree = Tree.empty();
 
-    expect(() => ngAdd()(tree, {} as never)).toThrow(SchematicsException);
-    expect(() => ngAdd()(tree, {} as never)).toThrow(
+    expect(() => ngAdd()(tree, createSchematicContext())).toThrow(SchematicsException);
+    expect(() => ngAdd()(tree, createSchematicContext())).toThrow(
       'Could not find angular.json in the target workspace.',
     );
   });
@@ -303,7 +317,7 @@ describe('angular-django2 schematics', () => {
 
     tree.create('/angular.json', JSON.stringify(originalContent, null, 2));
 
-    const updatedTree = ngAdd()(tree, {} as never) as Tree;
+    const updatedTree = ngAdd()(tree, createSchematicContext()) as Tree;
     const angularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
 
     expect(angularJson.version).toBe(originalContent.version);
@@ -327,7 +341,7 @@ describe('angular-django2 schematics', () => {
       ),
     );
 
-    const updatedTree = ngAdd()(tree, {} as never) as Tree;
+    const updatedTree = ngAdd()(tree, createSchematicContext()) as Tree;
     const rawContent = updatedTree.read('/angular.json')!.toString();
 
     expect(() => JSON.parse(rawContent)).not.toThrow();
@@ -784,7 +798,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         theme: 'indigo-pink',
         typography: true,
         animations: true,
-      })(tree, {} as never) as Tree;
+      })(tree, createSchematicContext()) as Tree;
 
       const updatedAngularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
       const styles = updatedAngularJson.projects['test-app'].architect.build.options.styles;
@@ -819,7 +833,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         theme: 'custom',
         typography: true,
         animations: true,
-      })(tree, {} as never) as Tree;
+      })(tree, createSchematicContext()) as Tree;
 
       const stylesContent = updatedTree.read('projects/test-app/src/styles.scss')!.toString();
 
@@ -855,7 +869,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         theme: 'custom',
         typography: false,
         animations: true,
-      })(tree, {} as never) as Tree;
+      })(tree, createSchematicContext()) as Tree;
 
       const stylesContent = updatedTree.read('projects/test-app/src/styles.scss')!.toString();
 
@@ -890,7 +904,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         theme: 'indigo-pink',
         typography: true,
         animations: true,
-      })(tree, {} as never) as Tree;
+      })(tree, createSchematicContext()) as Tree;
 
       // Run again
       updatedTree = materialSetup({
@@ -898,7 +912,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         theme: 'indigo-pink',
         typography: true,
         animations: true,
-      })(updatedTree, {} as never) as Tree;
+      })(updatedTree, createSchematicContext()) as Tree;
 
       const updatedAngularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
       const styles = updatedAngularJson.projects['test-app'].architect.build.options.styles;
@@ -926,7 +940,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
           theme: 'indigo-pink',
           typography: true,
           animations: true,
-        })(tree, {} as never),
+        })(tree, createSchematicContext()),
       ).toThrow(SchematicsException);
       expect(() =>
         materialSetup({
@@ -934,7 +948,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
           theme: 'indigo-pink',
           typography: true,
           animations: true,
-        })(tree, {} as never),
+        })(tree, createSchematicContext()),
       ).toThrow('Project "nonexistent" not found');
     });
   });
@@ -956,7 +970,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       const updatedTree = projectStructure({
         project: 'test-app',
         prefix: 'app',
-      })(tree, {} as never) as Tree;
+      })(tree, createSchematicContext()) as Tree;
 
       const expectedFiles = [
         'projects/test-app/src/app/core/index.ts',
@@ -987,7 +1001,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       const updatedTree = projectStructure({
         project: 'test-app',
         prefix: 'app',
-      })(tree, {} as never) as Tree;
+      })(tree, createSchematicContext()) as Tree;
 
       const expectedFiles = [
         'projects/test-app/src/app/core/index.ts',
@@ -1024,7 +1038,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       const updatedTree = projectStructure({
         project: 'test-app',
         prefix: 'app',
-      })(tree, {} as never) as Tree;
+      })(tree, createSchematicContext()) as Tree;
 
       const coreIndexContent = updatedTree
         .read('projects/test-app/src/app/core/index.ts')!
@@ -1049,13 +1063,13 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         projectStructure({
           project: 'nonexistent',
           prefix: 'app',
-        })(tree, {} as never),
+        })(tree, createSchematicContext()),
       ).toThrow(SchematicsException);
       expect(() =>
         projectStructure({
           project: 'nonexistent',
           prefix: 'app',
-        })(tree, {} as never),
+        })(tree, createSchematicContext()),
       ).toThrow('Project "nonexistent" not found');
     });
   });

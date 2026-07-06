@@ -1,5 +1,8 @@
-import type { Rule, Tree } from '@angular-devkit/schematics';
+import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { SchematicsException } from '@angular-devkit/schematics';
+import type { WorkspaceConfig } from '../utility/workspace';
+import { readWorkspace, requireWorkspaceProject, writeWorkspace } from '../utility/workspace';
+import { THEME_MAPPING } from '../utility/material-constants';
 
 interface MaterialSetupOptions {
   project: string;
@@ -8,61 +11,28 @@ interface MaterialSetupOptions {
   animations: boolean;
 }
 
-interface WorkspaceConfig {
-  projects: Record<
-    string,
-    {
-      root?: string;
-      sourceRoot?: string;
-      architect?: {
-        build?: {
-          options?: {
-            styles?: string[];
-          };
-        };
-      };
-    }
-  >;
-}
-
-const THEME_MAPPING: Record<string, string> = {
-  'indigo-pink': '@angular/material/prebuilt-themes/indigo-pink.css',
-  'deeppurple-amber': '@angular/material/prebuilt-themes/deeppurple-amber.css',
-  'pink-bluegrey': '@angular/material/prebuilt-themes/pink-bluegrey.css',
-  'purple-green': '@angular/material/prebuilt-themes/purple-green.css',
-};
-
 export function materialSetup(options: MaterialSetupOptions): Rule {
-  return (tree: Tree) => {
+  return (tree: Tree, context: SchematicContext) => {
     const { project, theme, typography, animations } = options;
 
     // Validate project exists
-    const angularJsonPath = '/angular.json';
-    const angularJsonBuffer = tree.read(angularJsonPath);
-    if (!angularJsonBuffer) {
-      throw new SchematicsException('Could not find angular.json in the workspace.');
-    }
-
-    const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
-    if (!workspace.projects[project]) {
-      throw new SchematicsException(`Project "${project}" not found in angular.json.`);
-    }
+    const workspace = readWorkspace(tree);
+    const projectConfig = requireWorkspaceProject(workspace, project);
 
     // Determine the project path from angular.json
-    const projectConfig = workspace.projects[project];
     const projectRoot = projectConfig.root || '';
     const stylesPath = projectRoot ? `${projectRoot}/src/styles.scss` : 'src/styles.scss';
 
     // Update angular.json for prebuilt themes
     if (theme !== 'custom') {
-      updateAngularJsonStyles(tree, workspace, project, THEME_MAPPING[theme]);
+      updateAngularJsonStyles(tree, context, workspace, project, THEME_MAPPING[theme]);
     }
 
     // Update styles.scss
-    updateStylesFile(tree, stylesPath, theme, typography);
+    updateStylesFile(tree, context, stylesPath, theme, typography);
 
     // Update app.config.ts to include Material providers
-    updateAppConfig(tree, projectRoot, animations);
+    updateAppConfig(tree, context, projectRoot, animations);
 
     return tree;
   };
@@ -70,28 +40,32 @@ export function materialSetup(options: MaterialSetupOptions): Rule {
 
 function updateAngularJsonStyles(
   tree: Tree,
+  context: SchematicContext,
   workspace: WorkspaceConfig,
   project: string,
   themePath: string,
 ): void {
-  const angularJsonPath = '/angular.json';
-
-  if (!workspace.projects[project].architect?.build?.options) {
+  const projectConfig = workspace.projects?.[project];
+  if (!projectConfig?.architect?.build?.options) {
     throw new SchematicsException(`Build options not found for project "${project}".`);
   }
 
-  const buildOptions = workspace.projects[project].architect!.build!.options!;
+  const buildOptions = projectConfig!.architect!.build!.options!;
   const styles = buildOptions.styles || [];
 
   // Check if the theme is already added (idempotency)
   if (!styles.includes(themePath)) {
     buildOptions.styles = [themePath, ...styles];
-    tree.overwrite(angularJsonPath, `${JSON.stringify(workspace, null, 2)}\n`);
+    writeWorkspace(tree, workspace);
+    context.logger.info(`Added Angular Material theme "${themePath}" to project "${project}".`);
+  } else {
+    context.logger.info(`Angular Material theme "${themePath}" is already configured.`);
   }
 }
 
 function updateStylesFile(
   tree: Tree,
+  context: SchematicContext,
   stylesPath: string,
   theme: string,
   typography: boolean,
@@ -104,6 +78,7 @@ function updateStylesFile(
 
   // Check if Material styles are already configured (idempotency)
   if (stylesContent.includes("@use '@angular/material'")) {
+    context.logger.info(`Angular Material styles are already configured in ${stylesPath}.`);
     return;
   }
 
@@ -140,16 +115,26 @@ $theme: mat.define-light-theme((
 
   if (tree.exists(stylesPath)) {
     tree.overwrite(stylesPath, stylesContent);
+    context.logger.info(`Updated ${stylesPath} with Angular Material style configuration.`);
   } else {
     tree.create(stylesPath, stylesContent);
+    context.logger.info(`Created ${stylesPath} with Angular Material style configuration.`);
   }
 }
 
-function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): void {
+function updateAppConfig(
+  tree: Tree,
+  context: SchematicContext,
+  projectRoot: string,
+  animations: boolean,
+): void {
   const appConfigPath = `${projectRoot}/src/app/app.config.ts`;
 
   if (!tree.exists(appConfigPath)) {
     // If app.config.ts doesn't exist, skip this step
+    context.logger.info(
+      `${appConfigPath} does not exist. Skipping Material animation provider setup.`,
+    );
     return;
   }
 
@@ -160,6 +145,7 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
     appConfigContent.includes('provideAnimations') ||
     appConfigContent.includes('provideNoopAnimations')
   ) {
+    context.logger.info(`Material animation provider is already configured in ${appConfigPath}.`);
     return;
   }
 
@@ -185,10 +171,18 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
 
   // Find the providers array and add new providers
   const providersRegex = /providers:\s*\[/;
-  appConfigContent = appConfigContent.replace(
+  const updatedAppConfigContent = appConfigContent.replace(
     providersRegex,
     `providers: [\n    ${providerToAdd},\n   `,
   );
 
-  tree.overwrite(appConfigPath, appConfigContent);
+  if (updatedAppConfigContent === appConfigContent) {
+    context.logger.warn(
+      `Could not find providers array in ${appConfigPath}. Skipping Material animation provider setup.`,
+    );
+    return;
+  }
+
+  tree.overwrite(appConfigPath, updatedAppConfigContent);
+  context.logger.info(`Added ${providerToAdd} to ${appConfigPath}.`);
 }

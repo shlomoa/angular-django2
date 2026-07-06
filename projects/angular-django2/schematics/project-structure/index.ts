@@ -1,45 +1,20 @@
-import type { Rule, Tree } from '@angular-devkit/schematics';
-import { SchematicsException } from '@angular-devkit/schematics';
+import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
+import { readWorkspace, requireWorkspaceProject } from '../utility/workspace';
+import { BARREL_CONTENT, DIRECTORIES } from '../utility/directory-structure';
 
 interface ProjectStructureOptions {
   project: string;
   prefix: string;
 }
 
-interface WorkspaceConfig {
-  projects: Record<
-    string,
-    {
-      root?: string;
-      sourceRoot?: string;
-    }
-  >;
-}
-
-const BARREL_CONTENT = `// Public API for this directory
-export {};
-`;
-
-const DIRECTORIES = ['core', 'shared/components', 'shared/pipes', 'features'] as const;
-
 export function projectStructure(options: ProjectStructureOptions): Rule {
-  return (tree: Tree) => {
+  return (tree: Tree, context: SchematicContext) => {
     const { project } = options;
 
     // Validate project exists
-    const angularJsonPath = '/angular.json';
-    const angularJsonBuffer = tree.read(angularJsonPath);
-    if (!angularJsonBuffer) {
-      throw new SchematicsException('Could not find angular.json in the workspace.');
-    }
+    const workspace = readWorkspace(tree);
+    const projectConfig = requireWorkspaceProject(workspace, project);
 
-    const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
-    if (!workspace.projects[project]) {
-      throw new SchematicsException(`Project "${project}" not found in angular.json.`);
-    }
-
-    // Determine the project path from angular.json
-    const projectConfig = workspace.projects[project];
     const projectRoot = projectConfig.root || '';
     const appRoot = projectRoot ? `${projectRoot}/src/app` : 'src/app';
 
@@ -53,18 +28,28 @@ export function projectStructure(options: ProjectStructureOptions): Rule {
         const existingContent = tree.read(indexPath)!.toString().trim();
         // Only skip if the file has meaningful content beyond the barrel export
         if (existingContent && existingContent !== BARREL_CONTENT.trim()) {
+          context.logger.info(`Skipping existing non-empty barrel file ${indexPath}.`);
           continue;
         }
       }
 
       // Create or overwrite with barrel content
-      tree.create(indexPath, BARREL_CONTENT);
+      if (tree.exists(indexPath)) {
+        tree.overwrite(indexPath, BARREL_CONTENT);
+        context.logger.info(`Updated barrel file ${indexPath}.`);
+      } else {
+        tree.create(indexPath, BARREL_CONTENT);
+        context.logger.info(`Created barrel file ${indexPath}.`);
+      }
     }
 
     // Also ensure shared/index.ts exists
     const sharedIndexPath = `${appRoot}/shared/index.ts`;
     if (!tree.exists(sharedIndexPath)) {
       tree.create(sharedIndexPath, BARREL_CONTENT);
+      context.logger.info(`Created barrel file ${sharedIndexPath}.`);
+    } else {
+      context.logger.info(`Barrel file ${sharedIndexPath} already exists.`);
     }
 
     return tree;

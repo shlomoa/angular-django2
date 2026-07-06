@@ -2,127 +2,23 @@ import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
 import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import type { NgAppSchema } from './schema';
-
-/**
- * Material App Shell Template for app.component.html
- * Responsive sidenav layout with toolbar and content area
- */
-const APP_SHELL_TEMPLATE = `<mat-toolbar color="primary">
-  <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span>{{ title }}</span>
-</mat-toolbar>
-
-<mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer mode="side" opened class="sidenav">
-    <mat-nav-list>
-      <a mat-list-item routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <mat-icon matListItemIcon>home</mat-icon>
-        <span matListItemTitle>Home</span>
-      </a>
-    </mat-nav-list>
-  </mat-sidenav>
-
-  <mat-sidenav-content>
-    <div class="content">
-      <router-outlet />
-    </div>
-  </mat-sidenav-content>
-</mat-sidenav-container>
-`;
-
-/**
- * Material App Shell Styles for app.component.scss
- */
-const APP_SHELL_STYLES = `.sidenav-container {
-  position: absolute;
-  top: 64px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-
-.sidenav {
-  width: 250px;
-}
-
-.content {
-  padding: 20px;
-}
-
-mat-toolbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2;
-}
-`;
-
-/**
- * Material App Shell Component TypeScript
- */
-const APP_SHELL_COMPONENT_TS = `import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatIconModule } from '@angular/material/icon';
-
-@Component({
-  selector: 'app-root',
-  imports: [
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    MatToolbarModule,
-    MatButtonModule,
-    MatSidenavModule,
-    MatListModule,
-    MatIconModule,
-  ],
-  templateUrl: './TEMPLATE_FILE',
-  styleUrl: './STYLE_FILE',
-})
-export class CLASS_NAME {
-  title = 'REPLACE_APP_NAME';
-}
-`;
-
-interface WorkspaceConfig {
-  projects: Record<
-    string,
-    {
-      root?: string;
-      sourceRoot?: string;
-      architect?: {
-        build?: {
-          options?: {
-            styles?: string[];
-          };
-        };
-      };
-    }
-  >;
-}
-
-const THEME_MAPPING: Record<string, string> = {
-  'indigo-pink': '@angular/material/prebuilt-themes/indigo-pink.css',
-  'deeppurple-amber': '@angular/material/prebuilt-themes/deeppurple-amber.css',
-  'pink-bluegrey': '@angular/material/prebuilt-themes/pink-bluegrey.css',
-  'purple-green': '@angular/material/prebuilt-themes/purple-green.css',
-};
-
-const BARREL_CONTENT = `// Public API for this directory
-export {};
-`;
-
-const MATERIAL_ICONS_STYLESHEET_HREF = 'https://fonts.googleapis.com/icon?family=Material+Icons';
-const MATERIAL_ICONS_STYLESHEET_LINK = `<link rel="stylesheet" href="${MATERIAL_ICONS_STYLESHEET_HREF}" />`;
-
-const DIRECTORIES = ['core', 'shared/components', 'shared/pipes', 'features'] as const;
+import { ensureDependency, readPackageJson, writePackageJson } from '../utility/package-json';
+import type { WorkspaceConfig } from '../utility/workspace';
+import {
+  ANGULAR_JSON_PATH,
+  readWorkspace,
+  requireWorkspaceProject,
+  writeWorkspace,
+} from '../utility/workspace';
+import {
+  APP_SHELL_COMPONENT_TS,
+  APP_SHELL_STYLES,
+  APP_SHELL_TEMPLATE,
+  MATERIAL_ICONS_STYLESHEET_HREF,
+  MATERIAL_ICONS_STYLESHEET_LINK,
+  THEME_MAPPING,
+} from '../utility/material-constants';
+import { BARREL_CONTENT, DIRECTORIES } from '../utility/directory-structure';
 
 type ResolvedNgAppSchema = Required<NgAppSchema>;
 
@@ -149,36 +45,10 @@ function resolveNgAppOptions(options: NgAppSchema): ResolvedNgAppSchema {
 export function ngApp(options: NgAppSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const resolvedOptions = resolveNgAppOptions(options);
-    const angularJsonPath = '/angular.json';
-    const angularJsonBuffer = tree.read(angularJsonPath);
 
-    let projectExists = false;
-    if (angularJsonBuffer) {
-      try {
-        const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
-        projectExists = !!workspace.projects[resolvedOptions.name];
-      } catch {
-        projectExists = false;
-      }
-    }
-
-    if (!projectExists) {
-      // externalSchematic is async — chain() ensures it completes before material setup runs
-      return chain([
-        externalSchematic('@schematics/angular', 'application', {
-          name: resolvedOptions.name,
-          routing: resolvedOptions.routing,
-          standalone: resolvedOptions.standalone,
-          ssr: resolvedOptions.ssr,
-          zoneless: resolvedOptions.zoneless,
-          style: resolvedOptions.style,
-          prefix: resolvedOptions.prefix,
-        }),
-        (innerTree: Tree, innerContext: SchematicContext) => {
-          applyMaterialSetup(innerTree, innerContext, resolvedOptions);
-          return innerTree;
-        },
-      ])(tree, context);
+    if (!workspaceProjectExists(tree, resolvedOptions.name)) {
+      context.logger.info(`Generating Angular application '${resolvedOptions.name}'.`);
+      return createApplicationThenApplyMaterialSetup(resolvedOptions)(tree, context);
     }
 
     context.logger.info(
@@ -189,53 +59,89 @@ export function ngApp(options: NgAppSchema): Rule {
   };
 }
 
+function workspaceProjectExists(tree: Tree, projectName: string): boolean {
+  const angularJsonBuffer = tree.read(ANGULAR_JSON_PATH);
+  if (!angularJsonBuffer) {
+    return false;
+  }
+
+  try {
+    const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
+    return !!workspace.projects?.[projectName];
+  } catch {
+    return false;
+  }
+}
+
+function createApplicationThenApplyMaterialSetup(options: ResolvedNgAppSchema): Rule {
+  // externalSchematic is async — chain() ensures Material setup runs after app generation.
+  return chain([generateAngularApplication(options), applyMaterialSetupRule(options)]);
+}
+
+function generateAngularApplication(options: ResolvedNgAppSchema): Rule {
+  return externalSchematic('@schematics/angular', 'application', {
+    name: options.name,
+    routing: options.routing,
+    standalone: options.standalone,
+    ssr: options.ssr,
+    zoneless: options.zoneless,
+    style: options.style,
+    prefix: options.prefix,
+  });
+}
+
+function applyMaterialSetupRule(options: ResolvedNgAppSchema): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    applyMaterialSetup(tree, context, options);
+    return tree;
+  };
+}
+
 function applyMaterialSetup(
   tree: Tree,
   context: SchematicContext,
   options: ResolvedNgAppSchema,
 ): void {
   addMaterialDependencies(tree, context);
-  configureMaterial(tree, options.name, options.theme, options.typography, options.animations);
-  createDirectoryStructure(tree, options.name);
-  updateIndexHtmlWithMaterialIcons(tree, options.name);
-  generateMaterialAppShell(tree, options.name, options.style);
+  configureMaterial(
+    tree,
+    context,
+    options.name,
+    options.theme,
+    options.typography,
+    options.animations,
+  );
+  createDirectoryStructure(tree, context, options.name);
+  updateIndexHtmlWithMaterialIcons(tree, context, options.name);
+  generateMaterialAppShell(tree, context, options.name, options.style);
 }
 
 /**
  * Add @angular/material and @angular/cdk to package.json dependencies
  */
 function addMaterialDependencies(tree: Tree, context: SchematicContext): void {
-  const packageJsonPath = '/package.json';
-  const packageJsonBuffer = tree.read(packageJsonPath);
+  const pkg = readPackageJson(tree, context);
+  if (!pkg) return;
 
-  if (!packageJsonBuffer) {
-    context.logger.warn('Could not find package.json. Skipping Material dependency installation.');
+  // Use the same version as the Angular version if possible
+  const angularVersion = pkg.dependencies?.['@angular/core'] ?? '^22.0.0';
+
+  // Add Material and CDK dependencies if not already present
+  const addedDependencies = [
+    ensureDependency(pkg, '@angular/material', angularVersion) ? '@angular/material' : undefined,
+    ensureDependency(pkg, '@angular/cdk', angularVersion) ? '@angular/cdk' : undefined,
+    ensureDependency(pkg, '@angular/animations', angularVersion)
+      ? '@angular/animations'
+      : undefined,
+  ].filter((name): name is string => !!name);
+
+  if (addedDependencies.length === 0) {
+    context.logger.info('Angular Material dependencies are already configured.');
     return;
   }
 
-  const packageJson = JSON.parse(packageJsonBuffer.toString());
-
-  // Add Material and CDK dependencies if not already present
-  if (!packageJson.dependencies) {
-    packageJson.dependencies = {};
-  }
-
-  // Use the same version as the Angular version if possible
-  const angularVersion = packageJson.dependencies['@angular/core'] || '^22.0.0';
-
-  if (!packageJson.dependencies['@angular/material']) {
-    packageJson.dependencies['@angular/material'] = angularVersion;
-  }
-
-  if (!packageJson.dependencies['@angular/cdk']) {
-    packageJson.dependencies['@angular/cdk'] = angularVersion;
-  }
-
-  if (!packageJson.dependencies['@angular/animations']) {
-    packageJson.dependencies['@angular/animations'] = angularVersion;
-  }
-
-  tree.overwrite(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+  writePackageJson(tree, pkg);
+  context.logger.info(`Added Angular Material dependencies: ${addedDependencies.join(', ')}.`);
 
   // Schedule npm install
   context.addTask(new NodePackageInstallTask());
@@ -246,64 +152,60 @@ function addMaterialDependencies(tree: Tree, context: SchematicContext): void {
  */
 function configureMaterial(
   tree: Tree,
+  context: SchematicContext,
   projectName: string,
   theme: string,
   typography: boolean,
   animations: boolean,
 ): void {
   // Validate project exists
-  const angularJsonPath = '/angular.json';
-  const angularJsonBuffer = tree.read(angularJsonPath);
-  if (!angularJsonBuffer) {
-    throw new SchematicsException('Could not find angular.json in the workspace.');
-  }
-
-  const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
-  if (!workspace.projects[projectName]) {
-    throw new SchematicsException(`Project "${projectName}" not found in angular.json.`);
-  }
+  const workspace = readWorkspace(tree);
+  const projectConfig = requireWorkspaceProject(workspace, projectName);
 
   // Determine the project path from angular.json
-  const projectConfig = workspace.projects[projectName];
   const projectRoot = projectConfig.root || '';
   const stylesPath = projectRoot ? `${projectRoot}/src/styles.scss` : 'src/styles.scss';
 
   // Update angular.json for prebuilt themes
   if (theme !== 'custom') {
-    updateAngularJsonStyles(tree, workspace, projectName, THEME_MAPPING[theme]);
+    updateAngularJsonStyles(tree, context, workspace, projectName, THEME_MAPPING[theme]);
   }
 
   // Update styles.scss
-  updateStylesFile(tree, stylesPath, theme, typography);
+  updateStylesFile(tree, context, stylesPath, theme, typography);
 
   // Update app.config.ts to include Material providers
-  updateAppConfig(tree, projectRoot, animations);
+  updateAppConfig(tree, context, projectRoot, animations);
 }
 
 function updateAngularJsonStyles(
   tree: Tree,
+  context: SchematicContext,
   workspace: WorkspaceConfig,
   project: string,
   themePath: string,
 ): void {
-  const angularJsonPath = '/angular.json';
-
-  if (!workspace.projects[project].architect?.build?.options) {
+  const projectConfig = workspace.projects?.[project];
+  if (!projectConfig?.architect?.build?.options) {
     throw new SchematicsException(`Build options not found for project "${project}".`);
   }
 
-  const buildOptions = workspace.projects[project].architect!.build!.options!;
+  const buildOptions = projectConfig!.architect!.build!.options!;
   const styles = buildOptions.styles || [];
 
   // Check if the theme is already added (idempotency)
   if (!styles.includes(themePath)) {
     buildOptions.styles = [themePath, ...styles];
-    tree.overwrite(angularJsonPath, `${JSON.stringify(workspace, null, 2)}\n`);
+    writeWorkspace(tree, workspace);
+    context.logger.info(`Added Angular Material theme "${themePath}" to project "${project}".`);
+  } else {
+    context.logger.info(`Angular Material theme "${themePath}" is already configured.`);
   }
 }
 
 function updateStylesFile(
   tree: Tree,
+  context: SchematicContext,
   stylesPath: string,
   theme: string,
   typography: boolean,
@@ -316,6 +218,7 @@ function updateStylesFile(
 
   // Check if Material styles are already configured (idempotency)
   if (stylesContent.includes("@use '@angular/material'")) {
+    context.logger.info(`Angular Material styles are already configured in ${stylesPath}.`);
     return;
   }
 
@@ -352,16 +255,26 @@ $theme: mat.define-light-theme((
 
   if (tree.exists(stylesPath)) {
     tree.overwrite(stylesPath, stylesContent);
+    context.logger.info(`Updated ${stylesPath} with Angular Material style configuration.`);
   } else {
     tree.create(stylesPath, stylesContent);
+    context.logger.info(`Created ${stylesPath} with Angular Material style configuration.`);
   }
 }
 
-function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): void {
+function updateAppConfig(
+  tree: Tree,
+  context: SchematicContext,
+  projectRoot: string,
+  animations: boolean,
+): void {
   const appConfigPath = `${projectRoot}/src/app/app.config.ts`;
 
   if (!tree.exists(appConfigPath)) {
     // If app.config.ts doesn't exist, skip this step
+    context.logger.info(
+      `${appConfigPath} does not exist. Skipping Material animation provider setup.`,
+    );
     return;
   }
 
@@ -372,6 +285,7 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
     appConfigContent.includes('provideAnimations') ||
     appConfigContent.includes('provideNoopAnimations')
   ) {
+    context.logger.info(`Material animation provider is already configured in ${appConfigPath}.`);
     return;
   }
 
@@ -397,30 +311,33 @@ function updateAppConfig(tree: Tree, projectRoot: string, animations: boolean): 
 
   // Find the providers array and add new providers
   const providersRegex = /providers:\s*\[/;
-  appConfigContent = appConfigContent.replace(
+  const updatedAppConfigContent = appConfigContent.replace(
     providersRegex,
     `providers: [\n    ${providerToAdd},\n   `,
   );
 
-  tree.overwrite(appConfigPath, appConfigContent);
+  if (updatedAppConfigContent === appConfigContent) {
+    context.logger.warn(
+      `Could not find providers array in ${appConfigPath}. Skipping Material animation provider setup.`,
+    );
+    return;
+  }
+
+  tree.overwrite(appConfigPath, updatedAppConfigContent);
+  context.logger.info(`Added ${providerToAdd} to ${appConfigPath}.`);
 }
 
 /**
  * Create standard directory structure
  */
-function createDirectoryStructure(tree: Tree, projectName: string): void {
+function createDirectoryStructure(
+  tree: Tree,
+  context: SchematicContext,
+  projectName: string,
+): void {
   // Read angular.json to get the actual project root
-  const angularJsonPath = '/angular.json';
-  const angularJsonBuffer = tree.read(angularJsonPath);
-  if (!angularJsonBuffer) {
-    throw new SchematicsException('Could not find angular.json in the workspace.');
-  }
-
-  const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
-  const projectConfig = workspace.projects[projectName];
-  if (!projectConfig) {
-    throw new SchematicsException(`Project "${projectName}" not found in angular.json.`);
-  }
+  const workspace = readWorkspace(tree);
+  const projectConfig = requireWorkspaceProject(workspace, projectName);
 
   const projectRoot = projectConfig.root || '';
   const appRoot = projectRoot ? `${projectRoot}/src/app` : 'src/app';
@@ -435,52 +352,64 @@ function createDirectoryStructure(tree: Tree, projectName: string): void {
       const existingContent = tree.read(indexPath)!.toString().trim();
       // Only skip if the file has meaningful content beyond the barrel export
       if (existingContent && existingContent !== BARREL_CONTENT.trim()) {
+        context.logger.info(`Skipping existing non-empty barrel file ${indexPath}.`);
         continue;
       }
     }
 
     // Create or overwrite with barrel content
-    tree.create(indexPath, BARREL_CONTENT);
+    if (tree.exists(indexPath)) {
+      tree.overwrite(indexPath, BARREL_CONTENT);
+      context.logger.info(`Updated barrel file ${indexPath}.`);
+    } else {
+      tree.create(indexPath, BARREL_CONTENT);
+      context.logger.info(`Created barrel file ${indexPath}.`);
+    }
   }
 
   // Also ensure shared/index.ts exists
   const sharedIndexPath = `${appRoot}/shared/index.ts`;
   if (!tree.exists(sharedIndexPath)) {
     tree.create(sharedIndexPath, BARREL_CONTENT);
+    context.logger.info(`Created barrel file ${sharedIndexPath}.`);
+  } else {
+    context.logger.info(`Barrel file ${sharedIndexPath} already exists.`);
   }
 }
 
 /**
  * Add the Google Material Icons font stylesheet required by mat-icon ligatures.
  */
-function updateIndexHtmlWithMaterialIcons(tree: Tree, projectName: string): void {
-  const angularJsonPath = '/angular.json';
-  const angularJsonBuffer = tree.read(angularJsonPath);
-  if (!angularJsonBuffer) {
-    throw new SchematicsException('Could not find angular.json in the workspace.');
-  }
-
-  const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
-  const projectConfig = workspace.projects[projectName];
-  if (!projectConfig) {
-    throw new SchematicsException(`Project "${projectName}" not found in angular.json.`);
-  }
+function updateIndexHtmlWithMaterialIcons(
+  tree: Tree,
+  context: SchematicContext,
+  projectName: string,
+): void {
+  const workspace = readWorkspace(tree);
+  const projectConfig = requireWorkspaceProject(workspace, projectName);
 
   const projectRoot = projectConfig.root || '';
   const indexHtmlPath = projectRoot ? `${projectRoot}/src/index.html` : 'src/index.html';
 
   if (!tree.exists(indexHtmlPath)) {
+    context.logger.info(
+      `${indexHtmlPath} does not exist. Skipping Material Icons stylesheet setup.`,
+    );
     return;
   }
 
   const indexHtml = tree.read(indexHtmlPath)!.toString();
   if (indexHtml.includes(MATERIAL_ICONS_STYLESHEET_HREF)) {
+    context.logger.info(`Material Icons stylesheet is already configured in ${indexHtmlPath}.`);
     return;
   }
 
   const closingHeadRegex = /^([ \t]*)<\/head>/im;
   const closingHeadMatch = indexHtml.match(closingHeadRegex);
   if (!closingHeadMatch) {
+    context.logger.warn(
+      `Could not find closing </head> tag in ${indexHtmlPath}. Skipping Material Icons stylesheet setup.`,
+    );
     return;
   }
 
@@ -492,24 +421,21 @@ function updateIndexHtmlWithMaterialIcons(tree: Tree, projectName: string): void
       `${indentation}${MATERIAL_ICONS_STYLESHEET_LINK}\n${closingHeadMatch[0]}`,
     ),
   );
+  context.logger.info(`Added Material Icons stylesheet to ${indexHtmlPath}.`);
 }
 
 /**
  * Generate Material App Shell by updating app.component files
  */
-function generateMaterialAppShell(tree: Tree, projectName: string, style: string): void {
+function generateMaterialAppShell(
+  tree: Tree,
+  context: SchematicContext,
+  projectName: string,
+  style: string,
+): void {
   // Read angular.json to get the actual project root
-  const angularJsonPath = '/angular.json';
-  const angularJsonBuffer = tree.read(angularJsonPath);
-  if (!angularJsonBuffer) {
-    throw new SchematicsException('Could not find angular.json in the workspace.');
-  }
-
-  const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
-  const projectConfig = workspace.projects[projectName];
-  if (!projectConfig) {
-    throw new SchematicsException(`Project "${projectName}" not found in angular.json.`);
-  }
+  const workspace = readWorkspace(tree);
+  const projectConfig = requireWorkspaceProject(workspace, projectName);
 
   const projectRoot = projectConfig.root || '';
   const appRoot = projectRoot ? `${projectRoot}/src/app` : 'src/app';
@@ -521,6 +447,9 @@ function generateMaterialAppShell(tree: Tree, projectName: string, style: string
   const htmlPath = htmlPaths.find((p) => tree.exists(p));
   if (htmlPath) {
     tree.overwrite(htmlPath, APP_SHELL_TEMPLATE);
+    context.logger.info(`Updated Material app shell template ${htmlPath}.`);
+  } else {
+    context.logger.warn(`Could not find app template file for project "${projectName}".`);
   }
 
   // Update app style file
@@ -532,6 +461,9 @@ function generateMaterialAppShell(tree: Tree, projectName: string, style: string
   const stylePath = stylePaths.find((p) => tree.exists(p));
   if (stylePath) {
     tree.overwrite(stylePath, APP_SHELL_STYLES);
+    context.logger.info(`Updated Material app shell styles ${stylePath}.`);
+  } else {
+    context.logger.warn(`Could not find app style file for project "${projectName}".`);
   }
 
   // Update app TypeScript file
@@ -550,5 +482,10 @@ function generateMaterialAppShell(tree: Tree, projectName: string, style: string
       .replace('STYLE_FILE', styleFile)
       .replace('CLASS_NAME', className);
     tree.overwrite(tsPath, componentContent);
+    context.logger.info(`Updated Material app shell component ${tsPath}.`);
+  } else {
+    context.logger.warn(
+      `Could not find app component TypeScript file for project "${projectName}".`,
+    );
   }
 }

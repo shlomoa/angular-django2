@@ -1,14 +1,6 @@
 import type { JsonObject } from '@angular-devkit/core';
 import type { Tree } from '@angular-devkit/schematics';
-
-interface WorkspaceConfig {
-  projects?: Record<
-    string,
-    {
-      root?: string;
-    }
-  >;
-}
+import type { WorkspaceConfig } from './workspace';
 
 /**
  * Resolve pass-through generator paths relative to the selected Angular project.
