@@ -122,13 +122,16 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
     begin/end embedding hooks into the generated files — TypeScript `import`,
     `injected services`, `input signals`, and `output signals` sections plus a
     template `children` section — so components can be embedded later
-  - `embed-component`: wire a generated child component into a parent using the
-    embedding hooks; options: `--component` (child component `.ts` path),
-    `--parent` (parent component `.ts` path); it adds the child element after
-    the parent template `children` marker (feeding input signals and binding
-    output signals to `on<Output>()` handlers), imports the child class,
-    registers it in the parent `imports` array, and adds not-implemented
-    `on<Output>()` handler stubs
+  - `embed-component`: wire a child component into a parent using the embedding
+    hooks. In file mode, options are `--component` (child component `.ts` path)
+    and `--parent` (parent component `.ts` path). In package mode (add
+    `--from=<module>`), `--component` is the exported class name and
+    `--selector`/`--inputs`/`--outputs` describe the wiring, so existing
+    components such as Angular Material's `MatDateRangePicker` can be embedded.
+    In both modes it adds the child element after the parent template
+    `children` marker (feeding inputs and binding outputs to `on<Output>()`
+    handlers), imports the child class, registers it in the parent `imports`
+    array, and adds not-implemented `on<Output>()` handler stubs
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `material-setup`: configure Angular Material theming (prebuilt or custom)
     and providers in an existing project; options: `--theme`, `--typography`,
