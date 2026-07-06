@@ -627,4 +627,104 @@ export const appConfig: ApplicationConfig = {
       expect(tree2.files).toContain('/projects/test-app/src/app/core/index.ts');
     });
   });
+
+  describe('component and embed-component schematic integration', () => {
+    let angularRunner: SchematicTestRunner;
+
+    const setupWorkspace = async (): Promise<UnitTestTree> => {
+      let tree: UnitTestTree = Tree.empty() as UnitTestTree;
+      tree = await angularRunner.runSchematic(
+        'workspace',
+        { name: 'demo', version: '22.0.0', newProjectRoot: 'projects' },
+        tree,
+      );
+      tree = await angularRunner.runSchematic(
+        'application',
+        { name: 'app', standalone: true, routing: false, style: 'scss', zoneless: true },
+        tree,
+      );
+      return tree;
+    };
+
+    beforeEach(() => {
+      angularRunner = new SchematicTestRunner(
+        '@schematics/angular',
+        path.join(__dirname, '../node_modules/@schematics/angular/collection.json'),
+      );
+    });
+
+    it('INT-CMP-01: adds section markers to the generated component TypeScript and template', async () => {
+      let tree = await setupWorkspace();
+
+      tree = (await runner.runSchematic(
+        'component',
+        { name: 'hero-card', project: 'app' },
+        tree,
+      )) as UnitTestTree;
+
+      const componentTs = tree.readContent('/projects/app/src/app/hero-card/hero-card.ts');
+      expect(componentTs).toContain('// Begin import section');
+      expect(componentTs).toContain('// End import section');
+      expect(componentTs).toContain('// Begin injected services section');
+      expect(componentTs).toContain('// Begin input signals section');
+      expect(componentTs).toContain('// Begin output signals section');
+
+      const componentHtml = tree.readContent('/projects/app/src/app/hero-card/hero-card.html');
+      expect(componentHtml).toContain('<!-- Begin children section -->');
+      expect(componentHtml).toContain('<!-- End children section -->');
+    });
+
+    it('INT-CMP-02: embeds a child component into a parent, wiring signals and stubs', async () => {
+      let tree = await setupWorkspace();
+
+      tree = (await runner.runSchematic(
+        'component',
+        { name: 'hero-card', project: 'app' },
+        tree,
+      )) as UnitTestTree;
+      tree = (await runner.runSchematic(
+        'component',
+        { name: 'dashboard', project: 'app' },
+        tree,
+      )) as UnitTestTree;
+
+      // Add input/output signals to the child using its marked sections.
+      const childPath = '/projects/app/src/app/hero-card/hero-card.ts';
+      const childTs = tree
+        .readContent(childPath)
+        .replace(
+          '// End import section',
+          "import { input, output } from '@angular/core';\n// End import section",
+        )
+        .replace(
+          '  // End input signals section',
+          '  readonly title = input<string>();\n  // End input signals section',
+        )
+        .replace(
+          '  // End output signals section',
+          '  readonly selected = output<string>();\n  // End output signals section',
+        );
+      tree.overwrite(childPath, childTs);
+
+      tree = (await runner.runSchematic(
+        'embed-component',
+        {
+          component: 'projects/app/src/app/hero-card/hero-card.ts',
+          parent: 'projects/app/src/app/dashboard/dashboard.ts',
+        },
+        tree,
+      )) as UnitTestTree;
+
+      const parentTs = tree.readContent('/projects/app/src/app/dashboard/dashboard.ts');
+      expect(parentTs).toContain("import { HeroCard } from '../hero-card/hero-card';");
+      expect(parentTs).toContain('imports: [HeroCard]');
+      expect(parentTs).toContain('onSelected($event: unknown): void {');
+      expect(parentTs).toContain("throw new Error('onSelected is not implemented');");
+
+      const parentHtml = tree.readContent('/projects/app/src/app/dashboard/dashboard.html');
+      expect(parentHtml).toContain(
+        '<app-hero-card [title]="undefined" (selected)="onSelected($event)"></app-hero-card>',
+      );
+    });
+  });
 });

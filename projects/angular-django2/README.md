@@ -11,7 +11,7 @@ The initial package surface is intentionally small:
 - `provideAngularDjango2(...)` for root-level configuration
 - `ANGULAR_DJANGO2_CONFIG` for DI-based access to resolved config
 - `AngularDjango2Service` for URL and CSRF helper methods
-- schematics for `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
+- schematics for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
 
 ## Usage
 
@@ -55,6 +55,7 @@ ng generate angular-django2:material-setup --project=my-app
 ng generate angular-django2:project-structure --project=my-app
 ng generate angular-django2:app-shell --project my-app
 ng generate angular-django2:component dashboard-card
+ng generate angular-django2:embed-component --component=projects/my-app/src/app/hero-card/hero-card.ts --parent=projects/my-app/src/app/dashboard-card/dashboard-card.ts
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
 ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
@@ -69,7 +70,13 @@ Current defaults:
 - `material-setup`: configures Angular Material with theme and providers
   - Options: `--theme` (indigo-pink, deeppurple-amber, pink-bluegrey, purple-green, custom), `--typography`, `--animations`
 - `project-structure`: creates standard directory structure (`core/`, `shared/`, `features/`) with barrel exports
-- `component`: `standalone: true`, `changeDetection: 'OnPush'`
+- `component`: `standalone: true`, `changeDetection: 'OnPush'`; also seeds begin/end embedding hooks into the generated files
+  - TypeScript sections: `import`, `injected services`, `input signals`, `output signals`
+  - Template section: `children`
+- `embed-component`: wires a generated child component into a parent using the embedding hooks
+  - Options: `--component` (child component `.ts` path), `--parent` (parent component `.ts` path)
+  - Inserts the child element after the parent template `children` marker, feeding input signals and binding output signals to `on<Output>($event)` handlers
+  - Imports the child class, registers it in the parent `imports` array, and adds not-implemented `on<Output>()` handler stubs; the operation is idempotent
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
 - `ng-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav app shell
   - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--defaults`, `--style`, `--prefix`

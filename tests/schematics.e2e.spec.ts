@@ -568,4 +568,144 @@ describe('angular-django2 schematics E2E tests', () => {
       }
     },
   );
+
+  it(
+    'E2E-04: component hooks and embed-component wire a child into a parent in a buildable app',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      // Setup
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'embed-test-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+
+      // For executing ng new outside the workspace scope to bypass the CLI workspace check
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      console.log(`\n[E2E-04] Test workspace: ${workspacePath}`);
+
+      try {
+        // Step 1: Create Angular workspace with a default application
+        console.log('[E2E-04] Creating Angular workspace...');
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        console.log('[E2E-04] ✓ Workspace created');
+
+        // Step 2: Install dependencies and angular-django2
+        console.log('[E2E-04] Installing dependencies...');
+        execCommand('npm install', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+        console.log('[E2E-04] ✓ Dependencies installed');
+
+        // Step 3: Generate two components with embedding hooks
+        console.log('[E2E-04] Generating components...');
+        execAngularCli(['generate', 'angular-django2:component', 'hero-card'], appPath);
+        execAngularCli(['generate', 'angular-django2:component', 'dashboard'], appPath);
+        console.log('[E2E-04] ✓ Components generated');
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        const childTsPath = path.join(appRoot, 'hero-card', 'hero-card.ts');
+        const childHtmlPath = path.join(appRoot, 'hero-card', 'hero-card.html');
+        const parentTsPath = path.join(appRoot, 'dashboard', 'dashboard.ts');
+        const parentHtmlPath = path.join(appRoot, 'dashboard', 'dashboard.html');
+
+        // Verify the generated component includes the embedding hooks
+        const childTsInitial = fs.readFileSync(childTsPath, 'utf8');
+        expect(childTsInitial).toContain('// Begin import section');
+        expect(childTsInitial).toContain('// Begin injected services section');
+        expect(childTsInitial).toContain('// Begin input signals section');
+        expect(childTsInitial).toContain('// Begin output signals section');
+        expect(fs.readFileSync(childHtmlPath, 'utf8')).toContain('<!-- Begin children section -->');
+        console.log('[E2E-04] ✓ Component hooks verified');
+
+        // Step 4: Add input/output signals to the child inside its marked sections
+        const childTsWithSignals = childTsInitial
+          .replace(
+            '// End import section',
+            "import { input, output } from '@angular/core';\n// End import section",
+          )
+          .replace(
+            '  // End input signals section',
+            '  readonly title = input<string>();\n  // End input signals section',
+          )
+          .replace(
+            '  // End output signals section',
+            '  readonly selected = output<string>();\n  // End output signals section',
+          );
+        fs.writeFileSync(childTsPath, childTsWithSignals);
+
+        // Step 5: Embed the child into the parent
+        console.log('[E2E-04] Embedding hero-card into dashboard...');
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:embed-component',
+            '--component=src/app/hero-card/hero-card.ts',
+            '--parent=src/app/dashboard/dashboard.ts',
+          ],
+          appPath,
+        );
+        console.log('[E2E-04] ✓ embed-component schematic completed');
+
+        // Verify the parent TypeScript wiring
+        const parentTs = fs.readFileSync(parentTsPath, 'utf8');
+        expect(parentTs).toContain("import { HeroCard } from '../hero-card/hero-card';");
+        expect(parentTs).toContain('imports: [HeroCard]');
+        expect(parentTs).toContain('onSelected($event: unknown): void {');
+        expect(parentTs).toContain("throw new Error('onSelected is not implemented');");
+
+        // Verify the parent template wiring
+        const parentHtml = fs.readFileSync(parentHtmlPath, 'utf8');
+        expect(parentHtml).toContain(
+          '<app-hero-card [title]="undefined" (selected)="onSelected($event)"></app-hero-card>',
+        );
+        console.log('[E2E-04] ✓ Parent wiring verified');
+
+        // Step 6: Embed the dashboard into the root app component and build
+        const appComponentPath = fs.existsSync(path.join(appRoot, 'app.ts'))
+          ? path.join(appRoot, 'app.ts')
+          : path.join(appRoot, 'app.component.ts');
+        const appComponentHtmlPath = fs.existsSync(path.join(appRoot, 'app.html'))
+          ? path.join(appRoot, 'app.html')
+          : path.join(appRoot, 'app.component.html');
+        const appComponentRelTs = path.relative(appPath, appComponentPath).replace(/\\/g, '/');
+
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:embed-component',
+            '--component=src/app/dashboard/dashboard.ts',
+            `--parent=${appComponentRelTs}`,
+          ],
+          appPath,
+        );
+
+        expect(fs.readFileSync(appComponentPath, 'utf8')).toContain('imports: [Dashboard]');
+        expect(fs.readFileSync(appComponentHtmlPath, 'utf8')).toContain('<app-dashboard>');
+        console.log('[E2E-04] ✓ Dashboard embedded into root app component');
+
+        console.log('[E2E-04] Building application...');
+        execAngularCli(['build', '--configuration=production'], appPath);
+        console.log('[E2E-04] ✓ Application built successfully');
+
+        console.log('[E2E-04] ✅ E2E test completed successfully');
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-04');
+      }
+    },
+  );
 });
