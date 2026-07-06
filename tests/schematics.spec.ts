@@ -86,7 +86,10 @@ describe('angular-django2 schematics', () => {
   });
 
   it('wraps the Angular component schematic with standalone and OnPush defaults', () => {
-    component({ changeDetection: 'Default', name: 'hero-card', standalone: false });
+    component({ changeDetection: 'Default', name: 'hero-card', standalone: false })(
+      Tree.empty(),
+      {} as never,
+    );
 
     expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'component', {
       changeDetection: 'Default',
@@ -96,7 +99,7 @@ describe('angular-django2 schematics', () => {
   });
 
   it('passes service options through to the Angular service schematic', () => {
-    service({ name: 'django-api', path: 'src/app/data' });
+    service({ name: 'django-api', path: 'src/app/data' })(Tree.empty(), {} as never);
 
     expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'service', {
       name: 'django-api',
@@ -105,10 +108,63 @@ describe('angular-django2 schematics', () => {
   });
 
   it('passes class options through to the Angular class schematic', () => {
-    classGenerator({ name: 'api-contract', project: 'demo-app' });
+    classGenerator({ name: 'api-contract', project: 'demo-app' })(Tree.empty(), {} as never);
 
     expect(mockedExternalSchematic).toHaveBeenCalledWith('@schematics/angular', 'class', {
       name: 'api-contract',
+      project: 'demo-app',
+    });
+  });
+
+  it('resolves pass-through generator paths relative to the selected project root', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/angular.json',
+      JSON.stringify({
+        version: 1,
+        projects: {
+          'demo-app': {
+            root: 'projects/demo-app',
+            sourceRoot: 'projects/demo-app/src',
+          },
+        },
+      }),
+    );
+
+    component({
+      name: 'dashboard-card',
+      project: 'demo-app',
+      path: 'src/app/features/dashboard',
+    })(tree, {} as never);
+
+    expect(mockedExternalSchematic).toHaveBeenLastCalledWith('@schematics/angular', 'component', {
+      changeDetection: 'OnPush',
+      name: 'dashboard-card',
+      path: 'projects/demo-app/src/app/features/dashboard',
+      project: 'demo-app',
+      standalone: true,
+    });
+
+    service({ name: 'api-status', project: 'demo-app', path: 'src/app/features/dashboard' })(
+      tree,
+      {} as never,
+    );
+
+    expect(mockedExternalSchematic).toHaveBeenLastCalledWith('@schematics/angular', 'service', {
+      name: 'api-status',
+      path: 'projects/demo-app/src/app/features/dashboard',
+      project: 'demo-app',
+    });
+
+    classGenerator({
+      name: 'user-summary',
+      project: 'demo-app',
+      path: 'src/app/features/dashboard',
+    })(tree, {} as never);
+
+    expect(mockedExternalSchematic).toHaveBeenLastCalledWith('@schematics/angular', 'class', {
+      name: 'user-summary',
+      path: 'projects/demo-app/src/app/features/dashboard',
       project: 'demo-app',
     });
   });
