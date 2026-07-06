@@ -789,10 +789,16 @@ describe('angular-django2 schematics E2E tests', () => {
         expect(parentTs).toContain("throw new Error('onOpened is not implemented');");
         expect(parentTs).toContain('onClosed($event: unknown): void {');
 
-        // Verify the parent template wiring
+        // Verify the parent template wiring. `ng generate` may run the
+        // workspace formatter, which can wrap the long element across multiple
+        // lines, so assert on the individual bindings rather than an exact
+        // single-line string.
         const parentHtml = fs.readFileSync(parentHtmlPath, 'utf8');
-        expect(parentHtml).toContain(
-          '<mat-date-range-picker (opened)="onOpened($event)" (closed)="onClosed($event)"></mat-date-range-picker>',
+        expect(parentHtml).toContain('<mat-date-range-picker');
+        expect(parentHtml).toContain('(opened)="onOpened($event)"');
+        expect(parentHtml).toContain('(closed)="onClosed($event)"');
+        expect(parentHtml.indexOf('<!-- Begin children section -->')).toBeLessThan(
+          parentHtml.indexOf('<mat-date-range-picker'),
         );
         console.log('[E2E-05] ✓ Parent wiring verified');
 

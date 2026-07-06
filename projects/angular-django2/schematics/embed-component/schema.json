@@ -38,6 +38,5 @@
       "type": "string",
       "description": "Comma-separated list of output names to bind to on<Output>() handlers (package mode only)."
     }
-  },
-  "required": ["component", "parent"]
+  }
 }

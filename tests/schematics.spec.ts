@@ -2225,4 +2225,23 @@ export class App {
       })(tree, createContext()),
     ).not.toThrow();
   });
+
+  it('TC-EMBED-11: throws when the component or parent argument is empty', () => {
+    const tree = createWorkspaceTree();
+
+    expect(() =>
+      embedComponent({
+        component: '',
+        parent: 'src/app/app.ts',
+      })(tree, createContext()),
+    ).toThrow(SchematicsException);
+
+    expect(() =>
+      embedComponent({
+        component: 'MatDateRangePicker',
+        parent: '  ',
+        from: '@angular/material/datepicker',
+      })(tree, createContext()),
+    ).toThrow(SchematicsException);
+  });
 });

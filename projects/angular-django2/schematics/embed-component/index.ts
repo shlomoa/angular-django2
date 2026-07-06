@@ -35,6 +35,17 @@ interface ChildComponent {
  */
 export function embedComponent(options: EmbedComponentSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
+    if (!options.component || !options.component.trim()) {
+      throw new SchematicsException(
+        'The "component" argument is required (a child component file path, or a class name in package mode).',
+      );
+    }
+    if (!options.parent || !options.parent.trim()) {
+      throw new SchematicsException(
+        'The "parent" argument is required (the parent component path).',
+      );
+    }
+
     const parentPath = normalizeTreePath(options.parent);
 
     if (!tree.exists(parentPath)) {
