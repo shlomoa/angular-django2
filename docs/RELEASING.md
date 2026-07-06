@@ -21,6 +21,35 @@ The published tarball contains:
 - the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `app-shell`, `service`, `class`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
 - the package README and manifest generated into `dist/angular-django2`
 
+## Versioning Script
+
+Use the checked-in versioning script through the root npm script:
+
+```bash
+npm run release:version -- patch
+```
+
+`npm run release:version` runs `tools/release-version.mjs`. The script is the
+source of truth for calculating the next package version and synchronizing the
+two checked-in package manifests.
+
+The script updates:
+
+- `package.json`
+- `projects/angular-django2/package.json`
+
+The script does not update:
+
+- `package-lock.json`
+- `README.md`
+- `CHANGELOG.md`
+- `dist/angular-django2/package.json`
+- Git commits or tags
+- GitHub Actions workflow dispatches
+- npm publishing
+
+Handle those follow-up steps explicitly in the release plan below.
+
 ## Detailed Release Plan
 
 1. Confirm package state and release prerequisites.
@@ -36,7 +65,8 @@ The published tarball contains:
    - **1.5** If you plan to publish through the checked-in GitHub Actions workflow, confirm the repository has `NPM_TOKEN` configured.
 
 2. Bump or set the release version.
-   - **2.1** Run the versioning script with the appropriate bump:
+   - **2.1** Run `tools/release-version.mjs` through the npm script with the
+     appropriate bump:
 
      ```bash
      npm run release:version -- patch
