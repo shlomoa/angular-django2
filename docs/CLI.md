@@ -56,7 +56,7 @@ already created the Angular workspace for you.
 If you are not using `django-angular3`, create the Angular workspace first:
 
 ```bash
-npx -y @angular/cli new demo-workspace --no-create-application --package-manager npm --skip-git --defaults
+npx -y @angular/cli@22 new demo-workspace --no-create-application --package-manager npm --skip-git --defaults
 cd demo-workspace
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
@@ -154,11 +154,11 @@ Recognized file hook keys and targets:
 
 Each hook accepts exactly one content source:
 
-| Mode       | Field      | Behavior                                                                                |
-| ---------- | ---------- | --------------------------------------------------------------------------------------- |
-| Inline     | `content`  | Write the supplied content directly to the target file.                                 |
-| Local file | `path`     | Read content from an absolute path or a path relative to the current working directory. |
-| Template   | `template` | Write a literal template and replace `{{key}}` placeholders from `params`.              |
+| Mode       | Field      | Behavior                                                                                                                                              |
+| ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Inline     | `content`  | Write the supplied content directly to the target file, overwriting any existing file.                                                                |
+| Local file | `path`     | Read content from an absolute path or a path relative to the current working directory at schematic execution time.                                   |
+| Template   | `template` | Write a literal template and replace `{{key}}` placeholders from `params`. Optional whitespace inside the braces (e.g. `{{ key }}`) is also accepted. |
 
 ### Step-by-step app setup
 

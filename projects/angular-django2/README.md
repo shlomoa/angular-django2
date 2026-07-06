@@ -95,6 +95,7 @@ For a workspace created with `ng new demo-workspace --no-create-application`, th
 ng add angular-django2
 ng generate angular-django2:ng-workspace my-app
 ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
+npm install
 ng build my-app
 ```
 
@@ -103,31 +104,9 @@ In the common case, pass the same name to both commands so the generated repo in
 
 ### Application source-file hooks
 
-For programmatic workspace provisioning, `ng-workspace` exposes file hooks for the application source files documented by Angular at <https://angular.dev/reference/configs/file-structure#application-source-files>.
+For programmatic workspace provisioning, `ng-workspace` exposes file hooks for the application source files documented by Angular at <https://angular.dev/reference/configs/file-structure#application-source-files>. Each hook accepts exactly one of `content` (inline string), `path` (local file), or `template` (string with `{{key}}` placeholders and a `params` map). When `project` is provided, targets resolve under that project's `sourceRoot`; otherwise they resolve under `/src`.
 
-Recognized hook keys and target paths are:
-
-| Key                  | Target path                 |
-| -------------------- | --------------------------- |
-| `favicon`            | `favicon.ico`               |
-| `indexHtml`          | `index.html`                |
-| `mainTs`             | `main.ts`                   |
-| `stylesCss`          | `styles.css`                |
-| `appConfigTs`        | `app/app.config.ts`         |
-| `appComponentTs`     | `app/app.component.ts`      |
-| `appComponentHtml`   | `app/app.component.html`    |
-| `appComponentCss`    | `app/app.component.css`     |
-| `appComponentSpecTs` | `app/app.component.spec.ts` |
-| `appModuleTs`        | `app/app.module.ts`         |
-| `appRoutesTs`        | `app/app.routes.ts`         |
-
-Each hook must specify exactly one source mode:
-
-- `content`: write inline content verbatim
-- `path`: read content from an absolute path, or from a path relative to the current working directory
-- `template`: write a literal template after replacing `{{key}}` placeholders from `params`
-
-When `project` is provided, targets resolve under that project's `sourceRoot`; otherwise targets resolve under `/src`.
+For the full list of recognized hook keys, target paths, and content modes, see the [CLI reference](https://angular-django2.readthedocs.io/en/latest/CLI/).
 
 Because Angular CLI command-line options do not pass nested objects conveniently, use these hooks from a schematic test runner, a custom delegating schematic, or the exported `ngWorkspace` factory.
 
