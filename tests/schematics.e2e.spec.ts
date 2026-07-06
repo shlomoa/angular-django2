@@ -802,7 +802,7 @@ describe('angular-django2 schematics E2E tests', () => {
         );
         console.log('[E2E-05] ✓ Parent wiring verified');
 
-        // Step 5: Embed the scheduler into the root app component and build
+        // Step 5: Embed the scheduler into the root app component and build.
         const appComponentPath = fs.existsSync(path.join(appRoot, 'app.ts'))
           ? path.join(appRoot, 'app.ts')
           : path.join(appRoot, 'app.component.ts');
