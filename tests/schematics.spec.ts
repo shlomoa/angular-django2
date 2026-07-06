@@ -113,6 +113,21 @@ describe('angular-django2 schematics', () => {
     });
   });
 
+  it('declares documented positional names for pass-through generators', () => {
+    for (const schematicName of ['class', 'component', 'service']) {
+      const schemaPath = path.resolve(
+        __dirname,
+        `../projects/angular-django2/schematics/${schematicName}/schema.json`,
+      );
+      const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+
+      expect(schema.properties.name.$default).toEqual({
+        $source: 'argv',
+        index: 0,
+      });
+    }
+  });
+
   it('passes app-shell options through to the Angular app-shell schematic', () => {
     appShell({ project: 'demo-app' });
 

@@ -7,7 +7,11 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "The service name."
+      "description": "The service name.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
     },
     "path": {
       "type": "string",
