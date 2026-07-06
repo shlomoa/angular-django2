@@ -97,7 +97,7 @@
               <p>{{ command.before.title }}</p>
               <p>{{ command.before.description }}</p>
               <ul>
-                @for (highlight of command.before.highlights; track highlight) {
+                @for (highlight of command.before.highlights; track $index) {
                   <li>{{ highlight }}</li>
                 }
               </ul>
@@ -111,7 +111,7 @@
                 <p>{{ command.after.title }}</p>
                 <p>{{ command.after.description }}</p>
                 <ul>
-                  @for (highlight of command.after.highlights; track highlight) {
+                  @for (highlight of command.after.highlights; track $index) {
                     <li>{{ highlight }}</li>
                   }
                 </ul>
