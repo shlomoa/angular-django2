@@ -63,18 +63,36 @@ The published tarball contains:
    `projects/angular-django2/package.json` stays aligned.
 
 3. Sync checked-in version references and release-facing documentation.
-   - **3.1** Confirm `package-lock.json` top-level version entries match the
-     intended release version.
-   - **3.2** Review and update `README.md` for any explicit current-version
+   - **3.1** Rebuild the package output and refresh the lockfile so tracked
+     package metadata and file-dependency entries match the intended release
+     version:
+
+     ```bash
+     npm run build
+     npm install --package-lock-only --ignore-scripts
+     ```
+
+     The root workspace depends on `angular-django2` through
+     `file:dist/angular-django2`, so the lockfile can retain the previous
+     `dist/angular-django2` version until the package output is rebuilt.
+
+   - **3.2** Confirm `package-lock.json` top-level version entries and the
+     `packages["dist/angular-django2"].version` entry match the intended
+     release version.
+   - **3.3** Review and update `README.md` for any explicit current-version
      references, such as the package version shown near the top of the
      repository overview.
-   - **3.3** Review `tests/release-version.spec.ts` and update checked-in
-     version fixtures if the test is intended to track the current repository
-     release version.
-   - **3.4** Review and update `CHANGELOG.md`.
-   - **3.5** Review and update `projects/angular-django2/README.md` if
+   - **3.4** Review `tests/release-version.spec.ts`. The existing version
+     values are behavior fixtures for the versioning helper, not automatically
+     current-release references. Update them only if a fixture is intentionally
+     meant to track the current repository release version or if the expected
+     versioning behavior changes.
+   - **3.5** Review and update `CHANGELOG.md` for the release being prepared.
+     Do this after the version bump and before `npm run release:prepare`, so
+     the release candidate includes the final user-facing notes.
+   - **3.6** Review and update `projects/angular-django2/README.md` if
      package-facing behavior or examples changed.
-   - **3.6** Review and update `docs/RELEASING.md` if the release procedure
+   - **3.7** Review and update `docs/RELEASING.md` if the release procedure
      itself changed.
 
 4. Validate the release candidate.
@@ -114,8 +132,8 @@ version is already on npm.
    - **6.4** Confirm the generated version, metadata, and README contents match the intended release.
 
 7. Commit, tag, and push the release.
-   - **7.1** Stage the changed manifests, docs, lockfile, and any
-     release-version test updates:
+   - **7.1** Stage the changed manifests, docs, lockfile, and any optional
+     release-version test fixture updates:
 
      ```bash
      git add package.json package-lock.json CHANGELOG.md README.md projects/angular-django2/package.json projects/angular-django2/README.md docs/RELEASING.md tests/release-version.spec.ts

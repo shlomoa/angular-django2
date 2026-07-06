@@ -6,6 +6,14 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+## [0.1.5]
+
+- Migrated the workspace and package tooling to Angular 22.
+- Added the Angular Material tutorial/reference app and validation coverage for its workspace setup.
+- Added ReadTheDocs, TypeDoc, tutorial, CLI, and release documentation updates.
+- Added Dependabot configuration and CI/documentation maintenance updates.
+- Polished schematics behavior and generated workspace documentation.
+
 ## [0.1.4]
 
 - Added the `ng-workspace` schematic and follow-up polish for generated workspace instructions.

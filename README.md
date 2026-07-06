@@ -3,7 +3,7 @@
 [![Documentation Status](https://readthedocs.org/projects/angular-django2/badge/?version=latest)](https://angular-django2.readthedocs.io/)
 
 **Note:** `angular-django2` is published to npm, but it is still pre-release
-software and not yet alpha. The current package version is `0.1.4`.
+software and not yet alpha. The current package version is `0.1.5`.
 
 `angular-django2` (also referred to as `ngdj`) is an Angular 22 library
 workspace for a Django-friendly npm package. It ships two things:
