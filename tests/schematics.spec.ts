@@ -1020,6 +1020,10 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         );
         innerTree.create('projects/generated-app/src/app/app.component.html', '<div>Hello</div>');
         innerTree.create('projects/generated-app/src/app/app.component.scss', '');
+        innerTree.create(
+          'projects/generated-app/src/index.html',
+          '<!doctype html>\n<html lang="en">\n  <head>\n  </head>\n  <body></body>\n</html>\n',
+        );
         innerTree.create('projects/generated-app/src/styles.scss', '');
         innerTree.create(
           'projects/generated-app/src/app/app.config.ts',
@@ -1085,6 +1089,10 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       tree.create('projects/my-app/src/app/app.component.ts', 'export class AppComponent {}');
       tree.create('projects/my-app/src/app/app.component.html', '<div>Hello</div>');
       tree.create('projects/my-app/src/app/app.component.scss', '');
+      tree.create(
+        'projects/my-app/src/index.html',
+        '<!doctype html>\n<html lang="en">\n  <head>\n  </head>\n  <body></body>\n</html>\n',
+      );
       tree.create('projects/my-app/src/styles.scss', '');
       tree.create('projects/my-app/src/app/app.config.ts', 'export const appConfig = {};');
 
@@ -1127,6 +1135,72 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         .toString();
       expect(appComponentTs).toContain('MatToolbarModule');
       expect(appComponentTs).toContain('MatSidenavModule');
+
+      // Verify Material Icons stylesheet is available for mat-icon ligatures
+      const indexHtml = updatedTree.read('projects/my-app/src/index.html')!.toString();
+      expect(indexHtml).toContain(
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />',
+      );
+      expect(indexHtml).toMatch(
+        /<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com\/icon\?family=Material\+Icons" \/>\n\s*<\/head>/,
+      );
+    });
+
+    it('does not duplicate an existing Material Icons stylesheet link', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/package.json',
+        JSON.stringify({
+          dependencies: {
+            '@angular/core': '^22.0.0',
+          },
+        }),
+      );
+      tree.create(
+        '/angular.json',
+        JSON.stringify({
+          version: 1,
+          projects: {
+            'my-app': {
+              root: 'projects/my-app',
+              sourceRoot: 'projects/my-app/src',
+              architect: {
+                build: {
+                  options: {
+                    styles: ['projects/my-app/src/styles.scss'],
+                  },
+                },
+              },
+            },
+          },
+        }),
+      );
+
+      tree.create('projects/my-app/src/app/app.component.ts', 'export class AppComponent {}');
+      tree.create('projects/my-app/src/app/app.component.html', '<div>Hello</div>');
+      tree.create('projects/my-app/src/app/app.component.scss', '');
+      tree.create(
+        'projects/my-app/src/index.html',
+        '<!doctype html>\n<html lang="en">\n  <head>\n    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />\n  </head>\n  <body></body>\n</html>\n',
+      );
+      tree.create('projects/my-app/src/styles.scss', '');
+      tree.create('projects/my-app/src/app/app.config.ts', 'export const appConfig = {};');
+
+      const context = {
+        addTask: vi.fn(),
+        logger: {
+          info: vi.fn(),
+          warn: vi.fn(),
+          error: vi.fn(),
+        },
+      } as never;
+
+      const updatedTree = ngApp({ name: 'my-app' })(tree, context) as Tree;
+      const indexHtml = updatedTree.read('projects/my-app/src/index.html')!.toString();
+
+      expect(
+        indexHtml.match(/https:\/\/fonts\.googleapis\.com\/icon\?family=Material\+Icons/g),
+      ).toHaveLength(1);
     });
 
     it('TC-APP-02: uses default options when not provided', () => {

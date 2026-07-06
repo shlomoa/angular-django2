@@ -461,6 +461,15 @@ describe('angular-django2 schematics E2E tests', () => {
         expect(appComponentContent).toContain('MatSidenavModule');
         console.log('[E2E-02] ✓ Material imports verified');
 
+        const indexHtmlContent = fs.readFileSync(
+          path.join(workspaceRoot, 'projects', 'demo', 'src', 'index.html'),
+          'utf8',
+        );
+        expect(indexHtmlContent).toContain(
+          '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />',
+        );
+        console.log('[E2E-02] ✓ Material Icons stylesheet verified');
+
         // Step 7: Build the application
         console.log('[E2E-02] Building application...');
         execAngularCli(['build', 'demo', '--configuration=production'], workspaceRoot);

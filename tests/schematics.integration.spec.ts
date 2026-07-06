@@ -437,6 +437,10 @@ export const appConfig: ApplicationConfig = {
       );
       tree.create(`projects/${projectName}/src/app/app.component.html`, '<div>Hello</div>');
       tree.create(`projects/${projectName}/src/app/app.component.scss`, '');
+      tree.create(
+        `projects/${projectName}/src/index.html`,
+        '<!doctype html>\n<html lang="en">\n  <head>\n  </head>\n  <body></body>\n</html>\n',
+      );
       tree.create(`projects/${projectName}/src/styles.scss`, '');
       tree.create(
         `projects/${projectName}/src/app/app.config.ts`,
@@ -498,6 +502,11 @@ export const appConfig: ApplicationConfig = {
       expect(appComponentHtml).toContain('mat-toolbar');
       expect(appComponentHtml).toContain('mat-sidenav-container');
       expect(appComponentHtml).toContain('router-outlet');
+
+      const indexHtml = tree.readContent('/projects/demo-app/src/index.html');
+      expect(indexHtml).toContain(
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />',
+      );
 
       // Verify project structure was created
       expect(tree.files).toContain('/projects/demo-app/src/app/core/index.ts');

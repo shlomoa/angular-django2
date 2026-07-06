@@ -101,7 +101,8 @@ ng generate angular-django2:ng-app my-app --theme=indigo-pink --typography=true 
 ```
 
 It composes the lower-level application, Material setup, project structure, and
-app-shell schematics.
+app-shell schematics. It also adds the Google Material Icons stylesheet to the
+generated app `index.html` so the shell's `mat-icon` ligatures render correctly.
 
 Supported options:
 

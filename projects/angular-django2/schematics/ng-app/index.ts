@@ -119,6 +119,9 @@ const BARREL_CONTENT = `// Public API for this directory
 export {};
 `;
 
+const MATERIAL_ICONS_STYLESHEET_HREF = 'https://fonts.googleapis.com/icon?family=Material+Icons';
+const MATERIAL_ICONS_STYLESHEET_LINK = `<link rel="stylesheet" href="${MATERIAL_ICONS_STYLESHEET_HREF}" />`;
+
 const DIRECTORIES = ['core', 'shared/components', 'shared/pipes', 'features'] as const;
 
 type ResolvedNgAppSchema = Required<NgAppSchema>;
@@ -194,6 +197,7 @@ function applyMaterialSetup(
   addMaterialDependencies(tree, context);
   configureMaterial(tree, options.name, options.theme, options.typography, options.animations);
   createDirectoryStructure(tree, options.name);
+  updateIndexHtmlWithMaterialIcons(tree, options.name);
   generateMaterialAppShell(tree, options.name, options.style);
 }
 
@@ -444,6 +448,50 @@ function createDirectoryStructure(tree: Tree, projectName: string): void {
   if (!tree.exists(sharedIndexPath)) {
     tree.create(sharedIndexPath, BARREL_CONTENT);
   }
+}
+
+/**
+ * Add the Google Material Icons font stylesheet required by mat-icon ligatures.
+ */
+function updateIndexHtmlWithMaterialIcons(tree: Tree, projectName: string): void {
+  const angularJsonPath = '/angular.json';
+  const angularJsonBuffer = tree.read(angularJsonPath);
+  if (!angularJsonBuffer) {
+    throw new SchematicsException('Could not find angular.json in the workspace.');
+  }
+
+  const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
+  const projectConfig = workspace.projects[projectName];
+  if (!projectConfig) {
+    throw new SchematicsException(`Project "${projectName}" not found in angular.json.`);
+  }
+
+  const projectRoot = projectConfig.root || '';
+  const indexHtmlPath = projectRoot ? `${projectRoot}/src/index.html` : 'src/index.html';
+
+  if (!tree.exists(indexHtmlPath)) {
+    return;
+  }
+
+  const indexHtml = tree.read(indexHtmlPath)!.toString();
+  if (indexHtml.includes(MATERIAL_ICONS_STYLESHEET_HREF)) {
+    return;
+  }
+
+  const closingHeadRegex = /^([ \t]*)<\/head>/im;
+  const closingHeadMatch = indexHtml.match(closingHeadRegex);
+  if (!closingHeadMatch) {
+    return;
+  }
+
+  const indentation = closingHeadMatch[1];
+  tree.overwrite(
+    indexHtmlPath,
+    indexHtml.replace(
+      closingHeadRegex,
+      `${indentation}${MATERIAL_ICONS_STYLESHEET_LINK}\n${closingHeadMatch[0]}`,
+    ),
+  );
 }
 
 /**
