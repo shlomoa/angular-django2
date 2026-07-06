@@ -27,6 +27,8 @@ You will create an Angular workspace with no initial application, register
 - a standard `core/`, `shared/`, and `features/` source layout
 - a responsive application shell
 - a feature component embedded into the application shell
+- an existing Angular Material component embedded with `embed-component`
+  package mode
 
 ## Prerequisites
 
@@ -165,7 +167,31 @@ Then rebuild to verify the generated code still compiles:
 npx ng build ngdj-tutorial
 ```
 
-## 10. Optional: add an OpenAPI client workflow
+## 10. Embed an existing Angular Material component
+
+`embed-component` also has a "package mode" for wiring an existing component
+exported from an npm package — such as an Angular Material component — into a
+parent. Add `--from` with the module specifier and pass the exported class name
+to `--component`. The selector, inputs, and outputs are provided explicitly:
+
+```bash
+npx ng generate angular-django2:embed-component --component=MatDateRangePicker --parent=projects/ngdj-tutorial/src/app/features/dashboard/dashboard-card/dashboard-card.ts --from=@angular/material/datepicker --selector=mat-date-range-picker --outputs=opened,closed
+```
+
+This imports `MatDateRangePicker` from `@angular/material/datepicker`, registers
+it in the parent's standalone `imports` array, inserts the
+`<mat-date-range-picker>` element after the parent's `children` marker, and adds
+not-implemented `onOpened()` and `onClosed()` handler stubs. `--selector`
+defaults to the dasherized class name when omitted, and `--inputs`/`--outputs`
+accept comma-separated lists.
+
+Rebuild to confirm the wired Material component compiles:
+
+```bash
+npx ng build ngdj-tutorial
+```
+
+## 11. Optional: add an OpenAPI client workflow
 
 If your Django backend exposes an OpenAPI schema, bootstrap `ng-openapi-gen`:
 
@@ -207,5 +233,7 @@ npx ng serve ngdj-tutorial
 - Read the [CLI guide](CLI.md) for the full command reference.
 - Compose more components with `angular-django2:component` and
   `angular-django2:embed-component`.
+- Embed existing package components (such as Angular Material) with
+  `embed-component` package mode (`--from`).
 - Add OpenAPI client generation with `angular-django2:ng-api`.
 - Add a data-service wrapper with `angular-django2:data-service`.

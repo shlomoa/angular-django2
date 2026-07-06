@@ -78,6 +78,10 @@ Current E2E coverage includes:
 - `E2E-01` — step-by-step app generation with individual schematics
 - `E2E-02` — `ng-workspace` + `ng-app` flow in a minimal workspace
 - `E2E-03` — `ng-api` setup and build verification
+- `E2E-04` — `component` hooks + `embed-component` wiring a generated child into
+  a parent in a buildable app
+- `E2E-05` — `embed-component` package mode wiring an Angular Material component
+  (`MatDateRangePicker`) into a parent in a buildable app
 
 The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.

@@ -726,5 +726,40 @@ export const appConfig: ApplicationConfig = {
         '<app-hero-card [title]="undefined" (selected)="onSelected($event)"></app-hero-card>',
       );
     });
+
+    it('INT-CMP-03: embeds an Angular Material component into a parent in package mode', async () => {
+      let tree = await setupWorkspace();
+
+      tree = (await runner.runSchematic(
+        'component',
+        { name: 'scheduler', project: 'app' },
+        tree,
+      )) as UnitTestTree;
+
+      tree = (await runner.runSchematic(
+        'embed-component',
+        {
+          component: 'MatDateRangePicker',
+          parent: 'projects/app/src/app/scheduler/scheduler.ts',
+          from: '@angular/material/datepicker',
+          selector: 'mat-date-range-picker',
+          outputs: 'opened,closed',
+        },
+        tree,
+      )) as UnitTestTree;
+
+      const parentTs = tree.readContent('/projects/app/src/app/scheduler/scheduler.ts');
+      expect(parentTs).toContain(
+        "import { MatDateRangePicker } from '@angular/material/datepicker';",
+      );
+      expect(parentTs).toContain('imports: [MatDateRangePicker]');
+      expect(parentTs).toContain('onOpened($event: unknown): void {');
+      expect(parentTs).toContain('onClosed($event: unknown): void {');
+
+      const parentHtml = tree.readContent('/projects/app/src/app/scheduler/scheduler.html');
+      expect(parentHtml).toContain(
+        '<mat-date-range-picker (opened)="onOpened($event)" (closed)="onClosed($event)"></mat-date-range-picker>',
+      );
+    });
   });
 });

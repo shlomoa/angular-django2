@@ -708,4 +708,131 @@ describe('angular-django2 schematics E2E tests', () => {
       }
     },
   );
+
+  it(
+    'E2E-05: embed-component wires an Angular Material component into a parent in a buildable app',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      // Setup
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'embed-material-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+
+      // For executing ng new outside the workspace scope to bypass the CLI workspace check
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      console.log(`\n[E2E-05] Test workspace: ${workspacePath}`);
+
+      try {
+        // Step 1: Create Angular workspace with a default application
+        console.log('[E2E-05] Creating Angular workspace...');
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        console.log('[E2E-05] ✓ Workspace created');
+
+        // Step 2: Install dependencies, Angular Material, and angular-django2
+        console.log('[E2E-05] Installing dependencies...');
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+        console.log('[E2E-05] ✓ Dependencies installed');
+
+        // Step 3: Generate a parent component with embedding hooks
+        console.log('[E2E-05] Generating parent component...');
+        execAngularCli(['generate', 'angular-django2:component', 'scheduler'], appPath);
+        console.log('[E2E-05] ✓ Component generated');
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        const parentTsPath = path.join(appRoot, 'scheduler', 'scheduler.ts');
+        const parentHtmlPath = path.join(appRoot, 'scheduler', 'scheduler.html');
+
+        // Step 4: Embed the existing Angular Material MatDateRangePicker into the
+        // parent. This is "package mode": the component is imported from a
+        // package rather than a local file, but the parent wiring is identical.
+        console.log('[E2E-05] Embedding MatDateRangePicker into scheduler...');
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:embed-component',
+            '--component=MatDateRangePicker',
+            '--parent=src/app/scheduler/scheduler.ts',
+            '--from=@angular/material/datepicker',
+            '--selector=mat-date-range-picker',
+            '--outputs=opened,closed',
+          ],
+          appPath,
+        );
+        console.log('[E2E-05] ✓ embed-component schematic completed');
+
+        // Verify the parent TypeScript wiring
+        const parentTs = fs.readFileSync(parentTsPath, 'utf8');
+        expect(parentTs).toContain(
+          "import { MatDateRangePicker } from '@angular/material/datepicker';",
+        );
+        expect(parentTs).toContain('imports: [MatDateRangePicker]');
+        expect(parentTs).toContain('onOpened($event: unknown): void {');
+        expect(parentTs).toContain("throw new Error('onOpened is not implemented');");
+        expect(parentTs).toContain('onClosed($event: unknown): void {');
+
+        // Verify the parent template wiring. `ng generate` may run the
+        // workspace formatter, which can wrap the long element across multiple
+        // lines, so assert on the individual bindings rather than an exact
+        // single-line string.
+        const parentHtml = fs.readFileSync(parentHtmlPath, 'utf8');
+        expect(parentHtml).toContain('<mat-date-range-picker');
+        expect(parentHtml).toContain('(opened)="onOpened($event)"');
+        expect(parentHtml).toContain('(closed)="onClosed($event)"');
+        expect(parentHtml.indexOf('<!-- Begin children section -->')).toBeLessThan(
+          parentHtml.indexOf('<mat-date-range-picker'),
+        );
+        console.log('[E2E-05] ✓ Parent wiring verified');
+
+        // Step 5: Embed the scheduler into the root app component and build.
+        const appComponentPath = fs.existsSync(path.join(appRoot, 'app.ts'))
+          ? path.join(appRoot, 'app.ts')
+          : path.join(appRoot, 'app.component.ts');
+        const appComponentHtmlPath = fs.existsSync(path.join(appRoot, 'app.html'))
+          ? path.join(appRoot, 'app.html')
+          : path.join(appRoot, 'app.component.html');
+        const appComponentRelTs = path.relative(appPath, appComponentPath).replace(/\\/g, '/');
+
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:embed-component',
+            '--component=src/app/scheduler/scheduler.ts',
+            `--parent=${appComponentRelTs}`,
+          ],
+          appPath,
+        );
+
+        expect(fs.readFileSync(appComponentPath, 'utf8')).toContain('imports: [Scheduler]');
+        expect(fs.readFileSync(appComponentHtmlPath, 'utf8')).toContain('<app-scheduler>');
+        console.log('[E2E-05] ✓ Scheduler embedded into root app component');
+
+        console.log('[E2E-05] Building application...');
+        execAngularCli(['build', '--configuration=production'], appPath);
+        console.log('[E2E-05] ✓ Application built successfully');
+
+        console.log('[E2E-05] ✅ E2E test completed successfully');
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-05');
+      }
+    },
+  );
 });

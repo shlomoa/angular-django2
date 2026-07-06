@@ -308,21 +308,21 @@ npm install ../angular-django2/dist/angular-django2
 After `angular-django2` is installed in a workspace, these commands are
 available:
 
-| Command                                                                          | Purpose                                                                                              | Notes                                                         |
-| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `ng add angular-django2`                                                         | Registers the collection in `angular.json`                                                           | Automatically done by `django-angular3`                       |
-| `ng generate angular-django2:application <name>`                                 | Creates an Angular application                                                                       | Defaults to standalone routing, no SSR, zoneless, and SCSS    |
-| `ng generate angular-django2:material-setup --project=<name>`                    | Configures Angular Material in an existing project                                                   | Supports `--theme`, `--typography`, `--animations`            |
-| `ng generate angular-django2:project-structure --project=<name>`                 | Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/`                              | Writes barrel `index.ts` files                                |
-| `ng generate angular-django2:component <name>`                                   | Creates a component with package defaults                                                            | Uses standalone + `OnPush` defaults and seeds embedding hooks |
-| `ng generate angular-django2:embed-component --component=<path> --parent=<path>` | Embeds a generated component into a parent component                                                 | Uses the embedding hooks to wire imports, signals, and stubs  |
-| `ng generate angular-django2:service <name>`                                     | Creates a service                                                                                    | Pass-through to Angular CLI service schematic                 |
-| `ng generate angular-django2:class <name>`                                       | Creates a class                                                                                      | Pass-through to Angular CLI class schematic                   |
-| `ng generate angular-django2:app-shell --project=<name>`                         | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation               |
-| `ng generate angular-django2:ng-app <name>`                                      | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults    |
-| `ng generate angular-django2:ng-workspace <name>`                                | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `ng-app` in an empty workspace                     |
-| `ng generate angular-django2:ng-api --inputPath=<file>`                          | Bootstraps `ng-openapi-gen`                                                                          | Adds `generate:api` script                                    |
-| `ng generate angular-django2:data-service <resource>`                            | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services                       |
+| Command                                                                          | Purpose                                                                                              | Notes                                                                                         |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `ng add angular-django2`                                                         | Registers the collection in `angular.json`                                                           | Automatically done by `django-angular3`                                                       |
+| `ng generate angular-django2:application <name>`                                 | Creates an Angular application                                                                       | Defaults to standalone routing, no SSR, zoneless, and SCSS                                    |
+| `ng generate angular-django2:material-setup --project=<name>`                    | Configures Angular Material in an existing project                                                   | Supports `--theme`, `--typography`, `--animations`                                            |
+| `ng generate angular-django2:project-structure --project=<name>`                 | Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/`                              | Writes barrel `index.ts` files                                                                |
+| `ng generate angular-django2:component <name>`                                   | Creates a component with package defaults                                                            | Uses standalone + `OnPush` defaults and seeds embedding hooks                                 |
+| `ng generate angular-django2:embed-component --component=<path> --parent=<path>` | Embeds a component into a parent component                                                           | Wires imports, signals, and stubs; `--from` embeds package components (e.g. Angular Material) |
+| `ng generate angular-django2:service <name>`                                     | Creates a service                                                                                    | Pass-through to Angular CLI service schematic                                                 |
+| `ng generate angular-django2:class <name>`                                       | Creates a class                                                                                      | Pass-through to Angular CLI class schematic                                                   |
+| `ng generate angular-django2:app-shell --project=<name>`                         | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation                                               |
+| `ng generate angular-django2:ng-app <name>`                                      | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults                                    |
+| `ng generate angular-django2:ng-workspace <name>`                                | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `ng-app` in an empty workspace                                                     |
+| `ng generate angular-django2:ng-api --inputPath=<file>`                          | Bootstraps `ng-openapi-gen`                                                                          | Adds `generate:api` script                                                                    |
+| `ng generate angular-django2:data-service <resource>`                            | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services                                                       |
 
 ### Recipes for a running Angular app
 
@@ -453,6 +453,34 @@ For the child, `embed-component`:
 
 The operation is idempotent, so embedding the same child twice does not
 duplicate the wiring.
+
+#### Embedding existing components (Angular Material)
+
+The same schematic can embed an existing component exported from an npm
+package — such as Angular Material's
+[`MatDateRangePicker`](https://material.angular.dev/components/datepicker/api#MatDateRangePicker)
+— by switching to "package mode" with `--from`. The parent wiring (element,
+imports array entry, and `on<Output>()` stubs) is identical to embedding a
+locally generated component.
+
+In package mode, `--component` is the exported class name instead of a file
+path, and the selector, inputs, and outputs are provided explicitly:
+
+```bash
+ng generate angular-django2:embed-component \
+  --component=MatDateRangePicker \
+  --parent=projects/my-app/src/app/scheduler/scheduler.ts \
+  --from=@angular/material/datepicker \
+  --selector=mat-date-range-picker \
+  --outputs=opened,closed
+```
+
+This imports `MatDateRangePicker` from `@angular/material/datepicker`, registers
+it in the parent's standalone `imports` array, inserts
+`<mat-date-range-picker (opened)="onOpened($event)" (closed)="onClosed($event)">`
+after the parent's `children` marker, and adds not-implemented `onOpened()` and
+`onClosed()` handler stubs. `--selector` defaults to the dasherized class name
+when omitted, and `--inputs`/`--outputs` accept comma-separated lists.
 
 ### References
 
