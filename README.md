@@ -449,6 +449,34 @@ For the child, `embed-component`:
 The operation is idempotent, so embedding the same child twice does not
 duplicate the wiring.
 
+#### Embedding existing components (Angular Material)
+
+The same schematic can embed an existing component exported from an npm
+package — such as Angular Material's
+[`MatDateRangePicker`](https://material.angular.dev/components/datepicker/api#MatDateRangePicker)
+— by switching to "package mode" with `--from`. The parent wiring (element,
+imports array entry, and `on<Output>()` stubs) is identical to embedding a
+locally generated component.
+
+In package mode, `--component` is the exported class name instead of a file
+path, and the selector, inputs, and outputs are provided explicitly:
+
+```bash
+ng generate angular-django2:embed-component \
+  --component=MatDateRangePicker \
+  --parent=projects/my-app/src/app/scheduler/scheduler.ts \
+  --from=@angular/material/datepicker \
+  --selector=mat-date-range-picker \
+  --outputs=opened,closed
+```
+
+This imports `MatDateRangePicker` from `@angular/material/datepicker`, registers
+it in the parent's standalone `imports` array, inserts
+`<mat-date-range-picker (opened)="onOpened($event)" (closed)="onClosed($event)">`
+after the parent's `children` marker, and adds not-implemented `onOpened()` and
+`onClosed()` handler stubs. `--selector` defaults to the dasherized class name
+when omitted, and `--inputs`/`--outputs` accept comma-separated lists.
+
 ### References
 
 - Angular libraries: https://angular.dev/tools/libraries

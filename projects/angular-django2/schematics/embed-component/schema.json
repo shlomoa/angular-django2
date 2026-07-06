@@ -7,8 +7,7 @@
   "properties": {
     "component": {
       "type": "string",
-      "format": "path",
-      "description": "Workspace-relative path to the child component TypeScript file to embed (e.g. 'projects/app/src/app/hero-card/hero-card.ts').",
+      "description": "In file mode, the workspace-relative path to the child component TypeScript file to embed (e.g. 'projects/app/src/app/hero-card/hero-card.ts'). In package mode (when 'from' is set), the exported class name to embed (e.g. 'MatDateRangePicker').",
       "$default": {
         "$source": "argv",
         "index": 0
@@ -22,6 +21,22 @@
         "$source": "argv",
         "index": 1
       }
+    },
+    "from": {
+      "type": "string",
+      "description": "Module specifier to import the component class from. When provided, 'component' is treated as the class name to import from this module instead of a local file path (e.g. '@angular/material/datepicker' for Angular Material's MatDateRangePicker)."
+    },
+    "selector": {
+      "type": "string",
+      "description": "Element selector for the embedded component (package mode only). Defaults to the dasherized class name (e.g. 'mat-date-range-picker')."
+    },
+    "inputs": {
+      "type": "string",
+      "description": "Comma-separated list of input names to wire on the embedded element (package mode only)."
+    },
+    "outputs": {
+      "type": "string",
+      "description": "Comma-separated list of output names to bind to on<Output>() handlers (package mode only)."
     }
   },
   "required": ["component", "parent"]

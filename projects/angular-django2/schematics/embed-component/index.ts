@@ -12,14 +12,20 @@ interface ChildComponent {
 }
 
 /**
- * embed-component schematic: wire a generated child component into a parent
- * component using the begin/end section markers produced by the
- * angular-django2 `component` schematic.
+ * embed-component schematic: wire a child component into a parent component
+ * using the begin/end section markers produced by the angular-django2
+ * `component` schematic.
+ *
+ * The child can either be a locally generated component (default "file mode",
+ * where `component` is a workspace-relative `.ts` path) or an existing exported
+ * component from an npm package ("package mode", enabled by passing `from`).
+ * Package mode makes it possible to embed components such as Angular Material's
+ * `MatDateRangePicker` without a local source file.
  *
  * The schematic:
  * - adds a `<selector ...>` element to the parent template after the
- *   `Begin children section` marker, feeding input signals and binding output
- *   signals to `on<Output>()` handlers;
+ *   `Begin children section` marker, feeding inputs and binding outputs to
+ *   `on<Output>()` handlers;
  * - imports the child class in the parent TypeScript file and registers it in
  *   the standalone `imports` array; and
  * - adds stub `on<Output>()` handlers that throw a "not implemented" error.
@@ -29,18 +35,26 @@ interface ChildComponent {
  */
 export function embedComponent(options: EmbedComponentSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const childPath = normalizeTreePath(options.component);
     const parentPath = normalizeTreePath(options.parent);
 
-    if (!tree.exists(childPath)) {
-      throw new SchematicsException(`Child component file not found: ${childPath}`);
-    }
     if (!tree.exists(parentPath)) {
       throw new SchematicsException(`Parent component file not found: ${parentPath}`);
     }
 
-    const child = parseChildComponent(tree.read(childPath)!.toString());
-    const importSpecifier = computeImportSpecifier(parentPath, childPath);
+    let child: ChildComponent;
+    let importSpecifier: string;
+
+    if (options.from) {
+      child = buildPackageChild(options);
+      importSpecifier = options.from;
+    } else {
+      const childPath = normalizeTreePath(options.component);
+      if (!tree.exists(childPath)) {
+        throw new SchematicsException(`Child component file not found: ${childPath}`);
+      }
+      child = parseChildComponent(tree.read(childPath)!.toString());
+      importSpecifier = computeImportSpecifier(parentPath, childPath);
+    }
 
     const parentContent = tree.read(parentPath)!.toString();
     const updatedParent = embedInComponentTs(parentContent, child, importSpecifier);
@@ -92,6 +106,54 @@ export function parseChildComponent(content: string): ChildComponent {
     ),
     outputs: collectSignalNames(content, /(?:readonly\s+)?(\w+)\s*=\s*output\s*[<(]/g),
   };
+}
+
+/**
+ * Build a {@link ChildComponent} descriptor for "package mode" from the raw
+ * schematic options. In package mode the child is an exported class from an npm
+ * package (for example Angular Material's `MatDateRangePicker`) rather than a
+ * local file, so the selector, inputs, and outputs are supplied explicitly.
+ *
+ * @internal
+ */
+export function buildPackageChild(options: EmbedComponentSchema): ChildComponent {
+  const className = options.component.trim();
+  if (!className) {
+    throw new SchematicsException(
+      'A component class name is required in package mode. Provide it as the first argument, e.g. --component=MatDateRangePicker.',
+    );
+  }
+
+  const selector = options.selector?.trim() || strings.dasherize(className);
+
+  return {
+    className,
+    selector,
+    inputs: parseNameList(options.inputs),
+    outputs: parseNameList(options.outputs),
+  };
+}
+
+/**
+ * Parse a comma-separated list of signal names into a de-duplicated array,
+ * preserving order and ignoring blank entries.
+ *
+ * @internal
+ */
+export function parseNameList(value: string | undefined): string[] {
+  if (!value) {
+    return [];
+  }
+
+  const names: string[] = [];
+  for (const raw of value.split(',')) {
+    const name = raw.trim();
+    if (name && !names.includes(name)) {
+      names.push(name);
+    }
+  }
+
+  return names;
 }
 
 /**

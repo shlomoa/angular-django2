@@ -2145,4 +2145,84 @@ export class App {
       })(tree, createContext()),
     ).toThrow(SchematicsException);
   });
+
+  it('TC-EMBED-07: embeds a package component (Angular Material) into the parent', () => {
+    const tree = createWorkspaceTree();
+
+    embedComponent({
+      component: 'MatDateRangePicker',
+      parent: 'src/app/app.ts',
+      from: '@angular/material/datepicker',
+      selector: 'mat-date-range-picker',
+      inputs: 'disabled, startAt',
+      outputs: 'opened, closed',
+    })(tree, createContext());
+
+    const updatedParent = tree.read('/src/app/app.ts')!.toString();
+    expect(updatedParent).toContain(
+      "import { MatDateRangePicker } from '@angular/material/datepicker';",
+    );
+    expect(updatedParent).toContain('imports: [MatDateRangePicker]');
+    expect(updatedParent).toContain('onOpened($event: unknown): void {');
+    expect(updatedParent).toContain("throw new Error('onOpened is not implemented');");
+    expect(updatedParent).toContain('onClosed($event: unknown): void {');
+
+    const updatedHtml = tree.read('/src/app/app.html')!.toString();
+    expect(updatedHtml).toContain(
+      '<mat-date-range-picker [disabled]="undefined" [startAt]="undefined" (opened)="onOpened($event)" (closed)="onClosed($event)"></mat-date-range-picker>',
+    );
+    expect(updatedHtml.indexOf('<!-- Begin children section -->')).toBeLessThan(
+      updatedHtml.indexOf('<mat-date-range-picker'),
+    );
+  });
+
+  it('TC-EMBED-08: defaults the package selector to the dasherized class name', () => {
+    const tree = createWorkspaceTree();
+
+    embedComponent({
+      component: 'MatDateRangePicker',
+      parent: 'src/app/app.ts',
+      from: '@angular/material/datepicker',
+    })(tree, createContext());
+
+    const updatedHtml = tree.read('/src/app/app.html')!.toString();
+    expect(updatedHtml).toContain('<mat-date-range-picker></mat-date-range-picker>');
+  });
+
+  it('TC-EMBED-09: is idempotent when embedding a package component twice', () => {
+    const tree = createWorkspaceTree();
+
+    const embed = () =>
+      embedComponent({
+        component: 'MatDateRangePicker',
+        parent: 'src/app/app.ts',
+        from: '@angular/material/datepicker',
+        selector: 'mat-date-range-picker',
+        outputs: 'opened',
+      })(tree, createContext());
+
+    embed();
+    const firstTs = tree.read('/src/app/app.ts')!.toString();
+    const firstHtml = tree.read('/src/app/app.html')!.toString();
+    embed();
+    const secondTs = tree.read('/src/app/app.ts')!.toString();
+    const secondHtml = tree.read('/src/app/app.html')!.toString();
+
+    expect(secondTs).toBe(firstTs);
+    expect(secondHtml).toBe(firstHtml);
+    expect(secondTs.match(/import \{ MatDateRangePicker \}/g)).toHaveLength(1);
+    expect(secondHtml.match(/<mat-date-range-picker/g)).toHaveLength(1);
+  });
+
+  it('TC-EMBED-10: does not require a local child file in package mode', () => {
+    const tree = createWorkspaceTree();
+
+    expect(() =>
+      embedComponent({
+        component: 'MatDateRangePicker',
+        parent: 'src/app/app.ts',
+        from: '@angular/material/datepicker',
+      })(tree, createContext()),
+    ).not.toThrow();
+  });
 });
