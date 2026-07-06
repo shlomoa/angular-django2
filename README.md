@@ -1,9 +1,10 @@
 # angular-django2
 
-[![Documentation Status](https://readthedocs.org/projects/angular-django2/badge/?version=latest)](https://angular-django2.readthedocs.io/)
+[![Documentation Status](https://readthedocs.org/projects/angular-django2/badge/?version=latest)](https://angular-django2.readthedocs.io/) [![CI](https://github.com/shlomoa/angular-django2/actions/workflows/ci.yml/badge.svg)](https://github.com/shlomoa/angular-django2/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/angular-django2)](https://www.npmjs.com/angular-django2)
 
 **Note:** `angular-django2` is published to npm, but it is still pre-release
-software and not yet alpha. The current package version is `0.1.5`.
+software and not yet alpha. The current package version is `0.1.6`.
 
 `angular-django2` (also referred to as `ngdj`) is an Angular 22 library
 workspace for a Django-friendly npm package. It ships two things:
