@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import * as path from 'node:path';
 import type * as SchematicsModule from '@angular-devkit/schematics';
 import { Tree, externalSchematic } from '@angular-devkit/schematics';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
@@ -24,6 +23,7 @@ import { application } from '../../projects/angular-django2/schematics/applicati
 import { classGenerator } from '../../projects/angular-django2/schematics/class/index';
 import { component } from '../../projects/angular-django2/schematics/component/index';
 import { service } from '../../projects/angular-django2/schematics/service/index';
+import { schematicSchemaPath } from './schematics.helpers';
 
 describe('angular-django2 schematics', () => {
   const mockedExternalSchematic = vi.mocked(externalSchematic);
@@ -161,11 +161,7 @@ describe('angular-django2 schematics', () => {
 
   it('declares documented positional names for pass-through generators', () => {
     for (const schematicName of ['class', 'component', 'service']) {
-      const schemaPath = path.resolve(
-        __dirname,
-        `../../projects/angular-django2/schematics/${schematicName}/schema.json`,
-      );
-      const schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+      const schema = JSON.parse(readFileSync(schematicSchemaPath(schematicName), 'utf8'));
 
       expect(schema.properties.name.$default).toEqual({
         $source: 'argv',

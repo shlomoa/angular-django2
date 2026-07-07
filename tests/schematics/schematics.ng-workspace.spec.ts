@@ -1,11 +1,9 @@
-import { readFileSync } from 'node:fs';
-import * as path from 'node:path';
 import { Tree, SchematicsException } from '@angular-devkit/schematics';
 import type { vi } from 'vitest';
 import { describe, expect, it } from 'vitest';
 
 import { ngWorkspace } from '../../projects/angular-django2/schematics/ng-workspace/index';
-import { createMockContext, workspaceReadme } from './schematics.helpers';
+import { createMockContext, workspaceReadme, workspaceReadmePath } from './schematics.helpers';
 
 describe('angular-django2 schematics', () => {
   it('TC-WS-01: writes workspace bootstrap files for the requested app name', () => {
@@ -225,17 +223,15 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
 
   it('TC-WS-06: reads application source file content from a local filesystem path', () => {
     const tree = Tree.empty();
-    const fixturePath = path.resolve(__dirname, '../../projects/angular-django2/README.md');
-    const fixtureContent = readFileSync(fixturePath, 'utf8');
 
     const updatedTree = ngWorkspace({
       name: 'demo-app',
       files: {
-        indexHtml: { path: fixturePath },
+        indexHtml: { path: workspaceReadmePath },
       },
     })(tree, createMockContext()) as Tree;
 
-    expect(updatedTree.read('/src/index.html')!.toString()).toBe(fixtureContent);
+    expect(updatedTree.read('/src/index.html')!.toString()).toBe(workspaceReadme);
   });
 
   it('TC-WS-07: instantiates a predefined template by substituting `{{key}}` placeholders from params', () => {
