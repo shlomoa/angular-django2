@@ -82,7 +82,7 @@ When `angular.json` is present and `angular-django2` is not yet registered:
 
 ## Test Coverage
 
-All behavior is verified in `tests/schematics.spec.ts`:
+All behavior is verified in `tests/schematics/schematics.ng-add.spec.ts`:
 
 - **TC-01:** Registers collection in a workspace with no existing cli config
 - **TC-02:** Registers collection prepended before existing collections
