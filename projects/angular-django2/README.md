@@ -89,8 +89,8 @@ Current defaults:
     - Each hook accepts exactly one of `content`, `path`, or `template`
     - Template hooks replace `{{key}}` placeholders from `params`
     - File targets use the selected project's `sourceRoot` when `--project` is provided; otherwise they use `/src`
-- `ng-api`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds the package to `devDependencies`, writes `ng-openapi-gen.json`, and adds a `generate:api` npm script
-  - Options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`)
+- `ng-api`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds the package to `devDependencies`, writes `ng-openapi-gen.json`, adds a `generate:api` npm script, and generates Django integration helpers (auth/CSRF/transport helpers and a CRM-oriented `ResourceAdapter`) under the helpers path
+  - Options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`), `--helpersPath` (default: `src/app/api-integration`), `--skipHelpers`, `--skipTests`
 - `data-service`: generates a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search and CRUD helpers
   - Options: `--apiService`, `--apiPath` (default: `../api/services`), `--path`, `--flat`, `--skipTests`
 

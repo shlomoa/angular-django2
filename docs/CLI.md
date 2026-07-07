@@ -89,7 +89,7 @@ npm install ../angular-django2/dist/angular-django2
 | `ng generate angular-django2:embed-component --component=<path> --parent=<path>` | Embed a component into a parent component.                                  | File mode: `--component` (child `.ts` path), `--parent` (parent `.ts` path). Package mode (add `--from`): `--component` (exported class name), `--from` (module specifier), `--selector`, `--inputs`, `--outputs` (comma-separated). Wires the child element, imports, `imports` array entry, and `on<Output>()` stubs; idempotent. |
 | `ng generate angular-django2:service <name>`                                     | Generate a service.                                                         | Project-relative `--path`, `--project`.                                                                                                                                                                                                                                                                                             |
 | `ng generate angular-django2:class <name>`                                       | Generate a class.                                                           | Project-relative `--path`, `--project`.                                                                                                                                                                                                                                                                                             |
-| `ng generate angular-django2:ng-api`                                             | Bootstrap `ng-openapi-gen` for OpenAPI client generation.                   | `--inputPath` default `openapi.json`, `--outputPath` default `src/app/api`.                                                                                                                                                                                                                                                         |
+| `ng generate angular-django2:ng-api`                                             | Bootstrap `ng-openapi-gen` and generate Django integration helpers.         | `--inputPath` default `openapi.json`, `--outputPath` default `src/app/api`, `--helpersPath` default `src/app/api-integration`, `--skipHelpers`, `--skipTests`.                                                                                                                                                                      |
 | `ng generate angular-django2:data-service <resource>`                            | Generate a typed `*DataService` wrapper around a generated OpenAPI service. | `--project`, `--path`, `--apiService`, `--apiPath`, `--flat`, `--skipTests`.                                                                                                                                                                                                                                                        |
 
 ### `ng-app`
@@ -188,7 +188,40 @@ ng generate angular-django2:data-service users
 ```
 
 `ng-api` writes `ng-openapi-gen.json`, adds `ng-openapi-gen` to
-`devDependencies`, and adds a `generate:api` npm script.
+`devDependencies`, and adds a `generate:api` npm script. It also generates
+Django integration helpers under `--helpersPath` (default
+`src/app/api-integration/`):
+
+- `django-transport.ts` — `provideDjangoApiTransport()`, `readCsrfCookie()`,
+  `djangoAuthInterceptor`, `djangoCredentialsInterceptor()`, and the
+  `DJANGO_AUTH_TOKEN` bearer-token seam.
+- `resource-adapter.ts` — `ResourceAdapter<T>` base with DRF-style
+  `PaginatedResult` and `ResourceQuery`, plus shared `catchError` handling.
+- `index.ts` — barrel re-export for the above files, with co-located specs.
+
+Compose `provideDjangoApiTransport` at application bootstrap:
+
+```typescript
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDjangoApiTransport({ csrfCookieName: 'csrftoken' }),
+    { provide: DJANGO_AUTH_TOKEN, useValue: () => sessionStore.token() },
+  ],
+};
+```
+
+Pass `--skipHelpers` to omit helper generation, or `--skipTests` to omit the
+co-located spec files.
+
+`ng-api` options:
+
+| Option          | Default                   | Description                                                                          |
+| --------------- | ------------------------- | ------------------------------------------------------------------------------------ |
+| `--inputPath`   | `openapi.json`            | Path to the OpenAPI schema file.                                                     |
+| `--outputPath`  | `src/app/api`             | Output directory for `ng-openapi-gen` generated services.                            |
+| `--helpersPath` | `src/app/api-integration` | Directory for the generated Django auth/CSRF/transport and resource adapter helpers. |
+| `--skipHelpers` | `false`                   | Skip generating the Django integration helpers.                                      |
+| `--skipTests`   | `false`                   | Do not generate spec files alongside the integration helpers.                        |
 
 `data-service` options:
 

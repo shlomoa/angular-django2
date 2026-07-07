@@ -247,6 +247,22 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       expect(packageJson.devDependencies['ng-openapi-gen']).toBeDefined();
       expect(packageJson.scripts['generate:api']).toBe('ng-openapi-gen');
     });
+
+    it('INT-API-04: generates Django integration helper artifacts', async () => {
+      const tree = await runner.runSchematic('ng-api', {}, appTree);
+
+      expect(tree.files).toContain('/src/app/api-integration/django-transport.ts');
+      expect(tree.files).toContain('/src/app/api-integration/resource-adapter.ts');
+      expect(tree.files).toContain('/src/app/api-integration/index.ts');
+
+      const transport = tree.readContent('/src/app/api-integration/django-transport.ts');
+      expect(transport).toContain('provideDjangoApiTransport');
+      expect(transport).toContain('readCsrfCookie');
+
+      const adapter = tree.readContent('/src/app/api-integration/resource-adapter.ts');
+      expect(adapter).toContain('ResourceAdapter');
+      expect(adapter).toContain('PaginatedResult');
+    });
   });
 
   describe('material-setup schematic integration', () => {

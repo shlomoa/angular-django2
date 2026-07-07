@@ -155,8 +155,15 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
   - `ng-api`: bootstrap
     [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds
     `ng-openapi-gen` to `devDependencies`, writes `ng-openapi-gen.json`, and
-    adds a `generate:api` npm script; options: `--inputPath` (default:
-    `openapi.json`), `--outputPath` (default: `src/app/api`)
+    adds a `generate:api` npm script; it also generates Django integration
+    artifacts under `helpersPath` — auth/CSRF/transport helpers
+    (`provideDjangoApiTransport`, `readCsrfCookie`, `djangoAuthInterceptor`,
+    `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) in
+    `django-transport.ts`, a CRM-oriented `ResourceAdapter` with a DRF-style
+    `PaginatedResult` in `resource-adapter.ts`, and a barrel `index.ts`; options:
+    `--inputPath` (default: `openapi.json`), `--outputPath` (default:
+    `src/app/api`), `--helpersPath` (default: `src/app/api-integration`),
+    `--skipHelpers`, `--skipTests`
   - `data-service`: generate a typed `*DataService` wrapper around an
     ng-openapi-gen `*ApiService` with search and CRUD helpers; options:
     `--apiService`, `--apiPath` (default: `../api/services`), `--path`,

@@ -1,6 +1,9 @@
+import { normalize } from '@angular-devkit/core';
 import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
+import * as path from 'path';
 import type { NgApiSchema } from './schema';
+import { getHelperFiles } from './templates';
 import {
   ensureDevDependency,
   ensureScript,
@@ -9,6 +12,8 @@ import {
 } from '../utility/package-json';
 
 const NG_OPENAPI_GEN_VERSION = '^1.0.5';
+
+const DEFAULT_HELPERS_PATH = 'src/app/api-integration';
 
 /**
  * Default ng-openapi-gen configuration
@@ -72,6 +77,39 @@ function generateConfigFile(tree: Tree, context: SchematicContext, options: NgAp
 }
 
 /**
+ * Generate the Django integration helper artifacts (auth, CSRF, transport, and
+ * CRM-oriented resource adapters) into the workspace.
+ */
+function generateHelperArtifacts(
+  tree: Tree,
+  context: SchematicContext,
+  options: NgApiSchema,
+): void {
+  if (options.skipHelpers) {
+    context.logger.info('Skipping Django integration helper generation (--skipHelpers).');
+    return;
+  }
+
+  const helpersDir = normalize(options.helpersPath || DEFAULT_HELPERS_PATH);
+
+  for (const file of getHelperFiles()) {
+    if (file.spec && options.skipTests) {
+      continue;
+    }
+
+    const filePath = normalize(path.join(helpersDir, file.fileName));
+
+    if (tree.exists(filePath)) {
+      context.logger.info(`${filePath} already exists. Skipping...`);
+      continue;
+    }
+
+    tree.create(filePath, file.content);
+    context.logger.info(`✓ Created ${filePath}`);
+  }
+}
+
+/**
  * ng-api schematic: Bootstrap ng-openapi-gen for Angular-Django integration
  *
  * This schematic sets up ng-openapi-gen to generate Angular services and models
@@ -89,6 +127,9 @@ export function ngApi(options: NgApiSchema): Rule {
 
     // Step 3: Add generate:api npm script
     addGenerateApiScript(tree, context);
+
+    // Step 4: Generate Django auth/CSRF/transport and resource adapter helpers
+    generateHelperArtifacts(tree, context, options);
 
     context.logger.info('✓ ng-api setup complete!');
     context.logger.info('  Run `npm run generate:api` to generate API models and services.');

@@ -14,6 +14,22 @@
       "type": "string",
       "description": "Path to the OpenAPI schema file",
       "default": "openapi.json"
+    },
+    "helpersPath": {
+      "type": "string",
+      "format": "path",
+      "description": "Directory for the generated Django integration helpers",
+      "default": "src/app/api-integration"
+    },
+    "skipHelpers": {
+      "type": "boolean",
+      "description": "When true, skips generating the Django auth/CSRF/transport and resource adapter helpers",
+      "default": false
+    },
+    "skipTests": {
+      "type": "boolean",
+      "description": "When true, does not generate spec files alongside the integration helpers",
+      "default": false
     }
   }
 }
