@@ -201,6 +201,32 @@ npm install
 npm run generate:api
 ```
 
+`ng-api` also generates Django integration helpers under
+`src/app/api-integration/`:
+
+- `django-transport.ts` — wires Angular XSRF handling with Django cookie and
+  header names; exports `provideDjangoApiTransport()`, `readCsrfCookie()`,
+  `djangoAuthInterceptor`, `djangoCredentialsInterceptor()`, and the
+  `DJANGO_AUTH_TOKEN` bearer-token seam.
+- `resource-adapter.ts` — `ResourceAdapter<T>` base with DRF-style
+  `PaginatedResult` and `ResourceQuery`, plus shared `catchError` handling.
+- `index.ts` — barrel re-export with co-located specs.
+
+Compose `provideDjangoApiTransport` at application bootstrap
+(`src/app/app.config.ts`):
+
+```typescript
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDjangoApiTransport({ csrfCookieName: 'csrftoken' }),
+    { provide: DJANGO_AUTH_TOKEN, useValue: () => sessionStore.token() },
+  ],
+};
+```
+
+Pass `--skipHelpers` to omit helper generation, or `--skipTests` to omit the
+co-located spec files.
+
 After generating API services from your schema, create a typed data-service
 wrapper:
 

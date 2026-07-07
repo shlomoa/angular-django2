@@ -6,6 +6,11 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+- `ng-api` schematic now generates Django integration helpers (`django-transport.ts`, `resource-adapter.ts`, barrel `index.ts`) under a configurable `--helpersPath` (default `src/app/api-integration/`).
+- New `ng-api` options: `--helpersPath`, `--skipHelpers`, `--skipTests`.
+- Django integration artifacts include `provideDjangoApiTransport()`, `readCsrfCookie()`, `djangoAuthInterceptor`, `djangoCredentialsInterceptor()`, `DJANGO_AUTH_TOKEN`, `ResourceAdapter<T>`, `PaginatedResult`, and `ResourceQuery`.
+- Added tests TC-API-09 through TC-API-15 (unit) and INT-API-04 (integration) covering artifact shape, composition points, custom paths, skip flags, and idempotency.
+
 ## [0.1.6]
 
 - Fixed CI and publish workflow build setup for the release pipeline.
