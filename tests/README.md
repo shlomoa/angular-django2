@@ -35,7 +35,7 @@ behavior, and platform caveats.
 
 Primary files:
 
-- `tests/schematics.spec.ts`
+- `tests/schematics/*.spec.ts`
 - `tests/release-version.spec.ts`
 - `tests/sync-package-metadata.spec.ts`
 - `tests/test_application.spec.ts`
@@ -77,9 +77,10 @@ See `docs/INTEGRATION_TESTING.md`.
 
 ### Core spec files
 
-- `tests/schematics.spec.ts`
-  - unit tests for schematic wrappers
-  - uses mocked `externalSchematic` calls
+- `tests/schematics/*.spec.ts`
+  - unit tests for schematic wrappers, split by schematic category
+  - uses mocked `externalSchematic` calls where relevant
+  - shared context/readme helpers live in `tests/schematics/schematics.helpers.ts`
 
 - `tests/schematics.integration.spec.ts`
   - integration coverage summary and usage details live in
