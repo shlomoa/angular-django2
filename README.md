@@ -317,7 +317,7 @@ ng serve my-app
 documented at
 https://angular.dev/reference/configs/file-structure#application-source-files.
 For recognized hook keys, target paths, and content modes, see the
-[CLI guide](docs/CLI.md#ng-workspace).
+[`ng-workspace` CLI reference](docs/cli/ng-workspace.md).
 
 Because the CLI does not pass nested object options on the command line, drive
 `ng-workspace` programmatically via the schematics test runner, a custom

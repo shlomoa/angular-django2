@@ -256,7 +256,7 @@ npx ng serve ngdj-tutorial
 
 ## What to try next
 
-- Read the [CLI guide](CLI.md) for the full command reference.
+- Read the [CLI guide](cli/index.md) for the full command reference.
 - Compose more components with `angular-django2:component` and
   `angular-django2:embed-component`.
 - Embed existing package components (such as Angular Material) with

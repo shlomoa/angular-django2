@@ -5,7 +5,7 @@
 The package surface is a schematics collection: `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, `data-service`
 
 Start with the [tutorial](TUTORIAL.md) to go from an empty directory to a
-working app with Angular CLI and the ngdj schematics. See the [CLI guide](CLI.md)
+working app with Angular CLI and the ngdj schematics. See the [CLI guide](cli/index.md)
 for install, `ng add`, `ng generate`, app setup, and OpenAPI workflow examples.
 
 ## Workspace file provisioning
@@ -46,6 +46,6 @@ npx ng serve my-app
 ```
 
 See the [tutorial](TUTORIAL.md) for the step-by-step walkthrough of this same
-flow, and the [CLI guide](CLI.md) for the full command reference.
+flow, and the [CLI guide](cli/index.md) for the full command reference.
 
 See the [GitHub repository](https://github.com/shlomoa/angular-django2) for full README, changelog, and contributing guidelines.

@@ -1,5 +1,5 @@
 site_name: angular-django2
-site_description: Angular library for Django-friendly HTTP integration primitives and custom schematics
+site_description: Angular CLI schematics collection for Django-friendly Angular workspaces
 site_url: https://angular-django2.readthedocs.io/
 repo_url: https://github.com/shlomoa/angular-django2
 repo_name: shlomoa/angular-django2
@@ -14,7 +14,21 @@ exclude_docs: |
 nav:
   - Home: index.md
   - Tutorial: TUTORIAL.md
-  - CLI: CLI.md
+  - CLI:
+      - Overview: cli/index.md
+      - ng-add: cli/ng-add.md
+      - application: cli/application.md
+      - ng-app: cli/ng-app.md
+      - ng-workspace: cli/ng-workspace.md
+      - material-setup: cli/material-setup.md
+      - project-structure: cli/project-structure.md
+      - app-shell: cli/app-shell.md
+      - component: cli/component.md
+      - embed-component: cli/embed-component.md
+      - service: cli/service.md
+      - class: cli/class.md
+      - ng-api: cli/ng-api.md
+      - data-service: cli/data-service.md
 
 theme:
   name: material

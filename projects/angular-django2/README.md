@@ -76,7 +76,7 @@ In the common case, pass the same name to both commands so the generated repo in
 
 For programmatic workspace provisioning, `ng-workspace` exposes file hooks for the application source files documented by Angular at <https://angular.dev/reference/configs/file-structure#application-source-files>. Each hook accepts exactly one of `content` (inline string), `path` (local file), or `template` (string with `{{key}}` placeholders and a `params` map). When `project` is provided, targets resolve under that project's `sourceRoot`; otherwise they resolve under `/src`.
 
-For the full list of recognized hook keys, target paths, and content modes, see the [CLI reference](https://angular-django2.readthedocs.io/en/latest/CLI/).
+For the full list of recognized hook keys, target paths, and content modes, see the [`ng-workspace` CLI reference](https://angular-django2.readthedocs.io/en/latest/cli/ng-workspace/).
 
 Because Angular CLI command-line options do not pass nested objects conveniently, use these hooks from a schematic test runner, a custom delegating schematic, or the exported `ngWorkspace` factory.
 
