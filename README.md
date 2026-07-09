@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/v/angular-django2)](https://www.npmjs.com/angular-django2)
 
 **Note:** `angular-django2` is published to npm, but it is still pre-release
-software and not yet alpha. The current package version is `0.2.0`.
+software and not yet alpha. The current package version is `0.3.0`.
 
 `angular-django2` (also referred to as `ngdj`) is an Angular 22 workspace for
 a Django-friendly npm package. It ships an Angular CLI schematics collection

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
-## [Unreleased]
+## [0.3.0]
 
 - **Breaking:** Renamed three schematics for a clearer, non-redundant naming
   scheme: `ng-app` → `material-app`, `ng-workspace` → `workspace-setup`,
