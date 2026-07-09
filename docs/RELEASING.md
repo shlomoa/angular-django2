@@ -94,21 +94,15 @@ Handle those follow-up steps explicitly in the release plan below.
 
 3. Sync checked-in version references and release-facing documentation.
    - **3.1** Rebuild the package output and refresh the lockfile so tracked
-     package metadata and file-dependency entries match the intended release
-     version:
+     package metadata matches the intended release version:
 
      ```bash
      npm run build
      npm install --package-lock-only --ignore-scripts
      ```
 
-     The root workspace depends on `angular-django2` through
-     `file:dist/angular-django2`, so the lockfile can retain the previous
-     `dist/angular-django2` version until the package output is rebuilt.
-
-   - **3.2** Confirm `package-lock.json` top-level version entries and the
-     `packages["dist/angular-django2"].version` entry match the intended
-     release version.
+   - **3.2** Confirm `package-lock.json`'s top-level `version` entry matches
+     the intended release version.
    - **3.3** Review and update `README.md` for any explicit current-version
      references, such as the package version shown near the top of the
      repository overview.

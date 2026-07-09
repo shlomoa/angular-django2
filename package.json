@@ -1,6 +1,6 @@
 {
   "name": "angular-django2",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Angular workspace for a Django-friendly Angular CLI schematics collection.",
   "scripts": {
     "ng": "ng",
@@ -39,7 +39,12 @@
     "type": "git",
     "url": "git+https://github.com/shlomoa/angular-django2.git"
   },
-  "keywords": ["angular", "django", "npm", "schematics"],
+  "keywords": [
+    "angular",
+    "django",
+    "npm",
+    "schematics"
+  ],
   "engines": {
     "node": "^22.22.3 || ^24.15.0 || >=26.0.0",
     "npm": ">=11"

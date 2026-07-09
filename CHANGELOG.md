@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
-## [Unreleased]
+## [0.2.0]
 
 - **Breaking:** Removed the runtime library (`provideAngularDjango2`, `AngularDjango2Service`, `ANGULAR_DJANGO2_CONFIG`, and related config types). `angular-django2` is now a schematics-only package; the Angular-library build (`ng-packagr`) and TypeDoc API docs have been removed accordingly.
 - `ng-api` schematic now generates Django integration helpers (`django-transport.ts`, `resource-adapter.ts`, barrel `index.ts`) under a configurable `--helpersPath` (default `src/app/api-integration/`).

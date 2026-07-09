@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/v/angular-django2)](https://www.npmjs.com/angular-django2)
 
 **Note:** `angular-django2` is published to npm, but it is still pre-release
-software and not yet alpha. The current package version is `0.1.6`.
+software and not yet alpha. The current package version is `0.2.0`.
 
 `angular-django2` (also referred to as `ngdj`) is an Angular 22 workspace for
 a Django-friendly npm package. It ships an Angular CLI schematics collection
@@ -58,19 +58,19 @@ npm install
 
 #### Common repository commands
 
-| Command                         | What it does                                                                     |
-| ------------------------------- | --------------------------------------------------------------------------------- |
+| Command                         | What it does                                                                              |
+| ------------------------------- | ----------------------------------------------------------------------------------------- |
 | `npm run build`                 | Syncs package metadata and compiles the schematics collection into `dist/angular-django2` |
-| `npm run build:reference-app`   | Builds the Angular Material reference app                                        |
-| `npm run lint`                  | Runs ESLint across schematics, tests, and tools                                  |
-| `npm run lint:reference-app`    | Runs ESLint for the reference app project                                        |
-| `npm run lint:fix`              | Applies fixable ESLint changes                                                   |
-| `npm run serve:reference-app`   | Starts the reference app dev server                                              |
-| `npm run format:check`          | Checks file formatting with Prettier                                             |
-| `npm run format`                | Fixes file formatting with Prettier                                              |
-| `npm run pack:dry-run`          | Rebuilds and verifies the npm tarball without publishing                         |
-| `npm run sync:package-metadata` | Syncs publishable package metadata from the root manifest                        |
-| `npm run release:prepare`       | Runs the release verification flow                                               |
+| `npm run build:reference-app`   | Builds the Angular Material reference app                                                 |
+| `npm run lint`                  | Runs ESLint across schematics, tests, and tools                                           |
+| `npm run lint:reference-app`    | Runs ESLint for the reference app project                                                 |
+| `npm run lint:fix`              | Applies fixable ESLint changes                                                            |
+| `npm run serve:reference-app`   | Starts the reference app dev server                                                       |
+| `npm run format:check`          | Checks file formatting with Prettier                                                      |
+| `npm run format`                | Fixes file formatting with Prettier                                                       |
+| `npm run pack:dry-run`          | Rebuilds and verifies the npm tarball without publishing                                  |
+| `npm run sync:package-metadata` | Syncs publishable package metadata from the root manifest                                 |
+| `npm run release:prepare`       | Runs the release verification flow                                                        |
 
 `npm run build` produces the publishable output in `dist/angular-django2`,
 including the compiled schematics collection.
