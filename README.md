@@ -6,11 +6,9 @@
 **Note:** `angular-django2` is published to npm, but it is still pre-release
 software and not yet alpha. The current package version is `0.1.6`.
 
-`angular-django2` (also referred to as `ngdj`) is an Angular 22 library
-workspace for a Django-friendly npm package. It ships two things:
-
-- runtime Angular utilities for Django-oriented configuration
-- an Angular CLI schematics collection for custom `ng generate` flows
+`angular-django2` (also referred to as `ngdj`) is an Angular 22 workspace for
+a Django-friendly npm package. It ships an Angular CLI schematics collection
+for custom `ng generate` flows.
 
 It is designed to work especially well with
 [django-angular3](https://github.com/shlomoa/django-angular3), which owns the
@@ -20,7 +18,6 @@ Django-side workspace lifecycle and can register this package automatically.
 
 ### What this repository contains
 
-- `projects/angular-django2/src`: the runtime library and public API
 - `projects/angular-django2/schematics`: the schematics collection source
 - `projects/angular-django2-reference`: the Angular Material tutorial and
   online reference application for this package
@@ -29,13 +26,6 @@ Django-side workspace lifecycle and can register this package automatically.
 - `tools`: repository automation such as release/version helpers
 - `docs`: release and testing documentation
 - `dist/angular-django2`: the publishable build output after `npm run build`
-
-The current public runtime surface is intentionally small:
-
-- `provideAngularDjango2(config?)`
-- `ANGULAR_DJANGO2_CONFIG`
-- `AngularDjango2Service`
-- configuration types exported from `projects/angular-django2/src/public-api.ts`
 
 The current schematics collection includes:
 
@@ -53,45 +43,6 @@ The current schematics collection includes:
 - `ng-api`
 - `data-service`
 
-### Runtime API at a glance
-
-Typical standalone Angular setup:
-
-```ts
-import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';
-import { ApplicationConfig } from '@angular/core';
-import { provideAngularDjango2 } from 'angular-django2';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(
-      withXsrfConfiguration({
-        cookieName: 'csrftoken',
-        headerName: 'X-CSRFToken',
-      }),
-    ),
-    provideAngularDjango2({
-      apiBaseUrl: 'https://api.example.com',
-      withCredentials: true,
-    }),
-  ],
-};
-```
-
-Resolved defaults:
-
-- `apiBaseUrl: ''`
-- `csrfCookieName: 'csrftoken'`
-- `csrfHeaderName: 'X-CSRFToken'`
-- `withCredentials: true`
-
-Current HTTP/CSRF boundaries:
-
-- the package does not currently ship its own `HttpClient` interceptor or automatic request wiring
-- `withCredentials` is stored in config but is not automatically applied to requests
-- there is no built-in CSRF cookie reader beyond the manual `csrfHeader()` helper on `AngularDjango2Service`
-- today, examples should prefer Angular's own `provideHttpClient(...)` and `withXsrfConfiguration(...)` alongside `provideAngularDjango2(...)`
-
 ### Build, lint, and package this repository
 
 #### Prerequisites
@@ -107,32 +58,30 @@ npm install
 
 #### Common repository commands
 
-| Command                         | What it does                                                                                            |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `npm run build`                 | Syncs package metadata, builds the Angular library, and compiles schematics into `dist/angular-django2` |
-| `npm run build:reference-app`   | Builds the library output needed by the reference app, then builds the Angular Material reference app   |
-| `npm run build:watch`           | Watches the Angular library build for iterative development                                             |
-| `npm run lint`                  | Runs ESLint across library code, schematics, tests, and tools                                           |
-| `npm run lint:reference-app`    | Runs ESLint for the reference app project                                                               |
-| `npm run lint:fix`              | Applies fixable ESLint changes                                                                          |
-| `npm run serve:reference-app`   | Builds the library output needed by the reference app, then starts the app dev server                   |
-| `npm run format:check`          | Checks file formatting with Prettier                                                                    |
-| `npm run format`                | Fixes file formatting with Prettier                                                                     |
-| `npm run pack:dry-run`          | Rebuilds and verifies the npm tarball without publishing                                                |
-| `npm run sync:package-metadata` | Syncs library package metadata from the root manifest                                                   |
-| `npm run release:prepare`       | Runs the release verification flow                                                                      |
+| Command                         | What it does                                                                     |
+| ------------------------------- | --------------------------------------------------------------------------------- |
+| `npm run build`                 | Syncs package metadata and compiles the schematics collection into `dist/angular-django2` |
+| `npm run build:reference-app`   | Builds the Angular Material reference app                                        |
+| `npm run lint`                  | Runs ESLint across schematics, tests, and tools                                  |
+| `npm run lint:reference-app`    | Runs ESLint for the reference app project                                        |
+| `npm run lint:fix`              | Applies fixable ESLint changes                                                   |
+| `npm run serve:reference-app`   | Starts the reference app dev server                                              |
+| `npm run format:check`          | Checks file formatting with Prettier                                             |
+| `npm run format`                | Fixes file formatting with Prettier                                              |
+| `npm run pack:dry-run`          | Rebuilds and verifies the npm tarball without publishing                         |
+| `npm run sync:package-metadata` | Syncs publishable package metadata from the root manifest                        |
+| `npm run release:prepare`       | Runs the release verification flow                                               |
 
 `npm run build` produces the publishable output in `dist/angular-django2`,
 including the compiled schematics collection.
 
 ### Testing in this repository
 
-This repository includes Angular library tests plus Node-side schematic
-validation.
+This repository includes Node-side schematic validation plus Angular Material
+reference app tests.
 
 Common commands:
 
-- `npm test` — Angular library tests
 - `npm run test:reference-app` — Angular Material reference app tests
 - `npm run test:node` — Node-side unit coverage plus the schematic integration
   suite
@@ -151,7 +100,6 @@ npm run test:ci
 That runs:
 
 - `npm run test:node`
-- `ng test angular-django2 --watch=false`
 - `npm run test:reference-app`
 
 It does **not** run the E2E suite.
@@ -180,8 +128,7 @@ Use these finite validation commands for the app infrastructure:
 - `npm run test:reference-app`
 
 For local tutorial authoring, `npm run serve:reference-app` starts the dev
-server after building the library output that backs the app's public package
-import.
+server.
 
 For the canonical integration-testing guide — including `SchematicTestRunner`
 coverage, E2E scenarios, build prerequisites, temp-workspace helpers,

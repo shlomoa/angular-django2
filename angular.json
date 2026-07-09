@@ -10,27 +10,8 @@
     "angular-django2": {
       "projectType": "library",
       "root": "projects/angular-django2",
-      "sourceRoot": "projects/angular-django2/src",
       "prefix": "lib",
       "architect": {
-        "build": {
-          "builder": "@angular/build:ng-packagr",
-          "configurations": {
-            "production": {
-              "tsConfig": "projects/angular-django2/tsconfig.lib.prod.json"
-            },
-            "development": {
-              "tsConfig": "projects/angular-django2/tsconfig.lib.json"
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "projects/angular-django2/tsconfig.spec.json"
-          }
-        },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {

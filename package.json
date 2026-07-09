@@ -1,15 +1,13 @@
 {
   "name": "angular-django2",
   "version": "0.1.6",
-  "description": "Angular library workspace for Django-friendly integration primitives and custom Angular CLI schematics.",
+  "description": "Angular workspace for a Django-friendly Angular CLI schematics collection.",
   "scripts": {
     "ng": "ng",
     "start": "npm run serve:reference-app",
-    "build": "npm run sync:package-metadata && npm run build:library && npm run build:schematics",
-    "build:library": "ng build angular-django2",
-    "build:reference-app": "npm run build:library && ng build angular-django2-reference",
-    "build:schematics": "tsc -p projects/angular-django2/tsconfig.schematics.json && cpy \"*.json\" \"*/schema.json\" \"../../../dist/angular-django2/schematics/\" --cwd=projects/angular-django2/schematics/",
-    "build:watch": "npm run sync:package-metadata && ng build angular-django2 --watch --configuration development",
+    "build": "npm run sync:package-metadata && npm run build:schematics",
+    "build:reference-app": "ng build angular-django2-reference",
+    "build:schematics": "cpy package.json README.md \"../../dist/angular-django2/\" --cwd=projects/angular-django2/ && tsc -p projects/angular-django2/tsconfig.schematics.json && cpy \"*.json\" \"*/schema.json\" \"../../../dist/angular-django2/schematics/\" --cwd=projects/angular-django2/schematics/",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "ng lint",
@@ -18,19 +16,17 @@
     "pack:dry-run": "npm run build && npm pack ./dist/angular-django2 --dry-run",
     "release:prepare": "npm run format:check && npm run lint && npm run test:ci && npm run pack:dry-run",
     "release:version": "node tools/release-version.mjs",
-    "serve:reference-app": "npm run build:library && ng serve angular-django2-reference",
+    "serve:reference-app": "ng serve angular-django2-reference",
     "sync:package-metadata": "node tools/sync-package-metadata.mjs",
-    "test": "ng test --watch=false angular-django2",
-    "test:ci": "npm run test:node && ng test angular-django2 --watch=false && npm run test:reference-app",
+    "test:ci": "npm run test:node && npm run test:reference-app",
     "cleanup:e2e:tmp-areas": "node --no-warnings --experimental-strip-types tests/utils/temp_areas.ts cleanup",
     "test:node": "vitest run --config vitest.config.mts",
     "test:node:watch": "vitest --config vitest.config.mts",
-    "test:reference-app": "npm run build:library && ng test angular-django2-reference --watch=false",
+    "test:reference-app": "ng test angular-django2-reference --watch=false",
     "test:e2e": "node --no-warnings --experimental-strip-types tests/utils/temp_areas.ts run",
     "test:e2e:watch": "node --no-warnings --experimental-strip-types tests/utils/temp_areas.ts watch",
     "test:e2e:debug": "node --no-warnings --experimental-strip-types tests/utils/temp_areas.ts debug",
-    "generate:api": "ng-openapi-gen",
-    "docs:api": "typedoc"
+    "generate:api": "ng-openapi-gen"
   },
   "private": true,
   "packageManager": "npm@11.6.2",
@@ -43,15 +39,7 @@
     "type": "git",
     "url": "git+https://github.com/shlomoa/angular-django2.git"
   },
-  "keywords": [
-    "angular",
-    "django",
-    "csrf",
-    "http",
-    "library",
-    "npm",
-    "schematics"
-  ],
+  "keywords": ["angular", "django", "npm", "schematics"],
   "engines": {
     "node": "^22.22.3 || ^24.15.0 || >=26.0.0",
     "npm": ">=11"
@@ -66,7 +54,6 @@
     "@angular/material": "22.0.1",
     "@angular/platform-browser": "^22.0.1",
     "@angular/router": "^22.0.1",
-    "angular-django2": "file:dist/angular-django2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -86,10 +73,7 @@
     "globals": "^17.4.0",
     "jsdom": "^29.0.2",
     "ng-openapi-gen": "^1.0.5",
-    "ng-packagr": "^22.0.0",
     "prettier": "^3.8.1",
-    "typedoc": "^0.28.19",
-    "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.58.0",
     "vitest": "^4.0.8"

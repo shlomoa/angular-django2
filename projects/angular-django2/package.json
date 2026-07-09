@@ -1,13 +1,10 @@
 {
   "name": "angular-django2",
   "version": "0.1.6",
-  "description": "Angular library workspace for Django-friendly integration primitives and custom Angular CLI schematics.",
+  "description": "Angular workspace for a Django-friendly Angular CLI schematics collection.",
   "keywords": [
     "angular",
     "django",
-    "csrf",
-    "http",
-    "library",
     "npm",
     "schematics"
   ],
@@ -24,14 +21,6 @@
   "ng-add": {
     "save": "devDependencies"
   },
-  "peerDependencies": {
-    "@angular/common": "^22.0.0",
-    "@angular/core": "^22.0.0"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
-  },
-  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   }

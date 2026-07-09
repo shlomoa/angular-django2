@@ -43,15 +43,13 @@ export const GUIDES: readonly Guide[] = [
         steps: [
           'ng add angular-django2 to register the schematic collection.',
           'ng generate angular-django2:ng-app my-app to scaffold a Material app in one step.',
-          'Add provideAngularDjango2({ apiBaseUrl: \u0027/api\u0027 }) to the application config.',
-          'Serve the app and confirm the resolved API base and CSRF header values render.',
+          'Serve the app and confirm the generated shell renders.',
         ],
       },
       {
         title: 'What to expect',
         body: [
-          'The generated app boots with standalone routing, zoneless change detection, and SCSS. ' +
-            'API URLs are built from the configured base URL instead of being hidden inside the package.',
+          'The generated app boots with standalone routing, zoneless change detection, and SCSS.',
         ],
       },
     ],
@@ -154,9 +152,8 @@ export const GUIDES: readonly Guide[] = [
       {
         title: 'CSRF and credentials',
         body: [
-          'Prefer Angular\u0027s provideHttpClient(...) with withXsrfConfiguration(...) alongside ' +
-            'provideAngularDjango2(...) so the CSRF header name and withCredentials behavior stay visible ' +
-            'for form submissions.',
+          'Prefer Angular\u0027s provideHttpClient(...) with withXsrfConfiguration(...) so the CSRF header ' +
+            'name and credentials behavior stay visible for form submissions.',
         ],
       },
     ],
@@ -174,8 +171,8 @@ export const GUIDES: readonly Guide[] = [
         steps: [
           'npm run format:check to verify formatting.',
           'npm run lint to run the Angular ESLint rules.',
-          'npm run test:ci to run node, library, and reference-app tests.',
-          'npm run build to produce the publishable library output.',
+          'npm run test:ci to run node and reference-app tests.',
+          'npm run build to produce the publishable package output.',
         ],
       },
       {
@@ -194,21 +191,6 @@ export const GUIDES: readonly Guide[] = [
     summary: 'Keep Django auth boundaries, CSRF naming, and credentials explicit in the app.',
     icon: 'security',
     sections: [
-      {
-        title: 'Explicit CSRF configuration',
-        body: [
-          'The package stores csrfCookieName and csrfHeaderName in configuration and exposes a csrfHeader() ' +
-            'helper. It does not ship a hidden interceptor, so CSRF wiring stays visible in the app code.',
-        ],
-      },
-      {
-        title: 'Credentials and auth boundaries',
-        body: [
-          'withCredentials is stored in config but is not applied automatically. Pair provideAngularDjango2(...) ' +
-            'with Angular\u0027s provideHttpClient(...) and withXsrfConfiguration(...) so credentialed requests and ' +
-            'auth boundaries remain intentional.',
-        ],
-      },
       {
         title: 'Review checklist',
         body: ['Confirm the security-sensitive boundaries before shipping.'],

@@ -3,10 +3,8 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Router, provideRouter } from '@angular/router';
 import type { WritableSignal } from '@angular/core';
-import { AngularDjango2Service, provideAngularDjango2 } from 'angular-django2';
 
 import { App } from './app';
-import { appConfig } from './app.config';
 import { routes } from './app.routes';
 
 type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-orange';
@@ -68,11 +66,7 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [
-        provideNoopAnimations(),
-        provideRouter(routes),
-        provideAngularDjango2({ apiBaseUrl: '/api' }),
-      ],
+      providers: [provideNoopAnimations(), provideRouter(routes)],
     }).compileComponents();
   });
 
@@ -106,22 +100,6 @@ describe('App', () => {
       'https://github.com/shlomoa/django-angular3',
       'Django companion',
     );
-  });
-
-  it('renders the package reference page section with configured Django integration values', async () => {
-    const { compiled } = await renderApp();
-
-    const packageCard = requireElement<HTMLElement>(compiled, '.main-frame:first-child');
-
-    expect(packageCard.textContent).toContain('Package reference');
-    expect(packageCard.textContent).toContain('Description of the package');
-    expect(packageCard.textContent).toContain('angular-django2');
-    expect(packageCard.textContent).toContain('Django-friendly Angular configuration primitives');
-    expect(packageCard.querySelector('mat-chip-set')?.getAttribute('aria-label')).toBe(
-      'Configured package values',
-    );
-    expect(packageCard.textContent).toContain('API base: /api/');
-    expect(packageCard.textContent).toContain('CSRF header: X-CSRFToken');
   });
 
   it('renders accessible navigation for every in-page section', async () => {
@@ -242,16 +220,12 @@ describe('App', () => {
     expect(documentationPage.textContent).toContain('View guides');
   });
 
-  it('keeps the current reference app page surface to three in-page frames', async () => {
+  it('keeps the current reference app page surface to two in-page frames', async () => {
     const { compiled } = await renderApp();
     const frames = [...compiled.querySelectorAll<HTMLElement>('.main-frame')];
 
-    expect(frames.length).toBe(3);
-    expect(frames.map((frame) => frame.id || 'package-reference')).toEqual([
-      'package-reference',
-      'ui',
-      'documentation',
-    ]);
+    expect(frames.length).toBe(2);
+    expect(frames.map((frame) => frame.id)).toEqual(['ui', 'documentation']);
   });
 
   it('renders the routed UI overview as the visible page at /ui', async () => {
@@ -274,24 +248,5 @@ describe('App', () => {
     expect(compiled.querySelector('#guides-overview-title')?.textContent).toContain(
       'Reference app guides',
     );
-  });
-});
-
-describe('reference app configuration', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: appConfig.providers,
-    });
-  });
-
-  it('provides the same Django integration defaults rendered by the app shell', () => {
-    const angularDjango2 = TestBed.inject(AngularDjango2Service);
-
-    expect(angularDjango2.resolvedConfig).toEqual({
-      apiBaseUrl: '/api',
-      csrfCookieName: 'csrftoken',
-      csrfHeaderName: 'X-CSRFToken',
-      withCredentials: true,
-    });
   });
 });

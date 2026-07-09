@@ -1,13 +1,8 @@
 # angular-django2
 
-`angular-django2` provides Angular-friendly configuration primitives for Django-backed applications and a schematics collection for custom `ng generate` flows.
+`angular-django2` provides an Angular CLI schematics collection for custom `ng generate` flows in Django-backed applications.
 
-The initial package surface is intentionally small:
-
-- `provideAngularDjango2(...)` — root-level configuration provider
-- `ANGULAR_DJANGO2_CONFIG` — DI token for resolved config
-- `AngularDjango2Service` — URL and CSRF helper methods
-- Schematics: `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, `data-service`
+The package surface is a schematics collection: `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, `data-service`
 
 Start with the [tutorial](TUTORIAL.md) to go from an empty directory to a
 working app with Angular CLI and the ngdj schematics. See the [CLI guide](CLI.md)
@@ -38,25 +33,19 @@ When `project` is provided, file targets are resolved under that project's `sour
 
 ## Quick start
 
-```ts
-import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';
-import { ApplicationConfig } from '@angular/core';
-import { provideAngularDjango2 } from 'angular-django2';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(
-      withXsrfConfiguration({
-        cookieName: 'csrftoken',
-        headerName: 'X-CSRFToken',
-      }),
-    ),
-    provideAngularDjango2({
-      apiBaseUrl: 'https://api.example.com',
-      withCredentials: true,
-    }),
-  ],
-};
+```bash
+npx -y @angular/cli@22 new demo-workspace --no-create-application --package-manager npm --skip-git --defaults
+cd demo-workspace
+npm install angular-django2
+npx ng add angular-django2 --skip-confirmation
+npx ng generate angular-django2:ng-workspace my-app
+npx ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
+npm install
+npx ng build my-app
+npx ng serve my-app
 ```
+
+See the [tutorial](TUTORIAL.md) for the step-by-step walkthrough of this same
+flow, and the [CLI guide](CLI.md) for the full command reference.
 
 See the [GitHub repository](https://github.com/shlomoa/angular-django2) for full README, changelog, and contributing guidelines.

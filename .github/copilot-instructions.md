@@ -26,8 +26,6 @@ as soon as a higher-priority source answers the question:
 1. **This repo — executable/configuration truth first**
    - `package.json`
    - `angular.json`
-   - `projects/angular-django2/src/public-api.ts`
-   - `projects/angular-django2/src/lib`
    - `projects/angular-django2/schematics`
    - `.github/workflows/publish.yml`
 2. **This repo — maintained documentation**
@@ -75,8 +73,8 @@ Instruction-file priority:
 - Keep Django integration boundaries explicit: configuration, auth boundaries, CSRF naming, URL handling, and serialization behavior should be visible in code.
 - Keep Django integration concerns explicit rather than hiding behavior behind package magic.
 - Prefer clear TypeScript APIs, narrow public exports, and maintainable Angular patterns.
-- Prefer standalone Angular patterns and provider functions; do not introduce NgModules for new package APIs.
-- All public exports must go through `projects/angular-django2/src/public-api.ts`. Do not export internal helpers; mark internal symbols with `@internal`.
+- Prefer standalone Angular patterns and provider functions in generated code; do not introduce NgModules for new schematics output.
+- This package has no runtime public API; its surface is the schematics collection under `projects/angular-django2/schematics`. Do not export internal helpers from generated templates; mark internal symbols with `@internal`.
 - Avoid generated-looking boilerplate that does not add package value.
 - Move non-generic implementation inventories back into `README.md`,
   `projects/angular-django2/README.md`, `docs/REQUIREMENTS.md`,

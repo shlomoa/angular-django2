@@ -5,9 +5,8 @@ This document summarizes the requirements already established for
 new source of truth. If this file drifts, resolve mismatches in this order:
 
 1. this repo's executable/configuration sources such as `package.json`,
-   `angular.json`, `projects/angular-django2/src/public-api.ts`,
-   `projects/angular-django2/src/lib`, `projects/angular-django2/schematics`,
-   and `.github/workflows/publish.yml`
+   `angular.json`, `projects/angular-django2/schematics`, and
+   `.github/workflows/publish.yml`
 2. this repo's maintained docs such as `README.md`,
    `projects/angular-django2/README.md`, `tests/README.md`,
    `docs/INTEGRATION_TESTING.md`, and `docs/RELEASING.md`
@@ -24,36 +23,34 @@ sources over lower-priority ones.
 ## Terminology
 
 - **angular-django2** (also referred to as **ngdj**): This repository — an
-  Angular 22 library workspace that produces a Django-friendly npm package.
+  Angular 22 workspace that produces a Django-friendly npm schematics package.
 - **django-angular3**: A companion Django package that provides Django
   management commands (`django-admin`) for Angular workspace operations,
   including automatic invocation of `ng add angular-django2`.
 
 ## 1. Repository Identity
 
-- The repository is an Angular 22 library workspace.
+- The repository is an Angular 22 workspace.
 - The repository exists to produce a Django-friendly npm package named
   `angular-django2`.
-- Treat the project as a publishable Angular library by default, not as an
+- Treat the project as a publishable schematics package by default, not as an
   Angular application, unless work explicitly targets app generation behavior.
-- The library source of truth is `projects/angular-django2`.
+- The schematics source of truth is `projects/angular-django2`.
 - The repo-owned Angular Material tutorial/reference app lives in
   `projects/angular-django2-reference`; its displayed app name is
   `angular-django2`, while the workspace project key remains distinct from the
-  publishable library project.
+  publishable schematics project.
 - The publishable build output is `dist/angular-django2`.
 - Shared commands are defined in the root `package.json`.
 
 ## 2. Product Requirements
 
-- The package must ship two main capabilities:
-  - runtime Angular utilities for Django-oriented configuration
-  - an Angular CLI schematics collection for custom `ng generate` flows
-- The public runtime API must stay narrow, typed, and intentional.
+- The package must ship an Angular CLI schematics collection for custom
+  `ng generate` flows.
 - Standalone Angular patterns and provider-style APIs are preferred over
-  module-centric patterns.
-- Django integration concerns must remain explicit in code and documentation,
-  especially:
+  module-centric patterns in generated code.
+- Django integration concerns must remain explicit in generated code and
+  documentation, especially:
   - configuration
   - URL handling
   - auth boundaries
@@ -63,40 +60,7 @@ sources over lower-priority ones.
 - Generated-looking boilerplate that does not add package value should be
   avoided.
 
-## 3. Current Runtime Surface
-
-The currently required runtime surface is intentionally small and centered on
-configuration helpers:
-
-- `provideAngularDjango2(config?)`
-- `ANGULAR_DJANGO2_CONFIG`
-- `AngularDjango2Service`
-- configuration types exported from the library entrypoint
-
-The resolved configuration defaults are currently:
-
-- `apiBaseUrl: ''`
-- `csrfCookieName: 'csrftoken'`
-- `csrfHeaderName: 'X-CSRFToken'`
-- `withCredentials: true`
-
-The service behavior currently expected by the repo docs and code is:
-
-- build API URLs from the configured base URL
-- expose a helper for building CSRF header objects
-
-Current HTTP/CSRF boundaries are also part of the current repo behavior:
-
-- the package does not currently ship its own `HttpClient` interceptor or
-  automatic request wiring
-- `withCredentials` is stored in config but is not automatically applied to
-  requests
-- there is no built-in CSRF cookie reader beyond the manual `csrfHeader()`
-  helper
-- current examples should prefer Angular's own `provideHttpClient(...)` and
-  `withXsrfConfiguration(...)` alongside `provideAngularDjango2(...)`
-
-## 4. Schematics Requirements
+## 3. Schematics Requirements
 
 - The package must publish a schematics collection.
 - The currently supported schematics are:
@@ -169,7 +133,7 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
     `--apiService`, `--apiPath` (default: `../api/services`), `--path`,
     `--flat`, `--skipTests`
 
-## 5. Django Integration Requirements
+## 4. Django Integration Requirements
 
 - This library is designed to integrate with
   [django-angular3](https://github.com/shlomoa/django-angular3).
@@ -180,7 +144,7 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
 - Documentation and code should reflect this integration relationship where
   relevant.
 
-## 6. Tooling And Verification Requirements
+## 5. Tooling And Verification Requirements
 
 - Development should use the root package scripts instead of ad hoc commands
   whenever possible.
@@ -207,12 +171,12 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
 - Packaging validation should use `npm pack ./dist/angular-django2 --dry-run`
   rather than `npm publish --dry-run`.
 
-## 7. Environment Requirements
+## 6. Environment Requirements
 
 - Supported Node.js versions: `^22.22.3 || ^24.15.0 || >=26.0.0`
 - Supported npm version: `>=11`
 
-## 8. Documentation Requirements
+## 7. Documentation Requirements
 
 - Documentation must stay aligned with the actual workspace and package
   behavior.
@@ -237,22 +201,21 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
   - `CLAUDE.md` and `GEMINI.md` should only reference `AGENTS.md` and keep only
     model-specific notes
 - Usage examples should prefer Angular.dev-style standalone setup and
-  `provide*` APIs.
+  `provide*` APIs in generated code.
 
-## 9. Change Management Requirements
+## 8. Change Management Requirements
 
 - Prefer small, reviewable changes.
-- Keep the public API small unless there is a clear package-level need to
-  expand it.
+- Keep the schematics surface small unless there is a clear package-level need
+  to expand it.
 - Use existing files and current repo behavior as the source of truth before
   introducing new patterns.
 
-## 10. Release Requirements
+## 9. Release Requirements
 
 - The release flow must build from the publishable output in
   `dist/angular-django2`.
 - The published tarball is expected to contain:
-  - the compiled runtime library
   - the compiled schematics collection
   - the generated package README and manifest
 - Before release, confirm the package state with the documented release flow in
@@ -266,10 +229,9 @@ Current HTTP/CSRF boundaries are also part of the current repo behavior:
   together.
 - Local publishing, when used, should publish `./dist/angular-django2`.
 
-## 11. Non-Goals And Boundaries
+## 10. Non-Goals And Boundaries
 
 - Do not treat this repo like a generic Angular app scaffold.
-- Do not widen the runtime API or schematics behavior without a concrete use
-  case.
+- Do not widen the schematics behavior without a concrete use case.
 - Do not hide Django-specific integration behavior behind unclear defaults.
 - Do not let docs, release instructions, and package behavior drift apart.

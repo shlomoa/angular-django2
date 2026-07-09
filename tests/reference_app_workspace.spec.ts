@@ -41,16 +41,12 @@ describe('reference app workspace infrastructure', () => {
       dependencies: Record<string, string>;
     }>('package.json');
 
-    expect(packageJson.scripts['build:reference-app']).toBe(
-      'npm run build:library && ng build angular-django2-reference',
-    );
+    expect(packageJson.scripts['build:reference-app']).toBe('ng build angular-django2-reference');
     expect(packageJson.scripts['lint:reference-app']).toBe('ng lint angular-django2-reference');
     expect(packageJson.scripts['test:reference-app']).toBe(
-      'npm run build:library && ng test angular-django2-reference --watch=false',
+      'ng test angular-django2-reference --watch=false',
     );
-    expect(packageJson.scripts['serve:reference-app']).toBe(
-      'npm run build:library && ng serve angular-django2-reference',
-    );
+    expect(packageJson.scripts['serve:reference-app']).toBe('ng serve angular-django2-reference');
     expect(packageJson.dependencies['@angular/material']).toBeDefined();
     expect(packageJson.dependencies['@angular/cdk']).toBeDefined();
     expect(packageJson.dependencies['@angular/animations']).toBeDefined();

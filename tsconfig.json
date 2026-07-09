@@ -3,9 +3,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "paths": {
-      "angular-django2": ["./dist/angular-django2"]
-    },
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -26,12 +23,6 @@
   },
   "files": [],
   "references": [
-    {
-      "path": "./projects/angular-django2/tsconfig.lib.json"
-    },
-    {
-      "path": "./projects/angular-django2/tsconfig.spec.json"
-    },
     {
       "path": "./projects/angular-django2-reference/tsconfig.app.json"
     },

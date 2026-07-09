@@ -18,7 +18,6 @@ Current checked-in automation:
 
 The published tarball contains:
 
-- the compiled runtime library from `projects/angular-django2/src`
 - the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `app-shell`, `service`, `class`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
 - the package README and manifest generated into `dist/angular-django2`
 
@@ -208,7 +207,7 @@ The `Publish npm package` workflow:
 
 - installs dependencies with `npm ci`
 - checks file formatting with `npm run format:check`
-- builds the runtime library and schematics collection
+- builds the schematics collection
 - runs lint
 - runs tests
 - publishes `dist/angular-django2` to npm

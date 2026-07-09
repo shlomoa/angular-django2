@@ -3,7 +3,6 @@ import { provideBrowserGlobalErrorListeners } from '@angular/core';
 import type { ApplicationConfig } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { provideAngularDjango2 } from 'angular-django2';
 
 import { routes } from './app.routes';
 
@@ -18,9 +17,5 @@ export const appConfig: ApplicationConfig = {
       }),
     ),
     provideAnimations(),
-    provideAngularDjango2({
-      apiBaseUrl: '/api',
-      withCredentials: true,
-    }),
   ],
 };

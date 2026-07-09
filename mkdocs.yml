@@ -15,20 +15,6 @@ nav:
   - Home: index.md
   - Tutorial: TUTORIAL.md
   - CLI: CLI.md
-  - API Reference:
-      - Overview: api/README.md
-      - All Exports: api/globals.md
-      - Classes:
-          - AngularDjango2Service: api/classes/AngularDjango2Service.md
-      - Functions:
-          - provideAngularDjango2: api/functions/provideAngularDjango2.md
-      - Interfaces:
-          - AngularDjango2Config: api/interfaces/AngularDjango2Config.md
-      - Type Aliases:
-          - AngularDjango2ResolvedConfig: api/type-aliases/AngularDjango2ResolvedConfig.md
-      - Variables:
-          - ANGULAR_DJANGO2_CONFIG: api/variables/ANGULAR_DJANGO2_CONFIG.md
-          - DEFAULT_ANGULAR_DJANGO2_CONFIG: api/variables/DEFAULT_ANGULAR_DJANGO2_CONFIG.md
 
 theme:
   name: material

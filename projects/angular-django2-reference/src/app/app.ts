@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { AngularDjango2Service } from 'angular-django2';
 import { filter } from 'rxjs';
 
 import { GUIDES } from './guides/guides-catalog';
@@ -40,14 +39,11 @@ type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-
   styleUrl: './app.scss',
 })
 export class App {
-  private readonly angularDjango2 = inject(AngularDjango2Service);
   private readonly location = inject(Location);
   private readonly router = inject(Router);
   private readonly currentUrl = signal(this.location.path() || this.router.url);
 
   protected readonly title = signal('angular-django2');
-  protected readonly packageApi = this.angularDjango2.buildUrl('/api/');
-  protected readonly csrfHeaderName = this.angularDjango2.resolvedConfig.csrfHeaderName;
   protected readonly selectedColorScheme = signal<MaterialColorScheme>('azure-blue');
   protected readonly colorSchemes: readonly { value: MaterialColorScheme; label: string }[] = [
     { value: 'rose-red', label: 'Rose & Red' },
@@ -65,8 +61,8 @@ export class App {
       description: 'Demonstrate a responsive toolbar, cards, chips, and selection controls.',
     },
     {
-      name: 'Runtime values',
-      description: 'Display resolved API and CSRF values users can compare with their app.',
+      name: 'Command exploration',
+      description: 'Browse schematic commands grouped into category cards and detail pages.',
     },
   ];
   protected readonly guides = GUIDES.slice(0, 3).map((guide) => ({

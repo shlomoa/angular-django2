@@ -11,12 +11,6 @@ behavior, and platform caveats.
 
 ## What kinds of testing this repo contains
 
-### Angular library tests
-
-- Run by `npm test`
-- Executed through Angular's test builder for the `angular-django2` library
-- Validate the runtime library code under `projects/angular-django2/src/lib`
-
 ### Angular Material reference app tests
 
 - Run by `npm run test:reference-app`
@@ -61,7 +55,6 @@ See `docs/INTEGRATION_TESTING.md`.
 
 | Command                         | Coverage                                                                                             |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `npm test`                      | Angular library tests only                                                                           |
 | `npm run test:reference-app`    | Angular Material reference app tests                                                                 |
 | `npm run test:node`             | Node-side unit + integration specs in `tests/**/*.spec.ts`, excluding `tests/schematics.e2e.spec.ts` |
 | `npm run test:node:watch`       | Watch mode for the same Node-side unit + integration specs                                           |
@@ -69,7 +62,7 @@ See `docs/INTEGRATION_TESTING.md`.
 | `npm run test:e2e`              | Only `tests/schematics.e2e.spec.ts`, after cleaning stale repo-root E2E temp workspaces              |
 | `npm run test:e2e:watch`        | Watch mode for the E2E suite, after cleaning stale repo-root E2E temp workspaces                     |
 | `npm run test:e2e:debug`        | Only `tests/schematics.e2e.spec.ts`, while preserving temp workspaces for failure debugging          |
-| `npm run test:ci`               | `npm run test:node` + Angular library tests + reference app tests                                    |
+| `npm run test:ci`               | `npm run test:node` + reference app tests                                                            |
 
 `npm run test:ci` does **not** run the E2E suite.
 
@@ -123,12 +116,6 @@ None at the moment; the former application harness now lives in
 flow.
 
 ## How to run the major test flows
-
-### Angular library tests only
-
-```bash
-npm test
-```
 
 ### Angular Material reference app tests only
 

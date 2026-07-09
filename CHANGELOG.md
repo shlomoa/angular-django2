@@ -6,6 +6,7 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+- **Breaking:** Removed the runtime library (`provideAngularDjango2`, `AngularDjango2Service`, `ANGULAR_DJANGO2_CONFIG`, and related config types). `angular-django2` is now a schematics-only package; the Angular-library build (`ng-packagr`) and TypeDoc API docs have been removed accordingly.
 - `ng-api` schematic now generates Django integration helpers (`django-transport.ts`, `resource-adapter.ts`, barrel `index.ts`) under a configurable `--helpersPath` (default `src/app/api-integration/`).
 - New `ng-api` options: `--helpersPath`, `--skipHelpers`, `--skipTests`.
 - Django integration artifacts include `provideDjangoApiTransport()`, `readCsrfCookie()`, `djangoAuthInterceptor`, `djangoCredentialsInterceptor()`, `DJANGO_AUTH_TOKEN`, `ResourceAdapter<T>`, `PaginatedResult`, and `ResourceQuery`.

@@ -2,48 +2,11 @@
 
 [![Documentation Status](https://readthedocs.org/projects/angular-django2/badge/?version=latest)](https://angular-django2.readthedocs.io/)
 
-`angular-django2` provides Angular-friendly configuration primitives for Django-backed applications and a schematics collection for custom `ng generate` flows.
+`angular-django2` provides an Angular CLI schematics collection for custom `ng generate` flows in Django-backed applications.
 
 Full documentation: <https://angular-django2.readthedocs.io/>
 
-The initial package surface is intentionally small:
-
-- `provideAngularDjango2(...)` for root-level configuration
-- `ANGULAR_DJANGO2_CONFIG` for DI-based access to resolved config
-- `AngularDjango2Service` for URL and CSRF helper methods
-- schematics for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
-
-## Usage
-
-Angular.dev best practices prefer standalone bootstrap and provider functions. A typical setup looks like this:
-
-```ts
-import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';
-import { ApplicationConfig } from '@angular/core';
-import { provideAngularDjango2 } from 'angular-django2';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(
-      withXsrfConfiguration({
-        cookieName: 'csrftoken',
-        headerName: 'X-CSRFToken',
-      }),
-    ),
-    provideAngularDjango2({
-      apiBaseUrl: 'https://api.example.com',
-      withCredentials: true,
-    }),
-  ],
-};
-```
-
-The resolved configuration defaults are:
-
-- `apiBaseUrl: ''`
-- `csrfCookieName: 'csrftoken'`
-- `csrfHeaderName: 'X-CSRFToken'`
-- `withCredentials: true`
+The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`.
 
 ## Schematics
 

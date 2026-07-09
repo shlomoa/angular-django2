@@ -32,15 +32,15 @@ Contact shlomoa@lightmoneysw.com with questions about contributing and before op
 
 ## Project Layout
 
-- `projects/angular-django2`: publishable Angular library source and schematics
+- `projects/angular-django2`: publishable schematics collection source
 - `dist/angular-django2`: generated package output after a build
 - `.github/workflows`: CI and publishing automation
 - `tools`: small repository automation scripts
 
 ## Development Notes
 
-- Keep the public API in `projects/angular-django2/src/public-api.ts` intentional and small.
-- Prefer standalone Angular patterns and provider functions over module-centric APIs.
+- This package has no runtime public API; its surface is the schematics collection under `projects/angular-django2/schematics`.
+- Prefer standalone Angular patterns and provider functions over module-centric APIs in generated code.
 - Keep Django-related concerns explicit, especially config, URL handling, and CSRF naming.
 - Keep schematics thin wrappers around Angular CLI behavior until you have a concrete customization to add.
 - Update documentation when commands or package behavior change.
