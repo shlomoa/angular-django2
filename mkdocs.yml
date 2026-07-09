@@ -15,7 +15,6 @@ nav:
   - Home: index.md
   - Tutorial: TUTORIAL.md
   - CLI: CLI.md
-  - Releasing: RELEASING.md
   - API Reference:
       - Overview: api/README.md
       - All Exports: api/globals.md
