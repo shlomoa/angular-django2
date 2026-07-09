@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "AngularDjango2NgApp",
-  "title": "angular-django2 ng-app schematic",
+  "$id": "AngularDjango2MaterialApp",
+  "title": "angular-django2 material-app schematic",
   "type": "object",
   "additionalProperties": false,
   "properties": {

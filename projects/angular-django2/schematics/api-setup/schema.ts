@@ -1,4 +1,4 @@
-export interface NgApiSchema {
+export interface ApiSetupSchema {
   /**
    * Output path for generated API models and services
    * @default "src/app/api"

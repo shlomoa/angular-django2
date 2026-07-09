@@ -190,7 +190,7 @@ describe('angular-django2 schematics E2E tests', () => {
   });
 
   it(
-    'E2E-01: ng-app schematic generates a buildable Angular application',
+    'E2E-01: material-app schematic generates a buildable Angular application',
     { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {
       // Setup
@@ -255,7 +255,7 @@ describe('angular-django2 schematics E2E tests', () => {
         expect(angularJson.cli?.schematicCollections).toContain('angular-django2');
         console.log('[E2E-01] ✓ ng add angular-django2 completed');
 
-        // Step 5: Generate Material app shell
+        // Step 5: Configure Angular Material
         console.log('[E2E-01] Configuring Material UI...');
 
         // Install Material dependencies first (including animations which is required)
@@ -336,7 +336,7 @@ describe('angular-django2 schematics E2E tests', () => {
   );
 
   it(
-    'E2E-02: ng-workspace and ng-app generate a complete buildable application',
+    'E2E-02: workspace-setup and material-app generate a complete buildable application',
     { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {
       // Setup
@@ -383,9 +383,9 @@ describe('angular-django2 schematics E2E tests', () => {
         console.log('[E2E-02] ✓ angular-django2 installed');
 
         // Step 4: Bootstrap workspace-level files
-        console.log('[E2E-02] Bootstrapping workspace files with ng-workspace...');
-        execAngularCli(['generate', 'angular-django2:ng-workspace', 'demo'], workspaceRoot);
-        console.log('[E2E-02] ✓ ng-workspace schematic completed');
+        console.log('[E2E-02] Bootstrapping workspace files with workspace-setup...');
+        execAngularCli(['generate', 'angular-django2:workspace-setup', 'demo'], workspaceRoot);
+        console.log('[E2E-02] ✓ workspace-setup schematic completed');
 
         // Verify workspace bootstrap files
         const workspaceReadmePath = path.join(workspaceRoot, 'README.md');
@@ -402,12 +402,12 @@ describe('angular-django2 schematics E2E tests', () => {
         );
         console.log('[E2E-02] ✓ Workspace bootstrap files verified');
 
-        // Step 5: Use ng-app schematic to generate complete application
-        console.log('[E2E-02] Generating application with ng-app schematic...');
+        // Step 5: Use material-app schematic to generate complete application
+        console.log('[E2E-02] Generating application with material-app schematic...');
         execAngularCli(
           [
             'generate',
-            'angular-django2:ng-app',
+            'angular-django2:material-app',
             'demo',
             '--theme=indigo-pink',
             '--typography=true',
@@ -422,9 +422,9 @@ describe('angular-django2 schematics E2E tests', () => {
           ],
           workspaceRoot,
         );
-        console.log('[E2E-02] ✓ ng-app schematic completed');
+        console.log('[E2E-02] ✓ material-app schematic completed');
 
-        // Step 6: Install Material dependencies (ng-app adds them to package.json)
+        // Step 6: Install Material dependencies (material-app adds them to package.json)
         console.log('[E2E-02] Installing added dependencies...');
         execCommand('npm install', workspaceRoot);
         console.log('[E2E-02] ✓ Dependencies updated');
@@ -489,7 +489,7 @@ describe('angular-django2 schematics E2E tests', () => {
   );
 
   it(
-    'E2E-03: ng-api schematic configures OpenAPI code generation',
+    'E2E-03: api-setup schematic configures OpenAPI code generation',
     { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {
       // Setup
@@ -531,10 +531,10 @@ describe('angular-django2 schematics E2E tests', () => {
         execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
         console.log('[E2E-03] ✓ Dependencies installed');
 
-        // Step 3: Run ng-api schematic
+        // Step 3: Run api-setup schematic
         console.log('[E2E-03] Configuring OpenAPI code generation...');
-        execAngularCli(['generate', 'angular-django2:ng-api'], appPath);
-        console.log('[E2E-03] ✓ ng-api schematic completed');
+        execAngularCli(['generate', 'angular-django2:api-setup'], appPath);
+        console.log('[E2E-03] ✓ api-setup schematic completed');
 
         // Verify ng-openapi-gen.json was created
         const ngOpenapiGenPath = path.join(appPath, 'ng-openapi-gen.json');

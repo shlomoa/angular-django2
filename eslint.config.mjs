@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['.angular/**', 'dist/**', 'node_modules/**'],
+    ignores: ['.angular/**', 'dist/**', 'node_modules/**', '.venv/**'],
   },
   {
     files: ['projects/angular-django2/src/**/*.ts'],

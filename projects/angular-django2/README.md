@@ -6,7 +6,7 @@
 
 Full documentation: <https://angular-django2.readthedocs.io/>
 
-The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`.
+The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `api-setup`, and `data-service`.
 
 ## Schematics
 
@@ -21,9 +21,9 @@ ng generate angular-django2:component dashboard-card
 ng generate angular-django2:embed-component --component=projects/my-app/src/app/hero-card/hero-card.ts --parent=projects/my-app/src/app/dashboard-card/dashboard-card.ts
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
-ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
-ng generate angular-django2:ng-workspace my-app
-ng generate angular-django2:ng-api --inputPath=openapi.json
+ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
+ng generate angular-django2:workspace-setup my-app
+ng generate angular-django2:api-setup --inputPath=openapi.json
 ng generate angular-django2:data-service users
 ```
 
@@ -41,9 +41,9 @@ Current defaults:
   - Inserts the child element after the parent template `children` marker, feeding input signals and binding output signals to `on<Output>($event)` handlers
   - Imports the child class, registers it in the parent `imports` array, and adds not-implemented `on<Output>()` handler stubs; the operation is idempotent
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
-- `ng-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav app shell
+- `material-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav layout
   - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--defaults`, `--style`, `--prefix`
-- `ng-workspace`: writes workspace-wide bootstrap files for an empty Angular workspace
+- `workspace-setup`: writes workspace-wide bootstrap files for an empty Angular workspace
   - Writes `.github/copilot-instructions.md` with repo instructions for the generated app name
   - Replaces the workspace root `README.md` with this guide so the generated repo includes the build recipes below
   - Adds `vitest` to `devDependencies`, writes a `vitest.config.mts`, and adds `test:node` / `test:node:watch` npm scripts so the generated package uses vitest for validation
@@ -52,7 +52,7 @@ Current defaults:
     - Each hook accepts exactly one of `content`, `path`, or `template`
     - Template hooks replace `{{key}}` placeholders from `params`
     - File targets use the selected project's `sourceRoot` when `--project` is provided; otherwise they use `/src`
-- `ng-api`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds the package to `devDependencies`, writes `ng-openapi-gen.json`, adds a `generate:api` npm script, and generates Django integration helpers (auth/CSRF/transport helpers and a CRM-oriented `ResourceAdapter`) under the helpers path
+- `api-setup`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds the package to `devDependencies`, writes `ng-openapi-gen.json`, adds a `generate:api` npm script, and generates Django integration helpers (auth/CSRF/transport helpers and a CRM-oriented `ResourceAdapter`) under the helpers path
   - Options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`), `--helpersPath` (default: `src/app/api-integration`), `--skipHelpers`, `--skipTests`
 - `data-service`: generates a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search and CRUD helpers
   - Options: `--apiService`, `--apiPath` (default: `../api/services`), `--path`, `--flat`, `--skipTests`
@@ -63,28 +63,28 @@ For a workspace created with `ng new demo-workspace --no-create-application`, th
 
 ```bash
 ng add angular-django2
-ng generate angular-django2:ng-workspace my-app
-ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
+ng generate angular-django2:workspace-setup my-app
+ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
 npm install
 ng build my-app
 ```
 
-`ng-workspace` sets up the workspace-level files first, and `ng-app` then generates the Angular application itself.
+`workspace-setup` sets up the workspace-level files first, and `material-app` then generates the Angular application itself.
 In the common case, pass the same name to both commands so the generated repo instructions and Angular app stay aligned.
 
 ### Application source-file hooks
 
-For programmatic workspace provisioning, `ng-workspace` exposes file hooks for the application source files documented by Angular at <https://angular.dev/reference/configs/file-structure#application-source-files>. Each hook accepts exactly one of `content` (inline string), `path` (local file), or `template` (string with `{{key}}` placeholders and a `params` map). When `project` is provided, targets resolve under that project's `sourceRoot`; otherwise they resolve under `/src`.
+For programmatic workspace provisioning, `workspace-setup` exposes file hooks for the application source files documented by Angular at <https://angular.dev/reference/configs/file-structure#application-source-files>. Each hook accepts exactly one of `content` (inline string), `path` (local file), or `template` (string with `{{key}}` placeholders and a `params` map). When `project` is provided, targets resolve under that project's `sourceRoot`; otherwise they resolve under `/src`.
 
-For the full list of recognized hook keys, target paths, and content modes, see the [`ng-workspace` CLI reference](https://angular-django2.readthedocs.io/en/latest/cli/ng-workspace/).
+For the full list of recognized hook keys, target paths, and content modes, see the [`workspace-setup` CLI reference](https://angular-django2.readthedocs.io/en/latest/cli/workspace-setup/).
 
-Because Angular CLI command-line options do not pass nested objects conveniently, use these hooks from a schematic test runner, a custom delegating schematic, or the exported `ngWorkspace` factory.
+Because Angular CLI command-line options do not pass nested objects conveniently, use these hooks from a schematic test runner, a custom delegating schematic, or the exported `workspaceSetup` factory.
 
 ### OpenAPI workflow
 
 ```bash
 # 1. Bootstrap ng-openapi-gen
-ng generate angular-django2:ng-api --inputPath=openapi.json
+ng generate angular-django2:api-setup --inputPath=openapi.json
 
 # 2. Generate typed Angular services from your OpenAPI spec
 npm run generate:api

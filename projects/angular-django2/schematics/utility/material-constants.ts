@@ -11,10 +11,10 @@ export const THEME_MAPPING: Record<string, string> = {
 };
 
 /**
- * Material App Shell Template for app.component.html
+ * Material layout template for app.component.html
  * Responsive sidenav layout with toolbar and content area
  */
-export const APP_SHELL_TEMPLATE = `<mat-toolbar color="primary">
+export const MATERIAL_LAYOUT_TEMPLATE = `<mat-toolbar color="primary">
   <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">
     <mat-icon>menu</mat-icon>
   </button>
@@ -40,9 +40,9 @@ export const APP_SHELL_TEMPLATE = `<mat-toolbar color="primary">
 `;
 
 /**
- * Material App Shell Styles for app.component.scss
+ * Material layout styles for app.component.scss
  */
-export const APP_SHELL_STYLES = `.sidenav-container {
+export const MATERIAL_LAYOUT_STYLES = `.sidenav-container {
   position: absolute;
   top: 64px;
   bottom: 0;
@@ -68,9 +68,9 @@ mat-toolbar {
 `;
 
 /**
- * Material App Shell Component TypeScript
+ * Material layout component TypeScript
  */
-export const APP_SHELL_COMPONENT_TS = `import { Component } from '@angular/core';
+export const MATERIAL_LAYOUT_COMPONENT_TS = `import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';

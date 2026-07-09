@@ -2,7 +2,7 @@
 
 `angular-django2` provides an Angular CLI schematics collection for custom `ng generate` flows in Django-backed applications.
 
-The package surface is a schematics collection: `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `ng-app`, `ng-workspace`, `ng-api`, `data-service`
+The package surface is a schematics collection: `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `api-setup`, `data-service`
 
 Start with the [tutorial](TUTORIAL.md) to go from an empty directory to a
 working app with Angular CLI and the ngdj schematics. See the [CLI guide](cli/index.md)
@@ -10,9 +10,9 @@ for install, `ng add`, `ng generate`, app setup, and OpenAPI workflow examples.
 
 ## Workspace file provisioning
 
-The completed workspace-file outcome from [GitHub issue #30](https://github.com/shlomoa/angular-django2/issues/30) is implemented by the `ng-workspace` schematic.
+The completed workspace-file outcome from [GitHub issue #30](https://github.com/shlomoa/angular-django2/issues/30) is implemented by the `workspace-setup` schematic.
 
-`ng-workspace` always writes the generated workspace bootstrap files:
+`workspace-setup` always writes the generated workspace bootstrap files:
 
 - `.github/copilot-instructions.md`
 - `README.md`
@@ -38,8 +38,8 @@ npx -y @angular/cli@22 new demo-workspace --no-create-application --package-mana
 cd demo-workspace
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
-npx ng generate angular-django2:ng-workspace my-app
-npx ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
+npx ng generate angular-django2:workspace-setup my-app
+npx ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
 npm install
 npx ng build my-app
 npx ng serve my-app

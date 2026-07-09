@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "AngularDjango2NgWorkspace",
-  "title": "angular-django2 ng-workspace schematic",
+  "$id": "AngularDjango2WorkspaceSetup",
+  "title": "angular-django2 workspace-setup schematic",
   "type": "object",
   "additionalProperties": false,
   "properties": {

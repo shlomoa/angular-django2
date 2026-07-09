@@ -46,14 +46,14 @@ These tests:
 Current integration suites cover:
 
 - `ng-add`
-- `ng-workspace`
-- `ng-api`
+- `workspace-setup`
+- `api-setup`
 - `material-setup`
 - `project-structure`
-- `ng-app`
+- `material-app`
 - schematic chaining scenarios
 
-When a schematic delegates to `externalSchematic` — for example `ng-app`
+When a schematic delegates to `externalSchematic` — for example `material-app`
 relying on the Angular application schematic — the current pattern is to
 pre-create the expected project structure inside the virtual tree and then
 validate the package-owned behavior layered on top.
@@ -76,8 +76,8 @@ These tests:
 Current E2E coverage includes:
 
 - `E2E-01` — step-by-step app generation with individual schematics
-- `E2E-02` — `ng-workspace` + `ng-app` flow in a minimal workspace
-- `E2E-03` — `ng-api` setup and build verification
+- `E2E-02` — `workspace-setup` + `material-app` flow in a minimal workspace
+- `E2E-03` — `api-setup` setup and build verification
 - `E2E-04` — `component` hooks + `embed-component` wiring a generated child into
   a parent in a buildable app
 - `E2E-05` — `embed-component` package mode wiring an Angular Material component

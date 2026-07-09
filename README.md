@@ -38,9 +38,9 @@ The current schematics collection includes:
 - `service`
 - `material-setup`
 - `project-structure`
-- `ng-app`
-- `ng-workspace`
-- `ng-api`
+- `material-app`
+- `workspace-setup`
+- `api-setup`
 - `data-service`
 
 ### Build, lint, and package this repository
@@ -208,22 +208,22 @@ Once your Angular workspace exists and `angular-django2` is registered, the
 shortest path to a running app is:
 
 ```bash
-ng generate angular-django2:ng-workspace my-app
-ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
+ng generate angular-django2:workspace-setup my-app
+ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
 npm install
 ng build my-app
 ng serve my-app
 ```
 
-Use `ng-app` when you want the package to generate:
+Use `material-app` when you want the package to generate:
 
 - an Angular application
 - Angular Material dependencies and theme configuration
 - a standard `core/`, `shared/`, and `features/` structure
-- a responsive Material app shell
+- a responsive Material sidenav layout
 
 If the workspace was created empty with `--no-create-application`, run
-`ng-workspace` first so the workspace-level bootstrap files are written before
+`workspace-setup` first so the workspace-level bootstrap files are written before
 the application is generated.
 
 ### Manual Angular-only setup
@@ -236,8 +236,8 @@ npx -y @angular/cli@22 new demo-workspace --no-create-application --package-mana
 cd demo-workspace
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
-npx ng generate angular-django2:ng-workspace my-app
-npx ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
+npx ng generate angular-django2:workspace-setup my-app
+npx ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
 npm install
 npx ng build my-app
 npx ng serve my-app
@@ -266,9 +266,9 @@ available:
 | `ng generate angular-django2:service <name>`                                     | Creates a service                                                                                    | Pass-through to Angular CLI service schematic                                                 |
 | `ng generate angular-django2:class <name>`                                       | Creates a class                                                                                      | Pass-through to Angular CLI class schematic                                                   |
 | `ng generate angular-django2:app-shell --project=<name>`                         | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation                                               |
-| `ng generate angular-django2:ng-app <name>`                                      | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults                                    |
-| `ng generate angular-django2:ng-workspace <name>`                                | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `ng-app` in an empty workspace                                                     |
-| `ng generate angular-django2:ng-api --inputPath=<file>`                          | Bootstraps `ng-openapi-gen` and Django integration helpers                                           | Adds `generate:api` script and auth/CSRF/transport + resource adapter helpers                 |
+| `ng generate angular-django2:material-app <name>`                                | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults                                    |
+| `ng generate angular-django2:workspace-setup <name>`                             | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `material-app` in an empty workspace                                               |
+| `ng generate angular-django2:api-setup --inputPath=<file>`                       | Bootstraps `ng-openapi-gen` and Django integration helpers                                           | Adds `generate:api` script and auth/CSRF/transport + resource adapter helpers                 |
 | `ng generate angular-django2:data-service <resource>`                            | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services                                                       |
 
 ### Recipes for a running Angular app
@@ -276,7 +276,7 @@ available:
 #### Fastest path: generate a complete app in one step
 
 ```bash
-ng generate angular-django2:ng-app my-app --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
+ng generate angular-django2:material-app my-app --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
 npm install
 ng build my-app
 ng serve my-app
@@ -290,8 +290,8 @@ Use this when you created the workspace with `--no-create-application` and
 want both workspace-level bootstrap files and a running Angular app:
 
 ```bash
-ng generate angular-django2:ng-workspace my-app
-ng generate angular-django2:ng-app my-app --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
+ng generate angular-django2:workspace-setup my-app
+ng generate angular-django2:material-app my-app --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
 npm install
 ng build my-app
 ng serve my-app
@@ -311,23 +311,23 @@ ng build my-app
 ng serve my-app
 ```
 
-#### Provisioning application source files from `ng-workspace`
+#### Provisioning application source files from `workspace-setup`
 
-`ng-workspace` exposes per-file hooks for the application source files
+`workspace-setup` exposes per-file hooks for the application source files
 documented at
 https://angular.dev/reference/configs/file-structure#application-source-files.
 For recognized hook keys, target paths, and content modes, see the
-[`ng-workspace` CLI reference](docs/cli/ng-workspace.md).
+[`workspace-setup` CLI reference](docs/cli/workspace-setup.md).
 
 Because the CLI does not pass nested object options on the command line, drive
-`ng-workspace` programmatically via the schematics test runner, a custom
-schematic that delegates to it, or by invoking the exported `ngWorkspace`
+`workspace-setup` programmatically via the schematics test runner, a custom
+schematic that delegates to it, or by invoking the exported `workspaceSetup`
 factory directly. Example (Node script):
 
 ```ts
-import { ngWorkspace } from 'angular-django2/schematics/ng-workspace';
+import { workspaceSetup } from 'angular-django2/schematics/workspace-setup';
 
-const rule = ngWorkspace({
+const rule = workspaceSetup({
   name: 'my-app',
   project: 'my-app',
   files: {
@@ -355,7 +355,7 @@ Notes:
 #### OpenAPI client workflow
 
 ```bash
-ng generate angular-django2:ng-api --inputPath=openapi.json
+ng generate angular-django2:api-setup --inputPath=openapi.json
 npm install
 npm run generate:api
 ng generate angular-django2:data-service users

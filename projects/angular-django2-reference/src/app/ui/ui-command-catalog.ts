@@ -15,9 +15,9 @@ export type UiCommandId =
   | 'service'
   | 'material-setup'
   | 'project-structure'
-  | 'ng-app'
-  | 'ng-workspace'
-  | 'ng-api'
+  | 'material-app'
+  | 'workspace-setup'
+  | 'api-setup'
   | 'data-service';
 
 export type UiCommandEffect = 'visual' | 'text';
@@ -156,10 +156,10 @@ export const UI_COMMANDS: readonly UiCommand[] = [
     },
   },
   {
-    id: 'ng-workspace',
+    id: 'workspace-setup',
     categoryId: 'workspace-setup',
     name: 'Initialize workspace files',
-    command: 'ng generate angular-django2:ng-workspace my-app',
+    command: 'ng generate angular-django2:workspace-setup my-app',
     summary: 'Writes workspace-level bootstrap files for empty Angular workspaces.',
     effect: 'text',
     before: {
@@ -205,17 +205,17 @@ export const UI_COMMANDS: readonly UiCommand[] = [
     },
   },
   {
-    id: 'ng-app',
+    id: 'material-app',
     categoryId: 'application-creation',
     name: 'Generate Django-friendly app',
-    command: 'ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults',
+    command:
+      'ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults',
     summary:
-      'Creates a complete Django-friendly Angular app with Material setup, structure, and shell.',
+      'Creates a complete Django-friendly Angular app with Material setup, structure, and layout.',
     effect: 'visual',
     before: {
       title: 'Manual setup required',
-      description:
-        'The user would otherwise run multiple setup commands to reach a styled app shell.',
+      description: 'The user would otherwise run multiple setup commands to reach a styled layout.',
       highlights: [
         'No Material theme is configured.',
         'No standard feature folder structure is present.',
@@ -224,14 +224,14 @@ export const UI_COMMANDS: readonly UiCommand[] = [
     after: {
       title: 'Runnable Material app',
       description:
-        'The application includes Material UI setup, a standard structure, and a responsive app shell.',
+        'The application includes Material UI setup, a standard structure, and a responsive layout.',
       highlights: [
         'Application generation is complete.',
-        'Material setup, project structure, and app shell are applied.',
+        'Material setup, project structure, and layout are applied.',
       ],
     },
     illustration: {
-      imagePath: '/ui-commands/ng-app.svg',
+      imagePath: '/ui-commands/material-app.svg',
       imageAlt: 'Complete generated Angular Material app illustration',
     },
   },
@@ -387,10 +387,10 @@ export const UI_COMMANDS: readonly UiCommand[] = [
     },
   },
   {
-    id: 'ng-api',
+    id: 'api-setup',
     categoryId: 'api-data',
     name: 'Bootstrap OpenAPI client generation',
-    command: 'ng generate angular-django2:ng-api --inputPath=openapi.json',
+    command: 'ng generate angular-django2:api-setup --inputPath=openapi.json',
     summary: 'Adds ng-openapi-gen configuration and the generate:api script.',
     effect: 'text',
     before: {

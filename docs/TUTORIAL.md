@@ -91,10 +91,10 @@ ngdj schematics.
 
 ## 4. Add workspace bootstrap files with ngdj
 
-Run the `ng-workspace` schematic before generating the app:
+Run the `workspace-setup` schematic before generating the app:
 
 ```bash
-npx ng generate angular-django2:ng-workspace ngdj-tutorial
+npx ng generate angular-django2:workspace-setup ngdj-tutorial
 ```
 
 This writes workspace-level bootstrap files for an empty Angular workspace. It
@@ -107,12 +107,13 @@ Now generate the Angular application, Material setup, project structure, and app
 shell in one flow:
 
 ```bash
-npx ng generate angular-django2:ng-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
+npx ng generate angular-django2:material-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
 ```
 
-The `ng-app` schematic is the fastest path to a runnable app. It composes the
+The `material-app` schematic is the fastest path to a runnable app. It composes the
 lower-level ngdj schematics that create the application, configure Angular
-Material, create the standard source layout, and write the app shell.
+Material, create the standard `core/`, `shared/`, and `features/` structure,
+and write the responsive sidenav layout.
 
 ## 6. Install generated dependencies
 
@@ -196,12 +197,12 @@ npx ng build ngdj-tutorial
 If your Django backend exposes an OpenAPI schema, bootstrap `ng-openapi-gen`:
 
 ```bash
-npx ng generate angular-django2:ng-api --inputPath=openapi.json
+npx ng generate angular-django2:api-setup --inputPath=openapi.json
 npm install
 npm run generate:api
 ```
 
-`ng-api` also generates Django integration helpers under
+`api-setup` also generates Django integration helpers under
 `src/app/api-integration/`:
 
 - `django-transport.ts` — wires Angular XSRF handling with Django cookie and
@@ -247,8 +248,8 @@ cd ngdj-tutorial
 npx -y @angular/cli@22 new ngdj-tutorial --directory . --no-create-application --package-manager npm --skip-git --defaults
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
-npx ng generate angular-django2:ng-workspace ngdj-tutorial
-npx ng generate angular-django2:ng-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
+npx ng generate angular-django2:workspace-setup ngdj-tutorial
+npx ng generate angular-django2:material-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
 npm install
 npx ng build ngdj-tutorial
 npx ng serve ngdj-tutorial
@@ -261,5 +262,5 @@ npx ng serve ngdj-tutorial
   `angular-django2:embed-component`.
 - Embed existing package components (such as Angular Material) with
   `embed-component` package mode (`--from`).
-- Add OpenAPI client generation with `angular-django2:ng-api`.
+- Add OpenAPI client generation with `angular-django2:api-setup`.
 - Add a data-service wrapper with `angular-django2:data-service`.

@@ -16,7 +16,7 @@ import { applyFileHooks, writeOrOverwrite } from './file-hooks';
 
 export type { AppSourceFileKey, FileHook } from './file-hooks';
 
-export interface NgWorkspaceSchema {
+export interface WorkspaceSetupSchema {
   name: string;
   project?: string;
   files?: Partial<Record<AppSourceFileKey, FileHook>>;
@@ -205,7 +205,7 @@ function addLintTargetsToAngularJson(tree: Tree, context: SchematicContext): voi
  *  - create vitest.config.mts
  *  - add test:node / test:node:watch scripts
  *
- * All steps are idempotent so re-running ng-workspace is safe.
+ * All steps are idempotent so re-running workspace-setup is safe.
  */
 function addVitestSupport(tree: Tree, context: SchematicContext): void {
   const pkg = readPackageJson(tree, context);
@@ -263,7 +263,7 @@ function resolveSourceRoot(tree: Tree, project: string | undefined): string {
   return sourceRoot.startsWith('/') ? sourceRoot : `/${sourceRoot}`;
 }
 
-export function ngWorkspace(options: NgWorkspaceSchema): Rule {
+export function workspaceSetup(options: WorkspaceSetupSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const name = options.name?.trim();
 

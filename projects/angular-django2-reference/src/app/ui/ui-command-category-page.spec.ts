@@ -85,18 +85,18 @@ describe('UiCommandCategoryPage', () => {
 
   it('updates the right panel when a command is clicked', async () => {
     const { compiled, fixture } = await renderCategoryPage('workspace-setup');
-    const ngWorkspaceButton = requireElement<HTMLButtonElement>(
+    const workspaceSetupButton = requireElement<HTMLButtonElement>(
       compiled,
-      '.ui-command-category__command-button[data-command-id="ng-workspace"]',
+      '.ui-command-category__command-button[data-command-id="workspace-setup"]',
     );
 
-    ngWorkspaceButton.click();
+    workspaceSetupButton.click();
     fixture.detectChanges();
 
     expect(
-      ngWorkspaceButton.classList.contains('ui-command-category__command-button--active'),
+      workspaceSetupButton.classList.contains('ui-command-category__command-button--active'),
     ).toBe(true);
-    expect(ngWorkspaceButton.getAttribute('aria-pressed')).toBe('true');
+    expect(workspaceSetupButton.getAttribute('aria-pressed')).toBe('true');
     expect(compiled.querySelector('#ui-command-detail-panel')?.textContent).toContain(
       'Initialize workspace files',
     );
@@ -135,16 +135,16 @@ describe('UiCommandCategoryPage', () => {
       compiled,
       '.ui-command-category__apply-button',
     );
-    const ngWorkspaceButton = requireElement<HTMLButtonElement>(
+    const workspaceSetupButton = requireElement<HTMLButtonElement>(
       compiled,
-      '.ui-command-category__command-button[data-command-id="ng-workspace"]',
+      '.ui-command-category__command-button[data-command-id="workspace-setup"]',
     );
 
     applyButton.click();
     fixture.detectChanges();
     expect(applyButton.textContent).toContain('Command applied');
 
-    ngWorkspaceButton.click();
+    workspaceSetupButton.click();
     fixture.detectChanges();
 
     expect(applyButton.textContent).toContain('Apply Command');
@@ -160,12 +160,12 @@ describe('UiCommandCategoryPage', () => {
 
     try {
       const { compiled, fixture } = await renderCategoryPage('workspace-setup');
-      const ngWorkspaceButton = requireElement<HTMLButtonElement>(
+      const workspaceSetupButton = requireElement<HTMLButtonElement>(
         compiled,
-        '.ui-command-category__command-button[data-command-id="ng-workspace"]',
+        '.ui-command-category__command-button[data-command-id="workspace-setup"]',
       );
 
-      ngWorkspaceButton.click();
+      workspaceSetupButton.click();
       fixture.detectChanges();
 
       expect(compiled.querySelector('#ui-command-detail-panel')?.textContent).toContain(

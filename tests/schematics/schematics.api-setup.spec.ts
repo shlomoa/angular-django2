@@ -1,10 +1,10 @@
 import { Tree } from '@angular-devkit/schematics';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ngApi } from '../../projects/angular-django2/schematics/ng-api/index';
+import { apiSetup } from '../../projects/angular-django2/schematics/api-setup/index';
 
 describe('angular-django2 schematics', () => {
-  describe('ng-api schematic', () => {
+  describe('api-setup schematic', () => {
     it('TC-API-01: adds ng-openapi-gen to devDependencies', () => {
       const tree = Tree.empty();
       tree.create(
@@ -29,7 +29,7 @@ describe('angular-django2 schematics', () => {
         },
       } as never;
 
-      const updatedTree = ngApi({})(tree, context) as Tree;
+      const updatedTree = apiSetup({})(tree, context) as Tree;
       const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
 
       expect(packageJson.devDependencies['ng-openapi-gen']).toBeDefined();
@@ -46,7 +46,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({})(tree, context) as Tree;
+      const updatedTree = apiSetup({})(tree, context) as Tree;
       const configContent = updatedTree.read('/ng-openapi-gen.json')!.toString();
       const config = JSON.parse(configContent);
 
@@ -66,7 +66,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({
+      const updatedTree = apiSetup({
         inputPath: 'schema/api.json',
         outputPath: 'src/generated/api',
       })(tree, context) as Tree;
@@ -99,7 +99,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({})(tree, context) as Tree;
+      const updatedTree = apiSetup({})(tree, context) as Tree;
       const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
 
       expect(packageJson.scripts['generate:api']).toBe('ng-openapi-gen');
@@ -127,12 +127,12 @@ describe('angular-django2 schematics', () => {
       } as never;
 
       // First run
-      let updatedTree = ngApi({})(tree, context) as Tree;
+      let updatedTree = apiSetup({})(tree, context) as Tree;
       const firstPackageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
       const firstConfig = updatedTree.read('/ng-openapi-gen.json')!.toString();
 
       // Second run
-      updatedTree = ngApi({})(updatedTree, context) as Tree;
+      updatedTree = apiSetup({})(updatedTree, context) as Tree;
       const secondPackageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
       const secondConfig = updatedTree.read('/ng-openapi-gen.json')!.toString();
 
@@ -153,7 +153,7 @@ describe('angular-django2 schematics', () => {
       } as never;
 
       // Should not throw
-      expect(() => ngApi({})(tree, context)).not.toThrow();
+      expect(() => apiSetup({})(tree, context)).not.toThrow();
 
       expect(context.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Could not find package.json'),
@@ -182,7 +182,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({})(tree, context) as Tree;
+      const updatedTree = apiSetup({})(tree, context) as Tree;
       const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
 
       expect(packageJson.devDependencies.typescript).toBe('^5.0.0');
@@ -209,7 +209,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({})(tree, context) as Tree;
+      const updatedTree = apiSetup({})(tree, context) as Tree;
       const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
 
       expect(packageJson.scripts).toBeDefined();
@@ -225,7 +225,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({})(tree, context) as Tree;
+      const updatedTree = apiSetup({})(tree, context) as Tree;
 
       expect(updatedTree.exists('/src/app/api-integration/django-transport.ts')).toBe(true);
       expect(updatedTree.exists('/src/app/api-integration/resource-adapter.ts')).toBe(true);
@@ -243,7 +243,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({})(tree, context) as Tree;
+      const updatedTree = apiSetup({})(tree, context) as Tree;
       const transport = updatedTree
         .read('/src/app/api-integration/django-transport.ts')!
         .toString();
@@ -267,7 +267,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({})(tree, context) as Tree;
+      const updatedTree = apiSetup({})(tree, context) as Tree;
       const adapter = updatedTree.read('/src/app/api-integration/resource-adapter.ts')!.toString();
       const barrel = updatedTree.read('/src/app/api-integration/index.ts')!.toString();
 
@@ -290,7 +290,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({ helpersPath: 'src/app/core/api' })(tree, context) as Tree;
+      const updatedTree = apiSetup({ helpersPath: 'src/app/core/api' })(tree, context) as Tree;
 
       expect(updatedTree.exists('/src/app/core/api/django-transport.ts')).toBe(true);
       expect(updatedTree.exists('/src/app/api-integration/django-transport.ts')).toBe(false);
@@ -305,7 +305,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({ skipHelpers: true })(tree, context) as Tree;
+      const updatedTree = apiSetup({ skipHelpers: true })(tree, context) as Tree;
 
       expect(updatedTree.exists('/src/app/api-integration/django-transport.ts')).toBe(false);
       // Bootstrap artifacts are still generated.
@@ -321,7 +321,7 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      const updatedTree = ngApi({ skipTests: true })(tree, context) as Tree;
+      const updatedTree = apiSetup({ skipTests: true })(tree, context) as Tree;
 
       expect(updatedTree.exists('/src/app/api-integration/django-transport.ts')).toBe(true);
       expect(updatedTree.exists('/src/app/api-integration/django-transport.spec.ts')).toBe(false);
@@ -337,12 +337,12 @@ describe('angular-django2 schematics', () => {
         logger: { info: vi.fn(), warn: vi.fn() },
       } as never;
 
-      let updatedTree = ngApi({})(tree, context) as Tree;
+      let updatedTree = apiSetup({})(tree, context) as Tree;
       const firstContent = updatedTree
         .read('/src/app/api-integration/django-transport.ts')!
         .toString();
 
-      updatedTree = ngApi({})(updatedTree, context) as Tree;
+      updatedTree = apiSetup({})(updatedTree, context) as Tree;
       const secondContent = updatedTree
         .read('/src/app/api-integration/django-transport.ts')!
         .toString();

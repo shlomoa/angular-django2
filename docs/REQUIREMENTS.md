@@ -73,9 +73,9 @@ sources over lower-priority ones.
   - `service`
   - `material-setup`
   - `project-structure`
-  - `ng-app`
-  - `ng-workspace`
-  - `ng-api`
+  - `material-app`
+  - `workspace-setup`
+  - `api-setup`
   - `data-service`
 - The documented defaults and behavior currently expected are:
   - `ng-add`: register or prepend `angular-django2` in
@@ -103,20 +103,20 @@ sources over lower-priority ones.
   - `project-structure`: create `core/`, `shared/components/`,
     `shared/pipes/`, and `features/` directories with barrel `index.ts`
     exports
-  - `ng-app`: generate a complete Angular app with Material UI in one step —
+  - `material-app`: generate a complete Angular app with Material UI in one step —
     runs `application`, installs `@angular/material` and `@angular/cdk`,
     configures Material theming, creates the standard directory structure, and
-    writes a responsive sidenav app shell into `app.component.*`; defaults the
+    writes a responsive sidenav layout into `app.component.*`; defaults the
     delegated Angular application generation to `--ssr=false`,
     `--zoneless=true`, and `--defaults`
-  - `ng-workspace`: write workspace-wide bootstrap files for an empty Angular
+  - `workspace-setup`: write workspace-wide bootstrap files for an empty Angular
     workspace, currently `.github/copilot-instructions.md`, the workspace root
     `README.md`, ESLint setup, Vitest setup, lint/test package scripts, and
     missing lint targets in `angular.json`; it also supports optional
     application source-file hooks for the Angular application files documented
     at <https://angular.dev/reference/configs/file-structure#application-source-files>
     using exactly one of `content`, `path`, or `template` per file hook
-  - `ng-api`: bootstrap
+  - `api-setup`: bootstrap
     [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds
     `ng-openapi-gen` to `devDependencies`, writes `ng-openapi-gen.json`, and
     adds a `generate:api` npm script; it also generates Django integration

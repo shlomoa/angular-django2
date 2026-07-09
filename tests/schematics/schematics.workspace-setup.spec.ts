@@ -2,14 +2,14 @@ import { Tree, SchematicsException } from '@angular-devkit/schematics';
 import type { vi } from 'vitest';
 import { describe, expect, it } from 'vitest';
 
-import { ngWorkspace } from '../../projects/angular-django2/schematics/ng-workspace/index';
+import { workspaceSetup } from '../../projects/angular-django2/schematics/workspace-setup/index';
 import { createMockContext, workspaceReadme, workspaceReadmePath } from './schematics.helpers';
 
 describe('angular-django2 schematics', () => {
   it('TC-WS-01: writes workspace bootstrap files for the requested app name', () => {
     const tree = Tree.empty();
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, createMockContext()) as Tree;
 
     expect(updatedTree.read('/.github/copilot-instructions.md')!.toString())
       .toBe(`# demo-app Repo Instructions
@@ -26,7 +26,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     tree.create('/README.md', 'old readme');
     tree.create('/.github/copilot-instructions.md', 'old instructions');
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, createMockContext()) as Tree;
 
     expect(updatedTree.read('/README.md')!.toString()).toBe(workspaceReadme);
     expect(updatedTree.read('/.github/copilot-instructions.md')!.toString()).toContain(
@@ -37,8 +37,10 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
   it('TC-WS-03: throws when name is missing', () => {
     const tree = Tree.empty();
 
-    expect(() => ngWorkspace({ name: '' })(tree, createMockContext())).toThrow(SchematicsException);
-    expect(() => ngWorkspace({ name: '' })(tree, createMockContext())).toThrow(
+    expect(() => workspaceSetup({ name: '' })(tree, createMockContext())).toThrow(
+      SchematicsException,
+    );
+    expect(() => workspaceSetup({ name: '' })(tree, createMockContext())).toThrow(
       'Option "name" is required.',
     );
   });
@@ -46,7 +48,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
   it('TC-WS-15: generates eslint.config.mjs at the workspace root', () => {
     const tree = Tree.empty();
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, createMockContext()) as Tree;
 
     const eslintConfig = updatedTree.read('/eslint.config.mjs')?.toString();
     expect(eslintConfig).toBeDefined();
@@ -60,7 +62,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     const existing = '// custom user eslint config\nexport default [];\n';
     tree.create('/eslint.config.mjs', existing);
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, createMockContext()) as Tree;
 
     expect(updatedTree.read('/eslint.config.mjs')!.toString()).toBe(existing);
   });
@@ -82,7 +84,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     );
 
     const context = createMockContext();
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, context) as Tree;
 
     const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
     expect(packageJson.scripts.lint).toBe('ng lint');
@@ -114,7 +116,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     );
 
     const context = createMockContext();
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, context) as Tree;
 
     const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
     expect(packageJson.scripts.lint).toBe('custom-lint');
@@ -142,7 +144,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     };
     tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, createMockContext()) as Tree;
 
     const updated = JSON.parse(updatedTree.read('/angular.json')!.toString());
     expect(updated.projects['app-a'].architect.lint).toEqual({
@@ -175,7 +177,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     };
     tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
 
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, createMockContext()) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, createMockContext()) as Tree;
 
     const updated = JSON.parse(updatedTree.read('/angular.json')!.toString());
     expect(updated.projects['app-a'].architect.lint.builder).toBe('@some-custom/builder:lint');
@@ -187,7 +189,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
   it('TC-WS-04: writes application source files from inline content hooks under /src by default', () => {
     const tree = Tree.empty();
 
-    const updatedTree = ngWorkspace({
+    const updatedTree = workspaceSetup({
       name: 'demo-app',
       files: {
         indexHtml: { content: '<!doctype html><html><body><app-root></app-root></body></html>' },
@@ -211,7 +213,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     const tree = Tree.empty();
     tree.create('/src/styles.css', '/* original */\n');
 
-    const updatedTree = ngWorkspace({
+    const updatedTree = workspaceSetup({
       name: 'demo-app',
       files: {
         stylesCss: { content: '/* overridden */\n' },
@@ -224,7 +226,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
   it('TC-WS-06: reads application source file content from a local filesystem path', () => {
     const tree = Tree.empty();
 
-    const updatedTree = ngWorkspace({
+    const updatedTree = workspaceSetup({
       name: 'demo-app',
       files: {
         indexHtml: { path: workspaceReadmePath },
@@ -237,7 +239,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
   it('TC-WS-07: instantiates a predefined template by substituting `{{key}}` placeholders from params', () => {
     const tree = Tree.empty();
 
-    const updatedTree = ngWorkspace({
+    const updatedTree = workspaceSetup({
       name: 'demo-app',
       files: {
         appComponentTs: {
@@ -268,7 +270,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       }),
     );
 
-    const updatedTree = ngWorkspace({
+    const updatedTree = workspaceSetup({
       name: 'demo-app',
       project: 'demo-app',
       files: {
@@ -285,7 +287,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     const tree = Tree.empty();
 
     expect(() =>
-      ngWorkspace({
+      workspaceSetup({
         name: 'demo-app',
         files: { mainTs: {} },
       })(tree, createMockContext()),
@@ -296,7 +298,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     const tree = Tree.empty();
 
     expect(() =>
-      ngWorkspace({
+      workspaceSetup({
         name: 'demo-app',
         files: { mainTs: { content: 'a', template: 'b' } },
       })(tree, createMockContext()),
@@ -308,7 +310,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     tree.create('/angular.json', JSON.stringify({ version: 1, projects: {} }));
 
     expect(() =>
-      ngWorkspace({
+      workspaceSetup({
         name: 'demo-app',
         project: 'missing',
         files: { mainTs: { content: '' } },
@@ -333,7 +335,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     );
 
     const context = createMockContext();
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, context) as Tree;
 
     const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
     expect(packageJson.devDependencies.vitest).toBeDefined();
@@ -367,7 +369,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
           },
           devDependencies: {
             vitest: '^3.0.0',
-            // Pre-seed lint devDependencies so ng-workspace's lint setup
+            // Pre-seed lint devDependencies so workspace-setup's lint setup
             // does not schedule its own NodePackageInstallTask, letting this
             // test stay focused on vitest idempotency.
             '@angular-eslint/builder': '^21.3.1',
@@ -386,7 +388,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     tree.create('/eslint.config.mjs', '// existing eslint config\n');
 
     const context = createMockContext();
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, context) as Tree;
 
     const packageJson = JSON.parse(updatedTree.read('/package.json')!.toString());
     expect(packageJson.devDependencies.vitest).toBe('^3.0.0');
@@ -404,7 +406,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     const tree = Tree.empty();
 
     const context = createMockContext();
-    const updatedTree = ngWorkspace({ name: 'demo-app' })(tree, context) as Tree;
+    const updatedTree = workspaceSetup({ name: 'demo-app' })(tree, context) as Tree;
 
     expect(updatedTree.exists('/vitest.config.mts')).toBe(false);
     expect(

@@ -18,7 +18,7 @@ Current checked-in automation:
 
 The published tarball contains:
 
-- the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `app-shell`, `service`, `class`, `ng-app`, `ng-workspace`, `ng-api`, and `data-service`
+- the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `app-shell`, `service`, `class`, `material-app`, `workspace-setup`, `api-setup`, and `data-service`
 - the package README and manifest generated into `dist/angular-django2`
 
 ## Versioning Script

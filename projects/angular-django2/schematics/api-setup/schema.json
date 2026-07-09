@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "AngularDjango2NgApi",
-  "title": "angular-django2 ng-api schematic",
+  "$id": "AngularDjango2ApiSetup",
+  "title": "angular-django2 api-setup schematic",
   "type": "object",
   "additionalProperties": false,
   "properties": {

@@ -31,8 +31,8 @@ For an empty Angular workspace, generate the workspace-level bootstrap files
 first, then generate the application:
 
 ```bash
-ng generate angular-django2:ng-workspace my-app
-ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
+ng generate angular-django2:workspace-setup my-app
+ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
 npm install
 ng build my-app
 ng serve my-app
@@ -51,8 +51,8 @@ npx -y @angular/cli@22 new demo-workspace --no-create-application --package-mana
 cd demo-workspace
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
-npx ng generate angular-django2:ng-workspace my-app
-npx ng generate angular-django2:ng-app my-app --ssr=false --zoneless=true --defaults
+npx ng generate angular-django2:workspace-setup my-app
+npx ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
 npm install
 npx ng build my-app
 npx ng serve my-app
@@ -85,21 +85,21 @@ for each schematic's options.
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| [`ng-add`](ng-add.md) | Register `angular-django2` as a schematic collection. |
-| [`application`](application.md) | Generate an Angular application using package defaults. |
-| [`ng-app`](ng-app.md) | Generate a Django-friendly Angular app with Material UI and an app shell. |
-| [`ng-workspace`](ng-workspace.md) | Initialize workspace-level files for an empty Angular workspace. |
-| [`material-setup`](material-setup.md) | Configure Angular Material in an existing project. |
-| [`project-structure`](project-structure.md) | Create the standard `core/`, `shared/`, and `features/` structure. |
-| [`app-shell`](app-shell.md) | Generate or update the application shell. |
-| [`component`](component.md) | Generate a standalone OnPush component with embedding hooks. |
-| [`embed-component`](embed-component.md) | Embed a component into a parent component. |
-| [`service`](service.md) | Generate a service. |
-| [`class`](class.md) | Generate a class. |
-| [`ng-api`](ng-api.md) | Bootstrap `ng-openapi-gen` and generate Django integration helpers. |
-| [`data-service`](data-service.md) | Generate a typed `*DataService` wrapper around a generated OpenAPI service. |
+| Command                                     | Purpose                                                                       |
+| ------------------------------------------- | ----------------------------------------------------------------------------- |
+| [`ng-add`](ng-add.md)                       | Register `angular-django2` as a schematic collection.                         |
+| [`application`](application.md)             | Generate an Angular application using package defaults.                       |
+| [`material-app`](material-app.md)           | Generate a Django-friendly Angular app with Material UI and a sidenav layout. |
+| [`workspace-setup`](workspace-setup.md)     | Initialize workspace-level files for an empty Angular workspace.              |
+| [`material-setup`](material-setup.md)       | Configure Angular Material in an existing project.                            |
+| [`project-structure`](project-structure.md) | Create the standard `core/`, `shared/`, and `features/` structure.            |
+| [`app-shell`](app-shell.md)                 | Generate or update the application shell.                                     |
+| [`component`](component.md)                 | Generate a standalone OnPush component with embedding hooks.                  |
+| [`embed-component`](embed-component.md)     | Embed a component into a parent component.                                    |
+| [`service`](service.md)                     | Generate a service.                                                           |
+| [`class`](class.md)                         | Generate a class.                                                             |
+| [`api-setup`](api-setup.md)                 | Bootstrap `ng-openapi-gen` and generate Django integration helpers.           |
+| [`data-service`](data-service.md)           | Generate a typed `*DataService` wrapper around a generated OpenAPI service.   |
 
 ## Discover command help
 
@@ -113,5 +113,5 @@ ng generate angular-django2:<schematic> --help
 For example:
 
 ```bash
-ng generate angular-django2:ng-app --help
+ng generate angular-django2:material-app --help
 ```

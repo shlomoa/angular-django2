@@ -14,9 +14,9 @@ const schematicCommandIds = [
   'service',
   'material-setup',
   'project-structure',
-  'ng-app',
-  'ng-workspace',
-  'ng-api',
+  'material-app',
+  'workspace-setup',
+  'api-setup',
   'data-service',
 ] as const;
 
@@ -39,11 +39,11 @@ describe('UI command catalog', () => {
     ]);
     expect(getUiCommandsByCategory('workspace-setup').map((command) => command.id)).toEqual([
       'ng-add',
-      'ng-workspace',
+      'workspace-setup',
     ]);
     expect(getUiCommandsByCategory('application-creation').map((command) => command.id)).toEqual([
       'application',
-      'ng-app',
+      'material-app',
     ]);
     expect(getUiCommandsByCategory('ui-material-shell').map((command) => command.id)).toEqual([
       'material-setup',
@@ -58,7 +58,7 @@ describe('UI command catalog', () => {
       'class',
     ]);
     expect(getUiCommandsByCategory('api-data').map((command) => command.id)).toEqual([
-      'ng-api',
+      'api-setup',
       'data-service',
     ]);
   });

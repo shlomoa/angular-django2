@@ -42,7 +42,7 @@ export const GUIDES: readonly Guide[] = [
         body: ['Run the schematic flow, then wire the standalone providers.'],
         steps: [
           'ng add angular-django2 to register the schematic collection.',
-          'ng generate angular-django2:ng-app my-app to scaffold a Material app in one step.',
+          'ng generate angular-django2:material-app my-app to scaffold a Material app in one step.',
           'Serve the app and confirm the generated shell renders.',
         ],
       },
@@ -100,7 +100,7 @@ export const GUIDES: readonly Guide[] = [
       {
         title: 'Generate a typed API client',
         body: [
-          'Bootstrap ng-openapi-gen with ng generate angular-django2:ng-api --inputPath=openapi.json, ' +
+          'Bootstrap ng-openapi-gen with ng generate angular-django2:api-setup --inputPath=openapi.json, ' +
             'then run the generate:api script to produce typed services from the Django OpenAPI document.',
         ],
       },

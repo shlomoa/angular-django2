@@ -18,8 +18,8 @@ nav:
       - Overview: cli/index.md
       - ng-add: cli/ng-add.md
       - application: cli/application.md
-      - ng-app: cli/ng-app.md
-      - ng-workspace: cli/ng-workspace.md
+      - material-app: cli/material-app.md
+      - workspace-setup: cli/workspace-setup.md
       - material-setup: cli/material-setup.md
       - project-structure: cli/project-structure.md
       - app-shell: cli/app-shell.md
@@ -27,7 +27,7 @@ nav:
       - embed-component: cli/embed-component.md
       - service: cli/service.md
       - class: cli/class.md
-      - ng-api: cli/ng-api.md
+      - api-setup: cli/api-setup.md
       - data-service: cli/data-service.md
 
 theme:

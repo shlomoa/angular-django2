@@ -1,4 +1,4 @@
-export interface NgAppSchema {
+export interface MaterialAppSchema {
   name: string;
   theme?: 'indigo-pink' | 'deeppurple-amber' | 'pink-bluegrey' | 'purple-green' | 'custom';
   typography?: boolean;
