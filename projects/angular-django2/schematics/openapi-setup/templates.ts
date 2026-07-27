@@ -1,4 +1,4 @@
-export interface ApiSetupHelperFile {
+export interface OpenapiSetupHelperFile {
   /** Path relative to the resolved helpers directory. */
   fileName: string;
   /** File contents. */
@@ -324,7 +324,7 @@ describe('ResourceAdapter', () => {
  * Build the list of generated integration helper artifacts.
  * @internal
  */
-export function getHelperFiles(): ApiSetupHelperFile[] {
+export function getHelperFiles(): OpenapiSetupHelperFile[] {
   return [
     { fileName: 'django-transport.ts', content: transportContent() },
     { fileName: 'resource-adapter.ts', content: resourceAdapterContent() },
