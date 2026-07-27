@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.3.1]
+
+- **Breaking:** Renamed the `api-setup` schematic to `openapi-setup` (#63). Update any `ng generate angular-django2:api-setup` invocations to `ng generate angular-django2:openapi-setup`.
+- **Breaking:** Renamed the `openapi-setup` schematic option `--inputPath` to `--openapi_spec_file` (#60).
+
 ## [0.3.0]
 
 - **Breaking:** Renamed three schematics for a clearer, non-redundant naming
