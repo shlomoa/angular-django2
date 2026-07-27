@@ -110,7 +110,7 @@ function generateHelperArtifacts(
 }
 
 /**
- * openapi-setup schematic: Bootstrap ng-openapi-gen for Angular-Django integration
+ * `openapi-setup` schematic: Bootstrap ng-openapi-gen for Angular-Django integration
  *
  * This schematic sets up ng-openapi-gen to generate Angular services and models
  * from an OpenAPI schema. It integrates with the django-angular3 backend pipeline.
