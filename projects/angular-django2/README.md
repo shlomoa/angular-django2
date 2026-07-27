@@ -23,7 +23,7 @@ ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
 ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
 ng generate angular-django2:workspace-setup my-app
-ng generate angular-django2:openapi-setup --inputPath=openapi.json
+ng generate angular-django2:openapi-setup --openapi_spec_file=openapi.json
 ng generate angular-django2:data-service users
 ```
 
@@ -53,7 +53,7 @@ Current defaults:
     - Template hooks replace `{{key}}` placeholders from `params`
     - File targets use the selected project's `sourceRoot` when `--project` is provided; otherwise they use `/src`
 - `openapi-setup`: bootstraps [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds the package to `devDependencies`, writes `ng-openapi-gen.json`, adds a `generate:api` npm script, and generates Django integration helpers (auth/CSRF/transport helpers and a CRM-oriented `ResourceAdapter`) under the helpers path
-  - Options: `--inputPath` (default: `openapi.json`), `--outputPath` (default: `src/app/api`), `--helpersPath` (default: `src/app/api-integration`), `--skipHelpers`, `--skipTests`
+  - Options: `--openapi_spec_file` (default: `openapi.json`), `--outputPath` (default: `src/app/api`), `--helpersPath` (default: `src/app/api-integration`), `--skipHelpers`, `--skipTests`
 - `data-service`: generates a typed `*DataService` wrapper around an ng-openapi-gen `*ApiService` with search and CRUD helpers
   - Options: `--apiService`, `--apiPath` (default: `../api/services`), `--path`, `--flat`, `--skipTests`
 
@@ -84,7 +84,7 @@ Because Angular CLI command-line options do not pass nested objects conveniently
 
 ```bash
 # 1. Bootstrap ng-openapi-gen
-ng generate angular-django2:openapi-setup --inputPath=openapi.json
+ng generate angular-django2:openapi-setup --openapi_spec_file=openapi.json
 
 # 2. Generate typed Angular services from your OpenAPI spec
 npm run generate:api

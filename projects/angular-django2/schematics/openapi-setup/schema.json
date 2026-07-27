@@ -10,7 +10,7 @@
       "description": "Output path for generated API models and services",
       "default": "src/app/api"
     },
-    "inputPath": {
+    "openapi_spec_file": {
       "type": "string",
       "description": "Path to the OpenAPI schema file",
       "default": "openapi.json"

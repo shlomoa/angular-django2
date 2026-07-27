@@ -215,7 +215,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       const tree = await runner.runSchematic(
         'openapi-setup',
         {
-          inputPath: 'custom/schema.json',
+          openapi_spec_file: 'custom/schema.json',
           outputPath: 'src/generated',
         },
         appTree,

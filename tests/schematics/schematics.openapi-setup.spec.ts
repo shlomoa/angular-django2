@@ -67,7 +67,7 @@ describe('angular-django2 schematics', () => {
       } as never;
 
       const updatedTree = openapiSetup({
-        inputPath: 'schema/api.json',
+        openapi_spec_file: 'schema/api.json',
         outputPath: 'src/generated/api',
       })(tree, context) as Tree;
 
