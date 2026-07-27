@@ -1,14 +1,14 @@
-# api-setup
+# openapi-setup
 
 Bootstrap `ng-openapi-gen` and generate Django integration helpers.
 
 ```bash
-ng generate angular-django2:api-setup --inputPath=openapi.json
+ng generate angular-django2:openapi-setup --inputPath=openapi.json
 npm install
 npm run generate:api
 ```
 
-`api-setup` writes `ng-openapi-gen.json`, adds `ng-openapi-gen` to
+`openapi-setup` writes `ng-openapi-gen.json`, adds `ng-openapi-gen` to
 `devDependencies`, and adds a `generate:api` npm script. It also generates
 Django integration helpers under `--helpersPath` (default
 `src/app/api-integration/`):

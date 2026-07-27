@@ -197,12 +197,12 @@ npx ng build ngdj-tutorial
 If your Django backend exposes an OpenAPI schema, bootstrap `ng-openapi-gen`:
 
 ```bash
-npx ng generate angular-django2:api-setup --inputPath=openapi.json
+npx ng generate angular-django2:openapi-setup --inputPath=openapi.json
 npm install
 npm run generate:api
 ```
 
-`api-setup` also generates Django integration helpers under
+`openapi-setup` also generates Django integration helpers under
 `src/app/api-integration/`:
 
 - `django-transport.ts` — wires Angular XSRF handling with Django cookie and
@@ -262,5 +262,5 @@ npx ng serve ngdj-tutorial
   `angular-django2:embed-component`.
 - Embed existing package components (such as Angular Material) with
   `embed-component` package mode (`--from`).
-- Add OpenAPI client generation with `angular-django2:api-setup`.
+- Add OpenAPI client generation with `angular-django2:openapi-setup`.
 - Add a data-service wrapper with `angular-django2:data-service`.

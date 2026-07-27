@@ -175,7 +175,14 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     });
   });
 
-  describe('api-setup schematic integration', () => {
+  describe('openapi-setup schematic integration', () => {
+    it('INT-API-00: registers openapi-setup without the deprecated api-setup name', () => {
+      const collection = JSON.parse(readFileSync(collectionPath, 'utf8'));
+
+      expect(collection.schematics).toHaveProperty('openapi-setup');
+      expect(collection.schematics).not.toHaveProperty('api-setup');
+    });
+
     beforeEach(() => {
       // Create minimal package.json
       appTree.create(
@@ -190,7 +197,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     });
 
     it('INT-API-01: generates complete ng-openapi-gen configuration', async () => {
-      const tree = await runner.runSchematic('api-setup', {}, appTree);
+      const tree = await runner.runSchematic('openapi-setup', {}, appTree);
 
       // Verify package.json was updated
       const packageJson = JSON.parse(tree.readContent('/package.json'));
@@ -206,7 +213,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
 
     it('INT-API-02: handles custom paths correctly', async () => {
       const tree = await runner.runSchematic(
-        'api-setup',
+        'openapi-setup',
         {
           inputPath: 'custom/schema.json',
           outputPath: 'src/generated',
@@ -237,7 +244,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
         }),
       );
 
-      const tree = await runner.runSchematic('api-setup', {}, appTree);
+      const tree = await runner.runSchematic('openapi-setup', {}, appTree);
 
       const packageJson = JSON.parse(tree.readContent('/package.json'));
       expect(packageJson.version).toBe('2.0.0');
@@ -249,7 +256,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
     });
 
     it('INT-API-04: generates Django integration helper artifacts', async () => {
-      const tree = await runner.runSchematic('api-setup', {}, appTree);
+      const tree = await runner.runSchematic('openapi-setup', {}, appTree);
 
       expect(tree.files).toContain('/src/app/api-integration/django-transport.ts');
       expect(tree.files).toContain('/src/app/api-integration/resource-adapter.ts');
@@ -561,7 +568,7 @@ export const appConfig: ApplicationConfig = {
   });
 
   describe('schematic chaining integration', () => {
-    it('INT-CHAIN-01: ng-add followed by api-setup works correctly', async () => {
+    it('INT-CHAIN-01: ng-add followed by openapi-setup works correctly', async () => {
       appTree.create(
         '/angular.json',
         JSON.stringify({
@@ -580,8 +587,8 @@ export const appConfig: ApplicationConfig = {
       // First run ng-add
       const tree1 = await runner.runSchematic('ng-add', {}, appTree);
 
-      // Then run api-setup
-      const tree2 = await runner.runSchematic('api-setup', {}, tree1);
+      // Then run openapi-setup
+      const tree2 = await runner.runSchematic('openapi-setup', {}, tree1);
 
       // Verify both schematics executed successfully
       const angularJson = JSON.parse(tree2.readContent('/angular.json'));

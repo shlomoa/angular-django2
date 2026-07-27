@@ -56,10 +56,10 @@
       "factory": "./workspace-setup/index#workspaceSetup",
       "schema": "./workspace-setup/schema.json"
     },
-    "api-setup": {
+    "openapi-setup": {
       "description": "Bootstrap ng-openapi-gen for OpenAPI client generation.",
-      "factory": "./api-setup/index#apiSetup",
-      "schema": "./api-setup/schema.json"
+      "factory": "./openapi-setup/index#openapiSetup",
+      "schema": "./openapi-setup/schema.json"
     },
     "data-service": {
       "description": "Generate a data service wrapper for OpenAPI-generated services with search and CRUD operations.",

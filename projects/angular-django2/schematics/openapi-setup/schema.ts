@@ -1,4 +1,4 @@
-export interface ApiSetupSchema {
+export interface OpenapiSetupSchema {
   /**
    * Output path for generated API models and services
    * @default "src/app/api"

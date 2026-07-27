@@ -2,7 +2,7 @@ import { normalize } from '@angular-devkit/core';
 import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import * as path from 'path';
-import type { ApiSetupSchema } from './schema';
+import type { OpenapiSetupSchema } from './schema';
 import { getHelperFiles } from './templates';
 import {
   ensureDevDependency,
@@ -18,7 +18,7 @@ const DEFAULT_HELPERS_PATH = 'src/app/api-integration';
 /**
  * Default ng-openapi-gen configuration
  */
-function getDefaultConfig(options: ApiSetupSchema): object {
+function getDefaultConfig(options: OpenapiSetupSchema): object {
   return {
     $schema: 'node_modules/ng-openapi-gen/ng-openapi-gen-schema.json',
     input: options.inputPath || 'openapi.json',
@@ -62,7 +62,7 @@ function addGenerateApiScript(tree: Tree, context: SchematicContext): void {
 /**
  * Generate ng-openapi-gen.json config file
  */
-function generateConfigFile(tree: Tree, context: SchematicContext, options: ApiSetupSchema): void {
+function generateConfigFile(tree: Tree, context: SchematicContext, options: OpenapiSetupSchema): void {
   const configPath = '/ng-openapi-gen.json';
 
   // Check if config file already exists (idempotent)
@@ -83,7 +83,7 @@ function generateConfigFile(tree: Tree, context: SchematicContext, options: ApiS
 function generateHelperArtifacts(
   tree: Tree,
   context: SchematicContext,
-  options: ApiSetupSchema,
+  options: OpenapiSetupSchema,
 ): void {
   if (options.skipHelpers) {
     context.logger.info('Skipping Django integration helper generation (--skipHelpers).');
@@ -110,12 +110,12 @@ function generateHelperArtifacts(
 }
 
 /**
- * api-setup schematic: Bootstrap ng-openapi-gen for Angular-Django integration
+ * openapi-setup schematic: Bootstrap ng-openapi-gen for Angular-Django integration
  *
  * This schematic sets up ng-openapi-gen to generate Angular services and models
  * from an OpenAPI schema. It integrates with the django-angular3 backend pipeline.
  */
-export function apiSetup(options: ApiSetupSchema): Rule {
+export function openapiSetup(options: OpenapiSetupSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
     context.logger.info('Setting up ng-openapi-gen for OpenAPI client generation...');
 
@@ -131,7 +131,7 @@ export function apiSetup(options: ApiSetupSchema): Rule {
     // Step 4: Generate Django auth/CSRF/transport and resource adapter helpers
     generateHelperArtifacts(tree, context, options);
 
-    context.logger.info('✓ api-setup complete!');
+    context.logger.info('✓ openapi-setup complete!');
     context.logger.info('  Run `npm run generate:api` to generate API models and services.');
 
     return tree;

@@ -6,11 +6,11 @@ Generate a typed `*DataService` wrapper around a generated OpenAPI service.
 ng generate angular-django2:data-service users
 ```
 
-Use this after bootstrapping [`api-setup`](api-setup.md) and running
+Use this after bootstrapping [`openapi-setup`](openapi-setup.md) and running
 `npm run generate:api` to produce the underlying `*ApiService`:
 
 ```bash
-ng generate angular-django2:api-setup --inputPath=openapi.json
+ng generate angular-django2:openapi-setup --inputPath=openapi.json
 npm install
 npm run generate:api
 ng generate angular-django2:data-service users

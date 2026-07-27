@@ -16,7 +16,7 @@ const schematicCommandIds = [
   'project-structure',
   'material-app',
   'workspace-setup',
-  'api-setup',
+  'openapi-setup',
   'data-service',
 ] as const;
 
@@ -58,7 +58,7 @@ describe('UI command catalog', () => {
       'class',
     ]);
     expect(getUiCommandsByCategory('api-data').map((command) => command.id)).toEqual([
-      'api-setup',
+      'openapi-setup',
       'data-service',
     ]);
   });
