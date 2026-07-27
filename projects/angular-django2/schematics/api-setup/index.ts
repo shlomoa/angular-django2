@@ -21,7 +21,7 @@ const DEFAULT_HELPERS_PATH = 'src/app/api-integration';
 function getDefaultConfig(options: ApiSetupSchema): object {
   return {
     $schema: 'node_modules/ng-openapi-gen/ng-openapi-gen-schema.json',
-    input: options.inputPath || 'openapi.json',
+    input: options.openapi_spec_file || 'openapi.json',
     output: options.outputPath || 'src/app/api',
   };
 }

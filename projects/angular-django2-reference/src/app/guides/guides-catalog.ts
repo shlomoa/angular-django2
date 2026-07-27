@@ -100,7 +100,7 @@ export const GUIDES: readonly Guide[] = [
       {
         title: 'Generate a typed API client',
         body: [
-          'Bootstrap ng-openapi-gen with ng generate angular-django2:api-setup --inputPath=openapi.json, ' +
+          'Bootstrap ng-openapi-gen with ng generate angular-django2:api-setup --openapi_spec_file=openapi.json, ' +
             'then run the generate:api script to produce typed services from the Django OpenAPI document.',
         ],
       },

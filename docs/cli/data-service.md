@@ -10,7 +10,7 @@ Use this after bootstrapping [`api-setup`](api-setup.md) and running
 `npm run generate:api` to produce the underlying `*ApiService`:
 
 ```bash
-ng generate angular-django2:api-setup --inputPath=openapi.json
+ng generate angular-django2:api-setup --openapi_spec_file=openapi.json
 npm install
 npm run generate:api
 ng generate angular-django2:data-service users

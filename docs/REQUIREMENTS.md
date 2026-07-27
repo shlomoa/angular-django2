@@ -125,7 +125,7 @@ sources over lower-priority ones.
     `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) in
     `django-transport.ts`, a CRM-oriented `ResourceAdapter` with a DRF-style
     `PaginatedResult` in `resource-adapter.ts`, and a barrel `index.ts`; options:
-    `--inputPath` (default: `openapi.json`), `--outputPath` (default:
+    `--openapi_spec_file` (default: `openapi.json`), `--outputPath` (default:
     `src/app/api`), `--helpersPath` (default: `src/app/api-integration`),
     `--skipHelpers`, `--skipTests`
   - `data-service`: generate a typed `*DataService` wrapper around an
