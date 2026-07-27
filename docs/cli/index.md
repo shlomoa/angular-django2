@@ -98,7 +98,7 @@ for each schematic's options.
 | [`embed-component`](embed-component.md)     | Embed a component into a parent component.                                    |
 | [`service`](service.md)                     | Generate a service.                                                           |
 | [`class`](class.md)                         | Generate a class.                                                             |
-| [`openapi-setup`](openapi-setup.md)                 | Bootstrap `ng-openapi-gen` and generate Django integration helpers.           |
+| [`openapi-setup`](openapi-setup.md)         | Bootstrap `ng-openapi-gen` and generate Django integration helpers.           |
 | [`data-service`](data-service.md)           | Generate a typed `*DataService` wrapper around a generated OpenAPI service.   |
 
 ## Discover command help

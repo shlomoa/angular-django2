@@ -62,7 +62,11 @@ function addGenerateApiScript(tree: Tree, context: SchematicContext): void {
 /**
  * Generate ng-openapi-gen.json config file
  */
-function generateConfigFile(tree: Tree, context: SchematicContext, options: OpenapiSetupSchema): void {
+function generateConfigFile(
+  tree: Tree,
+  context: SchematicContext,
+  options: OpenapiSetupSchema,
+): void {
   const configPath = '/ng-openapi-gen.json';
 
   // Check if config file already exists (idempotent)
