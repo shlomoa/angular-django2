@@ -9,7 +9,7 @@ export interface ApiSetupSchema {
    * Path to the OpenAPI schema file
    * @default "openapi.json"
    */
-  inputPath?: string;
+  openapi_spec_file?: string;
 
   /**
    * Directory for the generated Django integration helpers

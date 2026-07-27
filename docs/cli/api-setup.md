@@ -3,7 +3,7 @@
 Bootstrap `ng-openapi-gen` and generate Django integration helpers.
 
 ```bash
-ng generate angular-django2:api-setup --inputPath=openapi.json
+ng generate angular-django2:api-setup --openapi_spec_file=openapi.json
 npm install
 npm run generate:api
 ```
@@ -36,13 +36,13 @@ co-located spec files.
 
 Options:
 
-| Option          | Default                   | Description                                                                          |
-| --------------- | ------------------------- | ------------------------------------------------------------------------------------ |
-| `--inputPath`   | `openapi.json`            | Path to the OpenAPI schema file.                                                     |
-| `--outputPath`  | `src/app/api`             | Output directory for `ng-openapi-gen` generated services.                            |
-| `--helpersPath` | `src/app/api-integration` | Directory for the generated Django auth/CSRF/transport and resource adapter helpers. |
-| `--skipHelpers` | `false`                   | Skip generating the Django integration helpers.                                      |
-| `--skipTests`   | `false`                   | Do not generate spec files alongside the integration helpers.                        |
+| Option                | Default                   | Description                                                                          |
+| --------------------- | ------------------------- | ------------------------------------------------------------------------------------ |
+| `--openapi_spec_file` | `openapi.json`            | Path to the OpenAPI schema file.                                                     |
+| `--outputPath`        | `src/app/api`             | Output directory for `ng-openapi-gen` generated services.                            |
+| `--helpersPath`       | `src/app/api-integration` | Directory for the generated Django auth/CSRF/transport and resource adapter helpers. |
+| `--skipHelpers`       | `false`                   | Skip generating the Django integration helpers.                                      |
+| `--skipTests`         | `false`                   | Do not generate spec files alongside the integration helpers.                        |
 
 After generating typed services from your OpenAPI schema, wrap one with
 [`data-service`](data-service.md).

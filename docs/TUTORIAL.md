@@ -197,7 +197,7 @@ npx ng build ngdj-tutorial
 If your Django backend exposes an OpenAPI schema, bootstrap `ng-openapi-gen`:
 
 ```bash
-npx ng generate angular-django2:api-setup --inputPath=openapi.json
+npx ng generate angular-django2:api-setup --openapi_spec_file=openapi.json
 npm install
 npm run generate:api
 ```
