@@ -27,7 +27,7 @@ nav:
       - embed-component: cli/embed-component.md
       - service: cli/service.md
       - class: cli/class.md
-      - api-setup: cli/api-setup.md
+      - openapi-setup: cli/openapi-setup.md
       - data-service: cli/data-service.md
 
 theme:

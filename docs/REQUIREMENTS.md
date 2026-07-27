@@ -75,7 +75,7 @@ sources over lower-priority ones.
   - `project-structure`
   - `material-app`
   - `workspace-setup`
-  - `api-setup`
+  - `openapi-setup`
   - `data-service`
 - The documented defaults and behavior currently expected are:
   - `ng-add`: register or prepend `angular-django2` in
@@ -116,7 +116,7 @@ sources over lower-priority ones.
     application source-file hooks for the Angular application files documented
     at <https://angular.dev/reference/configs/file-structure#application-source-files>
     using exactly one of `content`, `path`, or `template` per file hook
-  - `api-setup`: bootstrap
+  - `openapi-setup`: bootstrap
     [ng-openapi-gen](https://github.com/cyclosproject/ng-openapi-gen) — adds
     `ng-openapi-gen` to `devDependencies`, writes `ng-openapi-gen.json`, and
     adds a `generate:api` npm script; it also generates Django integration

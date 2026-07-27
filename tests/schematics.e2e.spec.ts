@@ -489,7 +489,7 @@ describe('angular-django2 schematics E2E tests', () => {
   );
 
   it(
-    'E2E-03: api-setup schematic configures OpenAPI code generation',
+    'E2E-03: openapi-setup schematic configures OpenAPI code generation',
     { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {
       // Setup
@@ -531,10 +531,10 @@ describe('angular-django2 schematics E2E tests', () => {
         execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
         console.log('[E2E-03] ✓ Dependencies installed');
 
-        // Step 3: Run api-setup schematic
+        // Step 3: Run openapi-setup schematic
         console.log('[E2E-03] Configuring OpenAPI code generation...');
-        execAngularCli(['generate', 'angular-django2:api-setup'], appPath);
-        console.log('[E2E-03] ✓ api-setup schematic completed');
+        execAngularCli(['generate', 'angular-django2:openapi-setup'], appPath);
+        console.log('[E2E-03] ✓ openapi-setup schematic completed');
 
         // Verify ng-openapi-gen.json was created
         const ngOpenapiGenPath = path.join(appPath, 'ng-openapi-gen.json');

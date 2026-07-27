@@ -2,7 +2,7 @@
 
 `angular-django2` provides an Angular CLI schematics collection for custom `ng generate` flows in Django-backed applications.
 
-The package surface is a schematics collection: `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `api-setup`, `data-service`
+The package surface is a schematics collection: `application`, `service`, `class`, `app-shell`, `component`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, `data-service`
 
 Start with the [tutorial](TUTORIAL.md) to go from an empty directory to a
 working app with Angular CLI and the ngdj schematics. See the [CLI guide](cli/index.md)

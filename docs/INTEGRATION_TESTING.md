@@ -47,7 +47,7 @@ Current integration suites cover:
 
 - `ng-add`
 - `workspace-setup`
-- `api-setup`
+- `openapi-setup`
 - `material-setup`
 - `project-structure`
 - `material-app`
@@ -77,7 +77,7 @@ Current E2E coverage includes:
 
 - `E2E-01` — step-by-step app generation with individual schematics
 - `E2E-02` — `workspace-setup` + `material-app` flow in a minimal workspace
-- `E2E-03` — `api-setup` setup and build verification
+- `E2E-03` — `openapi-setup` setup and build verification
 - `E2E-04` — `component` hooks + `embed-component` wiring a generated child into
   a parent in a buildable app
 - `E2E-05` — `embed-component` package mode wiring an Angular Material component

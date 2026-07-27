@@ -40,7 +40,7 @@ The current schematics collection includes:
 - `project-structure`
 - `material-app`
 - `workspace-setup`
-- `api-setup`
+- `openapi-setup`
 - `data-service`
 
 ### Build, lint, and package this repository
@@ -268,7 +268,7 @@ available:
 | `ng generate angular-django2:app-shell --project=<name>`                         | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation                                               |
 | `ng generate angular-django2:material-app <name>`                                | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults                                    |
 | `ng generate angular-django2:workspace-setup <name>`                             | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `material-app` in an empty workspace                                               |
-| `ng generate angular-django2:api-setup --openapi_spec_file=<file>`               | Bootstraps `ng-openapi-gen` and Django integration helpers                                           | Adds `generate:api` script and auth/CSRF/transport + resource adapter helpers                 |
+| `ng generate angular-django2:openapi-setup --openapi_spec_file=<file>`           | Bootstraps `ng-openapi-gen` and Django integration helpers                                           | Adds `generate:api` script and auth/CSRF/transport + resource adapter helpers                 |
 | `ng generate angular-django2:data-service <resource>`                            | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services                                                       |
 
 ### Recipes for a running Angular app
@@ -355,7 +355,7 @@ Notes:
 #### OpenAPI client workflow
 
 ```bash
-ng generate angular-django2:api-setup --openapi_spec_file=openapi.json
+ng generate angular-django2:openapi-setup --openapi_spec_file=openapi.json
 npm install
 npm run generate:api
 ng generate angular-django2:data-service users
