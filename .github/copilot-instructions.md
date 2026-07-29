@@ -2,118 +2,79 @@
 
 ## General instructions
 
-The source of truth for the general instructions is [here](https://github.com/shlomoa/shlomoa/blob/main/.github/copilot-instructions.md).
+Read this file before making repository-specific changes.
+Keep [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md), and [GEMINI.md](GEMINI.md) aligned with it.
 
-Treat this file as the canonical repository-specific instruction file.
-Keep `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` aligned with it.
+## Current repository shape
 
-Do not duplicate detailed product, runtime, schematic, testing, or release
-inventories in this file when an existing repository document already owns that
-information.
+- This repository is an Angular 22 workspace that publishes an Angular CLI schematics collection under [projects/angular-django2/schematics](projects/angular-django2/schematics).
+- The checked-in reference app lives in [projects/angular-django2-reference](projects/angular-django2-reference) and is used for tutorial and Material-related coverage.
+- The package is not a runtime application library; it has no public runtime API. Keep the public surface narrow and centered on the schematics package and generated output.
+- The repo currently uses Node.js 22/24/26-compatible tooling, npm 11+, Angular CLI 22, Vitest, and Angular Material 22.
 
-Expected instruction-file chain:
+## Source of truth for repository facts
 
-- `AGENTS.md` should only reference this file
-- `CLAUDE.md` and `GEMINI.md` should only reference `AGENTS.md` and keep only model-specific notes
+When validating repository-specific facts, use sources in this order and stop as soon as a higher-priority source answers the question:
 
-## angular django2 repo Repo Instructions
+1. Executable and configuration truth first:
+   - [package.json](package.json)
+   - [angular.json](angular.json)
+   - [projects/angular-django2/schematics](projects/angular-django2/schematics)
+   - [.github/workflows/publish.yml](.github/workflows/publish.yml)
+2. Maintained repository documentation:
+   - [README.md](README.md)
+   - [projects/angular-django2/README.md](projects/angular-django2/README.md)
+   - [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)
+   - [tests/README.md](tests/README.md)
+   - [docs/INTEGRATION_TESTING.md](docs/INTEGRATION_TESTING.md)
+   - [docs/RELEASING.md](docs/RELEASING.md)
+3. Other shlomoa repositories only when the local docs are silent and the relationship is directly relevant.
+4. Upstream framework or tool documentation only for behavior that is not already covered by local repo state.
 
-### Source Priority
+When sources conflict, prefer code and configuration over prose, and prefer this repository over external documentation.
 
-When validating repository-specific facts, use sources in this order and stop
-as soon as a higher-priority source answers the question:
-
-1. **This repo — executable/configuration truth first**
-   - `package.json`
-   - `angular.json`
-   - `projects/angular-django2/schematics`
-   - `.github/workflows/publish.yml`
-2. **This repo — maintained documentation**
-   - `README.md`
-   - `projects/angular-django2/README.md`
-   - `docs/REQUIREMENTS.md`
-   - `tests/README.md`
-   - `docs/RELEASING.md`
-3. **`django-angular3` repo** for Django-side workspace lifecycle or
-   integration details not documented here
-4. **Other `shlomoa` repos** only if the higher-priority sources are silent and
-   the relationship is directly relevant
-5. **Upstream framework/tool docs** such as Angular, Django, DRF, npm, or
-   GitHub Actions for framework behavior, never to override verified local repo
-   state
-
-When sources conflict, prefer code/config over prose, and prefer higher-priority
-sources over lower-priority ones.
-
-### Documentation Map
-
-Use the existing repository documents instead of restating their contents here:
-
-- `README.md` — repository overview, runtime usage, schematic workflows, and
-  local development commands
-- `projects/angular-django2/README.md` — published package usage summary
-- `docs/REQUIREMENTS.md` — product requirements, current runtime/schematic
-  boundaries, and documentation expectations
-- `tests/README.md` — general repository testing index
-- `docs/INTEGRATION_TESTING.md` — canonical integration and end-to-end testing
-  guide, including build prerequisites and temp-workspace caveats
-- `docs/RELEASING.md` — release flow and publish workflow details
-
-Instruction-file priority:
-
-- `.github/copilot-instructions.md` — single source of truth for repository-specific AI agent instructions
-- `AGENTS.md` — reference-only pointer to the canonical repository-specific guidance
-- `CLAUDE.md` and `GEMINI.md` — model-specific companion files that should reference `AGENTS.md` and avoid duplicating shared repo guidance
-
-### Working Agreement
+## Working agreement
 
 - Prefer small, reviewable changes.
-- Treat this as an Angular library package unless the user explicitly asks for an application.
-- If the request is ambiguous between library scope and application scope, ask one clarifying question before generating code.
-- Keep Django integration boundaries explicit: configuration, auth boundaries, CSRF naming, URL handling, and serialization behavior should be visible in code.
-- Keep Django integration concerns explicit rather than hiding behavior behind package magic.
-- Prefer clear TypeScript APIs, narrow public exports, and maintainable Angular patterns.
-- Prefer standalone Angular patterns and provider functions in generated code; do not introduce NgModules for new schematics output.
-- This package has no runtime public API; its surface is the schematics collection under `projects/angular-django2/schematics`. Do not export internal helpers from generated templates; mark internal symbols with `@internal`.
+- Treat this as an Angular library package and schematics workspace unless the request explicitly calls for an application change.
+- If a request is ambiguous between library scope and application scope, ask one clarifying question before implementing code.
+- Keep Django integration boundaries explicit in code and generated output: auth behavior, CSRF naming, URL handling, and serialization concerns should remain visible.
+- Prefer clear TypeScript APIs, narrow exports, and maintainable Angular patterns.
+- Prefer standalone Angular patterns and provider functions for new generated code; do not introduce NgModules for new schematics output.
+- Do not add public runtime exports or broaden the package surface beyond the schematics package.
 - Avoid generated-looking boilerplate that does not add package value.
-- Move non-generic implementation inventories back into `README.md`,
-  `projects/angular-django2/README.md`, `docs/REQUIREMENTS.md`,
-  `tests/README.md`, or `docs/RELEASING.md` instead of expanding this file.
+- Move implementation inventories or long-form notes into the docs when they would otherwise bloat this file.
 
-### Testing And Verification
+## Verification and testing
 
-Use root `package.json` scripts as the canonical verification command list.
-Use `tests/README.md` for the general testing index and
-`docs/INTEGRATION_TESTING.md` for integration/E2E command coverage,
-build-before-run requirements, and temp-workspace caveats.
+Use the root scripts in [package.json](package.json) as the canonical verification commands.
 
-## Release And Publishing Notes
+Current validation flow:
 
-Use `docs/RELEASING.md` as the canonical release procedure and
-`.github/workflows/publish.yml` as the executable source of truth for the
-checked-in publish automation.
+- [package.json](package.json): `npm run format:check`
+- [package.json](package.json): `npm run lint`
+- [package.json](package.json): `npm run build`
+- [package.json](package.json): `npm run test:ci`
+- [package.json](package.json): `npm run pack:dry-run`
 
-### Documentation Alignment
+The repo uses Vitest for Node-side specs and Angular's test builder for the reference app. End-to-end schematic coverage is documented in [docs/INTEGRATION_TESTING.md](docs/INTEGRATION_TESTING.md) and uses temp-area-based workspaces.
 
-Keep these files aligned with the actual workspace state:
+## Documentation alignment
 
-- `.github/copilot-instructions.md`
-- `AGENTS.md`
-- `CLAUDE.md`
-- `GEMINI.md`
-- `README.md`
-- `tests/README.md`
-- `docs/INTEGRATION_TESTING.md`
-- `projects/angular-django2/README.md`
-- `docs/REQUIREMENTS.md`
-- `docs/RELEASING.md`
+Keep the following files aligned with the current workspace state:
 
-### What To Optimize For
+- [README.md](README.md)
+- [tests/README.md](tests/README.md)
+- [docs/INTEGRATION_TESTING.md](docs/INTEGRATION_TESTING.md)
+- [projects/angular-django2/README.md](projects/angular-django2/README.md)
+- [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)
+- [docs/RELEASING.md](docs/RELEASING.md)
 
-- Treat this as an Angular library package unless the user explicitly asks for an application.
+## What to optimize for
+
 - Keep changes small and reviewable.
-- Prefer Angular.dev-style examples based on standalone providers and `provide*` APIs.
+- Prefer Angular.dev-style examples based on standalone providers and `provide*` APIs when relevant.
 - Only report commands as successful if they were actually run.
-- Do not fabricate Angular.dev URLs; only reference documentation when the user asks.
+- Do not fabricate documentation or URLs; rely on repository sources and local verification.
 
 ---
