@@ -9,7 +9,8 @@ In this guide:
   global Angular CLI install.
   - This could be resolved by one of two ways:
     - adding `./node_modules/.bin` to your PATH:
-      - \$env:Path = "$((Get-Location).Path)\node_modules\.bin;$env:Path"
+      - Linux (Bash): `export PATH="$(pwd)/node_modules/.bin:$PATH"`
+      - Windows (PowerShell): `$env:Path = "$((Get-Location).Path)\node_modules\.bin;$env:Path"`
     - installing Angular CLI globally with:
       - `npm install -g @angular/cli`.
 - `ngdj` is shorthand for `angular-django2`. In Angular CLI commands, the
