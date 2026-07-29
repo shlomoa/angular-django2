@@ -172,6 +172,37 @@ The current integration and E2E harnesses are designed to stay OS agnostic:
   `ng test --watch=false --browsers=ChromeHeadless` step so the suite does not
   assume a preinstalled browser on every platform
 
+### Validate on Linux and Windows
+
+The npm scripts in this repository do not require shell-specific wrappers.
+Validate the same repository flows in each supported shell after installing
+dependencies:
+
+Linux (Bash):
+
+```bash
+npm ci
+npm run format:check
+npm run lint
+npm run build
+npm run test:ci
+npm run pack:dry-run
+```
+
+Windows (PowerShell):
+
+```powershell
+npm ci
+npm run format:check
+npm run lint
+npm run build
+npm run test:ci
+npm run pack:dry-run
+```
+
+Run `npm run test:e2e` separately when its network, disk-space, and free-port
+prerequisites are available.
+
 ### E2E temp workspace cleanup and debug mode
 
 The E2E suite creates repo-root temporary workspaces with the `ngdj-e2e-`
