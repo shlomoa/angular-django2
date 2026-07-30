@@ -1,9 +1,8 @@
 # Repo Instructions
 
-## General instructions
+## General instructions source of truth (SSOT)
 
-Read this file before making repository-specific changes.
-Keep [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md), and [GEMINI.md](GEMINI.md) aligned with it.
+Read the external source of truth (SSOT) for general instructions from https://github.com/shlomoa/shlomoa/blob/main/.github/copilot-instructions.md It is mandatory.
 
 ## Current repository shape
 
@@ -31,19 +30,7 @@ When validating repository-specific facts, use sources in this order and stop as
 3. Other shlomoa repositories only when the local docs are silent and the relationship is directly relevant.
 4. Upstream framework or tool documentation only for behavior that is not already covered by local repo state.
 
-When sources conflict, prefer code and configuration over prose, and prefer this repository over external documentation.
-
-## Working agreement
-
-- Prefer small, reviewable changes.
-- Treat this as an Angular library package and schematics workspace unless the request explicitly calls for an application change.
-- If a request is ambiguous between library scope and application scope, ask one clarifying question before implementing code.
-- Keep Django integration boundaries explicit in code and generated output: auth behavior, CSRF naming, URL handling, and serialization concerns should remain visible.
-- Prefer clear TypeScript APIs, narrow exports, and maintainable Angular patterns.
-- Prefer standalone Angular patterns and provider functions for new generated code; do not introduce NgModules for new schematics output.
-- Do not add public runtime exports or broaden the package surface beyond the schematics package.
-- Avoid generated-looking boilerplate that does not add package value.
-- Move implementation inventories or long-form notes into the docs when they would otherwise bloat this file.
+When sources conflict, report the conflict and stop.
 
 ## Verification and testing
 
@@ -69,12 +56,5 @@ Keep the following files aligned with the current workspace state:
 - [projects/angular-django2/README.md](projects/angular-django2/README.md)
 - [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)
 - [docs/RELEASING.md](docs/RELEASING.md)
-
-## What to optimize for
-
-- Keep changes small and reviewable.
-- Prefer Angular.dev-style examples based on standalone providers and `provide*` APIs when relevant.
-- Only report commands as successful if they were actually run.
-- Do not fabricate documentation or URLs; rely on repository sources and local verification.
 
 ---
