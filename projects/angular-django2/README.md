@@ -6,7 +6,7 @@
 
 Full documentation: <https://angular-django2.readthedocs.io/>
 
-The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
+The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `complex-component`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
 
 ## Schematics
 
@@ -19,6 +19,7 @@ ng generate angular-django2:project-structure --project=my-app
 ng generate angular-django2:app-shell --project my-app
 ng generate angular-django2:component dashboard-card
 ng generate angular-django2:embed-component --component=projects/my-app/src/app/hero-card/hero-card.ts --parent=projects/my-app/src/app/dashboard-card/dashboard-card.ts
+ng generate angular-django2:complex-component dashboard-card --project=my-app --path=src/app/features/dashboard --features=mixins,nested,projection,cdk-overlay
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
 ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
@@ -40,6 +41,10 @@ Current defaults:
   - Options: `--component` (child component `.ts` path), `--parent` (parent component `.ts` path)
   - Inserts the child element after the parent template `children` marker, feeding input signals and binding output signals to `on<Output>($event)` handlers
   - Imports the child class, registers it in the parent `imports` array, and adds not-implemented `on<Output>()` handler stubs; the operation is idempotent
+- `complex-component`: composes `component` and `embed-component` for advanced Angular Material components
+  - Requires `--path` within an application source tree and a non-empty `--features` list of `mixins`, `nested`, `projection`, and/or `cdk-overlay`
+  - Supports `--mode=create|modify|delete`; deletion requires `--confirm=true`
+  - Creates a component-local Material theme mixin, optional projected slots and CDK overlay, and two embedded child components for the selected features
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
 - `material-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav layout
   - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--defaults`, `--style`, `--prefix`

@@ -25,6 +25,7 @@ nav:
       - app-shell: cli/app-shell.md
       - component: cli/component.md
       - embed-component: cli/embed-component.md
+      - complex-component: cli/complex-component.md
       - service: cli/service.md
       - class: cli/class.md
       - openapi-setup: cli/openapi-setup.md

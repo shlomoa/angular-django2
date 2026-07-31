@@ -31,6 +31,11 @@
       "factory": "./embed-component/index#embedComponent",
       "schema": "./embed-component/schema.json"
     },
+    "complex-component": {
+      "description": "Generate or maintain an advanced Angular Material component composed from component and embed-component.",
+      "factory": "./complex-component/index#complexComponent",
+      "schema": "./complex-component/schema.json"
+    },
     "service": {
       "description": "Generate a service using the angular-django2 collection.",
       "factory": "./service/index#service",

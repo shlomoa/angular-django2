@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2ComplexComponent",
+  "title": "angular-django2 complex-component schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Kebab-case name of the complex component.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "Destination directory within the Angular application source tree."
+    },
+    "project": {
+      "type": "string",
+      "description": "Angular application project. Required when the workspace has multiple source roots."
+    },
+    "features": {
+      "type": "string",
+      "description": "Required comma-separated feature list: mixins, nested, projection, cdk-overlay."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["create", "modify", "delete"],
+      "default": "create",
+      "description": "Lifecycle operation. Delete requires --confirm."
+    },
+    "confirm": {
+      "type": "boolean",
+      "default": false,
+      "description": "Explicitly confirm deletion when --mode=delete."
+    }
+  },
+  "required": ["name", "path", "features"]
+}

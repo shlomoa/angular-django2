@@ -71,7 +71,8 @@ See `docs/INTEGRATION_TESTING.md`.
 ### Core spec files
 
 - `tests/schematics/*.spec.ts`
-  - unit tests for schematic wrappers, split by schematic category
+  - unit tests for schematic wrappers, including `complex-component` lifecycle,
+    feature validation, theme registration, and composed child wiring
   - uses mocked `externalSchematic` calls where relevant
   - shared context/readme helpers live in `tests/schematics/schematics.helpers.ts`
 
