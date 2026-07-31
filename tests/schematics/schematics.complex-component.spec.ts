@@ -105,6 +105,9 @@ describe('complex-component schematic', () => {
     expect(modified.readContent(`${componentRoot}/dashboard-card.html`)).toContain(
       '<ng-content select="[dashboard-card-header]"></ng-content>',
     );
+    expect(modified.readContent(`${componentRoot}/dashboard-card.ts`)).toContain(
+      'Projection slots: [dashboard-card-header], default, [dashboard-card-actions].',
+    );
     await expect(
       runner.runSchematic('complex-component', { ...options, mode: 'delete' }, modified),
     ).rejects.toThrow('requires --confirm=true');

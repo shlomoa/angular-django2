@@ -333,14 +333,16 @@ function addPublicApiDocumentation(
   content: string,
   resolved: ResolvedComplexComponentOptions,
 ): string {
-  if (content.includes('Complex component public API:')) {
-    return content;
-  }
-
   const projectionSlots = resolved.features.includes('projection')
     ? `[${resolved.name}-header], default, [${resolved.name}-actions]`
     : 'none';
   const documentation = `/**\n * Complex component public API:\n * - Inputs: none.\n * - Outputs: none.\n * - Projection slots: ${projectionSlots}.\n */\n`;
+  const existingDocumentation =
+    /\/\*\n \* Complex component public API:\n \* - Inputs: none\.\n \* - Outputs: none\.\n \* - Projection slots: .*\.\n \*\/\n/;
+
+  if (existingDocumentation.test(content)) {
+    return content.replace(existingDocumentation, documentation);
+  }
 
   return content.replace(/(export\s+(?:default\s+)?class\s+\w+)/, `${documentation}$1`);
 }
