@@ -835,4 +835,79 @@ describe('angular-django2 schematics E2E tests', () => {
       }
     },
   );
+
+  it(
+    'E2E-06: complex-component create, modify, and delete flows build in development mode',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'complex-component-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:complex-component',
+            'dashboard-card',
+            '--path=src/app/features',
+            '--features=mixins,nested,projection,cdk-overlay',
+          ],
+          appPath,
+        );
+        execAngularCli(['build', '--configuration=development'], appPath);
+
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:complex-component',
+            'dashboard-card',
+            '--path=src/app/features',
+            '--features=projection,nested',
+            '--mode=modify',
+          ],
+          appPath,
+        );
+        execAngularCli(['build', '--configuration=development'], appPath);
+
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:complex-component',
+            'dashboard-card',
+            '--path=src/app/features',
+            '--features=mixins',
+            '--mode=delete',
+            '--confirm=true',
+          ],
+          appPath,
+        );
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-06');
+      }
+    },
+  );
 });

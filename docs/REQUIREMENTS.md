@@ -70,6 +70,7 @@ sources over lower-priority ones.
   - `class`
   - `component`
   - `embed-component`
+  - `complex-component`
   - `service`
   - `material-setup`
   - `project-structure`
@@ -96,6 +97,11 @@ sources over lower-priority ones.
     `children` marker (feeding inputs and binding outputs to `on<Output>()`
     handlers), imports the child class, registers it in the parent `imports`
     array, and adds not-implemented `on<Output>()` handler stubs
+  - `complex-component`: compose `component` and `embed-component` to create,
+    modify, or delete an advanced standalone OnPush Angular Material component.
+    It requires a kebab-case name, an application-source-tree path, and a
+    non-empty feature list limited to `mixins`, `nested`, `projection`, and
+    `cdk-overlay`; delete requires explicit confirmation.
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `material-setup`: configure Angular Material theming (prebuilt or custom)
     and providers in an existing project; options: `--theme`, `--typography`,
