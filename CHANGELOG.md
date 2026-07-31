@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.3.2]
+
+- Added the advanced `complex-component` schematic for composing Angular Material components with mixins, nested components, projection, and CDK overlays.
+- Updated `complex-component` modify mode to refresh its projection API.
+- Added Linux and Windows validation for generated commands and restricted CI token permissions.
+
 ## [0.3.1]
 
 - **Breaking:** Renamed the `api-setup` schematic to `openapi-setup` (#63). Update any `ng generate angular-django2:api-setup` invocations to `ng generate angular-django2:openapi-setup`.
