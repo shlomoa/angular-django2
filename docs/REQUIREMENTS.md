@@ -131,10 +131,11 @@ sources over lower-priority ones.
     duplicated, and control-incompatible validator entries are rejected, and
     validators are emitted in a canonical order. Output is written to `--path`
     (default `src/app/features`) inside the selected application's source root
-    and composes an existing local `ControlValueAccessor` primitive from
-    `--primitives-path` (default `src/app/shared/form-helpers`) when exactly
-    one match is found, failing on ambiguity and falling back to inline
-    Material controls otherwise. The generated component builds a strictly
+    and composes canonical `form-field` output from `--primitives-path` (default
+    `src/app/shared/form-helpers`) through private schematic metadata rather
+    than generated-source parsing. `field-component` is its supported
+    convenience façade over the same canonical output, and absent primitives
+    fall back to inline Material controls. The generated component builds a strictly
     typed `FormBuilder` group initialized from the contract and exposes a typed
     payload, submit state, accessible markup, and Django REST Framework error
     mapping that retains entered values; declared initial values are restored

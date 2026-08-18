@@ -1,4 +1,5 @@
 import { strings } from '@angular-devkit/core';
+import type { FormFieldPrimitiveBinding } from '../form-field/schema';
 import {
   REACTIVE_FORM_VALIDATOR_KINDS,
   type ReactiveFormControlKind,
@@ -8,23 +9,12 @@ import {
   type ReactiveFormValidatorKind,
 } from './schema';
 
-/** Inputs a composed field primitive is known to expose. */
-export interface ReactiveFormPrimitiveInputs {
-  fieldId: boolean;
-  label: boolean;
-  hint: boolean;
-  placeholder: boolean;
-  required: boolean;
-  controlType: boolean;
-  serverErrors: boolean;
-}
-
 /** A reusable field primitive that already exists in the workspace. */
 export interface ReactiveFormPrimitive {
   className: string;
   selector: string;
   importPath: string;
-  inputs: ReactiveFormPrimitiveInputs;
+  bindings: readonly FormFieldPrimitiveBinding[];
 }
 
 /** A contract field plus the primitive composed for it, when one exists. */
@@ -94,8 +84,8 @@ export function reactiveFormComponentSource(options: ReactiveFormTemplateOptions
   const errorsType = `${base}ServerErrors`;
   const statusType = `${base}Status`;
   const inlineFields = options.fields.filter((field) => !field.primitive);
-  const usesServerErrorInputs = options.fields.some(
-    (field) => field.primitive?.inputs.serverErrors,
+  const usesServerErrorInputs = options.fields.some((field) =>
+    field.primitive?.bindings.includes('serverErrors'),
   );
   const usesValidators = options.fields.some(
     (field) => resolveFieldValidators(field.definition).length > 0,
@@ -583,28 +573,28 @@ function primitiveFieldMarkup(
   const definition = field.definition;
   const lines = [`  <${primitive.selector}`, `    formControlName="${definition.name}"`];
 
-  if (primitive.inputs.fieldId) {
+  if (primitive.bindings.includes('fieldId')) {
     lines.push(`    fieldId="${options.fileName}-${definition.name}"`);
   }
-  if (primitive.inputs.label) {
+  if (primitive.bindings.includes('label')) {
     lines.push(`    label="${escapeHtmlAttribute(definition.label)}"`);
   }
-  if (primitive.inputs.controlType) {
+  if (primitive.bindings.includes('controlType')) {
     lines.push(`    controlType="${definition.control}"`);
   }
-  if (primitive.inputs.hint && definition.hint) {
+  if (primitive.bindings.includes('hint') && definition.hint) {
     lines.push(`    hint="${escapeHtmlAttribute(definition.hint)}"`);
   }
-  if (primitive.inputs.placeholder && definition.placeholder) {
+  if (primitive.bindings.includes('placeholder') && definition.placeholder) {
     lines.push(`    placeholder="${escapeHtmlAttribute(definition.placeholder)}"`);
   }
   if (
-    primitive.inputs.required &&
+    primitive.bindings.includes('required') &&
     resolveFieldValidators(definition).some((validator) => validator.type === 'required')
   ) {
     lines.push(`    [required]="true"`);
   }
-  if (primitive.inputs.serverErrors) {
+  if (primitive.bindings.includes('serverErrors')) {
     lines.push(`    [serverErrors]="serverErrors('${definition.name}')"`);
   }
   lines.push(`  ></${primitive.selector}>`);

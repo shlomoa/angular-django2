@@ -1046,9 +1046,13 @@ export class App {
         execCommand(`npm install "${libraryPath}"`, appPath);
         execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
 
-        // A local primitive that the reactive form must compose instead of inlining.
+        // Canonical and façade-generated primitives share the canonical contract.
         execAngularCli(
           ['generate', 'angular-django2:form-field', 'email', '--control-type=email'],
+          appPath,
+        );
+        execAngularCli(
+          ['generate', 'angular-django2:field-component', 'notes', '--kind=textarea'],
           appPath,
         );
 
@@ -1132,7 +1136,12 @@ export class App {
         expect(generatedComponent).toContain(
           "import { EmailFieldComponent } from '../../shared/form-helpers/email-field/email-field';",
         );
+        expect(generatedComponent).toContain(
+          "import { NotesFieldComponent } from '../../shared/form-helpers/notes-field/notes-field';",
+        );
         expect(generatedTemplate).toContain('<app-email-field');
+        expect(generatedTemplate).toContain('<app-notes-field');
+        expect(generatedTemplate).toContain('[serverErrors]="serverErrors(\'notes\')"');
         expect(generatedTemplate).toContain('formControlName="fullName"');
         expect(generatedTemplate).toContain('[attr.aria-busy]="submitting()"');
 

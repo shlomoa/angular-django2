@@ -2,6 +2,10 @@ import { strings } from '@angular-devkit/core';
 import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { SchematicsException } from '@angular-devkit/schematics';
 import * as path from 'node:path';
+import {
+  formFieldPrimitiveDescriptor,
+  type FormFieldPrimitiveDescriptor,
+} from '../form-field/generate';
 import { assertPackageDependencies } from '../utility/package-json';
 import { resolveApplicationTargetDirectory } from '../utility/project-relative-path';
 import {
@@ -185,13 +189,12 @@ function resolveDefinitionPath(definition: string | undefined): string {
 }
 
 /**
- * Compose the reusable field primitive generated for this field when exactly
- * one exists locally. Two or more candidates are ambiguous and rejected.
+ * Compose the canonical reusable field primitive generated for this field when
+ * it exists locally.
  *
- * Only the documented primitive layouts are considered, so discovery stays
- * deterministic: `<field>-field/<field>-field.ts` (the `form-field` layout),
- * `<field>/<field>.ts` (the `field-component` layout), and the `.component.ts`
- * variant of each.
+ * `field-component` delegates to `form-field`, so both schematics produce the
+ * same canonical component path and contract. Resolution therefore needs no
+ * generated-source parsing or secondary competing layout.
  */
 function resolveField(
   tree: Tree,
@@ -199,74 +202,30 @@ function resolveField(
   primitivesDirectory: string,
   componentDirectory: string,
 ): ResolvedReactiveFormField {
-  const fieldName = strings.dasherize(field.name);
-  const candidates: { filePath: string; primitive: ReactiveFormPrimitive }[] = [];
-
-  for (const directoryName of [`${fieldName}-field`, fieldName]) {
-    for (const fileName of [`${directoryName}.ts`, `${directoryName}.component.ts`]) {
-      const filePath = path.posix.join(primitivesDirectory, directoryName, fileName);
-      const content = tree.read(`/${filePath}`)?.toString();
-      if (!content) {
-        continue;
-      }
-
-      const primitive = readPrimitive(content, filePath, componentDirectory, field);
-      if (primitive) {
-        candidates.push({ filePath, primitive });
-      }
-    }
-  }
-
-  if (candidates.length > 1) {
-    throw new SchematicsException(
-      `Field "${field.name}" matches more than one form-field primitive: ${candidates
-        .map((candidate) => candidate.filePath)
-        .join(', ')}. Remove the ambiguity or point --primitives-path at a single directory.`,
-    );
-  }
-
-  return candidates.length === 1
-    ? { definition: field, primitive: candidates[0].primitive }
-    : { definition: field };
-}
-
-function readPrimitive(
-  content: string,
-  filePath: string,
-  componentDirectory: string,
-  field: ReactiveFormFieldDefinition,
-): ReactiveFormPrimitive | null {
-  if (!content.includes('implements ControlValueAccessor')) {
-    return null;
-  }
-
-  const className = /export class (\w+)/.exec(content)?.[1];
-  const selector = /selector:\s*'([^']+)'/.exec(content)?.[1];
-  if (!className || !selector) {
-    return null;
+  const descriptor = formFieldPrimitiveDescriptor(
+    strings.dasherize(field.name),
+    primitivesDirectory,
+  );
+  if (!tree.exists(`/${descriptor.componentPath}`)) {
+    return { definition: field };
   }
 
   return {
-    className,
-    selector,
-    importPath: relativeImportPath(componentDirectory, filePath),
-    inputs: {
-      fieldId: hasInput(content, 'fieldId'),
-      label: hasInput(content, 'label'),
-      hint: hasInput(content, 'hint'),
-      placeholder: hasInput(content, 'placeholder'),
-      required: hasInput(content, 'required'),
-      controlType: hasInput(content, 'controlType') && content.includes(`'${field.control}'`),
-      serverErrors: hasInput(content, 'serverErrors'),
-    },
+    definition: field,
+    primitive: resolvedPrimitive(descriptor, componentDirectory),
   };
 }
 
-function hasInput(content: string, name: string): boolean {
-  return (
-    new RegExp(`@Input\\([^)]*\\)\\s+(?:set\\s+)?${name}\\b`).test(content) ||
-    new RegExp(`\\b${name}\\s*=\\s*input(?:\\.required)?\\s*[(<]`).test(content)
-  );
+function resolvedPrimitive(
+  descriptor: FormFieldPrimitiveDescriptor,
+  componentDirectory: string,
+): ReactiveFormPrimitive {
+  return {
+    className: descriptor.className,
+    selector: descriptor.selector,
+    importPath: relativeImportPath(componentDirectory, descriptor.componentPath),
+    bindings: descriptor.bindings,
+  };
 }
 
 /**

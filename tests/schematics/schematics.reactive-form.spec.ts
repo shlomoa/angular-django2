@@ -3,6 +3,7 @@ import { Tree } from '@angular-devkit/schematics';
 import type { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { fieldComponent } from '../../projects/angular-django2/schematics/field-component/index';
 import { reactiveForm } from '../../projects/angular-django2/schematics/reactive-form/index';
 import {
   REACTIVE_FORM_CONTROL_KINDS,
@@ -33,30 +34,6 @@ const DEFINITION = {
     { name: 'notes', label: 'Notes', control: 'textarea' },
   ],
 };
-
-const PRIMITIVE_SOURCE = `import { ChangeDetectionStrategy, Component, Input, booleanAttribute, inject } from '@angular/core';
-import { ControlValueAccessor, NgControl } from '@angular/forms';
-
-export type FormFieldControlType = 'text' | 'email' | 'password' | 'number' | 'textarea';
-
-@Component({
-  selector: 'app-email-field',
-  standalone: true,
-  templateUrl: './email-field.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class EmailFieldComponent implements ControlValueAccessor {
-  readonly ngControl = inject(NgControl, { self: true, optional: true });
-
-  @Input() fieldId = 'email-field';
-  @Input() label = 'Email';
-  @Input({ transform: booleanAttribute }) required = false;
-  @Input() hint = '';
-  @Input() placeholder = '';
-  @Input() controlType: FormFieldControlType = 'email';
-  @Input() serverErrors: readonly string[] = [];
-}
-`;
 
 function createApplicationTree(
   definition: unknown = DEFINITION,
@@ -98,6 +75,13 @@ function generate(tree: Tree, options: Partial<ReactiveFormSchema> = {}): UnitTe
 
 function readContent(tree: Tree, path: string): string {
   return tree.read(path)!.toString();
+}
+
+function createCanonicalPrimitive(tree: Tree, name: string): void {
+  tree.create(
+    `/src/app/shared/form-helpers/${name}-field/${name}-field.ts`,
+    'export {}; // Formatting and implementation details are irrelevant to schematic metadata.',
+  );
 }
 
 describe('reactive-form schematic', () => {
@@ -173,9 +157,9 @@ describe('reactive-form schematic', () => {
     expect(template).toContain('role="status"');
   });
 
-  it('TC-REACTIVE-FORM-04: composes an existing field primitive and falls back to inline markup', () => {
+  it('TC-REACTIVE-FORM-04: composes the canonical form-field contract and falls back to inline markup', () => {
     const tree = createApplicationTree();
-    tree.create('/src/app/shared/form-helpers/email-field/email-field.ts', PRIMITIVE_SOURCE);
+    createCanonicalPrimitive(tree, 'email');
     const generated = generate(tree);
     const component = readContent(generated, COMPONENT_PATH);
     const template = readContent(generated, TEMPLATE_PATH);
@@ -195,19 +179,56 @@ describe('reactive-form schematic', () => {
     expect(template).toContain('formControlName="first_name"');
   });
 
-  it('TC-REACTIVE-FORM-05: rejects an ambiguous primitive match before writing output', () => {
+  it('TC-REACTIVE-FORM-05: prefers the canonical form-field path over a noncanonical file', () => {
     const tree = createApplicationTree();
-    tree.create('/src/app/shared/form-helpers/email-field/email-field.ts', PRIMITIVE_SOURCE);
+    createCanonicalPrimitive(tree, 'email');
     tree.create(
       '/src/app/shared/form-helpers/email/email.ts',
-      PRIMITIVE_SOURCE.replace('EmailFieldComponent', 'EmailComponent').replace(
-        'app-email-field',
-        'app-email',
-      ),
+      'export {}; // This legacy-shaped path must not compete with the canonical descriptor.',
     );
 
-    expect(() => generate(tree)).toThrow('matches more than one form-field primitive');
-    expect(tree.exists(COMPONENT_PATH)).toBe(false);
+    const generated = generate(tree);
+    const component = readContent(generated, COMPONENT_PATH);
+    const template = readContent(generated, TEMPLATE_PATH);
+
+    expect(component).toContain(
+      "import { EmailFieldComponent } from '../../shared/form-helpers/email-field/email-field';",
+    );
+    expect(template).toContain('<app-email-field');
+  });
+
+  it('TC-REACTIVE-FORM-05A: composes a field-component façade through its shared canonical output', () => {
+    const tree = createApplicationTree();
+    fieldComponent({ name: 'email', kind: 'email' })(tree, createContext());
+
+    const generated = generate(tree);
+    const template = readContent(generated, TEMPLATE_PATH);
+
+    expect(template).toContain('<app-email-field');
+    expect(template).toContain('controlType="email"');
+  });
+
+  it('TC-REACTIVE-FORM-05B: resolves number controls only through the canonical form-field descriptor', () => {
+    const tree = createApplicationTree();
+    createCanonicalPrimitive(tree, 'seats');
+
+    const generated = generate(tree);
+    const template = readContent(generated, TEMPLATE_PATH);
+
+    expect(template).toContain('<app-seats-field');
+    expect(template).toContain('controlType="number"');
+  });
+
+  it('TC-REACTIVE-FORM-05C: ignores primitive source formatting during resolution', () => {
+    const tree = createApplicationTree();
+    createCanonicalPrimitive(tree, 'email');
+    tree.overwrite(
+      '/src/app/shared/form-helpers/email-field/email-field.ts',
+      '\n\n  export     {    };\n',
+    );
+
+    const generated = generate(tree);
+    expect(readContent(generated, TEMPLATE_PATH)).toContain('<app-email-field');
   });
 
   it('TC-REACTIVE-FORM-06: enforces the isolated create-only definition contract atomically', () => {
@@ -407,10 +428,7 @@ export class ContactSubmitService {
       admin: { root: 'projects/admin', sourceRoot: 'projects/admin/src' },
       storefront: { root: 'projects/storefront', sourceRoot: 'projects/storefront/src' },
     });
-    tree.create(
-      '/projects/storefront/src/app/ui/fields/email-field/email-field.ts',
-      PRIMITIVE_SOURCE,
-    );
+    tree.create('/projects/storefront/src/app/ui/fields/email-field/email-field.ts', 'export {};');
 
     const generated = generate(tree, {
       project: 'storefront',
@@ -463,7 +481,7 @@ export class ContactSubmitService {
       ],
     };
     const tree = createApplicationTree(definition);
-    tree.create('/src/app/shared/form-helpers/email-field/email-field.ts', PRIMITIVE_SOURCE);
+    createCanonicalPrimitive(tree, 'email');
     const generated = generate(tree);
     const component = readContent(generated, COMPONENT_PATH);
     const template = readContent(generated, TEMPLATE_PATH);

@@ -77,7 +77,8 @@ See `docs/INTEGRATION_TESTING.md`.
     advanced number/appearance behavior, theme registration, and composed child
     wiring; and `reactive-form` definition
     validation, initial values and declared validators, typed `FormBuilder`
-    output, primitive composition, integration wiring, and create-only reruns
+    output, metadata-based canonical primitive composition (including the
+    `field-component` façade), integration wiring, and create-only reruns
   - uses mocked `externalSchematic` calls where relevant
   - shared context/readme helpers live in `tests/schematics/schematics.helpers.ts`
 

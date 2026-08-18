@@ -840,13 +840,18 @@ export const appConfig: ApplicationConfig = {
       );
     });
 
-    it('INT-RF-01: composes a generated form-field primitive into a typed reactive form', async () => {
+    it('INT-RF-01: composes canonical form-field and field-component façade output', async () => {
       let tree = await setupWorkspace();
       tree.create('/projects/app/form.json', JSON.stringify(definition));
 
       tree = (await runner.runSchematic(
         'form-field',
         { name: 'email', project: 'app', controlType: 'email' },
+        tree,
+      )) as UnitTestTree;
+      tree = (await runner.runSchematic(
+        'field-component',
+        { name: 'notes', project: 'app', kind: 'textarea' },
         tree,
       )) as UnitTestTree;
       tree = (await runner.runSchematic(
@@ -878,11 +883,14 @@ export const appConfig: ApplicationConfig = {
       expect(component).toContain(
         "import { EmailFieldComponent } from '../../shared/form-helpers/email-field/email-field';",
       );
+      expect(component).toContain(
+        "import { NotesFieldComponent } from '../../shared/form-helpers/notes-field/notes-field';",
+      );
       expect(template).toContain('<app-email-field');
       expect(template).toContain('[required]="true"');
       expect(template).toContain('[serverErrors]="serverErrors(\'email\')"');
-      // Fields without a local primitive keep an inline Material control.
-      expect(template).toContain('formControlName="notes"');
+      expect(template).toContain('<app-notes-field');
+      expect(template).toContain('controlType="textarea"');
     });
 
     it('INT-RF-02: rejects a CRM-shaped definition without writing output', async () => {
