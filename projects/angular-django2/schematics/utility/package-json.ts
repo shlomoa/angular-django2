@@ -2,6 +2,7 @@
  * Shared package.json utilities for schematics.
  * @internal
  */
+import { SchematicsException } from '@angular-devkit/schematics';
 import type { Tree, SchematicContext } from '@angular-devkit/schematics';
 
 export interface PackageJson {
@@ -80,4 +81,27 @@ export function ensureScript(packageJson: PackageJson, name: string, command: st
   }
   packageJson.scripts[name] = command;
   return true;
+}
+
+/** Throw before mutation when a schematic's runtime prerequisites are absent. */
+export function assertPackageDependencies(
+  tree: Tree,
+  schematicName: string,
+  requiredDependencies: readonly string[],
+): void {
+  const packageJson = tree.read(PACKAGE_JSON_PATH);
+  if (!packageJson) {
+    throw new SchematicsException(
+      `${schematicName} requires package.json with ${requiredDependencies.join(', ')} dependencies.`,
+    );
+  }
+
+  const parsed = JSON.parse(packageJson.toString()) as PackageJson;
+  const dependencies = { ...parsed.devDependencies, ...parsed.dependencies };
+  const missing = requiredDependencies.filter((dependency) => !dependencies[dependency]);
+  if (missing.length > 0) {
+    throw new SchematicsException(
+      `${schematicName} requires installed prerequisites: ${missing.join(', ')}.`,
+    );
+  }
 }
