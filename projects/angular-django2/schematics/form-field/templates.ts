@@ -57,6 +57,7 @@ export class ${className} implements ControlValueAccessor {
   readonly subscriptSizing = input<FormFieldSubscriptSizing>('${options.subscriptSizing}');
   readonly controlType = input<FormFieldControlType>('${options.controlType}');
   readonly serverErrors = input<readonly string[]>([]);
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   protected readonly value = signal<FormFieldValue>(${initialValue});
   protected readonly controlDisabled = computed(() => this.disabled() || this.formDisabled());
@@ -99,8 +100,6 @@ export class ${className} implements ControlValueAccessor {
       this.ngControl.valueAccessor = this;
     }
   }
-
-  readonly disabled = input(false, { transform: booleanAttribute });
 
   writeValue(value: FormFieldValue | null): void {
     this.value.set(value ?? ${initialValue});
