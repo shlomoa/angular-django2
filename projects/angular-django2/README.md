@@ -18,6 +18,7 @@ ng generate angular-django2:material-setup --project=my-app
 ng generate angular-django2:project-structure --project=my-app
 ng generate angular-django2:app-shell --project my-app
 ng generate angular-django2:component dashboard-card
+ng generate angular-django2:page orders --project=my-app --path=src/app/features/orders --route-path=orders
 ng generate angular-django2:embed-component --component=projects/my-app/src/app/hero-card/hero-card.ts --parent=projects/my-app/src/app/dashboard-card/dashboard-card.ts
 ng generate angular-django2:complex-component dashboard-card --project=my-app --path=src/app/features/dashboard --features=mixins,nested,projection,cdk-overlay
 ng generate angular-django2:field-component email-field --project=my-app --kind=email
@@ -40,6 +41,14 @@ Current defaults:
 - `component`: `standalone: true`, `changeDetection: 'OnPush'`; also seeds begin/end embedding hooks into the generated files
   - TypeScript sections: `import`, `injected services`, `input signals`, `output signals`
   - Template section: `children`
+- `page`: generates a standalone `OnPush` Angular Material feature page, its
+  feature-owned lazy `Routes` definition, and explicit route navigation metadata
+  - Requires an existing routed application, Material/CDK/router dependencies,
+    and a path inside the selected application source root
+  - Options: `--path`, `--project`, `--route-path`, `--access=public|protected`,
+    `--auth-guard`, `--navigation-label`, and `--navigation-icon`
+  - Protected routes reuse an already configured guard and do not replace
+    backend authorization; see the [CLI reference](https://angular-django2.readthedocs.io/en/latest/cli/page/)
 - `embed-component`: wires a generated child component into a parent using the embedding hooks
   - Options: `--component` (child component `.ts` path), `--parent` (parent component `.ts` path)
   - Inserts the child element after the parent template `children` marker, feeding input signals and binding output signals to `on<Output>($event)` handlers

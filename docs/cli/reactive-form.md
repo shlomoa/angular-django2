@@ -84,7 +84,8 @@ validate the file before it is used.
 | `submitLabel` | no       | Overrides the submit button label                                  |
 | `integration` | no       | Wires the form to one existing typed artifact (see below)          |
 
-Each field accepts `name` (camelCase, matching the serializer field), `label`,
+Each field accepts `name` (lower-camelCase or snake_case, matching the serializer
+field), `label`,
 `control` (`text`, `email`, `password`, `number`, or `textarea`), and the
 optional `initialValue`, `required`, `validators`, `hint`, `placeholder`, and
 `autocomplete` keys.
