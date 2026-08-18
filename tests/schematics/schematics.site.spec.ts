@@ -84,7 +84,7 @@ describe('site schematic', () => {
           {
             name: 'contact',
             routePath: 'contact',
-            navigation: { id: 'contact', label: 'Contact', icon: 'mail' },
+            navigation: { id: 'contact', label: 'Contact "team"', icon: 'mail' },
           },
         ],
         forms: [{ name: 'contact', definition: 'src/app/openui/contact-form.json' }],
@@ -106,7 +106,7 @@ describe('site schematic', () => {
     expect(
       result.readContent('/src/app/app.config.ts').match(/@angular\/common\/http/g),
     ).toHaveLength(1);
-    expect(result.readContent('/src/app/app.html')).toContain('routerLink="/contact"');
+    expect(result.readContent('/src/app/app.html')).toContain('Contact &quot;team&quot;');
     expect(result.readContent('/.angular-django2/site/demo.json')).toContain(
       '"source": "src/app/openui/site.json"',
     );
