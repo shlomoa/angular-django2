@@ -685,7 +685,7 @@ function renderShell(definition: SiteDefinition): string {
       return `      <a mat-list-item routerLink="/${htmlText(page.routePath ?? page.name)}">${icon}\n        <span matListItemTitle>${htmlText(page.navigation.label)}</span>\n      </a>`;
     })
     .join('\n');
-  return MATERIAL_LAYOUT_TEMPLATE.replace(/      <a mat-list-item[\s\S]*?      <\/a>/, navigation);
+  return MATERIAL_LAYOUT_TEMPLATE.replace(/ {6}<a mat-list-item[\s\S]*? {6}<\/a>/, navigation);
 }
 
 function assertUnique(values: readonly string[], label: string): void {
