@@ -6,7 +6,7 @@
 
 Full documentation: <https://angular-django2.readthedocs.io/>
 
-The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `complex-component`, `field-component`, `form-field`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
+The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `complex-component`, `field-component`, `form-field`, `reactive-form`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
 
 ## Schematics
 
@@ -22,6 +22,7 @@ ng generate angular-django2:embed-component --component=projects/my-app/src/app/
 ng generate angular-django2:complex-component dashboard-card --project=my-app --path=src/app/features/dashboard --features=mixins,nested,projection,cdk-overlay
 ng generate angular-django2:field-component email-field --project=my-app --kind=email
 ng generate angular-django2:form-field email --project=my-app --control-type=email
+ng generate angular-django2:reactive-form contact --project=my-app --definition=forms/contact-form.json
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
 ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
@@ -51,9 +52,17 @@ Current defaults:
   - Requires a kebab-case name; delegates to the canonical form-field implementation with `fill` appearance and `fixed` subscript sizing
   - Options: `--path`, `--project`, `--kind` (`text`, `email`, `password`, or `textarea`)
   - Every generated control has a string value model and the canonical field identity, accessibility, and server-error inputs
-- `form-field`: configurable typed Angular Material form-field generator
+- `form-field`: canonical configurable typed Angular Material form-field generator
   - Options: `--path` (default: `src/app/shared/form-helpers`), `--project`, `--control-type` (`text`, `email`, `password`, `number`, `textarea`), `--appearance` (`fill`, `outline`), and `--subscript-sizing` (`fixed`, `dynamic`)
   - Supports number values, appearance, subscript sizing, field identity, and server validation errors; requires `@angular/forms`, `@angular/material`, and `@angular/cdk`
+- `reactive-form`: generates a typed standalone OnPush Angular Material reactive form from a single JSON definition
+  - Options: `--definition` (required workspace-relative `.json` file), `--path` (default: `src/app/features`), `--primitives-path` (default: `src/app/shared/form-helpers`), `--project`
+  - The definition is validated atomically before any file is written; CRM-style keys (`resource`, `list`, `retrieve`, `update`, `destroy`, and similar) are rejected because the form is create-only
+  - Fields declare `initialValue` and an explicit `validators` list (`required`, `email`, `minLength`, `maxLength`, `min`, `max`, `pattern`) using one object shape, `{ "type": ..., "value": ... }`; malformed, unsupported, duplicated, and control-incompatible entries are rejected
+  - Generates a strictly typed `FormBuilder` group initialized from the contract, plus a frozen `INITIAL_VALUES` constant restored after an accepted create
+  - Composes canonical `form-field` output through private schematic metadata, never generated-source parsing; `field-component` is the supported convenience façade over the same path, and absent primitives fall back to inline `mat-form-field` controls
+  - Generates a typed payload, submit state, accessible markup, and Django REST Framework error mapping that retains entered values; an optional `integration` block wires one existing typed artifact
+  - Requires `@angular/forms`, `@angular/material`, and `@angular/cdk`; see the [CLI reference](https://angular-django2.readthedocs.io/en/latest/cli/reactive-form/)
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
 - `material-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav layout
   - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--defaults`, `--style`, `--prefix`

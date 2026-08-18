@@ -26,6 +26,7 @@ nav:
       - component: cli/component.md
       - embed-component: cli/embed-component.md
       - complex-component: cli/complex-component.md
+      - reactive-form: cli/reactive-form.md
       - service: cli/service.md
       - class: cli/class.md
       - openapi-setup: cli/openapi-setup.md
