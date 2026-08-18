@@ -1254,4 +1254,93 @@ export class App {
       }
     },
   );
+
+  it(
+    'E2E-10: site assembles an OpenUI Material shell, routes, forms, and OpenAPI setup that builds',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'site-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+        execAngularCli(
+          ['generate', 'angular-django2:material-app', appName, '--ssr=false', '--defaults'],
+          appPath,
+        );
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        const openuiDirectory = path.join(appRoot, 'openui');
+        fs.mkdirSync(openuiDirectory, { recursive: true });
+        fs.writeFileSync(
+          path.join(openuiDirectory, 'contact-form.json'),
+          JSON.stringify({
+            title: 'Contact',
+            endpoint: '/api/contact/',
+            fields: [{ name: 'email', label: 'Email', control: 'email', required: true }],
+          }),
+        );
+        fs.writeFileSync(
+          path.join(openuiDirectory, 'site.json'),
+          JSON.stringify({
+            pages: [
+              {
+                name: 'contact',
+                navigation: { id: 'contact', label: 'Contact', icon: 'mail' },
+              },
+            ],
+            forms: [{ name: 'contact', definition: 'src/app/openui/contact-form.json' }],
+            openapi: { spec: 'openapi.json' },
+          }),
+        );
+        fs.writeFileSync(path.join(appPath, 'openapi.json'), JSON.stringify({ openapi: '3.0.0' }));
+
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:site',
+            `--project=${appName}`,
+            '--source=src/app/openui/site.json',
+          ],
+          appPath,
+        );
+
+        expect(fs.existsSync(path.join(appRoot, 'features', 'contact', 'contact-page.ts'))).toBe(
+          true,
+        );
+        expect(
+          fs.existsSync(path.join(appRoot, 'features', 'contact-form', 'contact-form.ts')),
+        ).toBe(true);
+        expect(fs.readFileSync(path.join(appRoot, 'app.html'), 'utf8')).toContain(
+          'routerLink="/contact"',
+        );
+        expect(fs.readFileSync(path.join(appRoot, 'app.config.ts'), 'utf8')).toContain(
+          'withXsrfConfiguration',
+        );
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-10');
+      }
+    },
+  );
 });

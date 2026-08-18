@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Site",
+  "title": "angular-django2 site schematic",
+  "description": "Assemble a Material site from one bounded, non-CRM OpenUI definition. Without --source, pass --defaults to generate the documented Home-only site.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "source": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative JSON OpenUI definition. It is the only source used to discover site pages, navigation, forms, and optional OpenAPI setup."
+    },
+    "defaults": {
+      "type": "boolean",
+      "default": false,
+      "description": "Generate only the documented Home-only default definition when --source is omitted."
+    },
+    "project": {
+      "type": "string",
+      "description": "Target Angular application project. Required when the workspace has more than one application."
+    },
+    "operation": {
+      "type": "string",
+      "enum": ["create", "modify", "delete"],
+      "default": "create",
+      "description": "create records a new site, modify updates a recorded site, and delete removes only the recorded site shell and ownership manifest."
+    },
+    "confirmDelete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Required with --operation=delete. Site never deletes generated pages, forms, routes, or user-owned source files."
+    },
+    "authGuard": {
+      "type": "string",
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$",
+      "default": "authGuard",
+      "description": "Existing reusable guard identifier for protected pages. The guard must already be imported and applied in app.routes.ts."
+    },
+    "csrfCookieName": {
+      "type": "string",
+      "minLength": 1,
+      "default": "csrftoken",
+      "description": "Django CSRF cookie name configured through withXsrfConfiguration."
+    },
+    "csrfHeaderName": {
+      "type": "string",
+      "minLength": 1,
+      "default": "X-CSRFToken",
+      "description": "Django CSRF request header configured through withXsrfConfiguration."
+    }
+  }
+}

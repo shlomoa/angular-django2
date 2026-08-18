@@ -24,6 +24,7 @@ nav:
       - project-structure: cli/project-structure.md
       - app-shell: cli/app-shell.md
       - component: cli/component.md
+      - site: cli/site.md
       - embed-component: cli/embed-component.md
       - complex-component: cli/complex-component.md
       - field-component: cli/field-component.md

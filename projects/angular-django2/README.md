@@ -6,7 +6,7 @@
 
 Full documentation: <https://angular-django2.readthedocs.io/>
 
-The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `page`, `embed-component`, `complex-component`, `field-component`, `form-field`, `reactive-form`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
+The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `page`, `site`, `embed-component`, `complex-component`, `field-component`, `form-field`, `reactive-form`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
 
 ## Schematics
 
@@ -19,6 +19,7 @@ ng generate angular-django2:project-structure --project=my-app
 ng generate angular-django2:app-shell --project my-app
 ng generate angular-django2:component dashboard-card
 ng generate angular-django2:page orders --project=my-app --path=src/app/features/orders --route-path=orders
+ng generate angular-django2:site --project=my-app --source=src/app/openui/site.json
 ng generate angular-django2:embed-component --component=projects/my-app/src/app/hero-card/hero-card.ts --parent=projects/my-app/src/app/dashboard-card/dashboard-card.ts
 ng generate angular-django2:complex-component dashboard-card --project=my-app --path=src/app/features/dashboard --features=mixins,nested,projection,cdk-overlay
 ng generate angular-django2:field-component email-field --project=my-app --kind=email
@@ -49,6 +50,10 @@ Current defaults:
     `--auth-guard`, `--navigation-label`, and `--navigation-icon`
   - Protected routes reuse an already configured guard and do not replace
     backend authorization; see the [CLI reference](https://angular-django2.readthedocs.io/en/latest/cli/page/)
+- `site`: assembles the unmodified `material-app` shell, explicit Django CSRF
+  provider, and pages/forms discovered only from a source-root OpenUI JSON
+  source; it delegates page, reactive-form, and optional openapi-setup output
+  and records only its shell ownership manifest
 - `embed-component`: wires a generated child component into a parent using the embedding hooks
   - Options: `--component` (child component `.ts` path), `--parent` (parent component `.ts` path)
   - Inserts the child element after the parent template `children` marker, feeding input signals and binding output signals to `on<Output>($event)` handlers
