@@ -28,7 +28,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 export type FormFieldValue = ${valueType};
-export type FormFieldControlType = '${options.controlType}';
+export type FormFieldControlType = 'text' | 'email' | 'password' | 'number' | 'textarea';
 export type FormFieldAppearance = 'fill' | 'outline';
 export type FormFieldSubscriptSizing = 'fixed' | 'dynamic';
 

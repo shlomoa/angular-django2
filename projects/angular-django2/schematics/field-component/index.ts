@@ -21,13 +21,17 @@ export function fieldComponent(options: FieldComponentSchema): Rule {
   }
 
   return generateFormField({
-    name: options.name,
+    name: canonicalName(options.name),
     path: options.path,
     project: options.project,
     controlType: kind,
     appearance: 'fill',
     subscriptSizing: 'fixed',
   });
+}
+
+function canonicalName(name: string): string {
+  return name.endsWith('-field') ? name.slice(0, -'-field'.length) : name;
 }
 
 function assertSupportedOptions(options: FieldComponentSchema): void {

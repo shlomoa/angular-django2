@@ -949,7 +949,7 @@ describe('angular-django2 schematics E2E tests', () => {
         }
 
         execAngularCli(
-          ['generate', 'angular-django2:form-field', 'email', '--control-type=email'],
+          ['generate', 'angular-django2:form-field', 'email-form', '--control-type=email'],
           appPath,
         );
 
@@ -966,12 +966,12 @@ describe('angular-django2 schematics E2E tests', () => {
           rootComponentPath,
           `import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EmailFieldComponent } from './shared/form-helpers/email-field/email-field';
-          import { TextFieldFieldComponent } from './shared/form-helpers/text-field-field/text-field-field';
+import { EmailFormFieldComponent } from './shared/form-helpers/email-form-field/email-form-field';
+          import { TextFieldComponent } from './shared/form-helpers/text-field/text-field';
 
           @Component({
             selector: 'app-root',
-            imports: [ReactiveFormsModule, EmailFieldComponent, TextFieldFieldComponent],
+            imports: [ReactiveFormsModule, EmailFormFieldComponent, TextFieldComponent],
   templateUrl: './${rootTemplateName}',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -989,19 +989,19 @@ export class App {
         );
         fs.writeFileSync(
           rootTemplatePath,
-          `<app-text-field-field [formControl]="text" label="Text"></app-text-field-field>
-<app-email-field
+          `<app-text-field [formControl]="text" label="Text"></app-text-field>
+<app-email-form-field
   [formControl]="email"
   fieldId="account-email"
   label="Email"
   hint="Used for account notices"
   [serverErrors]="serverErrors"
-></app-email-field>
+></app-email-form-field>
 `,
         );
 
         const generatedField = fs.readFileSync(
-          path.join(appRoot, 'shared', 'form-helpers', 'email-field', 'email-field.ts'),
+          path.join(appRoot, 'shared', 'form-helpers', 'email-form-field', 'email-form-field.ts'),
           'utf8',
         );
         expect(generatedField).toContain('implements ControlValueAccessor');

@@ -9,9 +9,10 @@ ng generate angular-django2:field-component email-field --kind=email
 ```
 
 By default, output is written below the selected application's
-`src/app/shared/form-helpers/<name>-field/` directory. Use `--path` for another
-directory below that application's source root, and use `--project` when the
-workspace has more than one application.
+`src/app/shared/form-helpers/<name>-field/` directory. A name already ending in
+`-field` is not suffixed again. Use `--path` for another directory below that
+application's source root, and use `--project` when the workspace has more than
+one application.
 
 ## Options
 

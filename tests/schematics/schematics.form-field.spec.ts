@@ -62,7 +62,7 @@ describe('form-field schematic', () => {
         `/src/app/shared/form-helpers/${controlType}-value-field/${controlType}-value-field.ts`,
       );
 
-      expect(component).toContain(`FormFieldControlType = '${controlType}'`);
+      expect(component).toContain(`input<FormFieldControlType>('${controlType}')`);
       if (controlType === 'number') {
         expect(component).toContain('export type FormFieldValue = string | number | null;');
         expect(component).toContain("input.value === ''");

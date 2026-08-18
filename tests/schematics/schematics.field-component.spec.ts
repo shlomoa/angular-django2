@@ -88,7 +88,7 @@ describe('field-component schematic', () => {
       const componentRoot = `/projects/demo-app/src/app/fields/${kind}-value-field`;
 
       expect(generated.readContent(`${componentRoot}/${kind}-value-field.ts`)).toContain(
-        `export type FormFieldControlType = '${kind}';`,
+        `readonly controlType = input<FormFieldControlType>('${kind}');`,
       );
       expect(generated.readContent(`${componentRoot}/${kind}-value-field.html`)).toContain(element);
       expect(generated.readContent(`${componentRoot}/${kind}-value-field.html`)).toContain(
@@ -136,7 +136,7 @@ describe('field-component schematic', () => {
     };
     const generated = await runner.runSchematic('field-component', options, tree);
     expect(generated.files).toContain(
-      '/projects/secondary-app/src/app/forms/email-field-field/email-field-field.ts',
+      '/projects/secondary-app/src/app/forms/email-field/email-field.ts',
     );
     await expect(runner.runSchematic('field-component', options, generated)).rejects.toThrow(
       'already exists',

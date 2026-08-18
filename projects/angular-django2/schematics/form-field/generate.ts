@@ -100,7 +100,7 @@ function assertNoCollision(tree: Tree, options: ResolvedFormFieldOptions): void 
     options.componentPath,
     options.templatePath,
     options.stylesheetPath,
-  ].filter((path) => tree.exists(path));
+  ].filter((filePath) => tree.exists(filePath));
   if (existingPaths.length > 0) {
     throw new SchematicsException(
       `A form field named "${options.name}" already exists at ${existingPaths.join(', ')}. Choose a different name or remove the existing output first.`,
