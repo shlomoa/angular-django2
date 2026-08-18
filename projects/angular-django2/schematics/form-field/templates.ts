@@ -73,7 +73,7 @@ export class ${className} implements ControlValueAccessor {
     const control = this.ngControl?.control;
     return (
       this.serverErrors.length > 0 ||
-      !!control?.invalid && !!(control.touched || control.dirty)
+      (!!control?.invalid && !!(control.touched || control.dirty))
     );
   }
 
