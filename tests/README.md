@@ -79,8 +79,8 @@ See `docs/INTEGRATION_TESTING.md`.
     route preservation, collisions, multi-project targeting, and idempotency;
     and `reactive-form` definition validation, initial values and declared validators, typed `FormBuilder`
     output, metadata-based canonical primitive composition (including the
-    `field-component` façade), integration wiring, and create-only reruns
-    ; `site` OpenUI/default assembly, route/form delegation, CSRF wiring,
+    `field-component` façade), integration wiring, and create-only reruns;
+    `site` OpenUI/default assembly, route/form delegation, CSRF wiring,
     ownership lifecycle, and guard/conflict validation
   - uses mocked `externalSchematic` calls where relevant
   - shared context/readme helpers live in `tests/schematics/schematics.helpers.ts`

@@ -568,14 +568,15 @@ function configureCsrf(resolved: ResolvedSite): Rule {
         'app.config.ts already has a different CSRF configuration; site will not replace it.',
       );
     }
-    const providersStart = source.indexOf('providers: [');
+    const sourceWithHttpImport = addHttpProvidersImport(source);
+    const providersStart = sourceWithHttpImport.indexOf('providers: [');
     if (providersStart < 0) {
       throw new SchematicsException(
         'site requires an explicit providers array in app.config.ts for CSRF wiring.',
       );
     }
-    const openingBracket = source.indexOf('[', providersStart);
-    const closingBracket = matchingBracket(source, openingBracket);
+    const openingBracket = sourceWithHttpImport.indexOf('[', providersStart);
+    const closingBracket = matchingBracket(sourceWithHttpImport, openingBracket);
     if (closingBracket < 0) {
       throw new SchematicsException(
         'Could not safely locate the providers array in app.config.ts.',
@@ -590,10 +591,35 @@ function configureCsrf(resolved: ResolvedSite): Rule {
       `    ),`;
     tree.overwrite(
       resolved.appConfigPath,
-      `import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';\n${source.slice(0, closingBracket)}${csrfProvider}${source.slice(closingBracket)}`,
+      `${sourceWithHttpImport.slice(0, closingBracket)}${csrfProvider}${sourceWithHttpImport.slice(closingBracket)}`,
     );
     return tree;
   };
+}
+
+function addHttpProvidersImport(source: string): string {
+  const importPattern = /import\s*{\s*([^}]*)}\s*from\s*(['"])@angular\/common\/http\2\s*;/;
+  const existing = source.match(importPattern);
+  if (!existing) {
+    if (source.includes('@angular/common/http')) {
+      throw new SchematicsException(
+        'site requires a named @angular/common/http import to configure CSRF safely.',
+      );
+    }
+    return `import { provideHttpClient, withXsrfConfiguration } from '@angular/common/http';\n${source}`;
+  }
+  const imports = new Set(
+    existing[1]
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+  imports.add('provideHttpClient');
+  imports.add('withXsrfConfiguration');
+  return source.replace(
+    importPattern,
+    `import { ${[...imports].join(', ')} } from ${existing[2]}@angular/common/http${existing[2]};`,
+  );
 }
 
 function matchingBracket(source: string, openingBracket: number): number {

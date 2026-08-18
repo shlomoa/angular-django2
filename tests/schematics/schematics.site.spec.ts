@@ -51,7 +51,8 @@ export const routes: Routes = [];
   );
   tree.create(
     '/src/app/app.config.ts',
-    `import { provideRouter } from '@angular/router';
+    `import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 
 export const appConfig = { providers: [provideRouter(routes)] };
@@ -102,6 +103,9 @@ describe('site schematic', () => {
       "path: 'contact'",
     );
     expect(result.readContent('/src/app/app.config.ts')).toContain('withXsrfConfiguration');
+    expect(
+      result.readContent('/src/app/app.config.ts').match(/@angular\/common\/http/g),
+    ).toHaveLength(1);
     expect(result.readContent('/src/app/app.html')).toContain('routerLink="/contact"');
     expect(result.readContent('/.angular-django2/site/demo.json')).toContain(
       '"source": "src/app/openui/site.json"',
