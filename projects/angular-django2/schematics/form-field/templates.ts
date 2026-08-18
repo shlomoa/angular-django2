@@ -10,13 +10,24 @@ export interface FormFieldTemplateOptions {
 
 export function formFieldComponentSource(options: FormFieldTemplateOptions): string {
   const className = `${strings.classify(options.name)}FieldComponent`;
+  const isNumber = options.controlType === 'number';
+  const valueType = isNumber ? 'string | number | null' : 'string';
+  const initialValue = isNumber ? 'null' : "''";
+  const updateValue = isNumber
+    ? `const input = event.target as HTMLInputElement;
+    const value = input.value === '' ? null : Number(input.value);
+    this.value.set(Number.isNaN(value) ? null : value);
+    this.onChange(this.value());`
+    : `const value = (event.target as HTMLInputElement | HTMLTextAreaElement).value;
+    this.value.set(value);
+    this.onChange(value);`;
 
-  return `import { ChangeDetectionStrategy, Component, Input, booleanAttribute, inject } from '@angular/core';
-import { ControlValueAccessor, NgControl, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
+  return `import { ChangeDetectionStrategy, Component, booleanAttribute, computed, inject, input, signal } from '@angular/core';
+import { ControlValueAccessor, NgControl, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
-export type FormFieldValue = string | number | null;
+export type FormFieldValue = ${valueType};
 export type FormFieldControlType = 'text' | 'email' | 'password' | 'number' | 'textarea';
 export type FormFieldAppearance = 'fill' | 'outline';
 export type FormFieldSubscriptSizing = 'fixed' | 'dynamic';
@@ -31,55 +42,36 @@ export type FormFieldSubscriptSizing = 'fixed' | 'dynamic';
 @Component({
   selector: 'app-${options.name}-field',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, ReactiveFormsModule],
+  imports: [MatFormFieldModule, MatInputModule],
   templateUrl: './${options.name}-field.html',
   styleUrl: './${options.name}-field.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ${className} implements ControlValueAccessor {
-  readonly ngControl = inject(NgControl, { self: true, optional: true });
+  readonly fieldId = input('${options.name}-field');
+  readonly label = input('${strings.classify(options.name)}');
+  readonly required = input(false, { transform: booleanAttribute });
+  readonly hint = input('');
+  readonly placeholder = input('');
+  readonly appearance = input<FormFieldAppearance>('${options.appearance}');
+  readonly subscriptSizing = input<FormFieldSubscriptSizing>('${options.subscriptSizing}');
+  readonly controlType = input<FormFieldControlType>('${options.controlType}');
+  readonly serverErrors = input<readonly string[]>([]);
+  readonly disabled = input(false, { transform: booleanAttribute });
 
-  @Input() fieldId = '${options.name}-field';
-  @Input() label = '${strings.classify(options.name)}';
-  @Input({ transform: booleanAttribute }) required = false;
-  @Input() hint = '';
-  @Input() placeholder = '';
-  @Input() appearance: FormFieldAppearance = '${options.appearance}';
-  @Input() subscriptSizing: FormFieldSubscriptSizing = '${options.subscriptSizing}';
-  @Input() controlType: FormFieldControlType = '${options.controlType}';
-  @Input() serverErrors: readonly string[] = [];
-
-  private isDisabled = false;
-  protected value: FormFieldValue = null;
-  private onChange: (value: FormFieldValue) => void = () => undefined;
-  private onTouched: () => void = () => undefined;
-
-  constructor() {
-    if (this.ngControl) {
-      this.ngControl.valueAccessor = this;
-    }
-  }
-
-  @Input({ transform: booleanAttribute })
-  set disabled(disabled: boolean) {
-    this.isDisabled = disabled;
-  }
-
-  get disabled(): boolean {
-    return this.isDisabled;
-  }
-
-  get errorState(): boolean {
+  protected readonly value = signal<FormFieldValue>(${initialValue});
+  protected readonly controlDisabled = computed(() => this.disabled() || this.formDisabled());
+  protected readonly errorState = computed(() => {
     const control = this.ngControl?.control;
     return (
-      this.serverErrors.length > 0 ||
+      this.serverErrors().length > 0 ||
       (!!control?.invalid && !!(control.touched || control.dirty))
     );
-  }
-
-  get errorMessage(): string {
-    if (this.serverErrors.length > 0) {
-      return this.serverErrors[0];
+  });
+  protected readonly errorMessage = computed(() => {
+    const serverErrors = this.serverErrors();
+    if (serverErrors.length > 0) {
+      return serverErrors[0];
     }
 
     const errors = this.ngControl?.control?.errors;
@@ -92,14 +84,25 @@ export class ${className} implements ControlValueAccessor {
       return serverMessage;
     }
     if (errors['required']) {
-      return \`\${this.label} is required.\`;
+      return \`\${this.label()} is required.\`;
     }
 
-    return \`\${this.label} is invalid.\`;
+    return \`\${this.label()} is invalid.\`;
+  });
+
+  private readonly ngControl = inject(NgControl, { self: true, optional: true });
+  private readonly formDisabled = signal(false);
+  private onChange: (value: FormFieldValue) => void = () => undefined;
+  private onTouched: () => void = () => undefined;
+
+  constructor() {
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
+    }
   }
 
-  writeValue(value: FormFieldValue): void {
-    this.value = value;
+  writeValue(value: FormFieldValue | null): void {
+    this.value.set(value ?? ${initialValue});
   }
 
   registerOnChange(onChange: (value: FormFieldValue) => void): void {
@@ -111,20 +114,11 @@ export class ${className} implements ControlValueAccessor {
   }
 
   setDisabledState(disabled: boolean): void {
-    this.isDisabled = disabled;
+    this.formDisabled.set(disabled);
   }
 
   protected updateValue(event: Event): void {
-    const input = event.target as HTMLInputElement | HTMLTextAreaElement;
-    const value =
-      this.controlType === 'number'
-        ? input.value === ''
-          ? null
-          : Number(input.value)
-        : input.value;
-
-    this.value = Number.isNaN(value) ? null : value;
-    this.onChange(this.value);
+    ${updateValue}
   }
 
   protected markTouched(): void {
@@ -149,41 +143,41 @@ function serverErrorMessage(errors: ValidationErrors): string | null {
 }
 
 export function formFieldTemplate(): string {
-  return `<mat-form-field [appearance]="appearance" [subscriptSizing]="subscriptSizing">
-  <mat-label>{{ label }}</mat-label>
-  @if (controlType === 'textarea') {
+  return `<mat-form-field [appearance]="appearance()" [subscriptSizing]="subscriptSizing()">
+  <mat-label>{{ label() }}</mat-label>
+  @if (controlType() === 'textarea') {
     <textarea
       matInput
-      [id]="fieldId"
-      [placeholder]="placeholder"
-      [required]="required"
-      [disabled]="disabled"
-      [value]="value ?? ''"
-      [attr.aria-invalid]="errorState"
-      [attr.aria-errormessage]="errorState ? fieldId + '-error' : null"
+      [id]="fieldId()"
+      [placeholder]="placeholder()"
+      [required]="required()"
+      [disabled]="controlDisabled()"
+      [value]="value() ?? ''"
+      [attr.aria-invalid]="errorState()"
+      [attr.aria-errormessage]="errorState() ? fieldId() + '-error' : null"
       (input)="updateValue($event)"
       (blur)="markTouched()"
     ></textarea>
   } @else {
     <input
       matInput
-      [id]="fieldId"
-      [type]="controlType"
-      [placeholder]="placeholder"
-      [required]="required"
-      [disabled]="disabled"
-      [value]="value ?? ''"
-      [attr.aria-invalid]="errorState"
-      [attr.aria-errormessage]="errorState ? fieldId + '-error' : null"
+      [id]="fieldId()"
+      [type]="controlType()"
+      [placeholder]="placeholder()"
+      [required]="required()"
+      [disabled]="controlDisabled()"
+      [value]="value() ?? ''"
+      [attr.aria-invalid]="errorState()"
+      [attr.aria-errormessage]="errorState() ? fieldId() + '-error' : null"
       (input)="updateValue($event)"
       (blur)="markTouched()"
     />
   }
-  @if (hint) {
-    <mat-hint>{{ hint }}</mat-hint>
+  @if (hint()) {
+    <mat-hint>{{ hint() }}</mat-hint>
   }
-  @if (errorState) {
-    <mat-error [id]="fieldId + '-error'">{{ errorMessage }}</mat-error>
+  @if (errorState()) {
+    <mat-error [id]="fieldId() + '-error'">{{ errorMessage() }}</mat-error>
   }
 </mat-form-field>
 `;

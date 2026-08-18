@@ -104,20 +104,19 @@ sources over lower-priority ones.
     It requires a kebab-case name, an application-source-tree path, and a
     non-empty feature list limited to `mixins`, `nested`, `projection`, and
     `cdk-overlay`; delete requires explicit confirmation.
-  - `field-component`: create a standalone OnPush Angular Material
-    `ControlValueAccessor` using a native input or textarea and a typed string
-    value model. It requires a kebab-case name, an application-source-tree path
-    (defaulting to `src/app/shared/ui/form-helpers/<name>/`), and installed
-    `@angular/material` plus `@angular/cdk`. The only supported `--kind` values
-    are `text`, `email`, `password`, and `textarea`; generated controls expose
-    typed label, required, disabled, hint, placeholder, and error-message APIs.
-  - `form-field`: generate a standalone OnPush typed `ControlValueAccessor`
-    Angular Material form field inside the selected application's source root.
-    It supports `text`, `email`, `password`, `number`, and `textarea` controls;
-    `fill` and `outline` appearances; and `fixed` and `dynamic` subscript
-    sizing. It requires `@angular/forms`, `@angular/material`, and
-    `@angular/cdk` before mutation and renders host and server validation
-    errors through Material's error surface.
+  - `field-component`: create a simple, string-valued Angular Material
+    field-control convenience component using the canonical `form-field`
+    implementation. It supports the narrow `--kind` contract of `text`,
+    `email`, `password`, and `textarea`, and applies `fill` appearance and
+    `fixed` subscript sizing defaults.
+  - `form-field`: generate the configurable standalone OnPush typed
+    `ControlValueAccessor` Angular Material form field inside the selected
+    application's source root. It supports `text`, `email`, `password`,
+    `number`, and `textarea` controls; `fill` and `outline` appearances; and
+    `fixed` and `dynamic` subscript sizing. Both entries require
+    `@angular/forms`, `@angular/material`, and `@angular/cdk` before mutation,
+    reject collisions before writes, and use the same field identity,
+    accessibility, and host/server validation-error behavior.
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `material-setup`: configure Angular Material theming (prebuilt or custom)
     and providers in an existing project; options: `--theme`, `--typography`,

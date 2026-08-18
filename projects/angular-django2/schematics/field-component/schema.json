@@ -16,7 +16,8 @@
     "path": {
       "type": "string",
       "format": "path",
-      "description": "Destination directory within the application source tree. Defaults to src/app/shared/ui/form-helpers."
+      "default": "src/app/shared/form-helpers",
+      "description": "Destination directory within the application source tree. Defaults to src/app/shared/form-helpers."
     },
     "project": {
       "type": "string",

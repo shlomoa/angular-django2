@@ -1,9 +1,9 @@
 # form-field
 
-Generate a reusable standalone, `OnPush` Angular Material form-field component
-with a typed `ControlValueAccessor` boundary. It is for OpenUI or other
-reactive-form consumers; it does not generate a page, feature workflow, or
-OpenAPI artifact.
+Generate a configurable typed standalone, `OnPush` Angular Material form-field
+component with a `ControlValueAccessor` boundary. Use it instead of
+`field-component` when number controls, appearance or subscript sizing choices,
+or server validation errors need explicit configuration.
 
 ```bash
 ng generate angular-django2:form-field email \
@@ -44,5 +44,6 @@ the baseline accessible configuration.
 ></app-email-field>
 ```
 
-The generated `FormFieldValue` is `string | number | null`; use a matching
-typed `FormControl` for `number` fields or text-like fields.
+Text, email, password, and textarea output declares `FormFieldValue` as
+`string`; number output declares `string | number | null`. Use a matching typed
+`FormControl`.

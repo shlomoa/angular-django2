@@ -97,8 +97,8 @@ for each schematic's options.
 | [`component`](component.md)                 | Generate a standalone OnPush component with embedding hooks.                  |
 | [`embed-component`](embed-component.md)     | Embed a component into a parent component.                                    |
 | [`complex-component`](complex-component.md) | Generate or maintain an advanced Angular Material component.                  |
-| [`field-component`](field-component.md)     | Generate a typed standalone Angular Material field control.                   |
-| [`form-field`](form-field.md)               | Generate a typed CVA-backed Angular Material form field.                      |
+| [`field-component`](field-component.md)     | Generate a simple typed Angular Material field-control convenience component. |
+| [`form-field`](form-field.md)               | Generate a configurable typed Angular Material form field.                    |
 | [`service`](service.md)                     | Generate a service.                                                           |
 | [`class`](class.md)                         | Generate a class.                                                             |
 | [`openapi-setup`](openapi-setup.md)         | Bootstrap `ng-openapi-gen` and generate Django integration helpers.           |
