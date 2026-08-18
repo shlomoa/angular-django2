@@ -41,6 +41,11 @@
       "factory": "./field-component/index#fieldComponent",
       "schema": "./field-component/schema.json"
     },
+    "form-field": {
+      "description": "Generate a standalone OnPush typed ControlValueAccessor Angular Material form field.",
+      "factory": "./form-field/index#formField",
+      "schema": "./form-field/schema.json"
+    },
     "service": {
       "description": "Generate a service using the angular-django2 collection.",
       "factory": "./service/index#service",
