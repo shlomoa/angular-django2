@@ -68,7 +68,7 @@ describe('field-component schematic', () => {
     expect(generated.readContent(templatePath)).toContain('mat-error');
     expect(generated.readContent(templatePath)).toContain('[attr.aria-invalid]');
     expect(generated.readContent(templatePath)).toContain(
-      '[attr.disabled]="controlDisabled() || null"',
+      '[attr.disabled]="controlDisabled() ? \'\' : null"',
     );
   });
 
