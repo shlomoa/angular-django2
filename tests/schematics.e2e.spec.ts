@@ -949,7 +949,7 @@ describe('angular-django2 schematics E2E tests', () => {
         }
 
         execAngularCli(
-          ['generate', 'angular-django2:form-field', 'email', '--control-type=email'],
+          ['generate', 'angular-django2:form-field', 'email-form', '--control-type=email'],
           appPath,
         );
 
@@ -966,15 +966,17 @@ describe('angular-django2 schematics E2E tests', () => {
           rootComponentPath,
           `import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EmailFieldComponent } from './shared/form-helpers/email-field/email-field';
+import { EmailFormFieldComponent } from './shared/form-helpers/email-form-field/email-form-field';
+          import { TextFieldComponent } from './shared/form-helpers/text-field/text-field';
 
-@Component({
-  selector: 'app-root',
-  imports: [ReactiveFormsModule, EmailFieldComponent],
+          @Component({
+            selector: 'app-root',
+            imports: [ReactiveFormsModule, EmailFormFieldComponent, TextFieldComponent],
   templateUrl: './${rootTemplateName}',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
+  readonly text = new FormControl<string>('', { nonNullable: true });
   readonly email = new FormControl<string | null>('', [Validators.email, Validators.required]);
   readonly serverErrors = ['The server rejected this address.'];
 
@@ -987,22 +989,24 @@ export class App {
         );
         fs.writeFileSync(
           rootTemplatePath,
-          `<app-email-field
+          `<app-text-field [formControl]="text" label="Text"></app-text-field>
+<app-email-form-field
   [formControl]="email"
   fieldId="account-email"
   label="Email"
   hint="Used for account notices"
   [serverErrors]="serverErrors"
-></app-email-field>
+></app-email-form-field>
 `,
         );
 
         const generatedField = fs.readFileSync(
-          path.join(appRoot, 'shared', 'form-helpers', 'email-field', 'email-field.ts'),
+          path.join(appRoot, 'shared', 'form-helpers', 'email-form-field', 'email-form-field.ts'),
           'utf8',
         );
         expect(generatedField).toContain('implements ControlValueAccessor');
         expect(generatedField).toContain('setDisabledState(disabled: boolean)');
+        expect(fs.readFileSync(rootTemplatePath, 'utf8')).toContain('[formControl]="text"');
         expect(fs.readFileSync(rootTemplatePath, 'utf8')).toContain('[formControl]="email"');
         execAngularCli(['build', '--configuration=development'], appPath);
       } finally {

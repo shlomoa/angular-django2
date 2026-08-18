@@ -56,14 +56,13 @@ Current defaults:
   - Requires `--path` within an application source tree and a non-empty `--features` list of `mixins`, `nested`, `projection`, and/or `cdk-overlay`
   - Supports `--mode=create|modify|delete`; deletion requires `--confirm=true`
   - Creates a component-local Material theme mixin, optional projected slots and CDK overlay, and two embedded child components for the selected features
-- `field-component`: creates a standalone OnPush Angular Material native-input `ControlValueAccessor`
-  - Requires a kebab-case name; defaults to `src/app/shared/ui/form-helpers/<name>/` in the selected application
+- `field-component`: simple typed Angular Material field-control convenience generator
+  - Requires a kebab-case name; delegates to the canonical form-field implementation with `fill` appearance and `fixed` subscript sizing
   - Options: `--path`, `--project`, `--kind` (`text`, `email`, `password`, or `textarea`)
-  - Exposes a typed string value model and typed `label`, `required`, `disabled`, `hint`, `placeholder`, and `errorMessage` inputs
-  - Requires `@angular/material` and `@angular/cdk`; run `ng add @angular/material` first
-- `form-field`: generates a standalone OnPush typed `ControlValueAccessor` Angular Material field
+  - Every generated control has a string value model and the canonical field identity, accessibility, and server-error inputs
+- `form-field`: configurable typed Angular Material form-field generator
   - Options: `--path` (default: `src/app/shared/form-helpers`), `--project`, `--control-type` (`text`, `email`, `password`, `number`, `textarea`), `--appearance` (`fill`, `outline`), and `--subscript-sizing` (`fixed`, `dynamic`)
-  - Requires `@angular/forms`, `@angular/material`, and `@angular/cdk`; see the [CLI reference](https://angular-django2.readthedocs.io/en/latest/cli/form-field/)
+  - Supports number values, appearance, subscript sizing, field identity, and server validation errors; requires `@angular/forms`, `@angular/material`, and `@angular/cdk`
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
 - `material-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav layout
   - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--defaults`, `--style`, `--prefix`
