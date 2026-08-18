@@ -912,12 +912,12 @@ describe('angular-django2 schematics E2E tests', () => {
   );
 
   it(
-    'E2E-07: form-field hosts typed reactive-form validation in a development build',
+    'E2E-07: field-component and form-field generate in a buildable application',
     { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {
       const tempArea = createE2ETempArea(repoRoot, debugMode);
       const workspacePath = tempArea.path;
-      const appName = 'form-field-app';
+      const appName = 'form-controls-app';
       const appPath = path.join(workspacePath, appName);
       const libraryPath = getLibraryPackagePath();
       const parentDir = path.dirname(repoRoot);
@@ -941,6 +941,13 @@ describe('angular-django2 schematics E2E tests', () => {
         execCommand('npm install @angular/material @angular/cdk', appPath);
         execCommand(`npm install "${libraryPath}"`, appPath);
         execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+        for (const kind of ['text', 'email', 'password', 'textarea']) {
+          execAngularCli(
+            ['generate', 'angular-django2:field-component', `${kind}-field`, `--kind=${kind}`],
+            appPath,
+          );
+        }
+
         execAngularCli(
           ['generate', 'angular-django2:form-field', 'email', '--control-type=email'],
           appPath,

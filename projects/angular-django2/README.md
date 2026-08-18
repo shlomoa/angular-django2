@@ -6,7 +6,7 @@
 
 Full documentation: <https://angular-django2.readthedocs.io/>
 
-The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `complex-component`, `form-field`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
+The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `complex-component`, `field-component`, `form-field`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
 
 ## Schematics
 
@@ -20,6 +20,7 @@ ng generate angular-django2:app-shell --project my-app
 ng generate angular-django2:component dashboard-card
 ng generate angular-django2:embed-component --component=projects/my-app/src/app/hero-card/hero-card.ts --parent=projects/my-app/src/app/dashboard-card/dashboard-card.ts
 ng generate angular-django2:complex-component dashboard-card --project=my-app --path=src/app/features/dashboard --features=mixins,nested,projection,cdk-overlay
+ng generate angular-django2:field-component email-field --project=my-app --kind=email
 ng generate angular-django2:form-field email --project=my-app --control-type=email
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
@@ -46,6 +47,11 @@ Current defaults:
   - Requires `--path` within an application source tree and a non-empty `--features` list of `mixins`, `nested`, `projection`, and/or `cdk-overlay`
   - Supports `--mode=create|modify|delete`; deletion requires `--confirm=true`
   - Creates a component-local Material theme mixin, optional projected slots and CDK overlay, and two embedded child components for the selected features
+- `field-component`: creates a standalone OnPush Angular Material native-input `ControlValueAccessor`
+  - Requires a kebab-case name; defaults to `src/app/shared/ui/form-helpers/<name>/` in the selected application
+  - Options: `--path`, `--project`, `--kind` (`text`, `email`, `password`, or `textarea`)
+  - Exposes a typed string value model and typed `label`, `required`, `disabled`, `hint`, `placeholder`, and `errorMessage` inputs
+  - Requires `@angular/material` and `@angular/cdk`; run `ng add @angular/material` first
 - `form-field`: generates a standalone OnPush typed `ControlValueAccessor` Angular Material field
   - Options: `--path` (default: `src/app/shared/form-helpers`), `--project`, `--control-type` (`text`, `email`, `password`, `number`, `textarea`), `--appearance` (`fill`, `outline`), and `--subscript-sizing` (`fixed`, `dynamic`)
   - Requires `@angular/forms`, `@angular/material`, and `@angular/cdk`; see the [CLI reference](https://angular-django2.readthedocs.io/en/latest/cli/form-field/)

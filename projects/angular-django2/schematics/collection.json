@@ -36,6 +36,11 @@
       "factory": "./complex-component/index#complexComponent",
       "schema": "./complex-component/schema.json"
     },
+    "field-component": {
+      "description": "Generate a typed standalone Angular Material form field control.",
+      "factory": "./field-component/index#fieldComponent",
+      "schema": "./field-component/schema.json"
+    },
     "form-field": {
       "description": "Generate a standalone OnPush typed ControlValueAccessor Angular Material form field.",
       "factory": "./form-field/index#formField",

@@ -71,6 +71,7 @@ sources over lower-priority ones.
   - `component`
   - `embed-component`
   - `complex-component`
+  - `field-component`
   - `form-field`
   - `service`
   - `material-setup`
@@ -103,6 +104,13 @@ sources over lower-priority ones.
     It requires a kebab-case name, an application-source-tree path, and a
     non-empty feature list limited to `mixins`, `nested`, `projection`, and
     `cdk-overlay`; delete requires explicit confirmation.
+  - `field-component`: create a standalone OnPush Angular Material
+    `ControlValueAccessor` using a native input or textarea and a typed string
+    value model. It requires a kebab-case name, an application-source-tree path
+    (defaulting to `src/app/shared/ui/form-helpers/<name>/`), and installed
+    `@angular/material` plus `@angular/cdk`. The only supported `--kind` values
+    are `text`, `email`, `password`, and `textarea`; generated controls expose
+    typed label, required, disabled, hint, placeholder, and error-message APIs.
   - `form-field`: generate a standalone OnPush typed `ControlValueAccessor`
     Angular Material form field inside the selected application's source root.
     It supports `text`, `email`, `password`, `number`, and `textarea` controls;

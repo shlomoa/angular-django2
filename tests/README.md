@@ -72,6 +72,8 @@ See `docs/INTEGRATION_TESTING.md`.
 
 - `tests/schematics/*.spec.ts`
   - unit tests for schematic wrappers, including `complex-component` lifecycle,
+    `field-component` control kinds, validation, project resolution, collision
+    handling, theme registration, and composed child wiring
     typed `form-field` CVA generation and validation, feature validation, theme
     registration, and composed child wiring
   - uses mocked `externalSchematic` calls where relevant
