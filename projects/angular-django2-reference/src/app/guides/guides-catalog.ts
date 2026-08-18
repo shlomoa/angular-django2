@@ -1,10 +1,5 @@
 export type GuideId =
-  | 'basic-tutorial'
-  | 'complex-components'
-  | 'data-flow'
-  | 'forms'
-  | 'quality'
-  | 'security';
+  'basic-tutorial' | 'complex-components' | 'data-flow' | 'forms' | 'quality' | 'security';
 
 export interface GuideSection {
   readonly title: string;
