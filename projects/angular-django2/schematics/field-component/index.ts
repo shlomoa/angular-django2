@@ -105,8 +105,13 @@ function resolveTargetDirectory(
     return path.posix.join(sourceRoot, DEFAULT_DIRECTORY);
   }
 
-  const normalizedPath = normalizeWorkspacePath(requestedPath);
-  if (!normalizedPath || requestedPath.split(/[\\/]+/).includes('..')) {
+  const normalizedPath = path.posix.normalize(normalizeWorkspacePath(requestedPath));
+  if (
+    !normalizedPath ||
+    normalizedPath === '.' ||
+    normalizedPath === '..' ||
+    normalizedPath.startsWith('../')
+  ) {
     throw new SchematicsException(
       'The target path must be a non-empty path within the application source tree.',
     );

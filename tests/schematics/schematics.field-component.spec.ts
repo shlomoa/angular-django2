@@ -153,6 +153,12 @@ describe('field-component schematic', () => {
     expect(() =>
       fieldComponent({
         name: 'display-name',
+        path: 'src/app/forms/../../../../outside',
+      })(tree, context),
+    ).toThrow('within the application source tree');
+    expect(() =>
+      fieldComponent({
+        name: 'display-name',
         kind: 'select' as FieldComponentSchema['kind'],
       })(tree, context),
     ).toThrow('Unsupported field control kind');
