@@ -238,7 +238,7 @@ function templateSource(resolved: ResolvedFieldComponentOptions): string {
     resolved.kind === 'textarea'
       ? `<textarea
   matInput
-  [disabled]="controlDisabled()"
+  [attr.disabled]="controlDisabled() || null"
   [placeholder]="placeholder()"
   [required]="required()"
   [value]="value()"
@@ -249,7 +249,7 @@ function templateSource(resolved: ResolvedFieldComponentOptions): string {
       : `<input
   matInput
   [type]="kind"
-  [disabled]="controlDisabled()"
+  [attr.disabled]="controlDisabled() || null"
   [placeholder]="placeholder()"
   [required]="required()"
   [value]="value()"
