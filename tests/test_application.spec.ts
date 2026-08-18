@@ -3,21 +3,16 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import {
-  DEFAULT_E2E_TIMEOUT,
-  execAngularCli,
-  execCommand,
-  getRepoRoot,
-  withTempArea,
-} from './utils/temp_areas';
+import { execAngularCli, execCommand, getRepoRoot, withTempArea } from './utils/temp_areas';
 
 const repoRoot = getRepoRoot();
 const angularDjango2PackagePath = path.join(repoRoot, 'dist', 'angular-django2');
+const APPLICATION_E2E_TIMEOUT = 10 * 60 * 1000;
 
 describe('angular-django2 application schematic', () => {
   it(
     'generates and builds the Angular app scaffold for my-app in a temp area',
-    { timeout: DEFAULT_E2E_TIMEOUT },
+    { timeout: APPLICATION_E2E_TIMEOUT },
     async () => {
       await withTempArea(
         (tempArea) => {
