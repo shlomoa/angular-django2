@@ -910,4 +910,104 @@ describe('angular-django2 schematics E2E tests', () => {
       }
     },
   );
+
+  it(
+    'E2E-07: field-component and form-field generate in a buildable application',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'form-controls-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+        for (const kind of ['text', 'email', 'password', 'textarea']) {
+          execAngularCli(
+            ['generate', 'angular-django2:field-component', `${kind}-field`, `--kind=${kind}`],
+            appPath,
+          );
+        }
+
+        execAngularCli(
+          ['generate', 'angular-django2:form-field', 'email', '--control-type=email'],
+          appPath,
+        );
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        const rootComponentPath = fs.existsSync(path.join(appRoot, 'app.ts'))
+          ? path.join(appRoot, 'app.ts')
+          : path.join(appRoot, 'app.component.ts');
+        const rootTemplatePath = fs.existsSync(path.join(appRoot, 'app.html'))
+          ? path.join(appRoot, 'app.html')
+          : path.join(appRoot, 'app.component.html');
+        const rootTemplateName = path.basename(rootTemplatePath);
+
+        fs.writeFileSync(
+          rootComponentPath,
+          `import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { EmailFieldComponent } from './shared/form-helpers/email-field/email-field';
+
+@Component({
+  selector: 'app-root',
+  imports: [ReactiveFormsModule, EmailFieldComponent],
+  templateUrl: './${rootTemplateName}',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class App {
+  readonly email = new FormControl<string | null>('', [Validators.email, Validators.required]);
+  readonly serverErrors = ['The server rejected this address.'];
+
+  constructor() {
+    this.email.markAsTouched();
+    this.email.disable();
+  }
+}
+`,
+        );
+        fs.writeFileSync(
+          rootTemplatePath,
+          `<app-email-field
+  [formControl]="email"
+  fieldId="account-email"
+  label="Email"
+  hint="Used for account notices"
+  [serverErrors]="serverErrors"
+></app-email-field>
+`,
+        );
+
+        const generatedField = fs.readFileSync(
+          path.join(appRoot, 'shared', 'form-helpers', 'email-field', 'email-field.ts'),
+          'utf8',
+        );
+        expect(generatedField).toContain('implements ControlValueAccessor');
+        expect(generatedField).toContain('setDisabledState(disabled: boolean)');
+        expect(fs.readFileSync(rootTemplatePath, 'utf8')).toContain('[formControl]="email"');
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-07');
+      }
+    },
+  );
 });

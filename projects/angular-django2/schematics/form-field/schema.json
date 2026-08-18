@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2FormField",
+  "title": "angular-django2 typed Material form-field schematic",
+  "description": "Generate a standalone OnPush typed ControlValueAccessor Material form field.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Kebab-case name for the form-field component.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "default": "src/app/shared/form-helpers",
+      "description": "Destination directory within the selected application's source root."
+    },
+    "project": {
+      "type": "string",
+      "description": "Target application project. Required when more than one application is available."
+    },
+    "controlType": {
+      "type": "string",
+      "enum": ["text", "email", "password", "number", "textarea"],
+      "default": "text",
+      "description": "Native control kind: text, email, password, number, or textarea."
+    },
+    "appearance": {
+      "type": "string",
+      "enum": ["fill", "outline"],
+      "default": "fill",
+      "description": "Angular Material form-field appearance."
+    },
+    "subscriptSizing": {
+      "type": "string",
+      "enum": ["fixed", "dynamic"],
+      "default": "fixed",
+      "description": "Angular Material hint and error subscript sizing."
+    }
+  },
+  "required": ["name"]
+}
