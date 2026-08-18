@@ -131,8 +131,9 @@ sources over lower-priority ones.
     reactive form from a single JSON definition file supplied through
     `--definition`. The definition contract is published in the schematic
     schema and is validated atomically before any file is written: exactly one
-    definition per file, a `/`-prefixed Django endpoint, unique camelCase
-    fields limited to `text`, `email`, `password`, `number`, and `textarea`
+    definition per file, a `/`-prefixed Django endpoint, unique lower-camelCase
+    or snake_case fields limited to `text`, `email`, `password`, `number`, and
+    `textarea`
     controls, and no CRM-style keys, because the form is create-only. Fields
     may declare a type-compatible `initialValue` and an explicit `validators`
     list limited to `required`, `email`, `minLength`, `maxLength`, `min`,
