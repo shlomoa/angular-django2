@@ -87,6 +87,8 @@ Current E2E coverage includes:
 - `E2E-07` — `field-component` generation with each documented control kind and
   `form-field` generation hosted in a typed reactive form, including disabled,
   touched, and server-error wiring, verified with a development build
+- `E2E-08` — `page` generation in a real routed Angular Material workspace,
+  verifying its lazy route and a development build
 
 The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.

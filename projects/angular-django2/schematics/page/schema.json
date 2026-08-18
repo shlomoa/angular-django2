@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Page",
+  "title": "angular-django2 page schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "description": "Kebab-case page and feature name.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "Feature directory within the selected application source root."
+    },
+    "project": {
+      "type": "string",
+      "description": "Angular application project. Required when the workspace has multiple applications."
+    },
+    "routePath": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[-/][a-z0-9]+)*$",
+      "description": "URL path for the lazy route. Defaults to the page name."
+    },
+    "access": {
+      "type": "string",
+      "enum": ["public", "protected"],
+      "default": "public",
+      "description": "Route access mode. Protected routes require an already-configured reusable auth guard."
+    },
+    "authGuard": {
+      "type": "string",
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$",
+      "default": "authGuard",
+      "description": "Existing locally imported auth-guard identifier used by protected routes."
+    },
+    "navigationLabel": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Navigation label stored in route data. Defaults to the classified page name."
+    },
+    "navigationIcon": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Optional Material icon name stored in route navigation data."
+    }
+  },
+  "required": ["name", "path"]
+}

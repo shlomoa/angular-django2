@@ -75,7 +75,9 @@ See `docs/INTEGRATION_TESTING.md`.
     `field-component` control kinds, validation, project resolution, collision
     handling, theme registration, and composed child wiring; typed `form-field`
     CVA generation and validation, feature validation, theme
-    registration, and composed child wiring
+    registration, and composed child wiring; `page` lazy-route generation,
+    guard and prerequisite validation, route preservation, collisions,
+    multi-project targeting, and idempotency
   - uses mocked `externalSchematic` calls where relevant
   - shared context/readme helpers live in `tests/schematics/schematics.helpers.ts`
 
