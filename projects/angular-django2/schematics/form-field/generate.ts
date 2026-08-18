@@ -1,3 +1,4 @@
+import { strings } from '@angular-devkit/core';
 import type { Rule, Tree } from '@angular-devkit/schematics';
 import { SchematicsException } from '@angular-devkit/schematics';
 import * as path from 'node:path';
@@ -11,9 +12,11 @@ import {
 import {
   FORM_FIELD_APPEARANCES,
   FORM_FIELD_CONTROL_TYPES,
+  FORM_FIELD_PRIMITIVE_BINDINGS,
   FORM_FIELD_SUBSCRIPT_SIZINGS,
   type FormFieldAppearance,
   type FormFieldControlType,
+  type FormFieldPrimitiveBinding,
   type FormFieldSubscriptSizing,
 } from './schema';
 import { formFieldComponentSource, formFieldTemplate } from './templates';
@@ -29,6 +32,20 @@ export interface CanonicalFormFieldOptions {
   subscriptSizing?: FormFieldSubscriptSizing;
 }
 
+/**
+ * @internal Stable schematic metadata for the generated form-field component.
+ *
+ * This is intentionally schematic-only metadata, not a runtime package API.
+ */
+export interface FormFieldPrimitiveDescriptor {
+  className: string;
+  selector: string;
+  componentPath: string;
+  controlTypes: readonly FormFieldControlType[];
+  bindings: readonly FormFieldPrimitiveBinding[];
+  canonical: boolean;
+}
+
 interface ResolvedFormFieldOptions {
   name: string;
   componentPath: string;
@@ -37,6 +54,23 @@ interface ResolvedFormFieldOptions {
   controlType: FormFieldControlType;
   appearance: FormFieldAppearance;
   subscriptSizing: FormFieldSubscriptSizing;
+}
+
+/** @internal Describe a canonical form-field from its naming and option contract. */
+export function formFieldPrimitiveDescriptor(
+  name: string,
+  targetDirectory: string,
+): FormFieldPrimitiveDescriptor {
+  const componentName = `${name}-field`;
+
+  return {
+    className: `${strings.classify(name)}FieldComponent`,
+    selector: `app-${componentName}`,
+    componentPath: path.posix.join(targetDirectory, componentName, `${componentName}.ts`),
+    controlTypes: FORM_FIELD_CONTROL_TYPES,
+    bindings: FORM_FIELD_PRIMITIVE_BINDINGS,
+    canonical: true,
+  };
 }
 
 /** @internal Shared implementation for Material native-control CVA schematics. */
@@ -82,13 +116,13 @@ function resolveOptions(tree: Tree, options: CanonicalFormFieldOptions): Resolve
   assertEnum(appearance, FORM_FIELD_APPEARANCES, 'appearance');
   assertEnum(subscriptSizing, FORM_FIELD_SUBSCRIPT_SIZINGS, 'subscript sizing');
 
-  const componentName = `${options.name}-field`;
-  const componentDirectory = path.posix.join(targetDirectory, componentName);
+  const primitive = formFieldPrimitiveDescriptor(options.name, targetDirectory);
+  const componentDirectory = path.posix.dirname(primitive.componentPath);
   return {
     name: options.name,
-    componentPath: path.posix.join(componentDirectory, `${componentName}.ts`),
-    templatePath: path.posix.join(componentDirectory, `${componentName}.html`),
-    stylesheetPath: path.posix.join(componentDirectory, `${componentName}.scss`),
+    componentPath: primitive.componentPath,
+    templatePath: path.posix.join(componentDirectory, `${options.name}-field.html`),
+    stylesheetPath: path.posix.join(componentDirectory, `${options.name}-field.scss`),
     controlType,
     appearance,
     subscriptSizing,

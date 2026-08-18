@@ -863,4 +863,131 @@ export const appConfig: ApplicationConfig = {
       );
     });
   });
+
+  describe('reactive-form schematic integration', () => {
+    let angularRunner: SchematicTestRunner;
+
+    const definition = {
+      title: 'Create contact',
+      endpoint: '/api/contacts/',
+      submitLabel: 'Create contact',
+      fields: [
+        {
+          name: 'email',
+          label: 'Email',
+          control: 'email',
+          initialValue: 'team@example.com',
+          validators: [{ type: 'required' }],
+        },
+        {
+          name: 'notes',
+          label: 'Notes',
+          control: 'textarea',
+          validators: [{ type: 'maxLength', value: 240 }],
+        },
+      ],
+    };
+
+    const setupWorkspace = async (): Promise<UnitTestTree> => {
+      let tree: UnitTestTree = Tree.empty() as UnitTestTree;
+      tree = await angularRunner.runSchematic(
+        'workspace',
+        { name: 'demo', version: '22.0.0', newProjectRoot: 'projects' },
+        tree,
+      );
+      tree = await angularRunner.runSchematic(
+        'application',
+        { name: 'app', standalone: true, routing: false, style: 'scss', zoneless: true },
+        tree,
+      );
+
+      const packageJson = JSON.parse(tree.readContent('/package.json')) as {
+        dependencies: Record<string, string>;
+      };
+      packageJson.dependencies['@angular/material'] = '^22.0.0';
+      packageJson.dependencies['@angular/cdk'] = '^22.0.0';
+      tree.overwrite('/package.json', JSON.stringify(packageJson, null, 2));
+
+      return tree;
+    };
+
+    beforeEach(() => {
+      angularRunner = new SchematicTestRunner(
+        '@schematics/angular',
+        path.join(__dirname, '../node_modules/@schematics/angular/collection.json'),
+      );
+    });
+
+    it('INT-RF-01: composes canonical form-field and field-component façade output', async () => {
+      let tree = await setupWorkspace();
+      tree.create('/projects/app/form.json', JSON.stringify(definition));
+
+      tree = (await runner.runSchematic(
+        'form-field',
+        { name: 'email', project: 'app', controlType: 'email' },
+        tree,
+      )) as UnitTestTree;
+      tree = (await runner.runSchematic(
+        'field-component',
+        { name: 'notes', project: 'app', kind: 'textarea' },
+        tree,
+      )) as UnitTestTree;
+      tree = (await runner.runSchematic(
+        'reactive-form',
+        { name: 'contact', project: 'app', definition: 'projects/app/form.json' },
+        tree,
+      )) as UnitTestTree;
+
+      const componentPath = '/projects/app/src/app/features/contact-form/contact-form.ts';
+      const component = tree.readContent(componentPath);
+      const template = tree.readContent(
+        '/projects/app/src/app/features/contact-form/contact-form.html',
+      );
+
+      expect(tree.files).toContain(componentPath);
+      expect(tree.files).toContain('/projects/app/src/app/features/contact-form/contact-form.scss');
+      expect(component).toContain('ChangeDetectionStrategy.OnPush');
+      expect(component).toContain("readonly endpoint = '/api/contacts/';");
+      expect(component).toContain('export interface ContactFormPayload {');
+      expect(component).toContain('private readonly formBuilder = inject(FormBuilder);');
+      expect(component).toContain("  email: 'team@example.com',");
+      expect(component).toContain('this.form.reset(INITIAL_VALUES);');
+      expect(component).toContain(
+        "email: this.formBuilder.control<string | null>('team@example.com', [",
+      );
+      expect(component).toContain(
+        'notes: this.formBuilder.control<string | null>(null, [Validators.maxLength(240)]),',
+      );
+      expect(component).toContain(
+        "import { EmailFieldComponent } from '../../shared/form-helpers/email-field/email-field';",
+      );
+      expect(component).toContain(
+        "import { NotesFieldComponent } from '../../shared/form-helpers/notes-field/notes-field';",
+      );
+      expect(template).toContain('<app-email-field');
+      expect(template).toContain('[required]="true"');
+      expect(template).toContain('[serverErrors]="serverErrors(\'email\')"');
+      expect(template).toContain('<app-notes-field');
+      expect(template).toContain('controlType="textarea"');
+    });
+
+    it('INT-RF-02: rejects a CRM-shaped definition without writing output', async () => {
+      const tree = await setupWorkspace();
+      tree.create(
+        '/projects/app/form.json',
+        JSON.stringify({ ...definition, resource: 'contacts', list: true }),
+      );
+
+      await expect(
+        runner.runSchematic(
+          'reactive-form',
+          { name: 'contact', project: 'app', definition: 'projects/app/form.json' },
+          tree,
+        ),
+      ).rejects.toThrow('create-only');
+      expect(tree.files).not.toContain(
+        '/projects/app/src/app/features/contact-form/contact-form.ts',
+      );
+    });
+  });
 });

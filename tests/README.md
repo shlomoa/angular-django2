@@ -71,12 +71,15 @@ See `docs/INTEGRATION_TESTING.md`.
 ### Core spec files
 
 - `tests/schematics/*.spec.ts`
-  - unit tests for schematic wrappers, including `complex-component` lifecycle;
-    `field-component` kind mapping to the canonical field implementation, shared
-    validation and collision handling; typed `form-field` CVA generation,
+  - unit tests for schematic wrappers, including `complex-component` lifecycle,
+    `field-component` kind mapping to the canonical field implementation,
+    shared validation and collision handling, typed `form-field` CVA generation,
     advanced number/appearance behavior, theme registration, and composed child
-    wiring; and `page` lazy-route generation, guard and prerequisite validation,
-    route preservation, collisions, multi-project targeting, and idempotency
+    wiring; `page` lazy-route generation, guard and prerequisite validation,
+    route preservation, collisions, multi-project targeting, and idempotency;
+    and `reactive-form` definition validation, initial values and declared validators, typed `FormBuilder`
+    output, metadata-based canonical primitive composition (including the
+    `field-component` façade), integration wiring, and create-only reruns
   - uses mocked `externalSchematic` calls where relevant
   - shared context/readme helpers live in `tests/schematics/schematics.helpers.ts`
 

@@ -51,6 +51,11 @@
       "factory": "./form-field/index#formField",
       "schema": "./form-field/schema.json"
     },
+    "reactive-form": {
+      "description": "Generate a typed standalone OnPush Angular Material reactive form from a JSON definition contract.",
+      "factory": "./reactive-form/index#reactiveForm",
+      "schema": "./reactive-form/schema.json"
+    },
     "service": {
       "description": "Generate a service using the angular-django2 collection.",
       "factory": "./service/index#service",

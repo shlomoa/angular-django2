@@ -51,6 +51,7 @@ Current integration suites cover:
 - `material-setup`
 - `project-structure`
 - `material-app`
+- `reactive-form`
 - schematic chaining scenarios
 
 When a schematic delegates to `externalSchematic` — for example `material-app`
@@ -88,7 +89,12 @@ Current E2E coverage includes:
   `form-field` generation, with both canonical outputs hosted in typed reactive
   forms; the configurable field also covers disabled, touched, and server-error
   wiring, verified with a development build
-- `E2E-08` — `page` generation in a real routed Angular Material workspace,
+- `E2E-08` — `reactive-form` generation from a JSON definition with initial
+  values and declared validators that composes canonical `form-field` output
+  and the `field-component` convenience façade through metadata (not source
+  parsing), including a create-only rerun and a hosted typed payload handler,
+  verified with a development build
+- `E2E-09` — `page` generation in a real routed Angular Material workspace,
   verifying its lazy route and a development build
 
 The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
