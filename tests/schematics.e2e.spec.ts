@@ -910,4 +910,68 @@ describe('angular-django2 schematics E2E tests', () => {
       }
     },
   );
+
+  it(
+    'E2E-07: field-component generates every supported control kind in a buildable application',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'field-component-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+
+        for (const kind of ['text', 'email', 'password', 'textarea']) {
+          execAngularCli(
+            ['generate', 'angular-django2:field-component', `${kind}-field`, `--kind=${kind}`],
+            appPath,
+          );
+        }
+        const appComponentPath = fs.existsSync(path.join(appPath, 'src/app/app.ts'))
+          ? path.join(appPath, 'src/app/app.ts')
+          : path.join(appPath, 'src/app/app.component.ts');
+        fs.writeFileSync(
+          appComponentPath,
+          `import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TextFieldComponent } from './shared/ui/form-helpers/text-field/text-field';
+
+@Component({
+  selector: 'app-root',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule, TextFieldComponent],
+  template: '<app-text-field [formControl]="field" label="Text value"></app-text-field>',
+})
+export class App {
+  readonly field = new FormControl<string>('', { nonNullable: true });
+}
+`,
+        );
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-07');
+      }
+    },
+  );
 });

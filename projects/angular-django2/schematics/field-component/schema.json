@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2FieldComponent",
+  "title": "angular-django2 field-component schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Kebab-case name of the reusable field component.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "Destination directory within the application source tree. Defaults to src/app/shared/ui/form-helpers."
+    },
+    "project": {
+      "type": "string",
+      "description": "Angular application project. Required when the workspace has multiple application source roots."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["text", "email", "password", "textarea"],
+      "default": "text",
+      "description": "Native control kind. Supported kinds are text, email, password, and textarea; every kind has a string value model."
+    }
+  },
+  "required": ["name"]
+}

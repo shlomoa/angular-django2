@@ -36,6 +36,11 @@
       "factory": "./complex-component/index#complexComponent",
       "schema": "./complex-component/schema.json"
     },
+    "field-component": {
+      "description": "Generate a typed standalone Angular Material form field control.",
+      "factory": "./field-component/index#fieldComponent",
+      "schema": "./field-component/schema.json"
+    },
     "service": {
       "description": "Generate a service using the angular-django2 collection.",
       "factory": "./service/index#service",
