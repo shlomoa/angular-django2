@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import * as path from 'node:path';
 import { fieldComponent } from '../../projects/angular-django2/schematics/field-component/index';
 import type { FieldComponentSchema } from '../../projects/angular-django2/schematics/field-component/schema';
+import { formField } from '../../projects/angular-django2/schematics/form-field/index';
 import { createSchematicContext } from './schematics.helpers';
 
 const collectionPath = path.join(
@@ -46,36 +47,34 @@ describe('field-component schematic', () => {
     return tree;
   }
 
-  it('TC-FIELD-01: generates a standalone typed Material text field in the default shared form-helper path', async () => {
+  it('TC-FIELD-01: delegates to the canonical standalone typed Material text field', async () => {
     const tree = await createApplicationTree();
     const generated = await runner.runSchematic('field-component', { name: 'display-name' }, tree);
     const componentPath =
-      '/projects/demo-app/src/app/shared/ui/form-helpers/display-name/display-name.ts';
+      '/projects/demo-app/src/app/shared/form-helpers/display-name-field/display-name-field.ts';
     const templatePath =
-      '/projects/demo-app/src/app/shared/ui/form-helpers/display-name/display-name.html';
+      '/projects/demo-app/src/app/shared/form-helpers/display-name-field/display-name-field.html';
 
     expect(generated.files).toContain(componentPath);
-    expect(generated.readContent(componentPath)).toContain(
-      'export type DisplayNameValue = string;',
-    );
-    expect(generated.readContent(componentPath)).toContain("selector: 'app-display-name'");
+    expect(generated.readContent(componentPath)).toContain('export type FormFieldValue = string;');
+    expect(generated.readContent(componentPath)).toContain("selector: 'app-display-name-field'");
     expect(generated.readContent(componentPath)).toContain(
       'changeDetection: ChangeDetectionStrategy.OnPush',
     );
     expect(generated.readContent(componentPath)).toContain('implements ControlValueAccessor');
-    expect(generated.readContent(componentPath)).toContain('readonly errorMessage = input<string>');
+    expect(generated.readContent(componentPath)).toContain(
+      'readonly serverErrors = input<readonly string[]>',
+    );
     expect(generated.readContent(templatePath)).toContain('<mat-label>{{ label() }}</mat-label>');
     expect(generated.readContent(templatePath)).toContain('mat-error');
     expect(generated.readContent(templatePath)).toContain('[attr.aria-invalid]');
-    expect(generated.readContent(templatePath)).toContain(
-      '[attr.disabled]="controlDisabled() ? \'\' : null"',
-    );
+    expect(generated.readContent(templatePath)).toContain('[disabled]="controlDisabled()"');
   });
 
   it.each([
-    ['text', '<input', '[type]="kind"'],
-    ['email', '<input', '[type]="kind"'],
-    ['password', '<input', '[type]="kind"'],
+    ['text', '<input', '[type]="controlType()"'],
+    ['email', '<input', '[type]="controlType()"'],
+    ['password', '<input', '[type]="controlType()"'],
     ['textarea', '<textarea', '(input)="updateValue($event)"'],
   ] as const)(
     'TC-FIELD-02: generates the supported %s control kind',
@@ -86,19 +85,39 @@ describe('field-component schematic', () => {
         { name: `${kind}-value`, kind, path: 'src/app/fields' },
         tree,
       );
-      const componentRoot = `/projects/demo-app/src/app/fields/${kind}-value`;
+      const componentRoot = `/projects/demo-app/src/app/fields/${kind}-value-field`;
 
-      expect(generated.readContent(`${componentRoot}/${kind}-value.ts`)).toContain(
-        `protected readonly kind = '${kind}';`,
+      expect(generated.readContent(`${componentRoot}/${kind}-value-field.ts`)).toContain(
+        `export type FormFieldControlType = '${kind}';`,
       );
-      expect(generated.readContent(`${componentRoot}/${kind}-value.html`)).toContain(element);
-      expect(generated.readContent(`${componentRoot}/${kind}-value.html`)).toContain(
+      expect(generated.readContent(`${componentRoot}/${kind}-value-field.html`)).toContain(element);
+      expect(generated.readContent(`${componentRoot}/${kind}-value-field.html`)).toContain(
         expectedBinding,
       );
     },
   );
 
-  it('TC-FIELD-03: resolves an explicitly selected application project and rejects collision', async () => {
+  it('TC-FIELD-03: maps kind to canonical form-field output', async () => {
+    const fieldTree = await createApplicationTree();
+    const formTree = await createApplicationTree();
+    const fieldGenerated = fieldComponent({
+      name: 'email',
+      kind: 'email',
+      path: 'src/app/forms',
+    })(fieldTree, createSchematicContext()) as UnitTestTree;
+    const formGenerated = formField({
+      name: 'email',
+      controlType: 'email',
+      path: 'src/app/forms',
+    })(formTree, createSchematicContext()) as UnitTestTree;
+    const componentPath = '/projects/demo-app/src/app/forms/email-field/email-field.ts';
+
+    expect(fieldGenerated.readContent(componentPath)).toBe(
+      formGenerated.readContent(componentPath),
+    );
+  });
+
+  it('TC-FIELD-04: resolves an explicitly selected application project and rejects collision', async () => {
     const tree = await createApplicationTree();
     const workspace = JSON.parse(tree.readContent('/angular.json')) as {
       projects: Record<string, unknown>;
@@ -117,14 +136,14 @@ describe('field-component schematic', () => {
     };
     const generated = await runner.runSchematic('field-component', options, tree);
     expect(generated.files).toContain(
-      '/projects/secondary-app/src/app/forms/email-field/email-field.ts',
+      '/projects/secondary-app/src/app/forms/email-field-field/email-field-field.ts',
     );
     await expect(runner.runSchematic('field-component', options, generated)).rejects.toThrow(
       'already exists',
     );
   });
 
-  it('TC-FIELD-04: rejects invalid inputs and Material prerequisites before creating files', () => {
+  it('TC-FIELD-05: rejects invalid inputs and shared prerequisites before creating files', () => {
     const tree = Tree.empty();
     tree.create(
       '/angular.json',
@@ -163,10 +182,12 @@ describe('field-component schematic', () => {
       })(tree, context),
     ).toThrow('Unsupported field control kind');
     expect(() => fieldComponent({ name: 'display-name' })(tree, context)).toThrow(
-      'Run ng add @angular/material first',
+      'requires installed prerequisites',
     );
     expect(
-      tree.exists('/projects/app/src/app/shared/ui/form-helpers/display-name/display-name.ts'),
+      tree.exists(
+        '/projects/app/src/app/shared/form-helpers/display-name-field/display-name-field.ts',
+      ),
     ).toBe(false);
   });
 });

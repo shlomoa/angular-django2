@@ -967,14 +967,16 @@ describe('angular-django2 schematics E2E tests', () => {
           `import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmailFieldComponent } from './shared/form-helpers/email-field/email-field';
+          import { TextFieldFieldComponent } from './shared/form-helpers/text-field-field/text-field-field';
 
-@Component({
-  selector: 'app-root',
-  imports: [ReactiveFormsModule, EmailFieldComponent],
+          @Component({
+            selector: 'app-root',
+            imports: [ReactiveFormsModule, EmailFieldComponent, TextFieldFieldComponent],
   templateUrl: './${rootTemplateName}',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
+  readonly text = new FormControl<string>('', { nonNullable: true });
   readonly email = new FormControl<string | null>('', [Validators.email, Validators.required]);
   readonly serverErrors = ['The server rejected this address.'];
 
@@ -987,7 +989,8 @@ export class App {
         );
         fs.writeFileSync(
           rootTemplatePath,
-          `<app-email-field
+          `<app-text-field-field [formControl]="text" label="Text"></app-text-field-field>
+<app-email-field
   [formControl]="email"
   fieldId="account-email"
   label="Email"
@@ -1003,6 +1006,7 @@ export class App {
         );
         expect(generatedField).toContain('implements ControlValueAccessor');
         expect(generatedField).toContain('setDisabledState(disabled: boolean)');
+        expect(fs.readFileSync(rootTemplatePath, 'utf8')).toContain('[formControl]="text"');
         expect(fs.readFileSync(rootTemplatePath, 'utf8')).toContain('[formControl]="email"');
         execAngularCli(['build', '--configuration=development'], appPath);
       } finally {
