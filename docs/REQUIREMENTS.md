@@ -82,6 +82,7 @@ sources over lower-priority ones.
   - `openapi-setup`
   - `data-service`
   - `page`
+  - `site`
 - The documented defaults and behavior currently expected are:
   - `ng-add`: register or prepend `angular-django2` in
     `cli.schematicCollections`
@@ -99,6 +100,16 @@ sources over lower-priority ones.
     routes only reference an already configured reusable guard and backend
     authorization remains authoritative; the schematic does not generate API
     clients, forms, shared components, or site-wide policy.
+  - `site`: assemble an existing, unmodified `material-app` shell from one
+    source-root OpenUI JSON definition. It validates all discovered page, form,
+    route, navigation, authentication, CSRF, and path prerequisites before
+    mutation; delegates page, reactive-form, and optional openapi-setup through
+    their public contracts; writes explicit XSRF provider configuration; and
+    records a typed ownership manifest. No source requires the documented
+    Home-only defaults. Create/modify are idempotent; confirmed delete restores
+    only the unchanged owned shell and removes only its manifest. OpenAPI and
+    non-CRM OpenUI inputs remain separate typed references, and Django/DRF
+    remains authoritative for protected operations.
   - `embed-component`: wire a child component into a parent using the embedding
     hooks. In file mode, options are `--component` (child component `.ts` path)
     and `--parent` (parent component `.ts` path). In package mode (add

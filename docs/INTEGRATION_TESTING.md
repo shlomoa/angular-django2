@@ -52,6 +52,7 @@ Current integration suites cover:
 - `project-structure`
 - `material-app`
 - `reactive-form`
+- `site`
 - schematic chaining scenarios
 
 When a schematic delegates to `externalSchematic` — for example `material-app`
@@ -96,6 +97,8 @@ Current E2E coverage includes:
   verified with a development build
 - `E2E-09` — `page` generation in a real routed Angular Material workspace,
   verifying its lazy route and a development build
+- `E2E-10` — `site` assembly from a representative OpenUI source and optional
+  OpenAPI input, verifying generated routes/forms and a development build
 
 The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.
