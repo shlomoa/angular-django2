@@ -51,7 +51,9 @@ describe('form-field schematic', () => {
     expect(template).toContain('<mat-form-field');
     expect(template).toContain('<mat-label>{{ label }}</mat-label>');
     expect(template).toContain('[attr.aria-invalid]="errorState"');
-    expect(template).toContain('<mat-error [id]="fieldId + \'-error\'">{{ errorMessage }}</mat-error>');
+    expect(template).toContain(
+      '<mat-error [id]="fieldId + \'-error\'">{{ errorMessage }}</mat-error>',
+    );
   });
 
   it.each(['text', 'email', 'password', 'number', 'textarea'] as const)(
@@ -78,25 +80,30 @@ describe('form-field schematic', () => {
   it.each([
     ['fill', 'fixed'],
     ['outline', 'dynamic'],
-  ] as const)('TC-FORM-FIELD-03: supports %s appearance and %s subscript sizing', (appearance, subscriptSizing) => {
-    const tree = createApplicationTree();
-    const generated = formField({ name: 'title', appearance, subscriptSizing })(
-      tree,
-      createContext(),
-    ) as UnitTestTree;
-    const component = readContent(
-      generated,
-      '/src/app/shared/form-helpers/title-field/title-field.ts',
-    );
-    const template = readContent(
-      generated,
-      '/src/app/shared/form-helpers/title-field/title-field.html',
-    );
+  ] as const)(
+    'TC-FORM-FIELD-03: supports %s appearance and %s subscript sizing',
+    (appearance, subscriptSizing) => {
+      const tree = createApplicationTree();
+      const generated = formField({ name: 'title', appearance, subscriptSizing })(
+        tree,
+        createContext(),
+      ) as UnitTestTree;
+      const component = readContent(
+        generated,
+        '/src/app/shared/form-helpers/title-field/title-field.ts',
+      );
+      const template = readContent(
+        generated,
+        '/src/app/shared/form-helpers/title-field/title-field.html',
+      );
 
-    expect(component).toContain(`appearance: FormFieldAppearance = '${appearance}'`);
-    expect(component).toContain(`subscriptSizing: FormFieldSubscriptSizing = '${subscriptSizing}'`);
-    expect(template).toContain('[appearance]="appearance" [subscriptSizing]="subscriptSizing"');
-  });
+      expect(component).toContain(`appearance: FormFieldAppearance = '${appearance}'`);
+      expect(component).toContain(
+        `subscriptSizing: FormFieldSubscriptSizing = '${subscriptSizing}'`,
+      );
+      expect(template).toContain('[appearance]="appearance" [subscriptSizing]="subscriptSizing"');
+    },
+  );
 
   it('TC-FORM-FIELD-04: uses the selected project and permits a source-root-contained path', () => {
     const tree = createApplicationTree({
@@ -124,7 +131,9 @@ describe('form-field schematic', () => {
 
     expect(() => formField({ name: 'Email' })(tree, createContext())).toThrow('kebab-case');
     expect(() => invalidPath(tree, createContext())).toThrow('within the application source tree');
-    expect(() => invalidControl(tree, createContext())).toThrow('Unsupported form-field control type');
+    expect(() => invalidControl(tree, createContext())).toThrow(
+      'Unsupported form-field control type',
+    );
     expect(() => unknownOption(tree, createContext())).toThrow('Unsupported form-field option');
     expect(() => formField({ name: 'email' })(missingDependencies, createContext())).toThrow(
       'requires installed prerequisites',

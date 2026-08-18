@@ -71,6 +71,7 @@ sources over lower-priority ones.
   - `component`
   - `embed-component`
   - `complex-component`
+  - `form-field`
   - `service`
   - `material-setup`
   - `project-structure`
@@ -102,6 +103,13 @@ sources over lower-priority ones.
     It requires a kebab-case name, an application-source-tree path, and a
     non-empty feature list limited to `mixins`, `nested`, `projection`, and
     `cdk-overlay`; delete requires explicit confirmation.
+  - `form-field`: generate a standalone OnPush typed `ControlValueAccessor`
+    Angular Material form field inside the selected application's source root.
+    It supports `text`, `email`, `password`, `number`, and `textarea` controls;
+    `fill` and `outline` appearances; and `fixed` and `dynamic` subscript
+    sizing. It requires `@angular/forms`, `@angular/material`, and
+    `@angular/cdk` before mutation and renders host and server validation
+    errors through Material's error surface.
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `material-setup`: configure Angular Material theming (prebuilt or custom)
     and providers in an existing project; options: `--theme`, `--typography`,

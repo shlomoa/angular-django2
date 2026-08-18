@@ -84,6 +84,8 @@ Current E2E coverage includes:
   (`MatDateRangePicker`) into a parent in a buildable app
 - `E2E-06` — `complex-component` create, modify, and confirmed delete flows,
   each verified with a development build
+- `E2E-07` — `form-field` generation hosted in a typed reactive form, including
+  disabled, touched, and server-error wiring, verified with a development build
 
 The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.

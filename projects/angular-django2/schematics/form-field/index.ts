@@ -3,7 +3,11 @@ import { SchematicsException } from '@angular-devkit/schematics';
 import * as path from 'node:path';
 import { assertPackageDependencies } from '../utility/package-json';
 import { resolveApplicationTargetDirectory } from '../utility/project-relative-path';
-import { readWorkspace, requireWorkspaceProject, type WorkspaceProject } from '../utility/workspace';
+import {
+  readWorkspace,
+  requireWorkspaceProject,
+  type WorkspaceProject,
+} from '../utility/workspace';
 import {
   FORM_FIELD_APPEARANCES,
   FORM_FIELD_CONTROL_TYPES,
@@ -42,7 +46,9 @@ export function formField(options: FormFieldSchema): Rule {
     const resolved = resolveOptions(tree, options);
 
     if (tree.exists(resolved.componentPath)) {
-      context.logger.warn(`${resolved.componentPath} already exists; skipping form-field generation.`);
+      context.logger.warn(
+        `${resolved.componentPath} already exists; skipping form-field generation.`,
+      );
       return tree;
     }
 

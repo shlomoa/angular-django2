@@ -1,9 +1,5 @@
 import { strings } from '@angular-devkit/core';
-import type {
-  FormFieldAppearance,
-  FormFieldControlType,
-  FormFieldSubscriptSizing,
-} from './schema';
+import type { FormFieldAppearance, FormFieldControlType, FormFieldSubscriptSizing } from './schema';
 
 export interface FormFieldTemplateOptions {
   name: string;

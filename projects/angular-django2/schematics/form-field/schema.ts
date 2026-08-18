@@ -1,4 +1,10 @@
-export const FORM_FIELD_CONTROL_TYPES = ['text', 'email', 'password', 'number', 'textarea'] as const;
+export const FORM_FIELD_CONTROL_TYPES = [
+  'text',
+  'email',
+  'password',
+  'number',
+  'textarea',
+] as const;
 export const FORM_FIELD_APPEARANCES = ['fill', 'outline'] as const;
 export const FORM_FIELD_SUBSCRIPT_SIZINGS = ['fixed', 'dynamic'] as const;
 
