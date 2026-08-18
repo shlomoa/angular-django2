@@ -75,7 +75,9 @@ See `docs/INTEGRATION_TESTING.md`.
     `field-component` kind mapping to the canonical field implementation,
     shared validation and collision handling, typed `form-field` CVA generation,
     advanced number/appearance behavior, theme registration, and composed child
-    wiring
+    wiring; and `reactive-form` definition
+    validation, initial values and declared validators, typed `FormBuilder`
+    output, primitive composition, integration wiring, and create-only reruns
   - uses mocked `externalSchematic` calls where relevant
   - shared context/readme helpers live in `tests/schematics/schematics.helpers.ts`
 

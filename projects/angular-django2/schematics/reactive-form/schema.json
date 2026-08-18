@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2ReactiveForm",
+  "title": "angular-django2 reactive-form schematic",
+  "description": "Generate a typed standalone OnPush Angular Material reactive form from a single isolated JSON definition contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Kebab-case name for the generated form component.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "definition": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path of the JSON form definition file described by definitions/reactiveFormDefinition."
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "default": "src/app/features",
+      "description": "Destination directory within the selected application's source root."
+    },
+    "project": {
+      "type": "string",
+      "description": "Target application project. Required when more than one application is available."
+    },
+    "primitivesPath": {
+      "type": "string",
+      "format": "path",
+      "default": "src/app/shared/form-helpers",
+      "description": "Directory scanned for reusable ControlValueAccessor field primitives to compose."
+    }
+  },
+  "required": ["name", "definition"],
+  "definitions": {
+    "reactiveFormDefinition": {
+      "title": "angular-django2 reactive-form definition contract",
+      "description": "A single, isolated, create-only form definition. It carries no CRM resource semantics: it never describes list, retrieve, update, or delete operations. Use data-service or openapi-setup for resource operations.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "Optional pointer to this contract; ignored by the schematic."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Accessible form title rendered as the form label."
+        },
+        "endpoint": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^/",
+          "description": "Explicit Django endpoint the form creates against."
+        },
+        "submitLabel": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Submit button label. Defaults to the form title."
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Ordered, non-empty list of controls with unique names.",
+          "items": {
+            "$ref": "#/definitions/reactiveFormField"
+          }
+        },
+        "integration": {
+          "$ref": "#/definitions/reactiveFormIntegration"
+        }
+      },
+      "required": ["title", "endpoint", "fields"]
+    },
+    "reactiveFormField": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-zA-Z0-9_]*$",
+          "description": "Payload key; it must match the Django REST Framework serializer field name."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Accessible label rendered for the control."
+        },
+        "control": {
+          "type": "string",
+          "enum": ["text", "email", "password", "number", "textarea"],
+          "description": "Native Material control kind used for the field."
+        },
+        "initialValue": {
+          "type": ["string", "number", "null"],
+          "default": null,
+          "description": "Initial control value. It must match the control kind: number controls take a number, every other control takes a string."
+        },
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Shorthand for a required validator. It may not be combined with a required entry in validators."
+        },
+        "validators": {
+          "type": "array",
+          "description": "Explicit validators emitted onto the generated control, in addition to the required shorthand and the implicit email validator of an email control. Each kind may be declared only once.",
+          "items": {
+            "$ref": "#/definitions/reactiveFormValidator"
+          }
+        },
+        "hint": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Hint text rendered under the control."
+        },
+        "placeholder": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Placeholder text rendered inside the control."
+        },
+        "autocomplete": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Native autocomplete token rendered on inline controls."
+        }
+      },
+      "required": ["name", "label", "control"]
+    },
+    "reactiveFormValidator": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A single validator entry. required and email take no value; minLength and maxLength take a non-negative integer; min and max take a number; pattern takes a regular-expression string. minLength, maxLength, pattern, and email apply to string controls; min and max apply to number controls.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["required", "email", "minLength", "maxLength", "min", "max", "pattern"],
+          "description": "Supported validator kind."
+        },
+        "value": {
+          "type": ["string", "number"],
+          "description": "Validator argument. Required for every kind except required and email."
+        }
+      },
+      "required": ["type"]
+    },
+    "reactiveFormIntegration": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional integration with a typed artifact that already exists in the application. The schematic never creates the artifact.",
+      "properties": {
+        "artifact": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path of the existing TypeScript artifact within the selected application."
+        },
+        "symbol": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Za-z0-9_]*$",
+          "description": "Exported injectable class used to submit the payload."
+        },
+        "method": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9_]*$",
+          "description": "Create-only method invoked on the exported class."
+        }
+      },
+      "required": ["artifact", "symbol", "method"]
+    }
+  }
+}

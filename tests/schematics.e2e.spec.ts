@@ -1014,4 +1014,178 @@ export class App {
       }
     },
   );
+
+  it(
+    'E2E-08: reactive-form generates a buildable Angular Material form',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'reactive-form-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+
+        // A local primitive that the reactive form must compose instead of inlining.
+        execAngularCli(
+          ['generate', 'angular-django2:form-field', 'email', '--control-type=email'],
+          appPath,
+        );
+
+        fs.writeFileSync(
+          path.join(appPath, 'contact-form.json'),
+          `${JSON.stringify(
+            {
+              title: 'Create contact',
+              endpoint: '/api/contacts/',
+              submitLabel: 'Create contact',
+              fields: [
+                {
+                  name: 'email',
+                  label: 'Email',
+                  control: 'email',
+                  required: true,
+                  autocomplete: 'email',
+                },
+                {
+                  name: 'fullName',
+                  label: 'Full name',
+                  control: 'text',
+                  initialValue: 'Jane Doe',
+                  validators: [
+                    { type: 'required' },
+                    { type: 'minLength', value: 2 },
+                    { type: 'maxLength', value: 120 },
+                    { type: 'pattern', value: '^[A-Za-z .-]+$' },
+                  ],
+                },
+                {
+                  name: 'headcount',
+                  label: 'Headcount',
+                  control: 'number',
+                  initialValue: 1,
+                  validators: [
+                    { type: 'min', value: 1 },
+                    { type: 'max', value: 500 },
+                  ],
+                },
+                { name: 'notes', label: 'Notes', control: 'textarea', hint: 'Optional context' },
+              ],
+            },
+            null,
+            2,
+          )}\n`,
+        );
+
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:reactive-form',
+            'contact',
+            '--definition=contact-form.json',
+          ],
+          appPath,
+        );
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        const formDirectory = path.join(appRoot, 'features', 'contact-form');
+        const generatedComponent = fs.readFileSync(
+          path.join(formDirectory, 'contact-form.ts'),
+          'utf8',
+        );
+        const generatedTemplate = fs.readFileSync(
+          path.join(formDirectory, 'contact-form.html'),
+          'utf8',
+        );
+
+        expect(generatedComponent).toContain('changeDetection: ChangeDetectionStrategy.OnPush');
+        expect(generatedComponent).toContain('export interface ContactFormPayload {');
+        expect(generatedComponent).toContain('readonly submitted = output<ContactFormPayload>();');
+        expect(generatedComponent).toContain('private readonly formBuilder = inject(FormBuilder);');
+        expect(generatedComponent).toContain('readonly form = this.formBuilder.group({');
+        expect(generatedComponent).toContain("  fullName: 'Jane Doe',");
+        expect(generatedComponent).toContain('this.form.reset(INITIAL_VALUES);');
+        expect(generatedComponent).toContain('Validators.minLength(2)');
+        expect(generatedComponent).toContain(
+          'headcount: this.formBuilder.control<number | null>(1, [Validators.min(1), Validators.max(500)]),',
+        );
+        expect(generatedComponent).toContain(
+          "import { EmailFieldComponent } from '../../shared/form-helpers/email-field/email-field';",
+        );
+        expect(generatedTemplate).toContain('<app-email-field');
+        expect(generatedTemplate).toContain('formControlName="fullName"');
+        expect(generatedTemplate).toContain('[attr.aria-busy]="submitting()"');
+
+        // The schematic is create-only: a rerun must not touch existing output.
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:reactive-form',
+            'contact',
+            '--definition=contact-form.json',
+          ],
+          appPath,
+        );
+        expect(fs.readFileSync(path.join(formDirectory, 'contact-form.ts'), 'utf8')).toBe(
+          generatedComponent,
+        );
+
+        const rootComponentPath = fs.existsSync(path.join(appRoot, 'app.ts'))
+          ? path.join(appRoot, 'app.ts')
+          : path.join(appRoot, 'app.component.ts');
+        const rootTemplatePath = fs.existsSync(path.join(appRoot, 'app.html'))
+          ? path.join(appRoot, 'app.html')
+          : path.join(appRoot, 'app.component.html');
+        const rootTemplateName = path.basename(rootTemplatePath);
+
+        fs.writeFileSync(
+          rootComponentPath,
+          `import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ContactFormComponent } from './features/contact-form/contact-form';
+import type { ContactFormPayload } from './features/contact-form/contact-form';
+
+@Component({
+  selector: 'app-root',
+  imports: [ContactFormComponent],
+  templateUrl: './${rootTemplateName}',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class App {
+  onSubmitted(payload: ContactFormPayload): void {
+    console.log(payload.email);
+  }
+}
+`,
+        );
+        fs.writeFileSync(
+          rootTemplatePath,
+          `<app-contact-form (submitted)="onSubmitted($event)"></app-contact-form>\n`,
+        );
+
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-08');
+      }
+    },
+  );
 });

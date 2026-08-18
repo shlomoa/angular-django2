@@ -99,6 +99,7 @@ for each schematic's options.
 | [`complex-component`](complex-component.md) | Generate or maintain an advanced Angular Material component.                  |
 | [`field-component`](field-component.md)     | Generate a simple typed Angular Material field-control convenience component. |
 | [`form-field`](form-field.md)               | Generate a configurable typed Angular Material form field.                    |
+| [`reactive-form`](reactive-form.md)         | Generate a typed Material reactive form from a JSON definition.               |
 | [`service`](service.md)                     | Generate a service.                                                           |
 | [`class`](class.md)                         | Generate a class.                                                             |
 | [`openapi-setup`](openapi-setup.md)         | Bootstrap `ng-openapi-gen` and generate Django integration helpers.           |

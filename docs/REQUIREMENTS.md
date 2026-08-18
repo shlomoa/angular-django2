@@ -73,6 +73,7 @@ sources over lower-priority ones.
   - `complex-component`
   - `field-component`
   - `form-field`
+  - `reactive-form`
   - `service`
   - `material-setup`
   - `project-structure`
@@ -117,6 +118,31 @@ sources over lower-priority ones.
     `@angular/forms`, `@angular/material`, and `@angular/cdk` before mutation,
     reject collisions before writes, and use the same field identity,
     accessibility, and host/server validation-error behavior.
+  - `reactive-form`: generate a typed standalone OnPush Angular Material
+    reactive form from a single JSON definition file supplied through
+    `--definition`. The definition contract is published in the schematic
+    schema and is validated atomically before any file is written: exactly one
+    definition per file, a `/`-prefixed Django endpoint, unique camelCase
+    fields limited to `text`, `email`, `password`, `number`, and `textarea`
+    controls, and no CRM-style keys, because the form is create-only. Fields
+    may declare a type-compatible `initialValue` and an explicit `validators`
+    list limited to `required`, `email`, `minLength`, `maxLength`, `min`,
+    `max`, and `pattern`, using one object shape; malformed, unsupported,
+    duplicated, and control-incompatible validator entries are rejected, and
+    validators are emitted in a canonical order. Output is written to `--path`
+    (default `src/app/features`) inside the selected application's source root
+    and composes an existing local `ControlValueAccessor` primitive from
+    `--primitives-path` (default `src/app/shared/form-helpers`) when exactly
+    one match is found, failing on ambiguity and falling back to inline
+    Material controls otherwise. The generated component builds a strictly
+    typed `FormBuilder` group initialized from the contract and exposes a typed
+    payload, submit state, accessible markup, and Django REST Framework error
+    mapping that retains entered values; declared initial values are restored
+    after an accepted create. An optional `integration` block wires exactly one
+    existing typed artifact after verifying the file, symbol, and method exist.
+    Generation is create-only: a rerun leaves existing output untouched, and
+    partial output fails. It requires `@angular/forms`, `@angular/material`,
+    and `@angular/cdk` before mutation.
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `material-setup`: configure Angular Material theming (prebuilt or custom)
     and providers in an existing project; options: `--theme`, `--typography`,
