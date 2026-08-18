@@ -36,6 +36,7 @@ The current schematics collection includes:
 - `component`
 - `embed-component`
 - `complex-component`
+- `field-component`
 - `service`
 - `material-setup`
 - `project-structure`

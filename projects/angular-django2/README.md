@@ -6,7 +6,7 @@
 
 Full documentation: <https://angular-django2.readthedocs.io/>
 
-The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `complex-component`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
+The package surface is a schematics collection for `application`, `service`, `class`, `app-shell`, `component`, `embed-component`, `complex-component`, `field-component`, `material-setup`, `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`.
 
 ## Schematics
 
@@ -20,6 +20,7 @@ ng generate angular-django2:app-shell --project my-app
 ng generate angular-django2:component dashboard-card
 ng generate angular-django2:embed-component --component=projects/my-app/src/app/hero-card/hero-card.ts --parent=projects/my-app/src/app/dashboard-card/dashboard-card.ts
 ng generate angular-django2:complex-component dashboard-card --project=my-app --path=src/app/features/dashboard --features=mixins,nested,projection,cdk-overlay
+ng generate angular-django2:field-component email-field --project=my-app --kind=email
 ng generate angular-django2:service django-api
 ng generate angular-django2:class api-contract
 ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
@@ -45,6 +46,11 @@ Current defaults:
   - Requires `--path` within an application source tree and a non-empty `--features` list of `mixins`, `nested`, `projection`, and/or `cdk-overlay`
   - Supports `--mode=create|modify|delete`; deletion requires `--confirm=true`
   - Creates a component-local Material theme mixin, optional projected slots and CDK overlay, and two embedded child components for the selected features
+- `field-component`: creates a standalone OnPush Angular Material native-input `ControlValueAccessor`
+  - Requires a kebab-case name; defaults to `src/app/shared/ui/form-helpers/<name>/` in the selected application
+  - Options: `--path`, `--project`, `--kind` (`text`, `email`, `password`, or `textarea`)
+  - Exposes a typed string value model and typed `label`, `required`, `disabled`, `hint`, `placeholder`, and `errorMessage` inputs
+  - Requires `@angular/material` and `@angular/cdk`; run `ng add @angular/material` first
 - `service`, `class`, and `app-shell`: pass through to Angular CLI
 - `material-app`: generates a complete Angular app with Material UI in a single step — runs `application`, adds `@angular/material`/`@angular/cdk`, configures theming, creates the standard directory structure, and writes a responsive sidenav layout
   - Options: `--theme`, `--typography`, `--animations`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--defaults`, `--style`, `--prefix`

@@ -22,6 +22,7 @@ export interface WorkspaceArchitectTarget {
 export type WorkspaceArchitect = Record<string, WorkspaceArchitectTarget | undefined>;
 
 export interface WorkspaceProject {
+  projectType?: 'application' | 'library';
   root?: string;
   sourceRoot?: string;
   architect?: WorkspaceArchitect;
