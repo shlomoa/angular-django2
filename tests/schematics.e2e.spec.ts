@@ -967,11 +967,11 @@ describe('angular-django2 schematics E2E tests', () => {
           `import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmailFormFieldComponent } from './shared/form-helpers/email-form-field/email-form-field';
-          import { TextFieldComponent } from './shared/form-helpers/text-field/text-field';
+import { TextFieldComponent } from './shared/form-helpers/text-field/text-field';
 
-          @Component({
-            selector: 'app-root',
-            imports: [ReactiveFormsModule, EmailFormFieldComponent, TextFieldComponent],
+@Component({
+  selector: 'app-root',
+  imports: [ReactiveFormsModule, EmailFormFieldComponent, TextFieldComponent],
   templateUrl: './${rootTemplateName}',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
