@@ -58,9 +58,7 @@ describe('field-component schematic', () => {
     expect(generated.readContent(componentPath)).toContain(
       'export type DisplayNameValue = string;',
     );
-    expect(generated.readContent(componentPath)).toContain(
-      "selector: 'app-display-name'",
-    );
+    expect(generated.readContent(componentPath)).toContain("selector: 'app-display-name'");
     expect(generated.readContent(componentPath)).toContain(
       'changeDetection: ChangeDetectionStrategy.OnPush',
     );
@@ -91,7 +89,9 @@ describe('field-component schematic', () => {
         `protected readonly kind = '${kind}';`,
       );
       expect(generated.readContent(`${componentRoot}/${kind}-value.html`)).toContain(element);
-      expect(generated.readContent(`${componentRoot}/${kind}-value.html`)).toContain(expectedBinding);
+      expect(generated.readContent(`${componentRoot}/${kind}-value.html`)).toContain(
+        expectedBinding,
+      );
     },
   );
 

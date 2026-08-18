@@ -37,10 +37,7 @@ export function fieldComponent(options: FieldComponentSchema): Rule {
   };
 }
 
-function resolveOptions(
-  tree: Tree,
-  options: FieldComponentSchema,
-): ResolvedFieldComponentOptions {
+function resolveOptions(tree: Tree, options: FieldComponentSchema): ResolvedFieldComponentOptions {
   if (!options.name || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(options.name)) {
     throw new SchematicsException('The field component name must be non-empty kebab-case.');
   }
@@ -56,7 +53,9 @@ function resolveOptions(
   const projectName = resolveProjectName(workspace.projects ?? {}, options.project);
   const project = requireWorkspaceProject(workspace, projectName);
   if (project.projectType !== 'application') {
-    throw new SchematicsException(`Project "${projectName}" must be an Angular application project.`);
+    throw new SchematicsException(
+      `Project "${projectName}" must be an Angular application project.`,
+    );
   }
 
   const sourceRoot = normalizeWorkspacePath(project.sourceRoot ?? '');

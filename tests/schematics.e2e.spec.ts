@@ -944,12 +944,7 @@ describe('angular-django2 schematics E2E tests', () => {
 
         for (const kind of ['text', 'email', 'password', 'textarea']) {
           execAngularCli(
-            [
-              'generate',
-              'angular-django2:field-component',
-              `${kind}-field`,
-              `--kind=${kind}`,
-            ],
+            ['generate', 'angular-django2:field-component', `${kind}-field`, `--kind=${kind}`],
             appPath,
           );
         }
