@@ -967,11 +967,11 @@ describe('angular-django2 schematics E2E tests', () => {
           `import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EmailFormFieldComponent } from './shared/form-helpers/email-form-field/email-form-field';
-          import { TextFieldComponent } from './shared/form-helpers/text-field/text-field';
+import { TextFieldComponent } from './shared/form-helpers/text-field/text-field';
 
-          @Component({
-            selector: 'app-root',
-            imports: [ReactiveFormsModule, EmailFormFieldComponent, TextFieldComponent],
+@Component({
+  selector: 'app-root',
+  imports: [ReactiveFormsModule, EmailFormFieldComponent, TextFieldComponent],
   templateUrl: './${rootTemplateName}',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -1194,6 +1194,63 @@ export class App {
         execAngularCli(['build', '--configuration=development'], appPath);
       } finally {
         cleanupWorkspace(tempArea, 'E2E-08');
+      }
+    },
+  );
+
+  it(
+    'E2E-09: page generates a lazy Angular Material route that builds in development mode',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'page-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:page',
+            'orders',
+            '--path=src/app/features/orders',
+            '--navigation-label=Orders',
+            '--navigation-icon=shopping_cart',
+          ],
+          appPath,
+        );
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        const pageRoute = fs.readFileSync(
+          path.join(appRoot, 'features', 'orders', 'orders.page.routes.ts'),
+          'utf8',
+        );
+        expect(pageRoute).toContain('loadComponent');
+        expect(pageRoute).toContain("path: 'orders'");
+        expect(pageRoute).toContain("navigation: { label: 'Orders', icon: 'shopping_cart' }");
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-09');
       }
     },
   );

@@ -46,6 +46,7 @@ The current schematics collection includes:
 - `workspace-setup`
 - `openapi-setup`
 - `data-service`
+- `page`
 
 ### Build, lint, and package this repository
 

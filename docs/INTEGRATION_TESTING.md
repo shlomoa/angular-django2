@@ -94,6 +94,8 @@ Current E2E coverage includes:
   and the `field-component` convenience façade through metadata (not source
   parsing), including a create-only rerun and a hosted typed payload handler,
   verified with a development build
+- `E2E-09` — `page` generation in a real routed Angular Material workspace,
+  verifying its lazy route and a development build
 
 The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.

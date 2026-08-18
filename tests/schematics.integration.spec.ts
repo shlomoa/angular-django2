@@ -77,6 +77,84 @@ describe('angular-django2 schematics integration tests', () => {
       const angularJson = JSON.parse(tree2.readContent('/angular.json'));
       expect(angularJson.cli.schematicCollections).toEqual(['angular-django2']);
     });
+
+    describe('page schematic integration', () => {
+      it('INT-PAGE-01: generates a lazy standalone Material page in a routed application', async () => {
+        appTree.create(
+          '/package.json',
+          JSON.stringify({
+            dependencies: {
+              '@angular/cdk': '^22.0.0',
+              '@angular/material': '^22.0.0',
+              '@angular/router': '^22.0.0',
+            },
+          }),
+        );
+        appTree.create(
+          '/angular.json',
+          JSON.stringify({
+            version: 1,
+            projects: {
+              demo: {
+                projectType: 'application',
+                root: 'projects/demo',
+                sourceRoot: 'projects/demo/src',
+              },
+            },
+          }),
+        );
+        appTree.create(
+          '/projects/demo/src/app/app.routes.ts',
+          `import type { Routes } from '@angular/router';
+
+  export const routes: Routes = [
+    { path: 'existing', loadComponent: () => import('./existing').then((module) => module.Existing) },
+  ];
+  `,
+        );
+        appTree.create(
+          '/projects/demo/src/app/app.config.ts',
+          `import { provideRouter } from '@angular/router';
+  import { routes } from './app.routes';
+
+  export const appConfig = { providers: [provideRouter(routes)] };
+  `,
+        );
+
+        let tree = (await runner.runSchematic(
+          'page',
+          {
+            name: 'orders',
+            path: 'src/app/features/orders',
+            navigationLabel: 'Orders',
+            navigationIcon: 'shopping_cart',
+          },
+          appTree,
+        )) as UnitTestTree;
+        tree = (await runner.runSchematic(
+          'page',
+          {
+            name: 'orders',
+            path: 'src/app/features/orders',
+            navigationLabel: 'Orders',
+            navigationIcon: 'shopping_cart',
+          },
+          tree,
+        )) as UnitTestTree;
+
+        expect(tree.readContent('/projects/demo/src/app/features/orders/orders-page.ts')).toContain(
+          'ChangeDetectionStrategy.OnPush',
+        );
+        const route = tree.readContent(
+          '/projects/demo/src/app/features/orders/orders.page.routes.ts',
+        );
+        expect(route).toContain('loadComponent');
+        expect(route).toContain("navigation: { label: 'Orders', icon: 'shopping_cart' }");
+        const appRoutes = tree.readContent('/projects/demo/src/app/app.routes.ts');
+        expect(appRoutes).toContain("path: 'existing'");
+        expect(appRoutes.match(/ordersPageRoutes/g)).toHaveLength(2);
+      });
+    });
   });
 
   describe('workspace-setup schematic integration', () => {

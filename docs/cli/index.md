@@ -95,6 +95,7 @@ for each schematic's options.
 | [`project-structure`](project-structure.md) | Create the standard `core/`, `shared/`, and `features/` structure.            |
 | [`app-shell`](app-shell.md)                 | Generate or update the application shell.                                     |
 | [`component`](component.md)                 | Generate a standalone OnPush component with embedding hooks.                  |
+| [`page`](page.md)                           | Generate a standalone OnPush Material page with a feature-owned lazy route.   |
 | [`embed-component`](embed-component.md)     | Embed a component into a parent component.                                    |
 | [`complex-component`](complex-component.md) | Generate or maintain an advanced Angular Material component.                  |
 | [`field-component`](field-component.md)     | Generate a simple façade over the canonical typed Material form field.        |

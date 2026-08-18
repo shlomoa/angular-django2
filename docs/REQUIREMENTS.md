@@ -81,6 +81,7 @@ sources over lower-priority ones.
   - `workspace-setup`
   - `openapi-setup`
   - `data-service`
+  - `page`
 - The documented defaults and behavior currently expected are:
   - `ng-add`: register or prepend `angular-django2` in
     `cli.schematicCollections`
@@ -90,6 +91,14 @@ sources over lower-priority ones.
     begin/end embedding hooks into the generated files — TypeScript `import`,
     `injected services`, `input signals`, and `output signals` sections plus a
     template `children` section — so components can be embedded later
+  - `page`: create a standalone `OnPush` Angular Material page in a selected
+    feature directory, with an owned lazy `Routes` definition and explicit
+    navigation metadata. It requires an application source root, configured
+    `provideRouter(routes)`, and Material/CDK/router dependencies; it rejects
+    unsafe route edits and duplicate paths. Public is the default. Protected
+    routes only reference an already configured reusable guard and backend
+    authorization remains authoritative; the schematic does not generate API
+    clients, forms, shared components, or site-wide policy.
   - `embed-component`: wire a child component into a parent using the embedding
     hooks. In file mode, options are `--component` (child component `.ts` path)
     and `--parent` (parent component `.ts` path). In package mode (add
@@ -122,8 +131,9 @@ sources over lower-priority ones.
     reactive form from a single JSON definition file supplied through
     `--definition`. The definition contract is published in the schematic
     schema and is validated atomically before any file is written: exactly one
-    definition per file, a `/`-prefixed Django endpoint, unique camelCase
-    fields limited to `text`, `email`, `password`, `number`, and `textarea`
+    definition per file, a `/`-prefixed Django endpoint, unique lower-camelCase
+    or snake_case fields limited to `text`, `email`, `password`, `number`, and
+    `textarea`
     controls, and no CRM-style keys, because the form is create-only. Fields
     may declare a type-compatible `initialValue` and an explicit `validators`
     list limited to `required`, `email`, `minLength`, `maxLength`, `min`,
