@@ -6,23 +6,23 @@ Generate a feature-owned, standalone Angular Material page and lazy route.
 ng generate angular-django2:page orders \
   --project=my-app \
   --path=src/app/features/orders \
-  --routePath=orders \
-  --navigationLabel=Orders \
-  --navigationIcon=shopping_cart
+  --route-path=orders \
+  --navigation-label=Orders \
+  --navigation-icon=shopping_cart
 ```
 
 ## Options
 
-| Option            | Required       | Default           | Description                                                                            |
-| ----------------- | -------------- | ----------------- | -------------------------------------------------------------------------------------- |
-| `name`            | yes            | —                 | Kebab-case page and feature name.                                                      |
-| `path`            | yes            | —                 | Feature directory inside the selected application source root.                         |
-| `project`         | no             | inferred          | Angular application project; required when more than one application is available.     |
-| `routePath`       | no             | `name`            | Lowercase URL path for the lazy route.                                                 |
-| `access`          | no             | `public`          | `public` or `protected`.                                                               |
-| `authGuard`       | protected only | `authGuard`       | Existing locally imported guard identifier that is already applied in `app.routes.ts`. |
-| `navigationLabel` | no             | classified `name` | Label stored in route navigation metadata.                                             |
-| `navigationIcon`  | no             | —                 | Material icon name stored in route navigation metadata.                                |
+| Option             | Required       | Default           | Description                                                                            |
+| ------------------ | -------------- | ----------------- | -------------------------------------------------------------------------------------- |
+| `name`             | yes            | —                 | Kebab-case page and feature name.                                                      |
+| `path`             | yes            | —                 | Feature directory inside the selected application source root.                         |
+| `project`          | no             | inferred          | Angular application project; required when more than one application is available.     |
+| `route-path`       | no             | `name`            | Lowercase URL path for the lazy route.                                                 |
+| `access`           | no             | `public`          | `public` or `protected`.                                                               |
+| `auth-guard`       | protected only | `authGuard`       | Existing locally imported guard identifier that is already applied in `app.routes.ts`. |
+| `navigation-label` | no             | classified `name` | Label stored in route navigation metadata.                                             |
+| `navigation-icon`  | no             | —                 | Material icon name stored in route navigation metadata.                                |
 
 ## Generated artifacts
 

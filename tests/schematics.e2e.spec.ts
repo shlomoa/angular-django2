@@ -1047,8 +1047,8 @@ export class App {
             'angular-django2:page',
             'orders',
             '--path=src/app/features/orders',
-            '--navigationLabel=Orders',
-            '--navigationIcon=shopping_cart',
+            '--navigation-label=Orders',
+            '--navigation-icon=shopping_cart',
           ],
           appPath,
         );
