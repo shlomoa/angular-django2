@@ -193,7 +193,102 @@ Rebuild to confirm the wired Material component compiles:
 npx ng build ngdj-tutorial
 ```
 
-## 11. Optional: add an OpenAPI client workflow
+## 11. Add a lazy-routed page
+
+Use the `page` schematic to add a standalone OnPush Material page that owns its
+own lazy route and registers itself in `app.routes.ts`:
+
+```bash
+npx ng generate angular-django2:page orders --project=ngdj-tutorial --path=src/app/features/orders --route-path=orders --navigation-label=Orders --navigation-icon=shopping_cart
+```
+
+This generates the page component, template, styles, and a feature-owned
+`orders.page.routes.ts`, then adds only an import and a spread into the existing
+`routes` array. Re-running the command is idempotent. See the
+[`page` reference](cli/page.md) for `--access=protected` and guard options.
+
+## 12. Generate typed Material form fields
+
+Add reusable typed Material field controls. `field-component` is the simple
+path; use `form-field` when you need explicit appearance, subscript sizing, or
+server-error configuration:
+
+```bash
+npx ng generate angular-django2:field-component email-field --project=ngdj-tutorial --kind=email
+npx ng generate angular-django2:form-field headcount --project=ngdj-tutorial --control-type=number --appearance=outline --subscript-sizing=dynamic
+```
+
+Both generate `ControlValueAccessor` components under
+`src/app/shared/form-helpers/` that bind to a typed `FormControl`. See the
+[`field-component`](cli/field-component.md) and [`form-field`](cli/form-field.md)
+references for the full input surface.
+
+## 13. Generate a reactive form from a definition
+
+The `reactive-form` schematic builds a typed OnPush Material form from a single
+JSON definition. First create a definition file, for example
+`forms/contact-form.json`:
+
+```json
+{
+  "$schema": "./node_modules/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition",
+  "title": "Create contact",
+  "endpoint": "/api/contacts/",
+  "submitLabel": "Create contact",
+  "fields": [
+    { "name": "email", "label": "Email", "control": "email", "required": true, "autocomplete": "email" },
+    { "name": "fullName", "label": "Full name", "control": "text", "validators": [{ "type": "required" }, { "type": "maxLength", "value": 120 }] },
+    { "name": "notes", "label": "Notes", "control": "textarea", "hint": "Optional context" }
+  ]
+}
+```
+
+Then generate the form component:
+
+```bash
+npx ng generate angular-django2:reactive-form contact --definition=forms/contact-form.json --project=ngdj-tutorial --path=src/app/features
+```
+
+The generated form reuses field primitives found under `--primitives-path` and
+creates against the declared Django endpoint. See the
+[`reactive-form` reference](cli/reactive-form.md) for the full definition
+contract, validators, and `integration` wiring.
+
+## 14. Compose an advanced component with complex-component
+
+When a feature needs mixins, nested children, content projection, or a CDK
+overlay, `complex-component` composes `component` and `embed-component` for you:
+
+```bash
+npx ng generate angular-django2:complex-component analytics-panel --project=ngdj-tutorial --path=src/app/features/dashboard --features=mixins,nested,projection
+```
+
+Use `--mode=modify` to add features later, or `--mode=delete --confirm=true` to
+remove the generated directory and its registered theme mixin. See the
+[`complex-component` reference](cli/complex-component.md) for each feature.
+
+Rebuild to confirm the generated code compiles:
+
+```bash
+npx ng build ngdj-tutorial
+```
+
+## 15. Optional: assemble a routed site from OpenUI
+
+For a whole routed site in one step, `site` is an orchestrator that delegates to
+`page`, `reactive-form`, and optional `openapi-setup` from a single OpenUI JSON
+source. It requires an unmodified `material-app` shell, so use it on a fresh
+Material app rather than after the manual edits above:
+
+```bash
+npx ng generate angular-django2:site --project=ngdj-tutorial --source=src/app/openui/site.json
+```
+
+Pass `--defaults` instead of `--source` to generate a single public `Home` page.
+See the [`site` reference](cli/site.md) for the OpenUI source contract and
+create/modify/delete lifecycle.
+
+## 16. Optional: add an OpenAPI client workflow
 
 If your Django backend exposes an OpenAPI schema, bootstrap `ng-openapi-gen`:
 
@@ -263,5 +358,15 @@ npx ng serve ngdj-tutorial
   `angular-django2:embed-component`.
 - Embed existing package components (such as Angular Material) with
   `embed-component` package mode (`--from`).
+- Add feature-owned lazy routes with [`angular-django2:page`](cli/page.md).
+- Generate typed Material form controls with
+  [`angular-django2:field-component`](cli/field-component.md) and
+  [`angular-django2:form-field`](cli/form-field.md).
+- Build typed reactive forms from a JSON definition with
+  [`angular-django2:reactive-form`](cli/reactive-form.md).
+- Compose advanced Material components with
+  [`angular-django2:complex-component`](cli/complex-component.md).
+- Assemble a full routed site from an OpenUI source with
+  [`angular-django2:site`](cli/site.md).
 - Add OpenAPI client generation with `angular-django2:openapi-setup`.
 - Add a data-service wrapper with `angular-django2:data-service`.
