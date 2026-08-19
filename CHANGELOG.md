@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.4.0]
+
+- Added the `site` schematic for generating a complete OpenUI Angular Material site, including routed pages, navigation, responsive layout, and Django CSRF provider wiring.
+- Added typed `reactive-form`, `form-field`, and `field-component` schematics for generating Angular Material form controls and form models.
+- Added the lazy-routed `page` schematic.
+- Improved generated form-field validation/error-state output, disabled-state handling, component-path validation, field-name compatibility, and site navigation safety.
+- Updated Angular, Angular CLI, Angular Material, linting, and test tooling dependencies.
+
 ## [0.3.2]
 
 - Added the advanced `complex-component` schematic for composing Angular Material components with mixins, nested components, projection, and CDK overlays.
