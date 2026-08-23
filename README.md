@@ -317,10 +317,16 @@ ng generate angular-django2:application my-app
 npm install @angular/material @angular/cdk @angular/animations
 ng generate angular-django2:material-setup --project=my-app --theme=indigo-pink --typography=true --animations=true
 ng generate angular-django2:project-structure --project=my-app
-ng generate angular-django2:app-shell --project=my-app
 ng build my-app
 ng serve my-app
 ```
+
+These three schematics produce a Material-configured app with the standard
+`core/`, `shared/`, and `features/` structure, but **not** the responsive
+sidenav layout. That layout is written only by `material-app`; there is no
+standalone layout schematic. Use `material-app` for the layout, or hand-author
+the root component. The `app-shell` schematic is unrelated — it wraps Angular's
+SSR/prerendering app-shell feature, not the Material layout.
 
 #### Provisioning application source files from `workspace-setup`
 

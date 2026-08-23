@@ -167,6 +167,60 @@ describe('angular-django2 schematics E2E tests', () => {
     console.log(`[${testId}] ✓ Workspace cleaned up`);
   }
 
+  // Both documented app-setup flows start from an empty workspace with the built
+  // package installed and registered; this shared setup keeps the two flow tests DRY.
+  function bootstrapEmptyWorkspace(
+    tempArea: TestTempAreaHandle,
+    workspaceName: string,
+    testId: string,
+  ): string {
+    const parentDir = path.dirname(repoRoot);
+    const workspaceRoot = path.join(tempArea.path, workspaceName);
+    const relativeDirectory = path.relative(parentDir, workspaceRoot);
+    const libraryPath = getLibraryPackagePath();
+
+    console.log(`[${testId}] Creating empty Angular workspace...`);
+    execAngularCli(
+      [
+        'new',
+        workspaceName,
+        `--directory=${relativeDirectory}`,
+        '--skip-git',
+        '--skip-install',
+        '--create-application=false',
+        '--defaults',
+      ],
+      parentDir,
+    );
+    expect(fs.existsSync(workspaceRoot)).toBe(true);
+
+    console.log(`[${testId}] Installing dependencies and angular-django2...`);
+    execCommand('npm install', workspaceRoot);
+    execCommand(`npm install "${libraryPath}"`, workspaceRoot);
+    execAngularCli(['add', 'angular-django2', '--skip-confirmation'], workspaceRoot);
+
+    const angularJson = JSON.parse(
+      fs.readFileSync(path.join(workspaceRoot, 'angular.json'), 'utf8'),
+    );
+    expect(angularJson.cli?.schematicCollections).toContain('angular-django2');
+    console.log(`[${testId}] ✓ Workspace ready`);
+
+    return workspaceRoot;
+  }
+
+  function resolveAppComponentPath(appRoot: string): string {
+    // Angular 21+ names the root component app.ts; older versions use app.component.ts.
+    return fs.existsSync(path.join(appRoot, 'app.ts'))
+      ? path.join(appRoot, 'app.ts')
+      : path.join(appRoot, 'app.component.ts');
+  }
+
+  function resolveAppTemplatePath(appRoot: string): string {
+    return fs.existsSync(path.join(appRoot, 'app.html'))
+      ? path.join(appRoot, 'app.html')
+      : path.join(appRoot, 'app.component.html');
+  }
+
   beforeAll(() => {
     if (debugMode) {
       console.log('[E2E] Debug mode enabled; skipping stale temp area cleanup.');
@@ -1340,6 +1394,138 @@ export class App {
         execAngularCli(['build', '--configuration=development'], appPath);
       } finally {
         cleanupWorkspace(tempArea, 'E2E-10');
+      }
+    },
+  );
+
+  it(
+    'E2E-11: one-step app flow (material-app) builds and writes the responsive sidenav layout',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const projectName = 'demo';
+      console.log(`\n[E2E-11] Test workspace: ${tempArea.path}`);
+
+      try {
+        const workspaceRoot = bootstrapEmptyWorkspace(tempArea, 'onestep-app', 'E2E-11');
+
+        // One-step flow: workspace bootstrap files, then the composite material-app.
+        console.log('[E2E-11] Running workspace-setup + material-app...');
+        execAngularCli(
+          ['generate', 'angular-django2:workspace-setup', projectName],
+          workspaceRoot,
+        );
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:material-app',
+            projectName,
+            '--theme=indigo-pink',
+            '--typography=true',
+            '--animations=true',
+            '--ssr=false',
+            '--zoneless=true',
+            '--defaults',
+          ],
+          workspaceRoot,
+        );
+        execCommand('npm install', workspaceRoot);
+        console.log('[E2E-11] ✓ material-app flow completed');
+
+        const appRoot = path.join(workspaceRoot, 'projects', projectName, 'src', 'app');
+
+        // Content: the composite writes the responsive Material sidenav layout.
+        const appComponent = fs.readFileSync(resolveAppComponentPath(appRoot), 'utf8');
+        expect(appComponent).toContain('MatToolbarModule');
+        expect(appComponent).toContain('MatSidenavModule');
+        expect(fs.readFileSync(resolveAppTemplatePath(appRoot), 'utf8')).toContain('mat-sidenav');
+
+        // Content: Material theme is configured and the standard structure exists.
+        const angularJson = JSON.parse(
+          fs.readFileSync(path.join(workspaceRoot, 'angular.json'), 'utf8'),
+        );
+        expect(angularJson.projects[projectName].architect.build.options.styles).toContain(
+          '@angular/material/prebuilt-themes/indigo-pink.css',
+        );
+        for (const dir of ['core', 'shared/components', 'shared/pipes', 'features']) {
+          expect(fs.existsSync(path.join(appRoot, dir, 'index.ts'))).toBe(true);
+        }
+        console.log('[E2E-11] ✓ Sidenav layout, theme, and structure verified');
+
+        // Works: a production build succeeds and emits browser artifacts.
+        execAngularCli(['build', projectName, '--configuration=production'], workspaceRoot);
+        const distPath = path.join(workspaceRoot, 'dist', projectName, 'browser');
+        expect(fs.existsSync(path.join(distPath, 'index.html'))).toBe(true);
+        console.log('[E2E-11] ✅ One-step flow verified');
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-11');
+      }
+    },
+  );
+
+  it(
+    'E2E-12: step-by-step app flow (application + material-setup + project-structure) builds without the sidenav layout',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const projectName = 'demo';
+      console.log(`\n[E2E-12] Test workspace: ${tempArea.path}`);
+
+      try {
+        const workspaceRoot = bootstrapEmptyWorkspace(tempArea, 'stepwise-app', 'E2E-12');
+
+        // Step-by-step flow: three explicit schematics instead of the composite.
+        console.log('[E2E-12] Running application + material-setup + project-structure...');
+        execAngularCli(['generate', 'angular-django2:application', projectName], workspaceRoot);
+        execCommand(
+          'npm install @angular/material @angular/cdk @angular/animations',
+          workspaceRoot,
+        );
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:material-setup',
+            `--project=${projectName}`,
+            '--theme=indigo-pink',
+            '--typography=true',
+            '--animations=true',
+          ],
+          workspaceRoot,
+        );
+        execAngularCli(
+          ['generate', 'angular-django2:project-structure', `--project=${projectName}`],
+          workspaceRoot,
+        );
+        execCommand('npm install', workspaceRoot);
+        console.log('[E2E-12] ✓ step-by-step flow completed');
+
+        const appRoot = path.join(workspaceRoot, 'projects', projectName, 'src', 'app');
+
+        // Content: Material theme is configured and the standard structure exists.
+        const angularJson = JSON.parse(
+          fs.readFileSync(path.join(workspaceRoot, 'angular.json'), 'utf8'),
+        );
+        expect(angularJson.projects[projectName].architect.build.options.styles).toContain(
+          '@angular/material/prebuilt-themes/indigo-pink.css',
+        );
+        for (const dir of ['core', 'shared/components', 'shared/pipes', 'features']) {
+          expect(fs.existsSync(path.join(appRoot, dir, 'index.ts'))).toBe(true);
+        }
+
+        // Content boundary: this flow does NOT write the responsive sidenav layout;
+        // only material-app does. See docs/cli/index.md "Step-by-step app setup".
+        expect(fs.readFileSync(resolveAppComponentPath(appRoot), 'utf8')).not.toContain(
+          'MatSidenavModule',
+        );
+        console.log('[E2E-12] ✓ Theme and structure present; sidenav layout absent');
+
+        // Works: a production build succeeds and emits browser artifacts.
+        execAngularCli(['build', projectName, '--configuration=production'], workspaceRoot);
+        const distPath = path.join(workspaceRoot, 'dist', projectName, 'browser');
+        expect(fs.existsSync(path.join(distPath, 'index.html'))).toBe(true);
+        console.log('[E2E-12] ✅ Step-by-step flow verified');
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-12');
       }
     },
   );

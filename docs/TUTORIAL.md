@@ -104,8 +104,8 @@ Node-side checks.
 
 ## 5. Generate the working app with ngdj
 
-Now generate the Angular application, Material setup, project structure, and app
-shell in one flow:
+Now generate the Angular application, Material setup, project structure, and
+responsive layout in one flow:
 
 ```bash
 npx ng generate angular-django2:material-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults

@@ -99,6 +99,12 @@ Current E2E coverage includes:
   verifying its lazy route and a development build
 - `E2E-10` — `site` assembly from a representative OpenUI source and optional
   OpenAPI input, verifying generated routes/forms and a development build
+- `E2E-11` — one-step app flow (`material-app`), verifying a production build and
+  that the responsive Material sidenav layout, theme, and standard structure are
+  present
+- `E2E-12` — step-by-step app flow (`application` + `material-setup` +
+  `project-structure`), verifying a production build, the theme and standard
+  structure, and that the sidenav layout is absent (only `material-app` writes it)
 
 The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.

@@ -25,7 +25,7 @@ ng add angular-django2
 See [`ng-add`](ng-add.md) for what this registers and how to configure it
 manually.
 
-## Recommended app flow
+## One-step app flow
 
 For an empty Angular workspace, generate the workspace-level bootstrap files
 first, then generate the application:
@@ -67,21 +67,31 @@ npm install ../angular-django2/dist/angular-django2
 
 ## Step-by-step app setup
 
-Use the lower-level schematics when you want explicit control over each stage:
+The [one-step app flow](#one-step-app-flow) above uses `material-app`, a
+one-step composite that generates the application, configures Angular Material,
+creates the standard directory structure, and writes the responsive Material
+sidenav layout. Use the step-by-step flow below when you want explicit control
+over the first three of those stages as separate schematics:
 
 ```bash
 ng generate angular-django2:application my-app
 npm install @angular/material @angular/cdk @angular/animations
 ng generate angular-django2:material-setup --project=my-app --theme=indigo-pink --typography=true --animations=true
 ng generate angular-django2:project-structure --project=my-app
-ng generate angular-django2:app-shell --project=my-app
 ng build my-app
 ng serve my-app
 ```
 
-See [`application`](application.md), [`material-setup`](material-setup.md),
-[`project-structure`](project-structure.md), and [`app-shell`](app-shell.md)
-for each schematic's options.
+See [`application`](application.md), [`material-setup`](material-setup.md), and
+[`project-structure`](project-structure.md) for each schematic's options.
+
+These three steps produce a Material-configured application with the standard
+`core/`, `shared/`, and `features/` structure, but **not** the responsive
+sidenav layout. That layout is written only by [`material-app`](material-app.md);
+there is no standalone layout schematic. Use `material-app` for the layout, or
+hand-author the root component. The standalone [`app-shell`](app-shell.md)
+schematic is unrelated — it wraps Angular's SSR/prerendering app-shell feature,
+not the Material layout.
 
 ## Commands
 
@@ -93,7 +103,7 @@ for each schematic's options.
 | [`workspace-setup`](workspace-setup.md)     | Initialize workspace-level files for an empty Angular workspace.              |
 | [`material-setup`](material-setup.md)       | Configure Angular Material in an existing project.                            |
 | [`project-structure`](project-structure.md) | Create the standard `core/`, `shared/`, and `features/` structure.            |
-| [`app-shell`](app-shell.md)                 | Generate or update the application shell.                                     |
+| [`app-shell`](app-shell.md)                 | Pass-through to Angular's SSR `app-shell` schematic (not the Material layout). |
 | [`component`](component.md)                 | Generate a standalone OnPush component with embedding hooks.                  |
 | [`page`](page.md)                           | Generate a standalone OnPush Material page with a feature-owned lazy route.   |
 | [`site`](site.md)                           | Assemble a validated OpenUI-defined Material site in an existing app.         |
