@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.4.1]
+
+- Expanded the tutorial, CLI reference, package README, and integration-testing guidance for the current schematics workflow.
+- Added cross-platform end-to-end schematic coverage and documented the shared temporary-workspace test harness.
+
 ## [0.4.0]
 
 - Added the `site` schematic for generating a complete OpenUI Angular Material site, including routed pages, navigation, responsive layout, and Django CSRF provider wiring.
