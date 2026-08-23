@@ -1411,10 +1411,7 @@ export class App {
 
         // One-step flow: workspace bootstrap files, then the composite material-app.
         console.log('[E2E-11] Running workspace-setup + material-app...');
-        execAngularCli(
-          ['generate', 'angular-django2:workspace-setup', projectName],
-          workspaceRoot,
-        );
+        execAngularCli(['generate', 'angular-django2:workspace-setup', projectName], workspaceRoot);
         execAngularCli(
           [
             'generate',

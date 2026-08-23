@@ -95,27 +95,27 @@ not the Material layout.
 
 ## Commands
 
-| Command                                     | Purpose                                                                       |
-| ------------------------------------------- | ----------------------------------------------------------------------------- |
-| [`ng-add`](ng-add.md)                       | Register `angular-django2` as a schematic collection.                         |
-| [`application`](application.md)             | Generate an Angular application using package defaults.                       |
-| [`material-app`](material-app.md)           | Generate a Django-friendly Angular app with Material UI and a sidenav layout. |
-| [`workspace-setup`](workspace-setup.md)     | Initialize workspace-level files for an empty Angular workspace.              |
-| [`material-setup`](material-setup.md)       | Configure Angular Material in an existing project.                            |
-| [`project-structure`](project-structure.md) | Create the standard `core/`, `shared/`, and `features/` structure.            |
+| Command                                     | Purpose                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------ |
+| [`ng-add`](ng-add.md)                       | Register `angular-django2` as a schematic collection.                          |
+| [`application`](application.md)             | Generate an Angular application using package defaults.                        |
+| [`material-app`](material-app.md)           | Generate a Django-friendly Angular app with Material UI and a sidenav layout.  |
+| [`workspace-setup`](workspace-setup.md)     | Initialize workspace-level files for an empty Angular workspace.               |
+| [`material-setup`](material-setup.md)       | Configure Angular Material in an existing project.                             |
+| [`project-structure`](project-structure.md) | Create the standard `core/`, `shared/`, and `features/` structure.             |
 | [`app-shell`](app-shell.md)                 | Pass-through to Angular's SSR `app-shell` schematic (not the Material layout). |
-| [`component`](component.md)                 | Generate a standalone OnPush component with embedding hooks.                  |
-| [`page`](page.md)                           | Generate a standalone OnPush Material page with a feature-owned lazy route.   |
-| [`site`](site.md)                           | Assemble a validated OpenUI-defined Material site in an existing app.         |
-| [`embed-component`](embed-component.md)     | Embed a component into a parent component.                                    |
-| [`complex-component`](complex-component.md) | Generate or maintain an advanced Angular Material component.                  |
-| [`field-component`](field-component.md)     | Generate a simple façade over the canonical typed Material form field.        |
-| [`form-field`](form-field.md)               | Generate the canonical configurable typed Angular Material form field.        |
-| [`reactive-form`](reactive-form.md)         | Generate a typed form that composes canonical Material field output.          |
-| [`service`](service.md)                     | Generate a service.                                                           |
-| [`class`](class.md)                         | Generate a class.                                                             |
-| [`openapi-setup`](openapi-setup.md)         | Bootstrap `ng-openapi-gen` and generate Django integration helpers.           |
-| [`data-service`](data-service.md)           | Generate a typed `*DataService` wrapper around a generated OpenAPI service.   |
+| [`component`](component.md)                 | Generate a standalone OnPush component with embedding hooks.                   |
+| [`page`](page.md)                           | Generate a standalone OnPush Material page with a feature-owned lazy route.    |
+| [`site`](site.md)                           | Assemble a validated OpenUI-defined Material site in an existing app.          |
+| [`embed-component`](embed-component.md)     | Embed a component into a parent component.                                     |
+| [`complex-component`](complex-component.md) | Generate or maintain an advanced Angular Material component.                   |
+| [`field-component`](field-component.md)     | Generate a simple façade over the canonical typed Material form field.         |
+| [`form-field`](form-field.md)               | Generate the canonical configurable typed Angular Material form field.         |
+| [`reactive-form`](reactive-form.md)         | Generate a typed form that composes canonical Material field output.           |
+| [`service`](service.md)                     | Generate a service.                                                            |
+| [`class`](class.md)                         | Generate a class.                                                              |
+| [`openapi-setup`](openapi-setup.md)         | Bootstrap `ng-openapi-gen` and generate Django integration helpers.            |
+| [`data-service`](data-service.md)           | Generate a typed `*DataService` wrapper around a generated OpenAPI service.    |
 
 ## Discover command help
 

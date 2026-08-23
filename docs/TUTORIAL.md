@@ -236,8 +236,19 @@ JSON definition. First create a definition file, for example
   "endpoint": "/api/contacts/",
   "submitLabel": "Create contact",
   "fields": [
-    { "name": "email", "label": "Email", "control": "email", "required": true, "autocomplete": "email" },
-    { "name": "fullName", "label": "Full name", "control": "text", "validators": [{ "type": "required" }, { "type": "maxLength", "value": 120 }] },
+    {
+      "name": "email",
+      "label": "Email",
+      "control": "email",
+      "required": true,
+      "autocomplete": "email"
+    },
+    {
+      "name": "fullName",
+      "label": "Full name",
+      "control": "text",
+      "validators": [{ "type": "required" }, { "type": "maxLength", "value": 120 }]
+    },
     { "name": "notes", "label": "Notes", "control": "textarea", "hint": "Optional context" }
   ]
 }
