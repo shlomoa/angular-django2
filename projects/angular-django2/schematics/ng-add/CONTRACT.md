@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The `ng-add` schematic registers `angular-django2` as a schematic collection in the Angular workspace's `angular.json` configuration file. This schematic is invoked by `ng add angular-django2` and is a critical dependency for the djng `ng-workspace` skill.
+The `ng-add` schematic registers `angular-django2` as a schematic collection in the Angular workspace's `angular.json` configuration file. This schematic is invoked by `ng add angular-django2` and is used by direct Angular CLI workflows and external orchestrators such as `djng`.
 
 ## Input
 

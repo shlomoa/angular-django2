@@ -5,6 +5,10 @@ source. `site` is an orchestrator: it delegates page, reactive-form, and
 optional OpenAPI setup to their published contracts instead of generating a
 client or backend authorization policy.
 
+Assembly is deterministic: the same validated OpenUI source, options, and
+workspace state select the same delegated operations and produce the same
+output or the same explicit validation error.
+
 ```bash
 ng generate angular-django2:site \
   --project=my-app \

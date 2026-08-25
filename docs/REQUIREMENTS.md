@@ -47,6 +47,14 @@ sources over lower-priority ones.
 
 - The package must ship an Angular CLI schematics collection for custom
   `ng generate` flows.
+- Generation must remain deterministic and must not load or execute AI agents,
+  provider SDKs, prompts, or SKILLS.
+- Schematics must consume explicit, validated options, workspace state, and
+  structured input documents. For the same accepted inputs and workspace
+  state, package-owned transformations must select the same operations and
+  produce the same output or the same explicit validation error.
+- External orchestrators may invoke public schematic contracts but must not
+  change their inputs, outputs, behavior, or error contract.
 - Standalone Angular patterns and provider-style APIs are preferred over
   module-centric patterns in generated code.
 - Django integration concerns must remain explicit in generated code and
@@ -301,6 +309,8 @@ sources over lower-priority ones.
 ## 10. Non-Goals And Boundaries
 
 - Do not treat this repo like a generic Angular app scaffold.
+- Do not make AI agents, provider SDKs, prompts, or SKILLS part of schematic
+  generation.
 - Do not widen the schematics behavior without a concrete use case.
 - Do not hide Django-specific integration behavior behind unclear defaults.
 - Do not let docs, release instructions, and package behavior drift apart.

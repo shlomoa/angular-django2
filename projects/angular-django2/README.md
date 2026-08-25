@@ -4,6 +4,11 @@
 
 `angular-django2` provides an Angular CLI schematics collection for custom `ng generate` flows in Django-backed applications. It covers application and workspace setup, Angular Material integration, pages and sites, reactive forms and form fields, component composition and embedding, and OpenAPI/Django data services.
 
+Generation uses deterministic Angular CLI schematics with explicit, validated
+inputs. The package does not load or execute AI agents, provider SDKs, prompts,
+or SKILLS; external orchestrators may invoke the same public schematic
+contracts without changing their behavior.
+
 **Full documentation: <https://angular-django2.readthedocs.io/>**
 
 ## Install

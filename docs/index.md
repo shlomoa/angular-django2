@@ -8,6 +8,11 @@ The package surface is a schematics collection: `application`, `service`, `class
 `project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and
 `data-service`.
 
+Generation uses deterministic Angular CLI schematics with explicit, validated
+inputs. The package does not load or execute AI agents, provider SDKs, prompts,
+or SKILLS; external orchestrators may invoke the same public contracts without
+changing their behavior.
+
 Start with the [tutorial](TUTORIAL.md) to go from an empty directory to a
 working app with Angular CLI and the ngdj schematics. See the [CLI guide](cli/index.md)
 for install, `ng add`, `ng generate`, app setup, and OpenAPI workflow examples.

@@ -14,6 +14,19 @@ It is designed to work especially well with
 [django-angular3](https://github.com/shlomoa/django-angular3), which owns the
 Django-side workspace lifecycle and can register this package automatically.
 
+## Generation model
+
+`ngdj` generates through deterministic Angular CLI schematics. Schematics
+consume explicit, validated options, workspace state, and structured input
+documents; the package does not load or execute AI agents, provider SDKs,
+prompts, or SKILLS. For the same accepted inputs and workspace state,
+package-owned schematic transformations select the same operations and produce
+the same output or the same explicit validation error.
+
+External orchestrators such as `django-angular3` may invoke the public
+schematic contracts, but orchestration does not change their inputs, outputs,
+behavior, or error contract.
+
 ## Repository
 
 ### What this repository contains
