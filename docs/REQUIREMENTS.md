@@ -30,7 +30,7 @@ sources over lower-priority ones.
 - **OpenUI**: An external, technology-independent UI-description specification.
   Its purpose and vocabulary are defined by the
   [OpenUI specification](https://github.com/shlomoa/openui-spec/blob/main/spec/README.md),
-  and the roles of its schema, catalog, and concrete UI specification are
+  and the roles of its schema, catalog, and concrete UI document are
   defined by the
   [OpenUI artifact-role SSOT](https://github.com/shlomoa/openui-spec/blob/main/spec/README.md#specification-artifacts-grammar-vs-catalog).
   This repository does not redefine that contract.
@@ -123,7 +123,7 @@ sources over lower-priority ones.
     records a typed ownership manifest. No source requires the documented
     Home-only defaults. Create/modify are idempotent; confirmed delete restores
     only the unchanged owned shell and removes only its manifest. The site
-    assembly definition is not an OpenUI concrete UI specification. OpenAPI
+    assembly definition is not an OpenUI concrete UI document. OpenAPI
     remains a separately typed reference, and Django/DRF remains authoritative
     for protected operations.
   - `embed-component`: wire a child component into a parent using the embedding

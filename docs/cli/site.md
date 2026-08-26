@@ -12,7 +12,7 @@ output or the same explicit validation error.
 ```bash
 ng generate angular-django2:site \
   --project=my-app \
-  --source=src/app/openui/site.json
+  --source=src/app/site/site.json
 ```
 
 ## Prerequisites
@@ -47,7 +47,7 @@ typed input and is passed to [`openapi-setup`](openapi-setup.md).
       "navigation": { "id": "contact", "label": "Contact", "icon": "mail" }
     }
   ],
-  "forms": [{ "name": "contact", "definition": "src/app/openui/contact-form.json" }],
+  "forms": [{ "name": "contact", "definition": "src/app/forms/contact-form.json" }],
   "openapi": {
     "spec": "openapi.json",
     "outputPath": "src/app/api",

@@ -70,7 +70,7 @@ describe('site schematic', () => {
   it('TC-SITE-01: registers and assembles a source-defined Material shell, routes, forms, and CSRF provider', async () => {
     const tree = createMaterialApplicationTree();
     tree.create(
-      '/src/app/openui/contact-form.json',
+      '/src/app/forms/contact-form.json',
       JSON.stringify({
         title: 'Contact',
         endpoint: '/api/contact/',
@@ -78,7 +78,7 @@ describe('site schematic', () => {
       }),
     );
     tree.create(
-      '/src/app/openui/site.json',
+      '/src/app/site/site.json',
       JSON.stringify({
         pages: [
           {
@@ -87,13 +87,13 @@ describe('site schematic', () => {
             navigation: { id: 'contact', label: 'Contact "team"', icon: 'mail' },
           },
         ],
-        forms: [{ name: 'contact', definition: 'src/app/openui/contact-form.json' }],
+        forms: [{ name: 'contact', definition: 'src/app/forms/contact-form.json' }],
       }),
     );
 
     const result = await createRunner().runSchematic(
       'site',
-      { project: 'demo', source: 'src/app/openui/site.json' },
+      { project: 'demo', source: 'src/app/site/site.json' },
       tree,
     );
 
@@ -108,7 +108,7 @@ describe('site schematic', () => {
     ).toHaveLength(1);
     expect(result.readContent('/src/app/app.html')).toContain('Contact &quot;team&quot;');
     expect(result.readContent('/.angular-django2/site/demo.json')).toContain(
-      '"source": "src/app/openui/site.json"',
+      '"source": "src/app/site/site.json"',
     );
   });
 
@@ -138,7 +138,7 @@ describe('site schematic', () => {
   it('TC-SITE-04: rejects a protected page without an existing applied guard', async () => {
     const tree = createMaterialApplicationTree();
     tree.create(
-      '/src/app/openui/site.json',
+      '/src/app/site/site.json',
       JSON.stringify({
         pages: [
           {
@@ -153,16 +153,16 @@ describe('site schematic', () => {
     await expect(
       createRunner().runSchematic(
         'site',
-        { project: 'demo', source: 'src/app/openui/site.json' },
+        { project: 'demo', source: 'src/app/site/site.json' },
         tree,
       ),
-    ).rejects.toThrow('Protected OpenUI pages require existing');
+    ).rejects.toThrow('Protected site pages require existing');
   });
 
-  it('TC-SITE-05: rejects conflicting OpenUI routes and navigation identifiers', async () => {
+  it('TC-SITE-05: rejects conflicting site routes and navigation identifiers', async () => {
     const tree = createMaterialApplicationTree();
     tree.create(
-      '/src/app/openui/site.json',
+      '/src/app/site/site.json',
       JSON.stringify({
         pages: [
           { name: 'orders', navigation: { id: 'shared', label: 'Orders' } },
@@ -178,7 +178,7 @@ describe('site schematic', () => {
     await expect(
       createRunner().runSchematic(
         'site',
-        { project: 'demo', source: 'src/app/openui/site.json' },
+        { project: 'demo', source: 'src/app/site/site.json' },
         tree,
       ),
     ).rejects.toThrow('conflicting route paths');

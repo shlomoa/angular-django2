@@ -292,7 +292,7 @@ definition. It requires an unmodified `material-app` shell, so use it on a fresh
 Material app rather than after the manual edits above:
 
 ```bash
-npx ng generate angular-django2:site --project=ngdj-tutorial --source=src/app/openui/site.json
+npx ng generate angular-django2:site --project=ngdj-tutorial --source=src/app/site/site.json
 ```
 
 Pass `--defaults` instead of `--source` to generate a single public `Home` page.

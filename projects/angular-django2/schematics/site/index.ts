@@ -63,7 +63,7 @@ interface SiteManifest {
 }
 
 /**
- * Assemble a site from a single inspected OpenUI definition. The schematic
+ * Assemble a site from a single inspected site assembly definition. The schematic
  * delegates page, reactive-form, and optional OpenAPI setup generation to their
  * public schematic contracts after validating the entire plan on a branch.
  */
@@ -159,14 +159,14 @@ function resolveSite(tree: Tree, options: SiteSchema): ResolvedSite {
     };
   }
   const source = options.source
-    ? resolveInputPath(project, options.source, 'OpenUI source')
+    ? resolveInputPath(project, options.source, 'Site assembly definition')
     : undefined;
   const definition = source
     ? readDefinition(tree, source)
     : options.defaults
       ? DEFAULT_DEFINITION
       : fail<SiteDefinition>(
-          'Pass --source with a validated OpenUI definition, or pass --defaults for the documented Home-only site.',
+          'Pass --source with a validated site assembly definition, or pass --defaults for the documented Home-only site.',
         );
 
   assertApplicationPrerequisites(tree, appRoutesPath, appConfigPath, definition);
@@ -250,24 +250,32 @@ function resolveInputPath(project: WorkspaceProject, value: string, label: strin
 function readDefinition(tree: Tree, source: string): SiteDefinition {
   const content = tree.read(source);
   if (!content) {
-    throw new SchematicsException(`The OpenUI source "${source.slice(1)}" was not found.`);
+    throw new SchematicsException(
+      `The site assembly definition "${source.slice(1)}" was not found.`,
+    );
   }
   let value: unknown;
   try {
     value = JSON.parse(content.toString());
   } catch {
-    throw new SchematicsException(`The OpenUI source "${source.slice(1)}" is not valid JSON.`);
+    throw new SchematicsException(
+      `The site assembly definition "${source.slice(1)}" is not valid JSON.`,
+    );
   }
   if (!isRecord(value)) {
-    throw new SchematicsException('The OpenUI source must be one JSON object.');
+    throw new SchematicsException('The site assembly definition must be one JSON object.');
   }
   const keys = Object.keys(value);
   const unknown = keys.filter((key) => !['pages', 'forms', 'openapi'].includes(key));
   if (unknown.length > 0) {
-    throw new SchematicsException(`Unsupported OpenUI source key(s): ${unknown.join(', ')}.`);
+    throw new SchematicsException(
+      `Unsupported site assembly definition key(s): ${unknown.join(', ')}.`,
+    );
   }
   if (!Array.isArray(value.pages) || value.pages.length === 0) {
-    throw new SchematicsException('The OpenUI source must define a non-empty pages array.');
+    throw new SchematicsException(
+      'The site assembly definition must define a non-empty pages array.',
+    );
   }
 
   const pages = value.pages.map((page, index) => parsePage(page, index));
@@ -295,32 +303,32 @@ function readDefinition(tree: Tree, source: string): SiteDefinition {
 
 function parsePage(value: unknown, index: number): SiteDefinition['pages'][number] {
   if (!isRecord(value)) {
-    throw new SchematicsException(`OpenUI page ${index + 1} must be an object.`);
+    throw new SchematicsException(`Site page ${index + 1} must be an object.`);
   }
   const unknown = Object.keys(value).filter(
     (key) => !['name', 'path', 'routePath', 'access', 'navigation'].includes(key),
   );
   if (unknown.length > 0) {
     throw new SchematicsException(
-      `OpenUI page ${index + 1} has unsupported key(s): ${unknown.join(', ')}.`,
+      `Site page ${index + 1} has unsupported key(s): ${unknown.join(', ')}.`,
     );
   }
   if (!isKebabCase(value.name)) {
-    throw new SchematicsException(`OpenUI page ${index + 1} name must be non-empty kebab-case.`);
+    throw new SchematicsException(`Site page ${index + 1} name must be non-empty kebab-case.`);
   }
   if (value.path !== undefined && !isString(value.path)) {
-    throw new SchematicsException(`OpenUI page "${value.name}" path must be a string.`);
+    throw new SchematicsException(`Site page "${value.name}" path must be a string.`);
   }
   if (
     value.routePath !== undefined &&
     (!isString(value.routePath) || !isRoutePath(value.routePath))
   ) {
-    throw new SchematicsException(`OpenUI page "${value.name}" routePath is invalid.`);
+    throw new SchematicsException(`Site page "${value.name}" routePath is invalid.`);
   }
   const access = value.access;
   if (access !== undefined && access !== 'public' && access !== 'protected') {
     throw new SchematicsException(
-      `OpenUI page "${value.name}" access must be public or protected.`,
+      `Site page "${value.name}" access must be public or protected.`,
     );
   }
   if (
@@ -329,14 +337,14 @@ function parsePage(value: unknown, index: number): SiteDefinition['pages'][numbe
     !isString(value.navigation.label)
   ) {
     throw new SchematicsException(
-      `OpenUI page "${value.name}" requires navigation.id and navigation.label.`,
+      `Site page "${value.name}" requires navigation.id and navigation.label.`,
     );
   }
   if (
     value.navigation.icon !== undefined &&
     (!isString(value.navigation.icon) || !/^[a-z0-9_]+$/.test(value.navigation.icon))
   ) {
-    throw new SchematicsException(`OpenUI page "${value.name}" navigation.icon is invalid.`);
+    throw new SchematicsException(`Site page "${value.name}" navigation.icon is invalid.`);
   }
   return {
     name: value.name,
@@ -353,19 +361,19 @@ function parsePage(value: unknown, index: number): SiteDefinition['pages'][numbe
 
 function parseForms(value: unknown): SiteFormDefinition[] {
   if (!Array.isArray(value)) {
-    throw new SchematicsException('OpenUI forms must be an array.');
+    throw new SchematicsException('Site forms must be an array.');
   }
   const forms = value.map((form, index) => {
     if (!isRecord(form) || !isKebabCase(form.name) || !isString(form.definition)) {
       throw new SchematicsException(
-        `OpenUI form ${index + 1} requires kebab-case name and a definition path.`,
+        `Site form ${index + 1} requires kebab-case name and a definition path.`,
       );
     }
     const unknown = Object.keys(form).filter(
       (key) => !['name', 'definition', 'path'].includes(key),
     );
     if (unknown.length > 0 || (form.path !== undefined && !isString(form.path))) {
-      throw new SchematicsException(`OpenUI form "${form.name}" is invalid.`);
+      throw new SchematicsException(`Site form "${form.name}" is invalid.`);
     }
     return {
       name: form.name,
@@ -382,7 +390,7 @@ function parseForms(value: unknown): SiteFormDefinition[] {
 
 function parseOpenapi(value: unknown): NonNullable<SiteDefinition['openapi']> {
   if (!isRecord(value) || !isString(value.spec)) {
-    throw new SchematicsException('OpenUI openapi requires a spec path.');
+    throw new SchematicsException('Site OpenAPI setup requires a spec path.');
   }
   const unknown = Object.keys(value).filter(
     (key) => !['spec', 'outputPath', 'helpersPath'].includes(key),
@@ -392,7 +400,7 @@ function parseOpenapi(value: unknown): NonNullable<SiteDefinition['openapi']> {
     (value.outputPath !== undefined && !isString(value.outputPath)) ||
     (value.helpersPath !== undefined && !isString(value.helpersPath))
   ) {
-    throw new SchematicsException('OpenUI openapi is invalid.');
+    throw new SchematicsException('Site OpenAPI setup is invalid.');
   }
   return {
     spec: value.spec,
@@ -496,7 +504,7 @@ function assertProtectedPagePrerequisites(
   const applied = new RegExp(`canActivate\\s*:\\s*\\[[^\\]]*\\b${authGuard}\\b`).test(appRoutes);
   if (!imported || !applied) {
     throw new SchematicsException(
-      `Protected OpenUI pages require existing "${authGuard}" import and canActivate configuration in app.routes.ts. Client guards guide navigation only; Django/DRF remains authoritative.`,
+      `Protected site pages require existing "${authGuard}" import and canActivate configuration in app.routes.ts. Client guards guide navigation only; Django/DRF remains authoritative.`,
     );
   }
 }
@@ -716,7 +724,7 @@ function renderShell(definition: SiteDefinition): string {
 
 function assertUnique(values: readonly string[], label: string): void {
   if (new Set(values).size !== values.length) {
-    throw new SchematicsException(`OpenUI source contains conflicting ${label}.`);
+    throw new SchematicsException(`Site assembly definition contains conflicting ${label}.`);
   }
 }
 

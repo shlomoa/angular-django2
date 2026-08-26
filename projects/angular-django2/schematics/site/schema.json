@@ -2,14 +2,14 @@
   "$schema": "http://json-schema.org/schema",
   "$id": "AngularDjango2Site",
   "title": "angular-django2 site schematic",
-  "description": "Assemble a Material site from one bounded, non-CRM OpenUI definition. Without --source, pass --defaults to generate the documented Home-only site.",
+  "description": "Assemble a Material site from one bounded site assembly definition. Without --source, pass --defaults to generate the documented Home-only site.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "source": {
       "type": "string",
       "format": "path",
-      "description": "Workspace-relative JSON OpenUI definition. It is the only source used to discover site pages, navigation, forms, and optional OpenAPI setup."
+      "description": "Workspace-relative JSON site assembly definition. It is the only source used to discover site pages, navigation, forms, and optional OpenAPI setup."
     },
     "defaults": {
       "type": "boolean",

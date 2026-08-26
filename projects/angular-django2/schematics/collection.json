@@ -32,7 +32,7 @@
       "schema": "./page/schema.json"
     },
     "site": {
-      "description": "Assemble a validated OpenUI-defined Angular Material site in an existing Material application.",
+      "description": "Assemble a validated, explicitly defined Angular Material site in an existing Material application.",
       "factory": "./site/index#site",
       "schema": "./site/schema.json"
     },
