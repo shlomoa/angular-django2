@@ -27,6 +27,9 @@ sources over lower-priority ones.
 - **django-angular3**: A companion Django package that provides Django
   management commands (`django-admin`) for Angular workspace operations,
   including automatic invocation of `ng add angular-django2`.
+- **djangoangular**: The code name for the tight Django–Angular integration
+  formed by `djng` and `ngdj`. Its canonical definition is in
+  [django-angular3 architecture §2.6.1](https://github.com/shlomoa/django-angular3/blob/main/doc/ARCHITECTURE.md#261-djangoangular).
 - **OpenUI**: An external, technology-independent UI-description specification.
   Its purpose and vocabulary are defined by the
   [OpenUI specification](https://github.com/shlomoa/openui-spec/blob/main/spec/README.md),

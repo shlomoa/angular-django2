@@ -327,9 +327,7 @@ function parsePage(value: unknown, index: number): SiteDefinition['pages'][numbe
   }
   const access = value.access;
   if (access !== undefined && access !== 'public' && access !== 'protected') {
-    throw new SchematicsException(
-      `Site page "${value.name}" access must be public or protected.`,
-    );
+    throw new SchematicsException(`Site page "${value.name}" access must be public or protected.`);
   }
   if (
     !isRecord(value.navigation) ||
