@@ -27,6 +27,13 @@ sources over lower-priority ones.
 - **django-angular3**: A companion Django package that provides Django
   management commands (`django-admin`) for Angular workspace operations,
   including automatic invocation of `ng add angular-django2`.
+- **OpenUI**: An external, technology-independent UI-description specification.
+  Its purpose and vocabulary are defined by the
+  [OpenUI specification](https://github.com/shlomoa/openui-spec/blob/main/spec/README.md),
+  and the roles of its schema, catalog, and concrete UI specification are
+  defined by the
+  [OpenUI artifact-role SSOT](https://github.com/shlomoa/openui-spec/blob/main/spec/README.md#specification-artifacts-grammar-vs-catalog).
+  This repository does not redefine that contract.
 
 ## 1. Repository Identity
 
@@ -109,15 +116,16 @@ sources over lower-priority ones.
     authorization remains authoritative; the schematic does not generate API
     clients, forms, shared components, or site-wide policy.
   - `site`: assemble an existing, unmodified `material-app` shell from one
-    source-root OpenUI JSON definition. It validates all discovered page, form,
+    source-root site assembly definition. It validates all discovered page, form,
     route, navigation, authentication, CSRF, and path prerequisites before
     mutation; delegates page, reactive-form, and optional openapi-setup through
     their public contracts; writes explicit XSRF provider configuration; and
     records a typed ownership manifest. No source requires the documented
     Home-only defaults. Create/modify are idempotent; confirmed delete restores
-    only the unchanged owned shell and removes only its manifest. OpenAPI and
-    non-CRM OpenUI inputs remain separate typed references, and Django/DRF
-    remains authoritative for protected operations.
+    only the unchanged owned shell and removes only its manifest. The site
+    assembly definition is not an OpenUI concrete UI specification. OpenAPI
+    remains a separately typed reference, and Django/DRF remains authoritative
+    for protected operations.
   - `embed-component`: wire a child component into a parent using the embedding
     hooks. In file mode, options are `--component` (child component `.ts` path)
     and `--parent` (parent component `.ts` path). In package mode (add

@@ -97,7 +97,7 @@ Current E2E coverage includes:
   verified with a development build
 - `E2E-09` — `page` generation in a real routed Angular Material workspace,
   verifying its lazy route and a development build
-- `E2E-10` — `site` assembly from a representative OpenUI source and optional
+- `E2E-10` — `site` assembly from a representative site definition and optional
   OpenAPI input, verifying generated routes/forms and a development build
 - `E2E-11` — one-step app flow (`material-app`), verifying a production build and
   that the responsive Material sidenav layout, theme, and standard structure are

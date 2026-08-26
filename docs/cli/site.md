@@ -1,11 +1,11 @@
 # `site`
 
-Assemble a routed Angular Material site from one bounded, non-CRM OpenUI JSON
-source. `site` is an orchestrator: it delegates page, reactive-form, and
+Assemble a routed Angular Material site from one bounded JSON site assembly
+definition. `site` is an orchestrator: it delegates page, reactive-form, and
 optional OpenAPI setup to their published contracts instead of generating a
 client or backend authorization policy.
 
-Assembly is deterministic: the same validated OpenUI source, options, and
+Assembly is deterministic: the same validated site assembly definition, options, and
 workspace state select the same delegated operations and produce the same
 output or the same explicit validation error.
 
@@ -22,14 +22,14 @@ workspace. `site` requires an existing standalone Angular application with
 `app.routes.ts`, `provideRouter(routes)`, a Material prebuilt theme, and the
 unmodified `material-app` root shell. It refuses to replace a custom shell or
 navigation. It also requires Material, CDK, router, and HTTP dependencies (and
-forms when the OpenUI source declares forms).
+forms when the site assembly definition declares forms).
 
 Protected pages require the named `--auth-guard` (default `authGuard`) to
 already be imported and applied through `canActivate` in `app.routes.ts`.
 Client guards guide navigation only; Django/DRF remains the authorization
 boundary.
 
-## OpenUI source contract
+## Site assembly definition contract
 
 `--source` is a source-root-relative `.json` file and is the only input used to
 discover pages, navigation, forms, and optional OpenAPI setup. No CRM resource
@@ -67,14 +67,14 @@ page at `/home`; omitting both fails.
 ## Output and lifecycle
 
 `site` adds an explicit `provideHttpClient(withXsrfConfiguration(...))` provider
-using Django's `csrftoken` / `X-CSRFToken` defaults, writes OpenUI navigation
+using Django's `csrftoken` / `X-CSRFToken` defaults, writes declared navigation
 into the known Material shell, invokes the owned page and form outputs, and
 records the shell baseline and inspected definition in
 `.angular-django2/site/<project>.json`.
 
 | Option               | Default       | Description                                     |
 | -------------------- | ------------- | ----------------------------------------------- |
-| `--source`           | —             | Source-root-relative OpenUI JSON source.        |
+| `--source`           | —             | Source-root-relative site assembly JSON.        |
 | `--defaults`         | `false`       | Generate only the documented Home-only default. |
 | `--project`          | inferred      | Target Angular application.                     |
 | `--operation`        | `create`      | `create`, `modify`, or `delete`.                |

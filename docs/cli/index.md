@@ -106,7 +106,7 @@ not the Material layout.
 | [`app-shell`](app-shell.md)                 | Pass-through to Angular's SSR `app-shell` schematic (not the Material layout). |
 | [`component`](component.md)                 | Generate a standalone OnPush component with embedding hooks.                   |
 | [`page`](page.md)                           | Generate a standalone OnPush Material page with a feature-owned lazy route.    |
-| [`site`](site.md)                           | Assemble a validated OpenUI-defined Material site in an existing app.          |
+| [`site`](site.md)                           | Assemble a validated, explicitly defined Material site in an existing app.     |
 | [`embed-component`](embed-component.md)     | Embed a component into a parent component.                                     |
 | [`complex-component`](complex-component.md) | Generate or maintain an advanced Angular Material component.                   |
 | [`field-component`](field-component.md)     | Generate a simple façade over the canonical typed Material form field.         |

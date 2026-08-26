@@ -284,11 +284,11 @@ Rebuild to confirm the generated code compiles:
 npx ng build ngdj-tutorial
 ```
 
-## 15. Optional: assemble a routed site from OpenUI
+## 15. Optional: assemble a routed site from a site definition
 
 For a whole routed site in one step, `site` is an orchestrator that delegates to
-`page`, `reactive-form`, and optional `openapi-setup` from a single OpenUI JSON
-source. It requires an unmodified `material-app` shell, so use it on a fresh
+`page`, `reactive-form`, and optional `openapi-setup` from a single site assembly
+definition. It requires an unmodified `material-app` shell, so use it on a fresh
 Material app rather than after the manual edits above:
 
 ```bash
@@ -296,7 +296,7 @@ npx ng generate angular-django2:site --project=ngdj-tutorial --source=src/app/op
 ```
 
 Pass `--defaults` instead of `--source` to generate a single public `Home` page.
-See the [`site` reference](cli/site.md) for the OpenUI source contract and
+See the [`site` reference](cli/site.md) for the site assembly definition contract and
 create/modify/delete lifecycle.
 
 ## 16. Optional: add an OpenAPI client workflow
@@ -377,7 +377,7 @@ npx ng serve ngdj-tutorial
   [`angular-django2:reactive-form`](cli/reactive-form.md).
 - Compose advanced Material components with
   [`angular-django2:complex-component`](cli/complex-component.md).
-- Assemble a full routed site from an OpenUI source with
+- Assemble a full routed site from a site assembly definition with
   [`angular-django2:site`](cli/site.md).
 - Add OpenAPI client generation with `angular-django2:openapi-setup`.
 - Add a data-service wrapper with `angular-django2:data-service`.
