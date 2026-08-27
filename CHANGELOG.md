@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.4.2]
+
+- Aligned package documentation and schematic messaging around the `ngdj`/`djangoangular` terminology and explicit site assembly definitions.
+- Updated generated site, OpenAPI setup, and reactive-form terminology to use resource-neutral names, with corresponding unit, integration, and end-to-end coverage.
+
 ## [0.4.1]
 
 - Expanded the tutorial, CLI reference, package README, and integration-testing guidance for the current schematics workflow.
