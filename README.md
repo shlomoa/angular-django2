@@ -399,7 +399,7 @@ This flow:
 - generates Django integration helpers under `--helpersPath` (default
   `src/app/api-integration`): auth/CSRF/transport helpers
   (`provideDjangoApiTransport`, `readCsrfCookie`, `djangoAuthInterceptor`,
-  `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) and a CRM-oriented
+  `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) and an API-contract-derived
   `ResourceAdapter` with a DRF-style `PaginatedResult`
 - lets you wrap a generated `*ApiService` in a typed `*DataService`
 

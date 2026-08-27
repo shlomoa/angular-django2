@@ -64,11 +64,11 @@ const TEXT_VALIDATOR_KINDS = new Set<ReactiveFormValidatorKind>([
 const NUMBER_VALIDATOR_KINDS = new Set<ReactiveFormValidatorKind>(['min', 'max']);
 
 /**
- * Keys that would turn the isolated create-only contract into a CRM resource
- * contract. They are rejected with an explicit pointer to the CRM-oriented
- * schematics instead of being silently ignored.
+ * Keys that would turn the isolated create-only contract into a
+ * resource-operation contract. They are rejected with an explicit pointer to
+ * resource-operation schematics instead of being silently ignored.
  */
-const CRM_KEYS = new Set([
+const RESOURCE_OPERATION_KEYS = new Set([
   'adapter',
   'crud',
   'delete',
@@ -431,11 +431,11 @@ function assertKnownKeys(
   scope: string,
 ): void {
   const keys = Object.keys(value);
-  const crmKeys = keys.filter((key) => CRM_KEYS.has(key));
-  if (crmKeys.length > 0) {
+  const resourceOperationKeys = keys.filter((key) => RESOURCE_OPERATION_KEYS.has(key));
+  if (resourceOperationKeys.length > 0) {
     throw definitionError(
       definitionPath,
-      `"${scope}" declares CRM resource key(s): ${crmKeys.join(', ')}. reactive-form definitions ` +
+      `"${scope}" declares resource-operation key(s): ${resourceOperationKeys.join(', ')}. reactive-form definitions ` +
         'are create-only; use data-service or openapi-setup for resource operations.',
     );
   }

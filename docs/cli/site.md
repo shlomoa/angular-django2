@@ -32,8 +32,9 @@ boundary.
 ## Site assembly definition contract
 
 `--source` is a source-root-relative `.json` file and is the only input used to
-discover pages, navigation, forms, and optional OpenAPI setup. No CRM resource
-definition is accepted. Form definition paths are also source-root-relative and
+discover pages, navigation, forms, and optional OpenAPI setup. No
+resource-operation definition is accepted, and the site assembly definition is
+not an OpenUI input. Form definition paths are also source-root-relative and
 are passed to [`reactive-form`](reactive-form.md); OpenAPI remains a separately
 typed input and is passed to [`openapi-setup`](openapi-setup.md).
 

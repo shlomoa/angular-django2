@@ -2,8 +2,8 @@
 
 Generate a typed standalone, `OnPush` Angular Material **reactive form** from a
 single JSON definition. The generated component creates one Django REST
-Framework resource; it is not a CRM resource shell, and it does not generate a
-list, retrieve, update, or delete flow.
+Framework resource; it is not a resource-operation shell, and it does not
+generate list, retrieve, update, or delete operations.
 
 ```bash
 ng generate angular-django2:reactive-form contact \
@@ -127,7 +127,7 @@ schematic rejects — without creating output — invalid JSON, a file holding m
 than one definition, unknown keys, duplicate or malformed field names, an
 unsupported control, a relative endpoint, an initial value that does not match
 its control, a malformed, unsupported, duplicated, or control-incompatible
-validator entry, and CRM-style keys such as `resource`, `list`, `retrieve`,
+validator entry, and resource-operation keys such as `resource`, `list`, `retrieve`,
 `update`, `partialUpdate`, `destroy`, `delete`, `crud`, `operations`, or
 `adapter`. Those keys are reported as create-only violations; use
 [`data-service`](data-service.md) or [`openapi-setup`](openapi-setup.md) for

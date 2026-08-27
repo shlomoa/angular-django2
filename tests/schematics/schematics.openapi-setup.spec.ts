@@ -258,7 +258,7 @@ describe('angular-django2 schematics', () => {
       expect(transport).toContain('Authorization: authorization');
     });
 
-    it('TC-API-11: resource adapter helper exposes CRM CRUD composition points', () => {
+    it('TC-API-11: resource adapter helper exposes API-contract-derived CRUD composition points', () => {
       const tree = Tree.empty();
       tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
 

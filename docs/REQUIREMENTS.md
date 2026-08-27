@@ -164,7 +164,7 @@ sources over lower-priority ones.
     definition per file, a `/`-prefixed Django endpoint, unique lower-camelCase
     or snake_case fields limited to `text`, `email`, `password`, `number`, and
     `textarea`
-    controls, and no CRM-style keys, because the form is create-only. Fields
+    controls, and no resource-operation keys, because the form is create-only. Fields
     may declare a type-compatible `initialValue` and an explicit `validators`
     list limited to `required`, `email`, `minLength`, `maxLength`, `min`,
     `max`, and `pattern`, using one object shape; malformed, unsupported,
@@ -211,7 +211,7 @@ sources over lower-priority ones.
     artifacts under `helpersPath` — auth/CSRF/transport helpers
     (`provideDjangoApiTransport`, `readCsrfCookie`, `djangoAuthInterceptor`,
     `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) in
-    `django-transport.ts`, a CRM-oriented `ResourceAdapter` with a DRF-style
+    `django-transport.ts`, an API-contract-derived `ResourceAdapter` with a DRF-style
     `PaginatedResult` in `resource-adapter.ts`, and a barrel `index.ts`; options:
     `--openapi_spec_file` (default: `openapi.json`), `--outputPath` (default:
     `src/app/api`), `--helpersPath` (default: `src/app/api-integration`),

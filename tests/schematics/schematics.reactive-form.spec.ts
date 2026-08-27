@@ -235,7 +235,7 @@ describe('reactive-form schematic', () => {
     const cases: [unknown, string][] = [
       ['{ not json', 'not valid JSON'],
       [[DEFINITION], 'exactly one form definition object'],
-      [{ ...DEFINITION, resource: 'contacts' }, 'CRM resource key'],
+      [{ ...DEFINITION, resource: 'contacts' }, 'resource-operation key'],
       [{ ...DEFINITION, list: true }, 'create-only'],
       [{ ...DEFINITION, unexpected: true }, 'unsupported key(s): unexpected'],
       [{ ...DEFINITION, fields: [] }, '"fields" must be a non-empty array'],

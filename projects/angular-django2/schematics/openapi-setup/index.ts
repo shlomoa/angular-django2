@@ -82,7 +82,7 @@ function generateConfigFile(
 
 /**
  * Generate the Django integration helper artifacts (auth, CSRF, transport, and
- * CRM-oriented resource adapters) into the workspace.
+ * API-contract-derived resource adapters) into the workspace.
  */
 function generateHelperArtifacts(
   tree: Tree,

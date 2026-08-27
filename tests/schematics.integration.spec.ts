@@ -971,7 +971,7 @@ export const appConfig: ApplicationConfig = {
       expect(template).toContain('controlType="textarea"');
     });
 
-    it('INT-RF-02: rejects a CRM-shaped definition without writing output', async () => {
+    it('INT-RF-02: rejects a resource-operation-shaped definition without writing output', async () => {
       const tree = await setupWorkspace();
       tree.create(
         '/projects/app/form.json',

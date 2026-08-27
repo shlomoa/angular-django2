@@ -142,7 +142,7 @@ export function provideDjangoApiTransport(
 }
 
 /**
- * CRM-oriented resource adapter and shared integration helpers.
+ * API-contract-derived resource adapter and shared integration helpers.
  * @internal
  */
 function resourceAdapterContent(): string {
@@ -170,7 +170,7 @@ export interface ResourceQuery {
 }
 
 /**
- * CRM-oriented adapter over a generated \`<Resource>ApiService\` client.
+ * API-contract-derived adapter over a generated \`<Resource>ApiService\` client.
  *
  * Concrete adapters implement each operation by delegating to the generated
  * service and returning typed \`Observable\`s. Route responses through

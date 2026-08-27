@@ -40,7 +40,7 @@
   "definitions": {
     "reactiveFormDefinition": {
       "title": "angular-django2 reactive-form definition contract",
-      "description": "A single, isolated, create-only form definition. It carries no CRM resource semantics: it never describes list, retrieve, update, or delete operations. Use data-service or openapi-setup for resource operations.",
+      "description": "A single, isolated, create-only form definition. It carries no resource-operation semantics: it never describes list, retrieve, update, or delete operations. Use data-service or openapi-setup for resource operations.",
       "type": "object",
       "additionalProperties": false,
       "properties": {

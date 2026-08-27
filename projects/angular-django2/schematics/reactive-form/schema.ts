@@ -91,7 +91,7 @@ export interface ReactiveFormIntegrationDefinition {
 /**
  * The single, isolated, create-only form definition contract.
  *
- * It intentionally carries no CRM resource semantics: it never describes list,
+ * It intentionally carries no resource-operation semantics: it never describes list,
  * retrieve, update, or delete operations.
  */
 export interface ReactiveFormDefinition {
