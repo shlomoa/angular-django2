@@ -20,14 +20,14 @@ Contact shlomoa@lightmoneysw.com with questions about contributing and before op
    `npm run format:check` checks file formatting. `npm run format` fixes file
    formatting.
 
-3. Run the main verification commands as needed:
+3. Run the canonical verification flow before opening a pull request:
 
    ```bash
    npm run format:check
-   ng lint
-   npm run test:node
-   npm run test:ci
+   npm run lint
    npm run build
+   npm run test:ci
+   npm run pack:dry-run
    ```
 
 ## Project Layout

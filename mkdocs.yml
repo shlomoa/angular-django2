@@ -14,6 +14,7 @@ exclude_docs: |
 nav:
   - Home: index.md
   - Tutorial: TUTORIAL.md
+  - Releasing: RELEASING.md
   - CLI:
       - Overview: cli/index.md
       - ng-add: cli/ng-add.md

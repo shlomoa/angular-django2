@@ -141,7 +141,7 @@ validation:
 | `npm run test:e2e`              | End-to-end schematic suite in `tests/schematics.e2e.spec.ts`, with stale tmp-area cleanup          |
 | `npm run test:e2e:watch`        | Watch mode for the E2E suite, with stale tmp-area cleanup before watch starts                      |
 | `npm run test:e2e:debug`        | End-to-end schematic suite without temp-area cleanup, useful for failure debugging                 |
-| `npm run test:ci`               | `npm run test:node` plus Angular library tests; does **not** run the E2E suite                     |
+| `npm run test:ci`               | `npm run test:node` plus Angular Material reference-app tests; does **not** run the E2E suite      |
 | `npm run test:node -- <spec>`   | Useful for running only a specific integration spec such as `tests/schematics.integration.spec.ts` |
 
 ## Prerequisites and caveats

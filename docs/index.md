@@ -2,11 +2,11 @@
 
 `angular-django2` provides an Angular CLI schematics collection for custom `ng generate` flows in Django-backed applications.
 
-The package surface is a schematics collection: `application`, `service`, `class`,
-`app-shell`, `component`, `site`, `embed-component`, `complex-component`,
-`field-component`, `form-field`, `reactive-form`, `page`, `material-setup`,
-`project-structure`, `material-app`, `workspace-setup`, `openapi-setup`, and
-`data-service`.
+The package surface is a schematics collection: `ng-add`, `application`,
+`service`, `class`, `app-shell`, `component`, `site`, `embed-component`,
+`complex-component`, `field-component`, `form-field`, `reactive-form`, `page`,
+`material-setup`, `project-structure`, `material-app`, `workspace-setup`,
+`openapi-setup`, and `data-service`.
 
 Generation uses deterministic Angular CLI schematics with explicit, validated
 inputs. The package does not load or execute AI agents, provider SDKs, prompts,

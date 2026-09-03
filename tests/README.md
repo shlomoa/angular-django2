@@ -1,8 +1,8 @@
 # Testing for `angular-django2`
 
 This directory documents everything related to testing and validation in this
-repository: Angular library tests, Node-side schematic tests, end-to-end
-workspace tests, and the temp-area helper harnesses.
+repository: Angular Material reference-app tests, Node-side schematic tests,
+end-to-end workspace tests, and the temp-area helper harnesses.
 
 Integration and end-to-end testing details are centralized in
 `docs/INTEGRATION_TESTING.md`. Use that document as the canonical source for
@@ -163,8 +163,8 @@ platform-specific `ChromeHeadless` setup.
 npm run test:ci
 ```
 
-This runs Node-side specs, Angular library tests, and checked-in Angular
-Material reference app tests, but not the E2E suite.
+This runs Node-side specs and checked-in Angular Material reference-app tests,
+but not the E2E suite.
 
 ## Integration-specific prerequisites and caveats
 
@@ -182,12 +182,15 @@ formatting locally before rerunning validation.
 
 The main CI flow runs:
 
-1. `npm run format:check`
-2. `npm run lint`
-3. `npm run build`
-4. `npm run test:ci`
-5. `npm run pack:dry-run`
+1. `npm run check:package-metadata`
+2. `npm run format:check`
+3. `npm run lint`
+4. `npm run build`
+5. `npm run test:ci`
+6. `npm pack ./dist/angular-django2 --dry-run`
+7. `git diff --exit-code`
 
 That means the default CI path covers formatting, linting, compiled schematics,
-Node-side tests, Angular library tests, and package verification, while the
-E2E suite remains a separate, explicit step.
+Node-side tests, Angular Material reference-app tests, source and distribution
+metadata validation, package verification, and tracked-file mutation checks,
+while the E2E suite remains a separate, explicit step.

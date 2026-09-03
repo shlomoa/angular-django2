@@ -245,10 +245,11 @@ sources over lower-priority ones.
   dev-server scripts available without making the library project an
   application.
 - The most important verification commands called out in repo guidance are:
+  - `npm run check:package-metadata`
   - `npm run format:check`
   - `npm run lint`
-  - `npm run test:ci`
   - `npm run build`
+  - `npm run test:ci`
   - `npm run pack:dry-run`
 - `npm run release:prepare` is the release validation command and currently
   runs:
