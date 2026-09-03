@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.4.3]
+
+- Added a single package-metadata projection with explicit source synchronization and read-only source/distribution validation.
+- Updated release versioning to keep the root manifest, publishable package manifest, and lockfile root records aligned.
+- Strengthened CI and publishing checks against metadata drift and unexpected build mutations.
+- Aligned contributor, testing, release, and Read the Docs documentation with the current workspace workflows.
+
 ## [0.4.2]
 
 - Aligned package documentation and schematic messaging around the `ngdj`/`djangoangular` terminology and explicit site assembly definitions.
