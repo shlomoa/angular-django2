@@ -77,19 +77,21 @@ npm install
 
 #### Common repository commands
 
-| Command                         | What it does                                                                              |
-| ------------------------------- | ----------------------------------------------------------------------------------------- |
-| `npm run build`                 | Syncs package metadata and compiles the schematics collection into `dist/angular-django2` |
-| `npm run build:reference-app`   | Builds the Angular Material reference app                                                 |
-| `npm run lint`                  | Runs ESLint across schematics, tests, and tools                                           |
-| `npm run lint:reference-app`    | Runs ESLint for the reference app project                                                 |
-| `npm run lint:fix`              | Applies fixable ESLint changes                                                            |
-| `npm run serve:reference-app`   | Starts the reference app dev server                                                       |
-| `npm run format:check`          | Checks file formatting with Prettier                                                      |
-| `npm run format`                | Fixes file formatting with Prettier                                                       |
-| `npm run pack:dry-run`          | Rebuilds and verifies the npm tarball without publishing                                  |
-| `npm run sync:package-metadata` | Syncs publishable package metadata from the root manifest                                 |
-| `npm run release:prepare`       | Runs the release verification flow                                                        |
+| Command                               | What it does                                                                                         |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm run build`                       | Validates source metadata, builds the schematics package, and validates its distribution metadata    |
+| `npm run build:reference-app`         | Builds the Angular Material reference app                                                            |
+| `npm run lint`                        | Runs ESLint across schematics, tests, and tools                                                      |
+| `npm run lint:reference-app`          | Runs ESLint for the reference app project                                                            |
+| `npm run lint:fix`                    | Applies fixable ESLint changes                                                                       |
+| `npm run serve:reference-app`         | Starts the reference app dev server                                                                  |
+| `npm run format:check`                | Checks file formatting with Prettier                                                                 |
+| `npm run format`                      | Fixes file formatting with Prettier                                                                  |
+| `npm run pack:dry-run`                | Rebuilds and verifies the npm tarball without publishing                                             |
+| `npm run sync:package-metadata`       | Explicitly synchronizes publishable package metadata from the root manifest                          |
+| `npm run check:package-metadata`      | Checks the source package manifest without modifying it                                              |
+| `npm run check:dist-package-metadata` | Checks the generated distribution manifest without modifying it; requires `npm run build` beforehand |
+| `npm run release:prepare`             | Runs the release verification flow                                                                   |
 
 `npm run build` produces the publishable output in `dist/angular-django2`,
 including the compiled schematics collection.
@@ -172,7 +174,6 @@ Before release:
 
 2. Sync checked-in version references and release-facing docs as needed:
 
-- `package-lock.json`
 - `CHANGELOG.md`
 - `README.md`
 - `projects/angular-django2/README.md`

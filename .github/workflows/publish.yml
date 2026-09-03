@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check package metadata
+        run: npm run check:package-metadata
+
       - name: Check formatting
         run: npm run format:check
 
@@ -41,10 +44,10 @@ jobs:
       - name: Run tests
         run: npm run test:ci
 
-      - name: Rebuild for publish
-        run: npm run build
-
       - name: Publish package
         run: npm publish ./dist/angular-django2 --access public --tag "${{ inputs.npm-tag }}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify tracked files are unchanged
+        run: git diff --exit-code

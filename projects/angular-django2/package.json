@@ -23,5 +23,9 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0",
+    "npm": ">=11"
   }
 }

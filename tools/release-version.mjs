@@ -1,17 +1,18 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { syncPackageMetadataFiles } from './sync-package-metadata.mjs';
+import { syncPackageMetadata } from './sync-package-metadata.mjs';
 
 const rootPackagePath = new URL('../package.json', import.meta.url);
 const libraryPackagePath = new URL('../projects/angular-django2/package.json', import.meta.url);
+const packageLockPath = new URL('../package-lock.json', import.meta.url);
 
 const releaseTypes = new Set(['patch', 'minor', 'major', 'prerelease']);
 const semverPattern =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 
 function isObject(value) {
-  return value !== null && typeof value === 'object';
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function normalizePath(pathLike) {
@@ -177,12 +178,33 @@ export async function updateReleaseVersionFiles(releaseTypeOrVersion = 'patch', 
     preid = 'rc',
     rootManifestPath = rootPackagePath,
     libraryManifestPath = libraryPackagePath,
+    lockfilePath = packageLockPath,
   } = options;
 
-  const rootPackage = JSON.parse(await readFile(rootManifestPath, 'utf8'));
+  const [rootPackage, libraryPackage, packageLock] = await Promise.all(
+    [rootManifestPath, libraryManifestPath, lockfilePath].map(async (path) =>
+      JSON.parse(await readFile(path, 'utf8')),
+    ),
+  );
 
   if (!isObject(rootPackage) || typeof rootPackage.version !== 'string') {
     throw new Error('Expected the root package manifest to contain a string version field.');
+  }
+
+  if (!isObject(libraryPackage)) {
+    throw new Error('Expected the publishable package manifest to contain a JSON object.');
+  }
+
+  if (
+    !isObject(packageLock) ||
+    typeof packageLock.version !== 'string' ||
+    !isObject(packageLock.packages) ||
+    !isObject(packageLock.packages['']) ||
+    typeof packageLock.packages[''].version !== 'string'
+  ) {
+    throw new Error(
+      'Expected the package lockfile to contain string version fields at "version" and "packages[\"\"].version".',
+    );
   }
 
   const currentVersion = rootPackage.version;
@@ -191,17 +213,36 @@ export async function updateReleaseVersionFiles(releaseTypeOrVersion = 'patch', 
     ...rootPackage,
     version: nextVersion,
   };
+  const nextLibraryPackage = syncPackageMetadata(nextRootPackage, libraryPackage);
+  const nextPackageLock = {
+    ...packageLock,
+    version: nextVersion,
+    packages: {
+      ...packageLock.packages,
+      '': {
+        ...packageLock.packages[''],
+        version: nextVersion,
+      },
+    },
+  };
 
-  await writeFile(rootManifestPath, `${JSON.stringify(nextRootPackage, null, 2)}\n`);
-  const { libraryPackage } = await syncPackageMetadataFiles(rootManifestPath, libraryManifestPath);
+  await Promise.all([
+    writeFile(rootManifestPath, `${JSON.stringify(nextRootPackage, null, 2)}\n`),
+    writeFile(libraryManifestPath, `${JSON.stringify(nextLibraryPackage, null, 2)}\n`),
+    writeFile(lockfilePath, `${JSON.stringify(nextPackageLock, null, 2)}\n`),
+  ]);
 
   return {
-    changedFiles: [normalizePath(rootManifestPath), normalizePath(libraryManifestPath)],
+    changedFiles: [
+      normalizePath(rootManifestPath),
+      normalizePath(libraryManifestPath),
+      normalizePath(lockfilePath),
+    ],
     currentVersion,
     nextVersion,
     preid,
     releaseTypeOrVersion,
-    libraryVersion: libraryPackage.version,
+    libraryVersion: nextLibraryPackage.version,
   };
 }
 

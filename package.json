@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "npm run serve:reference-app",
-    "build": "npm run sync:package-metadata && npm run build:schematics",
+    "build": "npm run check:package-metadata && npm run build:schematics && npm run check:dist-package-metadata",
     "build:reference-app": "ng build angular-django2-reference",
     "build:schematics": "cpy package.json README.md \"../../dist/angular-django2/\" --cwd=projects/angular-django2/ && tsc -p projects/angular-django2/tsconfig.schematics.json && cpy \"*.json\" \"*/schema.json\" \"../../../dist/angular-django2/schematics/\" --cwd=projects/angular-django2/schematics/",
     "format": "prettier --write .",
@@ -18,6 +18,8 @@
     "release:version": "node tools/release-version.mjs",
     "serve:reference-app": "ng serve angular-django2-reference",
     "sync:package-metadata": "node tools/sync-package-metadata.mjs",
+    "check:package-metadata": "node tools/sync-package-metadata.mjs --check",
+    "check:dist-package-metadata": "node tools/sync-package-metadata.mjs --check --dist",
     "test:ci": "npm run test:node && npm run test:reference-app",
     "cleanup:e2e:tmp-areas": "node --no-warnings --experimental-strip-types tests/utils/temp_areas.ts cleanup",
     "test:node": "vitest run --config vitest.config.mts",

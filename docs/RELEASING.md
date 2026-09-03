@@ -21,6 +21,29 @@ The published tarball contains:
 - the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `page`, `site`, `embed-component`, `complex-component`, `field-component`, `form-field`, `reactive-form`, `app-shell`, `service`, `class`, `material-app`, `workspace-setup`, `openapi-setup`, and `data-service`
 - the package README and manifest generated into `dist/angular-django2`
 
+## Package Manifest Ownership
+
+The root `package.json` is the single source of truth for the release version,
+shared descriptive and repository metadata, and the tested Node/npm engine
+ranges. It also owns workspace-only configuration such as scripts,
+development dependencies, `private`, and `packageManager`.
+
+`projects/angular-django2/package.json` is the publishable consumer contract.
+It receives shared metadata from the root while retaining package-owned fields
+such as `schematics`, `ng-add`, `publishConfig`, dependencies, peer
+dependencies, exports, and entry points. Root workspace configuration must not
+leak into it, and `publishConfig.access` remains `public`.
+
+Run `npm run sync:package-metadata` only when intentionally writing or
+repairing the checked-in publishable manifest. `npm run build`, CI, and the
+publish workflow use non-mutating checks and fail on drift instead of silently
+repairing tracked files. The build also checks the generated
+`dist/angular-django2/package.json` before it can be packed or published.
+
+`projects/angular-django2/schematics/package.json` is excluded from metadata
+synchronization. It declares only the CommonJS module boundary and remains
+unversioned.
+
 ## Versioning Script
 
 Use the checked-in versioning script through the root npm script:
@@ -31,16 +54,17 @@ npm run release:version -- patch
 
 `npm run release:version` runs `tools/release-version.mjs`. The script is the
 source of truth for calculating the next package version and synchronizing the
-two checked-in package manifests.
+checked-in package and lockfile version records.
 
 The script updates:
 
 - `package.json`
 - `projects/angular-django2/package.json`
+- `package-lock.json` at both the top-level `version` and
+  `packages[""]` root-package records
 
 The script does not update:
 
-- `package-lock.json`
 - `README.md`
 - `CHANGELOG.md`
 - `dist/angular-django2/package.json`
@@ -93,16 +117,16 @@ Handle those follow-up steps explicitly in the release plan below.
    `projects/angular-django2/package.json` stays aligned.
 
 3. Sync checked-in version references and release-facing documentation.
-   - **3.1** Rebuild the package output and refresh the lockfile so tracked
-     package metadata matches the intended release version:
+   - **3.1** Build the package output. The versioning script already updates
+     the lockfile root records, and the build validates rather than repairs
+     checked-in package metadata:
 
      ```bash
      npm run build
-     npm install --package-lock-only --ignore-scripts
      ```
 
-   - **3.2** Confirm `package-lock.json`'s top-level `version` entry matches
-     the intended release version.
+   - **3.2** Confirm `package-lock.json`'s top-level `version` and
+     `packages[""]` version entries match the intended release version.
    - **3.3** Review and update `README.md` for any explicit current-version
      references, such as the package version shown near the top of the
      repository overview.
@@ -200,11 +224,13 @@ version is already on npm.
 The `Publish npm package` workflow:
 
 - installs dependencies with `npm ci`
+- validates the checked-in publishable package metadata
 - checks file formatting with `npm run format:check`
-- builds the schematics collection
+- builds the schematics collection and validates its distribution metadata
 - runs lint
 - runs tests
 - publishes `dist/angular-django2` to npm
+- verifies that build and package operations did not modify tracked files
 
 Use the `npm-tag` workflow input to publish under `latest`, `next`, or another dist-tag.
 
@@ -229,5 +255,5 @@ If the package is later renamed to a scoped package, use `npm publish ./dist/ang
 - the first successful publish creates the npm package page automatically
 - `angular-django2` is currently unscoped, so the name must be globally unique on npm
 - the root `package.json` is the version source of truth
-- `npm run release:version -- <bump>` updates that source of truth and then
-  synchronizes the publishable library manifest
+- `npm run release:version -- <bump>` updates that source of truth, synchronizes
+  the publishable library manifest, and updates the lockfile root records

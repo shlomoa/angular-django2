@@ -69,6 +69,7 @@ describe('release-version', () => {
     const tempDirectory = createTempDir(repoRoot, 'angular-django2-release-version-');
     const rootManifestPath = join(tempDirectory, 'package.json');
     const libraryManifestPath = join(tempDirectory, 'library-package.json');
+    const lockfilePath = join(tempDirectory, 'package-lock.json');
 
     tempDirectories.push(tempDirectory);
 
@@ -80,6 +81,10 @@ describe('release-version', () => {
             url: 'https://example.com/issues',
           },
           description: 'Root description',
+          engines: {
+            node: '>=22',
+            npm: '>=11',
+          },
           homepage: 'https://example.com',
           keywords: ['angular', 'django'],
           license: 'MIT',
@@ -98,6 +103,9 @@ describe('release-version', () => {
       libraryManifestPath,
       `${JSON.stringify(
         {
+          dependencies: {
+            runtime: '^1.0.0',
+          },
           peerDependencies: {
             '@angular/core': '^21.2.0',
           },
@@ -112,26 +120,56 @@ describe('release-version', () => {
         2,
       )}\n`,
     );
+    await writeFile(
+      lockfilePath,
+      `${JSON.stringify(
+        {
+          name: 'angular-django2',
+          version: '0.1.3',
+          lockfileVersion: 3,
+          packages: {
+            '': {
+              name: 'angular-django2',
+              version: '0.1.3',
+            },
+            'node_modules/example': {
+              version: '0.1.3',
+            },
+          },
+        },
+        null,
+        2,
+      )}\n`,
+    );
 
     const result = await updateReleaseVersionFiles('minor', {
       libraryManifestPath,
+      lockfilePath,
       rootManifestPath,
     });
 
     const rootManifest = JSON.parse(await readFile(rootManifestPath, 'utf8'));
     const libraryManifest = JSON.parse(await readFile(libraryManifestPath, 'utf8'));
+    const lockfile = JSON.parse(await readFile(lockfilePath, 'utf8'));
 
     expect(result.currentVersion).toBe('0.1.3');
     expect(result.nextVersion).toBe('0.2.0');
     expect(result.libraryVersion).toBe('0.2.0');
-    expect(result.changedFiles).toEqual([rootManifestPath, libraryManifestPath]);
+    expect(result.changedFiles).toEqual([rootManifestPath, libraryManifestPath, lockfilePath]);
 
     expect(rootManifest.version).toBe('0.2.0');
     expect(libraryManifest).toEqual({
       bugs: {
         url: 'https://example.com/issues',
       },
+      dependencies: {
+        runtime: '^1.0.0',
+      },
       description: 'Root description',
+      engines: {
+        node: '>=22',
+        npm: '>=11',
+      },
       homepage: 'https://example.com',
       keywords: ['angular', 'django'],
       license: 'MIT',
@@ -151,5 +189,36 @@ describe('release-version', () => {
       sideEffects: false,
       version: '0.2.0',
     });
+    expect(lockfile.version).toBe('0.2.0');
+    expect(lockfile.packages[''].version).toBe('0.2.0');
+    expect(lockfile.packages['node_modules/example'].version).toBe('0.1.3');
+  });
+
+  it('rejects malformed lockfiles before changing any manifest', async () => {
+    const tempDirectory = createTempDir(repoRoot, 'angular-django2-release-version-invalid-');
+    const rootManifestPath = join(tempDirectory, 'package.json');
+    const libraryManifestPath = join(tempDirectory, 'library-package.json');
+    const lockfilePath = join(tempDirectory, 'package-lock.json');
+    const rootContents = '{"name":"angular-django2","version":"1.0.0"}\n';
+    const libraryContents =
+      '{"name":"angular-django2","version":"1.0.0","publishConfig":{"access":"public"}}\n';
+    const lockfileContents = '{"name":"angular-django2","version":"1.0.0","packages":{}}\n';
+
+    tempDirectories.push(tempDirectory);
+    await writeFile(rootManifestPath, rootContents);
+    await writeFile(libraryManifestPath, libraryContents);
+    await writeFile(lockfilePath, lockfileContents);
+
+    await expect(
+      updateReleaseVersionFiles('patch', {
+        libraryManifestPath,
+        lockfilePath,
+        rootManifestPath,
+      }),
+    ).rejects.toThrow('Expected the package lockfile to contain string version fields');
+
+    expect(await readFile(rootManifestPath, 'utf8')).toBe(rootContents);
+    expect(await readFile(libraryManifestPath, 'utf8')).toBe(libraryContents);
+    expect(await readFile(lockfilePath, 'utf8')).toBe(lockfileContents);
   });
 });
