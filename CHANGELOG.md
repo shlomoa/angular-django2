@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.4.5]
+
+- Reorganized the public documentation around clearer user journeys and workflow-oriented tutorial guidance.
+- Normalized the schematic CLI reference and added automated coverage for its generated command documentation.
+- Added deterministic strict Read the Docs validation in CI and strengthened documentation consistency checks.
+
 ## [0.4.4]
 
 - Added kebab-case CLI aliases for multiword schematic options while retaining camelCase schema property support and the legacy `--openapi_spec_file` alias.
