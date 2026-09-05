@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.4.4]
+
+- Added kebab-case CLI aliases for multiword schematic options while retaining camelCase schema property support and the legacy `--openapi_spec_file` alias.
+- Updated schematic option handling, reference-app guidance, CLI documentation, and tests to use and verify the canonical kebab-case spellings.
+
 ## [0.4.3]
 
 - Added a single package-metadata projection with explicit source synchronization and read-only source/distribution validation.
