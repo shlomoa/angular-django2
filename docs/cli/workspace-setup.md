@@ -6,8 +6,11 @@ Initialize workspace-level files for an empty Angular workspace.
 ng generate angular-django2:workspace-setup my-app
 ```
 
-Options: optional `--project`; advanced `files` hooks are programmatic, not
-command-line friendly.
+| Option      | Default  | Constraint or effect                                                                         |
+| ----------- | -------- | -------------------------------------------------------------------------------------------- |
+| `name`      | Required | Application or repository name.                                                              |
+| `--project` | —        | Optional Angular project whose `sourceRoot` receives application file hooks.                 |
+| `files`     | —        | Programmatic per-file hooks; each hook uses exactly one of `content`, `path`, or `template`. |
 
 Use `workspace-setup` before [`material-app`](material-app.md) in an empty
 workspace. It writes workspace-level bootstrap files and validation setup for

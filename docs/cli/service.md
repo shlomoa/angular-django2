@@ -1,19 +1,33 @@
 # service
 
-Generate a service.
+Generate an Angular service through Angular CLI. This collection wrapper only
+adjusts an explicit path relative to a selected project, then delegates the
+remaining behavior to `@schematics/angular:service`.
+
+## Prerequisites
+
+Run in an Angular workspace. To have a path resolved relative to a project,
+provide both `--project` and `--path`.
+
+## Command synopsis
 
 ```bash
-ng generate angular-django2:service <name>
+ng generate angular-django2:service users --project=my-app --path=src/app/core
 ```
 
-This schematic wraps Angular's own `@schematics/angular:service`, making
-`--path` project-relative and forwarding all other options unchanged.
+## Options and output
 
-## Options
+| Option      | Default  | Constraint or effect                                                                      |
+| ----------- | -------- | ----------------------------------------------------------------------------------------- |
+| `name`      | Required | Service name.                                                                             |
+| `--path`    | —        | Destination path. With `--project`, a path outside the project root is resolved below it. |
+| `--project` | —        | Target project used with `--path` resolution.                                             |
 
-The most relevant options are project-relative `--path` and `--project`. Because
-this schematic forwards options to `@schematics/angular:service`, it also
-accepts that schematic's full option set (for example `--flat`, `--type`, and
-`--skip-tests`). See Angular's
-[`service` documentation](https://angular.dev/cli/generate/service) for the
-authoritative, version-specific list.
+The wrapper accepts additional options and forwards them unchanged. Angular
+CLI's [`service` documentation](https://angular.dev/cli/generate/service)
+defines their defaults, constraints, and generated files.
+
+## Related commands
+
+Use [`data-service`](data-service.md) instead when wrapping an
+OpenAPI-generated API service with Django-oriented CRUD helpers.

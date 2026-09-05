@@ -276,29 +276,9 @@ npm install ../angular-django2/dist/angular-django2
 
 ### Available commands
 
-After `angular-django2` is installed in a workspace, these commands are
-available:
-
-| Command                                                                                    | Purpose                                                                                              | Notes                                                                                              |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ng add angular-django2`                                                                   | Registers the collection in `angular.json`                                                           | Automatically done by `django-angular3`                                                            |
-| `ng generate angular-django2:application <name>`                                           | Creates an Angular application                                                                       | Defaults to standalone routing, no SSR, zoneless, and SCSS                                         |
-| `ng generate angular-django2:material-setup --project=<name>`                              | Configures Angular Material in an existing project                                                   | Supports `--theme`, `--typography`, `--animations`                                                 |
-| `ng generate angular-django2:project-structure --project=<name>`                           | Creates `core/`, `shared/components/`, `shared/pipes/`, and `features/`                              | Writes barrel `index.ts` files                                                                     |
-| `ng generate angular-django2:component <name>`                                             | Creates a component with package defaults                                                            | Uses standalone + `OnPush` defaults and seeds embedding hooks                                      |
-| `ng generate angular-django2:embed-component --component=<path> --parent=<path>`           | Embeds a component into a parent component                                                           | Wires imports, signals, and stubs; `--from` embeds package components (e.g. Angular Material)      |
-| `ng generate angular-django2:complex-component <name> --path=<path> --features=<features>` | Creates or maintains an advanced Material component                                                  | Composes component + embed-component; supports `mixins`, `nested`, `projection`, and `cdk-overlay` |
-| `ng generate angular-django2:field-component <name>`                                       | Creates a simple typed Material field-control convenience component                                  | Supports string-valued text, email, password, and textarea controls with canonical defaults        |
-| `ng generate angular-django2:form-field <name>`                                            | Creates a configurable typed CVA-backed Material form field                                          | Supports number, appearance, subscript sizing, and server validation errors                        |
-| `ng generate angular-django2:reactive-form <name> --definition=<file>`                     | Creates a typed Material reactive form from a JSON definition                                        | Create-only; composes canonical `form-field` output and maps Django REST Framework errors          |
-| `ng generate angular-django2:site --project=<name> --source=<file>`                        | Assembles a JSON-defined Material site in an existing Material app                                   | Requires the known `material-app` shell; routes/forms remain separate owned outputs                |
-| `ng generate angular-django2:service <name>`                                               | Creates a service                                                                                    | Pass-through to Angular CLI service schematic                                                      |
-| `ng generate angular-django2:class <name>`                                                 | Creates a class                                                                                      | Pass-through to Angular CLI class schematic                                                        |
-| `ng generate angular-django2:app-shell --project=<name>`                                   | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation                                                    |
-| `ng generate angular-django2:material-app <name>`                                          | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults                                         |
-| `ng generate angular-django2:workspace-setup <name>`                                       | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `material-app` in an empty workspace                                                    |
-| `ng generate angular-django2:openapi-setup --openapi-spec-file=<file>`                     | Bootstraps `ng-openapi-gen` and Django integration helpers                                           | Adds `generate:api` script and auth/CSRF/transport + resource adapter helpers                      |
-| `ng generate angular-django2:data-service <resource>`                                      | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services                                                            |
+The [CLI reference](docs/cli/index.md) is the canonical command guide. It
+helps select a schematic and links to its schema-grounded options,
+prerequisites, output, and examples.
 
 ### Recipes for a running Angular app
 

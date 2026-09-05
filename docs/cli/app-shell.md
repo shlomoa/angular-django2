@@ -1,35 +1,32 @@
 # app-shell
 
 Generate an Angular **App Shell** for server-side rendering (SSR) and
-prerendering. This schematic is a thin pass-through that delegates to Angular's
-own [`@schematics/angular:app-shell`](https://angular.dev/cli/generate/app-shell)
-and forwards every option unchanged.
-
-```bash
-ng generate angular-django2:app-shell --project=<name>
-```
-
-## Not the Material layout
-
-This is **not** the responsive Material sidenav layout that
-[`material-app`](material-app.md) writes. Angular's App Shell is an unrelated
-SSR/prerendering feature that renders a static placeholder shown while the
-client application bootstraps. Use `material-app` (or `material-setup` plus
-`project-structure`) for the Material UI layout.
+prerendering. This thin pass-through delegates to Angular's
+[`@schematics/angular:app-shell`](https://angular.dev/cli/generate/app-shell)
+schematic and adds no package-owned behavior.
 
 ## Prerequisites
 
-Angular's App Shell requires an SSR-enabled application. Configure SSR first,
-then run this schematic:
+Configure the target application for SSR before invoking this command. Angular's
+SSR setup and app-shell requirements are version-specific; follow the upstream
+documentation for the installed Angular CLI version.
+
+## Command synopsis
 
 ```bash
-ng add @angular/ssr --project=<name>
+ng generate angular-django2:app-shell --project=my-app
 ```
 
-## Options
+## Options and output
 
-Because this schematic forwards options directly to
-`@schematics/angular:app-shell`, it accepts that schematic's full option set —
-not just `--project`. See Angular's
-[`app-shell` documentation](https://angular.dev/cli/generate/app-shell) for the
-authoritative and version-specific list of options.
+The local schema exposes `--project` for the target application. Because it
+accepts additional options and forwards them unchanged, Angular CLI's
+[`app-shell` documentation](https://angular.dev/cli/generate/app-shell)
+defines the complete option set, defaults, constraints, and generated files.
+
+## Related commands
+
+This is **not** the responsive Material sidenav layout written by
+[`material-app`](material-app.md). Use `material-app`, or
+[`material-setup`](material-setup.md) with
+[`project-structure`](project-structure.md), for Material UI setup.

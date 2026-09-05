@@ -73,16 +73,16 @@ into the known Material shell, invokes the owned page and form outputs, and
 records the shell baseline and inspected definition in
 `.angular-django2/site/<project>.json`.
 
-| Option               | Default       | Description                                     |
-| -------------------- | ------------- | ----------------------------------------------- |
-| `--source`           | —             | Workspace-relative site assembly JSON.          |
-| `--defaults`         | `false`       | Generate only the documented Home-only default. |
-| `--project`          | inferred      | Target Angular application.                     |
-| `--operation`        | `create`      | `create`, `modify`, or `delete`.                |
-| `--confirm-delete`   | `false`       | Required for `delete`.                          |
-| `--auth-guard`       | `authGuard`   | Existing guard identifier for protected pages.  |
-| `--csrf-cookie-name` | `csrftoken`   | Django CSRF cookie name.                        |
-| `--csrf-header-name` | `X-CSRFToken` | Django CSRF request header name.                |
+| Option               | Default       | Description                                         |
+| -------------------- | ------------- | --------------------------------------------------- |
+| `--source`           | —             | Workspace-relative site assembly JSON.              |
+| `--defaults`         | `false`       | Generate only the documented Home-only default.     |
+| `--project`          | inferred      | Target Angular application.                         |
+| `--operation`        | `create`      | `create`, `modify`, or `delete`.                    |
+| `--confirm-delete`   | `false`       | Required for `delete`.                              |
+| `--auth-guard`       | `authGuard`   | Existing JavaScript identifier for protected pages. |
+| `--csrf-cookie-name` | `csrftoken`   | Non-empty Django CSRF cookie name.                  |
+| `--csrf-header-name` | `X-CSRFToken` | Non-empty Django CSRF request header name.          |
 
 Create and modify are idempotent. `modify` requires the ownership manifest and
 refuses a changed shell. `delete` requires `--confirm-delete=true`, restores
