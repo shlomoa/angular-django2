@@ -23,12 +23,26 @@ describe('CLI reference', () => {
       .sort();
     const mkdocsConfig = readFileSync(join(repoRoot, 'mkdocs.yml'), 'utf8');
     const cliIndex = readFileSync(join(cliDirectory, 'index.md'), 'utf8');
+    const navSection = mkdocsConfig.split('\nnav:\n')[1].split('\ntheme:')[0];
+    const navigatedNames = Array.from(
+      navSection.matchAll(/^\s+- .+: cli\/([\w-]+)\.md$/gm),
+      ([, schematic]) => schematic,
+    ).sort();
 
     expect(documentedNames).toEqual(schematicNames);
+    expect(navigatedNames).toEqual(['index', ...schematicNames].sort());
     for (const schematic of schematicNames) {
       expect(existsSync(join(cliDirectory, `${schematic}.md`))).toBe(true);
-      expect(mkdocsConfig).toContain(`cli/${schematic}.md`);
       expect(cliIndex).toContain(`](${schematic}.md)`);
+    }
+
+    for (const repositoryOnlyDocument of [
+      'REQUIREMENTS.md',
+      'INTEGRATION_TESTING.md',
+      'RELEASING.md',
+    ]) {
+      expect(mkdocsConfig).toMatch(new RegExp(`^  ${repositoryOnlyDocument}$`, 'm'));
+      expect(navSection).not.toContain(repositoryOnlyDocument);
     }
   });
 });
