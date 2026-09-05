@@ -1,233 +1,124 @@
-# Tutorial: empty repo to working app
+# Tutorial: task-oriented workflows
 
-This tutorial starts with an empty directory and ends with a running Angular app
-generated with Angular CLI and the `angular-django2` schematics collection.
+Choose one workflow for your goal rather than following every command in
+sequence. Each workflow links to the [CLI reference](cli/index.md), which owns
+the complete option contracts and constraints.
 
-In this guide:
+In this guide, `ng` means the local Angular CLI invoked with `npx ng`, and
+`angular-django2:<schematic>` identifies a schematic in this collection.
 
-- `ng` means the Angular CLI. Commands use `npx ng` so they work without a
-  global Angular CLI install.
-  - This could be resolved by one of two ways:
-    - adding `./node_modules/.bin` to your PATH:
-      - Linux (Bash): `export PATH="$(pwd)/node_modules/.bin:$PATH"`
-      - Windows (PowerShell): `$env:Path = "$((Get-Location).Path)\node_modules\.bin;$env:Path"`
-    - installing Angular CLI globally with:
-      - `npm install -g @angular/cli`.
-- `ngdj` is shorthand for `angular-django2`. In Angular CLI commands, the
-  shorthand appears as the schematics collection name
-  `angular-django2:<schematic>`.
+## Prerequisites and workspace choice
 
-## What you will build
-
-You will create an Angular workspace with no initial application, register
-`angular-django2`, then use the ngdj schematics to generate:
-
-- workspace bootstrap files
-- an Angular application
-- Angular Material setup
-- a standard `core/`, `shared/`, and `features/` source layout
-- a responsive application shell
-- a feature component embedded into the application shell
-- an existing Angular Material component embedded with `embed-component`
-  package mode
-
-## Prerequisites
-
-Use the runtime versions supported by this package:
+**Use this first** to choose the workspace that owns setup and to check the
+tools every workflow needs.
 
 - Node.js `^22.22.3 || ^24.15.0 || >=26.0.0`
 - npm `>=11`
-
-Check your local versions:
 
 ```bash
 node --version
 npm --version
 ```
 
-## 1. Create an empty project directory
+If `django-angular3` manages your workspace, it owns the Django-side lifecycle.
+Use the [CLI reference](cli/index.md) to select the applicable command instead
+of creating another Angular workspace. For a standalone app, begin with the
+fastest or explicit setup workflow below.
 
-Start from an empty directory. This example uses `ngdj-tutorial` as both the
-folder name and the generated Angular project name.
+**Expected result:** you have a supported Node.js/npm installation and have
+chosen either the existing managed workspace or a new standalone workspace.
+
+## Fastest complete Material app
+
+**Use this workflow** when you want a runnable Angular Material application with
+the standard directory structure and responsive sidenav shell as quickly as
+possible. Start in an empty directory.
 
 ```bash
 mkdir ngdj-tutorial
 cd ngdj-tutorial
-```
-
-If you want this directory to be a Git repository, initialize Git after the
-Angular workspace is created so the Angular CLI does not have to write into a
-non-empty directory.
-
-## 2. Create an empty Angular workspace with `ng`
-
-Create an Angular workspace in the current directory without generating an app
-yet:
-
-```bash
 npx -y @angular/cli@22 new ngdj-tutorial --directory . --no-create-application --package-manager npm --skip-git --defaults
-```
-
-This gives you a clean Angular workspace and local Angular CLI installation, but
-no application project yet.
-
-If you want Git history for the tutorial project, initialize it now:
-
-```bash
-git init
-```
-
-## 3. Install and register ngdj
-
-Install `angular-django2`, then register its schematics collection with Angular
-CLI:
-
-```bash
 npm install angular-django2
 npx ng add angular-django2 --skip-confirmation
-```
-
-The `ng add` step configures the Angular workspace so `ng generate` can find the
-ngdj schematics.
-
-## 4. Add workspace bootstrap files with ngdj
-
-Run the `workspace-setup` schematic before generating the app:
-
-```bash
 npx ng generate angular-django2:workspace-setup ngdj-tutorial
-```
-
-This writes workspace-level bootstrap files for an empty Angular workspace. It
-also prepares validation-oriented files that the generated workspace can use for
-Node-side checks.
-
-## 5. Generate the working app with ngdj
-
-Now generate the Angular application, Material setup, project structure, and
-responsive layout in one flow:
-
-```bash
 npx ng generate angular-django2:material-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
-```
-
-The `material-app` schematic is the fastest path to a runnable app. It composes the
-lower-level ngdj schematics that create the application, configure Angular
-Material, create the standard `core/`, `shared/`, and `features/` structure,
-and write the responsive sidenav layout.
-
-## 6. Install generated dependencies
-
-Some schematics update `package.json`. Run npm install once more after code
-generation:
-
-```bash
 npm install
-```
-
-## 7. Build the app
-
-Build the generated application with Angular CLI:
-
-```bash
 npx ng build ngdj-tutorial
-```
-
-A successful build confirms the generated workspace and application compile.
-
-## 8. Run the app
-
-Start the Angular dev server:
-
-```bash
 npx ng serve ngdj-tutorial
 ```
 
-Open the local URL printed by Angular CLI. You should see the generated
-Material-based application shell.
+Open the local URL printed by `ng serve`. You should see a Material toolbar,
+sidenav, and router outlet. See [`material-app`](cli/material-app.md) for its
+options and generated output.
 
-## 9. Generate and embed a feature component
+**Expected result:** `ng build` succeeds and the generated Material application
+runs locally.
 
-Use the ngdj component schematic when you want a standalone OnPush component
-that follows the package defaults. Generated components include embedding hooks
-that make later composition predictable:
+## Explicit step-by-step composition
+
+**Use this workflow** when you want the standard application, Material
+configuration, and directory structure but do not want the `material-app`
+responsive shell. Start in an empty directory.
+
+```bash
+mkdir ngdj-composed
+cd ngdj-composed
+npx -y @angular/cli@22 new ngdj-composed --directory . --no-create-application --package-manager npm --skip-git --defaults
+npm install angular-django2
+npx ng add angular-django2 --skip-confirmation
+npx ng generate angular-django2:workspace-setup ngdj-composed
+npx ng generate angular-django2:application ngdj-composed
+npm install @angular/material @angular/cdk @angular/animations
+npx ng generate angular-django2:material-setup --project=ngdj-composed --theme=indigo-pink --typography=true --animations=true
+npx ng generate angular-django2:project-structure --project=ngdj-composed
+npm install
+npx ng build ngdj-composed
+```
+
+This deliberately leaves the generated root component without the Material
+sidenav layout. Read [`application`](cli/application.md),
+[`material-setup`](cli/material-setup.md), and
+[`project-structure`](cli/project-structure.md) before changing the composition
+or its options.
+
+**Expected result:** `ng build` succeeds, Material is configured, and the
+project has `core/`, `shared/`, and `features/` barrels without a sidenav shell.
+
+## Component composition
+
+**Use this workflow** after either application setup workflow when a feature
+needs a standalone component wired into an existing parent.
 
 ```bash
 npx ng generate angular-django2:component dashboard-card --project=ngdj-tutorial --path=src/app/features/dashboard
-```
-
-Use `embed-component` to wire the generated component into the root app
-component:
-
-```bash
 npx ng generate angular-django2:embed-component --component=projects/ngdj-tutorial/src/app/features/dashboard/dashboard-card/dashboard-card.ts --parent=projects/ngdj-tutorial/src/app/app.ts
-```
-
-Then rebuild to verify the generated code still compiles:
-
-```bash
 npx ng build ngdj-tutorial
 ```
 
-## 10. Embed an existing Angular Material component
+The generated child is imported by the root component and inserted into its
+template. The child uses the component embedding markers, so do not generate it
+with an inline template when you need automatic HTML embedding. For package
+components, advanced composition, output-handler stubs, and all options, use
+[`embed-component`](cli/embed-component.md),
+[`component`](cli/component.md), and
+[`complex-component`](cli/complex-component.md).
 
-`embed-component` also has a "package mode" for wiring an existing component
-exported from an npm package — such as an Angular Material component — into a
-parent. Add `--from` with the module specifier and pass the exported class name
-to `--component`. The selector, inputs, and outputs are provided explicitly:
+**Expected result:** the build succeeds with `dashboard-card` rendered by the
+root application component.
 
-```bash
-npx ng generate angular-django2:embed-component --component=MatDateRangePicker --parent=projects/ngdj-tutorial/src/app/features/dashboard/dashboard-card/dashboard-card.ts --from=@angular/material/datepicker --selector=mat-date-range-picker --outputs=opened,closed
-```
+## Forms and validation
 
-This imports `MatDateRangePicker` from `@angular/material/datepicker`, registers
-it in the parent's standalone `imports` array, inserts the
-`<mat-date-range-picker>` element after the parent's `children` marker, and adds
-not-implemented `onOpened()` and `onClosed()` handler stubs. `--selector`
-defaults to the dasherized class name when omitted, and `--inputs`/`--outputs`
-accept comma-separated lists.
+**Use this workflow** after Material is configured when you need reusable
+typed controls or a create-only Django REST Framework form.
 
-Rebuild to confirm the wired Material component compiles:
-
-```bash
-npx ng build ngdj-tutorial
-```
-
-## 11. Add a lazy-routed page
-
-Use the `page` schematic to add a standalone OnPush Material page that owns its
-own lazy route and registers itself in `app.routes.ts`:
-
-```bash
-npx ng generate angular-django2:page orders --project=ngdj-tutorial --path=src/app/features/orders --route-path=orders --navigation-label=Orders --navigation-icon=shopping_cart
-```
-
-This generates the page component, template, styles, and a feature-owned
-`orders.page.routes.ts`, then adds only an import and a spread into the existing
-`routes` array. Re-running the command is idempotent. See the
-[`page` reference](cli/page.md) for `--access=protected` and guard options.
-
-## 12. Generate typed Material form fields
-
-Add reusable typed Material field controls. `field-component` is the simple
-path; use `form-field` when you need explicit appearance, subscript sizing, or
-server-error configuration:
+Generate field primitives first:
 
 ```bash
 npx ng generate angular-django2:field-component email-field --project=ngdj-tutorial --kind=email
 npx ng generate angular-django2:form-field headcount --project=ngdj-tutorial --control-type=number --appearance=outline --subscript-sizing=dynamic
 ```
 
-Both generate `ControlValueAccessor` components under
-`src/app/shared/form-helpers/` that bind to a typed `FormControl`. See the
-[`field-component`](cli/field-component.md) and [`form-field`](cli/form-field.md)
-references for the full input surface.
-
-## 13. Generate a reactive form from a definition
-
-The `reactive-form` schematic builds a typed OnPush Material form from a single
-JSON definition. First create a definition file, for example
-`forms/contact-form.json`:
+To generate a complete form, create `forms/contact-form.json`:
 
 ```json
 {
@@ -254,130 +145,85 @@ JSON definition. First create a definition file, for example
 }
 ```
 
-Then generate the form component:
+The `$schema` value is an installed-package path, so it resolves after
+`npm install angular-django2`. Readers of this documentation can inspect the
+[published reactive-form definition schema](https://github.com/shlomoa/angular-django2/blob/main/projects/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition)
+online.
 
 ```bash
 npx ng generate angular-django2:reactive-form contact --definition=forms/contact-form.json --project=ngdj-tutorial --path=src/app/features
-```
-
-The generated form reuses field primitives found under `--primitives-path` and
-creates against the declared Django endpoint. See the
-[`reactive-form` reference](cli/reactive-form.md) for the full definition
-contract, validators, and `integration` wiring.
-
-## 14. Compose an advanced component with complex-component
-
-When a feature needs mixins, nested children, content projection, or a CDK
-overlay, `complex-component` composes `component` and `embed-component` for you:
-
-```bash
-npx ng generate angular-django2:complex-component analytics-panel --project=ngdj-tutorial --path=src/app/features/dashboard --features=mixins,nested,projection
-```
-
-Use `--mode=modify` to add features later, or `--mode=delete --confirm=true` to
-remove the generated directory and its registered theme mixin. See the
-[`complex-component` reference](cli/complex-component.md) for each feature.
-
-Rebuild to confirm the generated code compiles:
-
-```bash
 npx ng build ngdj-tutorial
 ```
 
-## 15. Optional: assemble a routed site from a site definition
+The generated form reuses primitives under `--primitives-path` when they match
+the canonical `form-field` output; otherwise it renders Material controls
+inline. See [`field-component`](cli/field-component.md),
+[`form-field`](cli/form-field.md), and
+[`reactive-form`](cli/reactive-form.md) for validation, integration, and option
+details.
 
-For a whole routed site in one step, `site` is an orchestrator that delegates to
-`page`, `reactive-form`, and optional `openapi-setup` from a single site assembly
-definition. It requires an unmodified `material-app` shell, so use it on a fresh
-Material app rather than after the manual edits above:
+**Expected result:** the build succeeds and `src/app/features/contact-form/`
+contains a typed, OnPush form that creates against `/api/contacts/`.
+
+## Page and site generation
+
+**Use this workflow** after a Material application exists when you want either
+one feature-owned lazy route or a complete site assembly.
+
+For one page:
 
 ```bash
-npx ng generate angular-django2:site --project=ngdj-tutorial --source=src/app/site/site.json
+npx ng generate angular-django2:page orders --project=ngdj-tutorial --path=src/app/features/orders --route-path=orders --navigation-label=Orders --navigation-icon=shopping_cart
+npx ng build ngdj-tutorial
 ```
 
-Pass `--defaults` instead of `--source` to generate a single public `Home` page.
-See the [`site` reference](cli/site.md) for the site assembly definition contract and
-create/modify/delete lifecycle.
+The command adds an `orders` lazy route and its navigation metadata without
+changing unrelated routes. For route guards and all constraints, see
+[`page`](cli/page.md).
 
-## 16. Optional: add an OpenAPI client workflow
+For a whole site, use a fresh, unmodified `material-app` shell; the `site`
+schematic refuses to replace a custom shell or navigation:
 
-If your Django backend exposes an OpenAPI schema, bootstrap `ng-openapi-gen`:
+```bash
+npx ng generate angular-django2:site --project=ngdj-tutorial --defaults
+npx ng build ngdj-tutorial
+```
+
+Use `--source=src/app/site/site.json` instead of `--defaults` when your
+workspace already has an explicit site assembly definition. The
+[`site` reference](cli/site.md) owns that JSON contract, lifecycle operations,
+and protected-page requirements.
+
+**Expected result:** the page workflow adds one lazy route, while the site
+workflow adds the documented Home page or exactly the routes and forms defined
+by its source file.
+
+## OpenAPI client integration
+
+**Use this workflow** after an application exists and your Django backend
+publishes an OpenAPI schema.
 
 ```bash
 npx ng generate angular-django2:openapi-setup --openapi-spec-file=openapi.json
 npm install
 npm run generate:api
-```
-
-`openapi-setup` also generates Django integration helpers under
-`src/app/api-integration/`:
-
-- `django-transport.ts` — wires Angular XSRF handling with Django cookie and
-  header names; exports `provideDjangoApiTransport()`, `readCsrfCookie()`,
-  `djangoAuthInterceptor`, `djangoCredentialsInterceptor()`, and the
-  `DJANGO_AUTH_TOKEN` bearer-token seam.
-- `resource-adapter.ts` — `ResourceAdapter<T>` base with DRF-style
-  `PaginatedResult` and `ResourceQuery`, plus shared `catchError` handling.
-- `index.ts` — barrel re-export with co-located specs.
-
-Compose `provideDjangoApiTransport` at application bootstrap
-(`src/app/app.config.ts`):
-
-```typescript
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDjangoApiTransport({ csrfCookieName: 'csrftoken' }),
-    { provide: DJANGO_AUTH_TOKEN, useValue: () => sessionStore.token() },
-  ],
-};
-```
-
-Pass `--skip-helpers` to omit helper generation, or `--skip-tests` to omit the
-co-located spec files.
-
-After generating API services from your schema, create a typed data-service
-wrapper:
-
-```bash
 npx ng generate angular-django2:data-service users --project=ngdj-tutorial
-```
-
-Use this flow when you want Angular services that wrap generated OpenAPI client
-services with resource-oriented helpers.
-
-## Full command sequence
-
-For a copyable minimal path from empty directory to running app:
-
-```bash
-mkdir ngdj-tutorial
-cd ngdj-tutorial
-npx -y @angular/cli@22 new ngdj-tutorial --directory . --no-create-application --package-manager npm --skip-git --defaults
-npm install angular-django2
-npx ng add angular-django2 --skip-confirmation
-npx ng generate angular-django2:workspace-setup ngdj-tutorial
-npx ng generate angular-django2:material-app ngdj-tutorial --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
-npm install
 npx ng build ngdj-tutorial
-npx ng serve ngdj-tutorial
 ```
 
-## What to try next
+`openapi-setup` adds the `ng-openapi-gen` configuration and Django transport
+helpers; the `data-service` command wraps a generated API service. Follow the
+[`openapi-setup`](cli/openapi-setup.md) reference to compose the generated
+transport at application bootstrap, and
+[`data-service`](cli/data-service.md) for its wrapper contract.
 
-- Read the [CLI guide](cli/index.md) for the full command reference.
-- Compose more components with `angular-django2:component` and
-  `angular-django2:embed-component`.
-- Embed existing package components (such as Angular Material) with
-  `embed-component` package mode (`--from`).
-- Add feature-owned lazy routes with [`angular-django2:page`](cli/page.md).
-- Generate typed Material form controls with
-  [`angular-django2:field-component`](cli/field-component.md) and
-  [`angular-django2:form-field`](cli/form-field.md).
-- Build typed reactive forms from a JSON definition with
-  [`angular-django2:reactive-form`](cli/reactive-form.md).
-- Compose advanced Material components with
-  [`angular-django2:complex-component`](cli/complex-component.md).
-- Assemble a full routed site from a site assembly definition with
-  [`angular-django2:site`](cli/site.md).
-- Add OpenAPI client generation with `angular-django2:openapi-setup`.
-- Add a data-service wrapper with `angular-django2:data-service`.
+**Expected result:** generated OpenAPI services are available under the
+configured output path, Django integration helpers are available under
+`src/app/api-integration/`, and the `UsersDataService` wrapper compiles.
+
+## Related commands
+
+The [CLI reference](cli/index.md) lists every schematic. In particular,
+[`app-shell`](cli/app-shell.md), [`service`](cli/service.md), and
+[`class`](cli/class.md) cover Angular SSR/prerendering shells and focused
+application artifacts not shown in the workflows above.
