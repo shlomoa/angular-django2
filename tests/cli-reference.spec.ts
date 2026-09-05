@@ -23,12 +23,31 @@ describe('CLI reference', () => {
       .sort();
     const mkdocsConfig = readFileSync(join(repoRoot, 'mkdocs.yml'), 'utf8');
     const cliIndex = readFileSync(join(cliDirectory, 'index.md'), 'utf8');
+    const navSection = mkdocsConfig.split('\nnav:\n')[1].split('\ntheme:')[0];
+    const navigatedNames = Array.from(
+      navSection.matchAll(/^\s+- .+: cli\/([\w-]+)\.md$/gm),
+      ([, schematic]) => schematic,
+    ).sort();
 
     expect(documentedNames).toEqual(schematicNames);
+    expect(navigatedNames).toEqual(['index', ...schematicNames].sort());
+    expect(navSection).toContain('- Create a complete Material application: TUTORIAL.md');
+    expect(navSection).toContain('- Generate a complete Material application: cli/material-app.md');
     for (const schematic of schematicNames) {
-      expect(existsSync(join(cliDirectory, `${schematic}.md`))).toBe(true);
-      expect(mkdocsConfig).toContain(`cli/${schematic}.md`);
+      const schematicPage = join(cliDirectory, `${schematic}.md`);
+
+      expect(existsSync(schematicPage)).toBe(true);
+      expect(readFileSync(schematicPage, 'utf8')).toMatch(new RegExp(`^# ${schematic}$`, 'm'));
       expect(cliIndex).toContain(`](${schematic}.md)`);
+    }
+
+    for (const repositoryOnlyDocument of [
+      'REQUIREMENTS.md',
+      'INTEGRATION_TESTING.md',
+      'RELEASING.md',
+    ]) {
+      expect(mkdocsConfig).toMatch(new RegExp(`^  ${repositoryOnlyDocument}$`, 'm'));
+      expect(navSection).not.toContain(repositoryOnlyDocument);
     }
   });
 });
