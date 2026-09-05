@@ -5,6 +5,11 @@ Angular workspace after installing the package and registering the collection.
 `ngdj` is the short name for `angular-django2`; in commands, use the collection
 name `angular-django2:<schematic>`.
 
+Use kebab-case for every multiword CLI flag, such as `--auth-guard` and
+`--openapi-spec-file`. The matching camelCase schema property spelling remains
+accepted for compatibility; `openapi_spec_file` is also accepted as the legacy
+OpenAPI option spelling.
+
 If you want a step-by-step path from an empty directory to a running app, start
 with the [tutorial](../TUTORIAL.md).
 

@@ -29,25 +29,29 @@
     "confirmDelete": {
       "type": "boolean",
       "default": false,
-      "description": "Required with --operation=delete. Site never deletes generated pages, forms, routes, or user-owned source files."
+      "description": "Required with --operation=delete. Site never deletes generated pages, forms, routes, or user-owned source files.",
+      "aliases": ["confirm-delete", "confirmDelete"]
     },
     "authGuard": {
       "type": "string",
       "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$",
       "default": "authGuard",
-      "description": "Existing reusable guard identifier for protected pages. The guard must already be imported and applied in app.routes.ts."
+      "description": "Existing reusable guard identifier for protected pages. The guard must already be imported and applied in app.routes.ts.",
+      "aliases": ["auth-guard", "authGuard"]
     },
     "csrfCookieName": {
       "type": "string",
       "minLength": 1,
       "default": "csrftoken",
-      "description": "Django CSRF cookie name configured through withXsrfConfiguration."
+      "description": "Django CSRF cookie name configured through withXsrfConfiguration.",
+      "aliases": ["csrf-cookie-name", "csrfCookieName"]
     },
     "csrfHeaderName": {
       "type": "string",
       "minLength": 1,
       "default": "X-CSRFToken",
-      "description": "Django CSRF request header configured through withXsrfConfiguration."
+      "description": "Django CSRF request header configured through withXsrfConfiguration.",
+      "aliases": ["csrf-header-name", "csrfHeaderName"]
     }
   }
 }

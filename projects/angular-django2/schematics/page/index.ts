@@ -259,7 +259,7 @@ function assertRoutePathAvailable(tree: Tree, resolved: ResolvedPageOptions): vo
     const content = tree.read(filePath)?.toString();
     if (content && routePaths(content).includes(resolved.routePath)) {
       throw new SchematicsException(
-        `The route path "${resolved.routePath}" is already declared in "${filePath}". Choose a unique --routePath.`,
+        `The route path "${resolved.routePath}" is already declared in "${filePath}". Choose a unique --route-path.`,
       );
     }
   }

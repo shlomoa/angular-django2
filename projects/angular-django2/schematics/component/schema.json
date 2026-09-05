@@ -28,7 +28,8 @@
     },
     "changeDetection": {
       "type": "string",
-      "default": "OnPush"
+      "default": "OnPush",
+      "aliases": ["change-detection", "changeDetection"]
     }
   },
   "required": ["name"]

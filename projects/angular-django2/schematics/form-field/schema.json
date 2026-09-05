@@ -28,7 +28,8 @@
       "type": "string",
       "enum": ["text", "email", "password", "number", "textarea"],
       "default": "text",
-      "description": "Native control kind: text, email, password, number, or textarea."
+      "description": "Native control kind: text, email, password, number, or textarea.",
+      "aliases": ["control-type", "controlType"]
     },
     "appearance": {
       "type": "string",
@@ -40,7 +41,8 @@
       "type": "string",
       "enum": ["fixed", "dynamic"],
       "default": "fixed",
-      "description": "Angular Material hint and error subscript sizing."
+      "description": "Angular Material hint and error subscript sizing.",
+      "aliases": ["subscript-sizing", "subscriptSizing"]
     }
   },
   "required": ["name"]

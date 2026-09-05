@@ -119,7 +119,7 @@ sources over lower-priority ones.
     authorization remains authoritative; the schematic does not generate API
     clients, forms, shared components, or site-wide policy.
   - `site`: assemble an existing, unmodified `material-app` shell from one
-    source-root site assembly definition. It validates all discovered page, form,
+    workspace-relative site assembly definition. It validates all discovered page, form,
     route, navigation, authentication, CSRF, and path prerequisites before
     mutation; delegates page, reactive-form, and optional openapi-setup through
     their public contracts; writes explicit XSRF provider configuration; and
@@ -213,13 +213,13 @@ sources over lower-priority ones.
     `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) in
     `django-transport.ts`, an API-contract-derived `ResourceAdapter` with a DRF-style
     `PaginatedResult` in `resource-adapter.ts`, and a barrel `index.ts`; options:
-    `--openapi_spec_file` (default: `openapi.json`), `--outputPath` (default:
-    `src/app/api`), `--helpersPath` (default: `src/app/api-integration`),
-    `--skipHelpers`, `--skipTests`
+    `--openapi-spec-file` (default: `openapi.json`), `--output-path` (default:
+    `src/app/api`), `--helpers-path` (default: `src/app/api-integration`),
+    `--skip-helpers`, `--skip-tests`
   - `data-service`: generate a typed `*DataService` wrapper around an
     ng-openapi-gen `*ApiService` with search and CRUD helpers; options:
-    `--apiService`, `--apiPath` (default: `../api/services`), `--path`,
-    `--flat`, `--skipTests`
+    `--api-service`, `--api-path` (default: `../api/services`), `--path`,
+    `--flat`, `--skip-tests`
 
 ## 4. Django Integration Requirements
 

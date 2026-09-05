@@ -21,7 +21,7 @@ const DEFAULT_HELPERS_PATH = 'src/app/api-integration';
 function getDefaultConfig(options: OpenapiSetupSchema): object {
   return {
     $schema: 'node_modules/ng-openapi-gen/ng-openapi-gen-schema.json',
-    input: options.openapi_spec_file || 'openapi.json',
+    input: options.openapiSpecFile || 'openapi.json',
     output: options.outputPath || 'src/app/api',
   };
 }
@@ -90,7 +90,7 @@ function generateHelperArtifacts(
   options: OpenapiSetupSchema,
 ): void {
   if (options.skipHelpers) {
-    context.logger.info('Skipping Django integration helper generation (--skipHelpers).');
+    context.logger.info('Skipping Django integration helper generation (--skip-helpers).');
     return;
   }
 

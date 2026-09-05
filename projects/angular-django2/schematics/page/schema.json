@@ -26,7 +26,8 @@
     "routePath": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:[-/][a-z0-9]+)*$",
-      "description": "URL path for the lazy route. Defaults to the page name."
+      "description": "URL path for the lazy route. Defaults to the page name.",
+      "aliases": ["route-path", "routePath"]
     },
     "access": {
       "type": "string",
@@ -38,17 +39,20 @@
       "type": "string",
       "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$",
       "default": "authGuard",
-      "description": "Existing locally imported auth-guard identifier used by protected routes."
+      "description": "Existing locally imported auth-guard identifier used by protected routes.",
+      "aliases": ["auth-guard", "authGuard"]
     },
     "navigationLabel": {
       "type": "string",
       "minLength": 1,
-      "description": "Navigation label stored in route data. Defaults to the classified page name."
+      "description": "Navigation label stored in route data. Defaults to the classified page name.",
+      "aliases": ["navigation-label", "navigationLabel"]
     },
     "navigationIcon": {
       "type": "string",
       "pattern": "^[a-z0-9_]+$",
-      "description": "Optional Material icon name stored in route navigation data."
+      "description": "Optional Material icon name stored in route navigation data.",
+      "aliases": ["navigation-icon", "navigationIcon"]
     }
   },
   "required": ["name", "path"]

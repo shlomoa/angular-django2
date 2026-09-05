@@ -56,7 +56,7 @@ through their declared interfaces when building out the generated feature.
 - `@angular/material`, `@angular/cdk`, and `@angular/router` installed
 - `src/app/app.routes.ts` exporting `routes: Routes`
 - `src/app/app.config.ts` configuring `provideRouter(routes)`
-- for `--access=protected`, a configured reusable guard matching `--authGuard`
+- for `--access=protected`, a configured reusable guard matching `--auth-guard`
 
 Run `ng add @angular/material` and generate the Angular application with
 routing enabled before running this schematic.
