@@ -10,26 +10,12 @@ software and not yet alpha. The current package version is `0.4.4`.
 a Django-friendly npm package. It ships an Angular CLI schematics collection
 for custom `ng generate` flows.
 
-For multiword schematic options, use kebab-case CLI flags (for example,
-`--openapi-spec-file` and `--auth-guard`). Matching camelCase schema property
-spellings remain supported, and `--openapi_spec_file` remains a legacy alias.
-
 It is designed to work especially well with
 [django-angular3](https://github.com/shlomoa/django-angular3), which owns the
 Django-side workspace lifecycle and can register this package automatically.
 
-## Generation model
-
-`ngdj` generates through deterministic Angular CLI schematics. Schematics
-consume explicit, validated options, workspace state, and structured input
-documents; the package does not load or execute AI agents, provider SDKs,
-prompts, or SKILLS. For the same accepted inputs and workspace state,
-package-owned schematic transformations select the same operations and produce
-the same output or the same explicit validation error.
-
-External orchestrators such as `django-angular3` may invoke the public
-schematic contracts, but orchestration does not change their inputs, outputs,
-behavior, or error contract.
+For installation, tutorials, focused generation workflows, and the CLI
+reference, see the [public documentation](https://angular-django2.readthedocs.io/).
 
 ## Repository
 
@@ -72,6 +58,7 @@ The current schematics collection includes:
 
 - Node.js `^22.22.3 || ^24.15.0 || >=26.0.0`
 - npm `>=11`
+- Python `3.12` for documentation validation
 
 #### Install dependencies
 
@@ -85,6 +72,7 @@ npm install
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `npm run build`                       | Validates source metadata, builds the schematics package, and validates its distribution metadata    |
 | `npm run build:reference-app`         | Builds the Angular Material reference app                                                            |
+| `npm run docs:build`                  | Builds the MkDocs site in strict mode                                                                |
 | `npm run lint`                        | Runs ESLint across schematics, tests, and tools                                                      |
 | `npm run lint:reference-app`          | Runs ESLint for the reference app project                                                            |
 | `npm run lint:fix`                    | Applies fixable ESLint changes                                                                       |
@@ -99,6 +87,20 @@ npm install
 
 `npm run build` produces the publishable output in `dist/angular-django2`,
 including the compiled schematics collection.
+
+#### Documentation validation
+
+Install the Python dependencies owned by `docs/requirements.txt`:
+
+```bash
+python -m pip install --requirement docs/requirements.txt
+```
+
+Then run the canonical strict documentation build:
+
+```bash
+npm run docs:build
+```
 
 ### Testing in this repository
 
@@ -210,256 +212,3 @@ The checked-in GitHub Actions publish workflow currently authenticates with
 `NPM_TOKEN`. Although the workflow already declares `id-token: write`, npm
 Trusted Publisher is not the active publish path yet. See `docs/RELEASING.md`
 for the canonical release checklist and publishing procedure.
-
-## HOWTO
-
-### Understand the intended flow first
-
-`angular-django2` is **not** the top-level workspace bootstrapper.
-
-The intended user flow is:
-
-1. create or configure the Angular workspace via `django-angular3`
-2. let that integration register `angular-django2` with `ng add angular-django2`
-3. use the `angular-django2` schematics inside that workspace
-
-If you are not using `django-angular3`, a plain Angular workspace still works
-fine; that compatibility flow is shown below.
-
-### Recommended flow inside a django-angular3-managed workspace
-
-Once your Angular workspace exists and `angular-django2` is registered, the
-shortest path to a running app is:
-
-```bash
-ng generate angular-django2:workspace-setup my-app
-ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
-npm install
-ng build my-app
-ng serve my-app
-```
-
-Use `material-app` when you want the package to generate:
-
-- an Angular application
-- Angular Material dependencies and theme configuration
-- a standard `core/`, `shared/`, and `features/` structure
-- a responsive Material sidenav layout
-
-If the workspace was created empty with `--no-create-application`, run
-`workspace-setup` first so the workspace-level bootstrap files are written before
-the application is generated.
-
-### Manual Angular-only setup
-
-If you are not using `django-angular3`, create a minimal Angular workspace
-first, then add `angular-django2`:
-
-```bash
-npx -y @angular/cli@22 new demo-workspace --no-create-application --package-manager npm --skip-git --defaults
-cd demo-workspace
-npm install angular-django2
-npx ng add angular-django2 --skip-confirmation
-npx ng generate angular-django2:workspace-setup my-app
-npx ng generate angular-django2:material-app my-app --ssr=false --zoneless=true --defaults
-npm install
-npx ng build my-app
-npx ng serve my-app
-```
-
-To validate a local sibling build instead of the published npm package, replace
-the install line with:
-
-```bash
-npm install ../angular-django2/dist/angular-django2
-```
-
-### Available commands
-
-The [CLI reference](docs/cli/index.md) is the canonical command guide. It
-helps select a schematic and links to its schema-grounded options,
-prerequisites, output, and examples.
-
-### Recipes for a running Angular app
-
-#### Fastest path: generate a complete app in one step
-
-```bash
-ng generate angular-django2:material-app my-app --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
-npm install
-ng build my-app
-ng serve my-app
-```
-
-Use this when you want the package to do most of the wiring for you.
-
-#### Empty workspace bootstrap
-
-Use this when you created the workspace with `--no-create-application` and
-want both workspace-level bootstrap files and a running Angular app:
-
-```bash
-ng generate angular-django2:workspace-setup my-app
-ng generate angular-django2:material-app my-app --theme=indigo-pink --typography=true --animations=true --ssr=false --zoneless=true --defaults
-npm install
-ng build my-app
-ng serve my-app
-```
-
-#### Step-by-step app setup
-
-Use this when you want explicit control over each stage:
-
-```bash
-ng generate angular-django2:application my-app
-npm install @angular/material @angular/cdk @angular/animations
-ng generate angular-django2:material-setup --project=my-app --theme=indigo-pink --typography=true --animations=true
-ng generate angular-django2:project-structure --project=my-app
-ng build my-app
-ng serve my-app
-```
-
-These three schematics produce a Material-configured app with the standard
-`core/`, `shared/`, and `features/` structure, but **not** the responsive
-sidenav layout. That layout is written only by `material-app`; there is no
-standalone layout schematic. Use `material-app` for the layout, or hand-author
-the root component. The `app-shell` schematic is unrelated — it wraps Angular's
-SSR/prerendering app-shell feature, not the Material layout.
-
-#### Provisioning application source files from `workspace-setup`
-
-`workspace-setup` exposes per-file hooks for the application source files
-documented at
-https://angular.dev/reference/configs/file-structure#application-source-files.
-For recognized hook keys, target paths, and content modes, see the
-[`workspace-setup` CLI reference](docs/cli/workspace-setup.md).
-
-Because the CLI does not pass nested object options on the command line, drive
-`workspace-setup` programmatically via the schematics test runner, a custom
-schematic that delegates to it, or by invoking the exported `workspaceSetup`
-factory directly. Example (Node script):
-
-```ts
-import { workspaceSetup } from 'angular-django2/schematics/workspace-setup';
-
-const rule = workspaceSetup({
-  name: 'my-app',
-  project: 'my-app',
-  files: {
-    indexHtml: { path: './templates/index.html' },
-    appComponentTs: {
-      template:
-        "import { Component } from '@angular/core';\n@Component({ selector: '{{selector}}', template: '<h1>{{title}}</h1>' })\nexport class AppComponent {}\n",
-      params: { selector: 'app-root', title: 'Hello' },
-    },
-    stylesCss: { content: 'body { margin: 0; }\n' },
-  },
-});
-```
-
-Notes:
-
-- Omitting `files` (or passing an empty object) preserves the original
-  workspace-only behavior: only `/README.md` and
-  `/.github/copilot-instructions.md` are written.
-- When `project` names a project missing from `angular.json`, the schematic
-  throws a `SchematicsException` so misconfigured names fail fast.
-- Each hook entry must specify exactly one of `content`, `path`, or
-  `template`; supplying zero or multiple modes is an error.
-
-#### OpenAPI client workflow
-
-```bash
-ng generate angular-django2:openapi-setup --openapi-spec-file=openapi.json
-npm install
-npm run generate:api
-ng generate angular-django2:data-service users
-```
-
-This flow:
-
-- adds `ng-openapi-gen` to `devDependencies`
-- writes `ng-openapi-gen.json`
-- adds `npm run generate:api`
-- generates Django integration helpers under `--helpers-path` (default
-  `src/app/api-integration`): auth/CSRF/transport helpers
-  (`provideDjangoApiTransport`, `readCsrfCookie`, `djangoAuthInterceptor`,
-  `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) and an API-contract-derived
-  `ResourceAdapter` with a DRF-style `PaginatedResult`
-- lets you wrap a generated `*ApiService` in a typed `*DataService`
-
-Pass `--skip-helpers` to bootstrap `ng-openapi-gen` only, or `--skip-tests` to
-omit the generated helper spec files.
-
-#### Composing components with embedding hooks
-
-Components generated with `angular-django2:component` include begin/end section
-markers ("hooks") so they can be wired into a parent later:
-
-- TypeScript sections: `import`, `injected services`, `input signals`, and
-  `output signals`
-- Template section: `children`
-
-The `embed-component` schematic uses those hooks to compose a child into a
-parent:
-
-```bash
-ng generate angular-django2:component hero-card --project=my-app
-ng generate angular-django2:component dashboard --project=my-app
-# add input()/output() signals to hero-card inside its marked sections, then:
-ng generate angular-django2:embed-component \
-  --component=projects/my-app/src/app/hero-card/hero-card.ts \
-  --parent=projects/my-app/src/app/dashboard/dashboard.ts
-```
-
-For the child, `embed-component`:
-
-- inserts `<app-hero-card ...>` after the parent template `children` marker,
-  feeding each input signal and binding each output signal to an
-  `on<Output>($event)` handler
-- imports the child class in the parent and registers it in the standalone
-  `imports` array
-- adds not-implemented `on<Output>()` handler stubs to the parent class
-
-The operation is idempotent, so embedding the same child twice does not
-duplicate the wiring.
-
-#### Embedding existing components (Angular Material)
-
-The same schematic can embed an existing component exported from an npm
-package — such as Angular Material's
-[`MatDateRangePicker`](https://material.angular.dev/components/datepicker/api#MatDateRangePicker)
-— by switching to "package mode" with `--from`. The parent wiring (element,
-imports array entry, and `on<Output>()` stubs) is identical to embedding a
-locally generated component.
-
-In package mode, `--component` is the exported class name instead of a file
-path, and the selector, inputs, and outputs are provided explicitly:
-
-```bash
-ng generate angular-django2:embed-component \
-  --component=MatDateRangePicker \
-  --parent=projects/my-app/src/app/scheduler/scheduler.ts \
-  --from=@angular/material/datepicker \
-  --selector=mat-date-range-picker \
-  --outputs=opened,closed
-```
-
-This imports `MatDateRangePicker` from `@angular/material/datepicker`, registers
-it in the parent's standalone `imports` array, inserts
-`<mat-date-range-picker (opened)="onOpened($event)" (closed)="onClosed($event)">`
-after the parent's `children` marker, and adds not-implemented `onOpened()` and
-`onClosed()` handler stubs. `--selector` defaults to the dasherized class name
-when omitted, and `--inputs`/`--outputs` accept comma-separated lists.
-
-### References
-
-- Angular libraries: https://angular.dev/tools/libraries
-- Angular schematics for libraries:
-  https://angular.dev/tools/cli/schematics-for-libraries
-- Angular CLI schematics: https://angular.dev/tools/cli/schematics
-- Workspace schematic collections:
-  https://angular.dev/reference/configs/workspace-config
-- npm trusted publishers: https://docs.npmjs.com/trusted-publishers/
-- npm 2FA requirements:
-  https://docs.npmjs.com/requiring-2fa-for-package-publishing-and-settings-modification/

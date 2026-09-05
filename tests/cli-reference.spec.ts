@@ -27,7 +27,7 @@ describe('CLI reference', () => {
     expect(documentedNames).toEqual(schematicNames);
     for (const schematic of schematicNames) {
       expect(existsSync(join(cliDirectory, `${schematic}.md`))).toBe(true);
-      expect(mkdocsConfig).toContain(`- ${schematic}: cli/${schematic}.md`);
+      expect(mkdocsConfig).toContain(`cli/${schematic}.md`);
       expect(cliIndex).toContain(`](${schematic}.md)`);
     }
   });
