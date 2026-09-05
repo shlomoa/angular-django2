@@ -58,6 +58,7 @@ The current schematics collection includes:
 
 - Node.js `^22.22.3 || ^24.15.0 || >=26.0.0`
 - npm `>=11`
+- Python `3.12` for documentation validation
 
 #### Install dependencies
 
@@ -71,6 +72,7 @@ npm install
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `npm run build`                       | Validates source metadata, builds the schematics package, and validates its distribution metadata    |
 | `npm run build:reference-app`         | Builds the Angular Material reference app                                                            |
+| `npm run docs:build`                  | Builds the MkDocs site in strict mode                                                                |
 | `npm run lint`                        | Runs ESLint across schematics, tests, and tools                                                      |
 | `npm run lint:reference-app`          | Runs ESLint for the reference app project                                                            |
 | `npm run lint:fix`                    | Applies fixable ESLint changes                                                                       |
@@ -85,6 +87,20 @@ npm install
 
 `npm run build` produces the publishable output in `dist/angular-django2`,
 including the compiled schematics collection.
+
+#### Documentation validation
+
+Install the Python dependencies owned by `docs/requirements.txt`:
+
+```bash
+python -m pip install --requirement docs/requirements.txt
+```
+
+Then run the canonical strict documentation build:
+
+```bash
+npm run docs:build
+```
 
 ### Testing in this repository
 

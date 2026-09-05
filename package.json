@@ -8,6 +8,7 @@
     "build": "npm run check:package-metadata && npm run build:schematics && npm run check:dist-package-metadata",
     "build:reference-app": "ng build angular-django2-reference",
     "build:schematics": "cpy package.json README.md \"../../dist/angular-django2/\" --cwd=projects/angular-django2/ && tsc -p projects/angular-django2/tsconfig.schematics.json && cpy \"*.json\" \"*/schema.json\" \"../../../dist/angular-django2/schematics/\" --cwd=projects/angular-django2/schematics/",
+    "docs:build": "python -m mkdocs build --strict",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "ng lint",
