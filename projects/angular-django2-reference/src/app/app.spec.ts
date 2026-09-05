@@ -90,9 +90,9 @@ describe('App', () => {
     );
     expectExternalLink(
       compiled,
-      '.hero-actions a[href="https://github.com/shlomoa/angular-django2#howto"]',
-      'https://github.com/shlomoa/angular-django2#howto',
-      'Read HOWTO',
+      '.hero-actions a[href="https://angular-django2.readthedocs.io/"]',
+      'https://angular-django2.readthedocs.io/',
+      'Read documentation',
     );
     expectExternalLink(
       compiled,
