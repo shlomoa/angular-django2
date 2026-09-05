@@ -7,13 +7,13 @@ ng generate angular-django2:component <name>
 ```
 
 This schematic wraps Angular's own `@schematics/angular:component`, applying
-`--standalone=true` and `--changeDetection=OnPush` as defaults, then seeds
+`--standalone=true` and `--change-detection=OnPush` as defaults, then seeds
 begin/end markers used by [`embed-component`](embed-component.md).
 
 ## Options
 
 The most relevant options are project-relative `--path`, `--project`,
-`--standalone` (default `true`), and `--changeDetection` (default `OnPush`).
+`--standalone` (default `true`), and `--change-detection` (default `OnPush`).
 Because this schematic forwards options to `@schematics/angular:component`, it
 also accepts that schematic's full option set (for example `--selector`,
 `--prefix`, `--style`, `--flat`, and `--inline-template`). See Angular's

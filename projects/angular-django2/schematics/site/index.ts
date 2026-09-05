@@ -83,7 +83,7 @@ export function site(options: SiteSchema): Rule {
     if (resolved.definition.openapi) {
       rules.push(
         externalSchematic('angular-django2', 'openapi-setup', {
-          openapi_spec_file: resolved.definition.openapi.spec,
+          openapiSpecFile: resolved.definition.openapi.spec,
           outputPath: resolved.definition.openapi.outputPath,
           helpersPath: resolved.definition.openapi.helpersPath,
         }),
@@ -159,7 +159,7 @@ function resolveSite(tree: Tree, options: SiteSchema): ResolvedSite {
     };
   }
   const source = options.source
-    ? resolveInputPath(project, options.source, 'Site assembly definition')
+    ? resolveInputPath(options.source, 'Site assembly definition')
     : undefined;
   const definition = source
     ? readDefinition(tree, source)
@@ -235,16 +235,17 @@ function findShellPath(tree: Tree, appDirectory: string): string {
   return shellPath;
 }
 
-function resolveInputPath(project: WorkspaceProject, value: string, label: string): string {
-  if (!value.endsWith('.json') || value.split(/[\\/]+/).includes('..')) {
-    throw new SchematicsException(`${label} must be a source-root-relative .json path.`);
+function resolveInputPath(value: string, label: string): string {
+  const normalized = value.replace(/\\/g, '/');
+  if (
+    !normalized.endsWith('.json') ||
+    path.posix.isAbsolute(normalized) ||
+    path.win32.isAbsolute(value) ||
+    normalized.split('/').includes('..')
+  ) {
+    throw new SchematicsException(`${label} must be a workspace-relative .json path.`);
   }
-  const directory = resolveApplicationTargetDirectory(
-    project,
-    path.posix.dirname(value.replace(/\\/g, '/')),
-    'src/app',
-  );
-  return `/${path.posix.join(directory, path.posix.basename(value))}`;
+  return `/${path.posix.normalize(normalized)}`;
 }
 
 function readDefinition(tree: Tree, source: string): SiteDefinition {
@@ -487,7 +488,21 @@ function assertDefinitionPaths(
 }
 
 function formDefinitionPath(project: WorkspaceProject, definition: string): string {
-  return resolveInputPath(project, definition, 'Form definition').slice(1);
+  const normalized = definition.replace(/\\/g, '/');
+  if (
+    !normalized.endsWith('.json') ||
+    path.posix.isAbsolute(normalized) ||
+    path.win32.isAbsolute(definition) ||
+    normalized.split('/').includes('..')
+  ) {
+    throw new SchematicsException('Form definition must be a source-root-relative .json path.');
+  }
+  const directory = resolveApplicationTargetDirectory(
+    project,
+    path.posix.dirname(normalized),
+    'src/app',
+  );
+  return path.posix.join(directory, path.posix.basename(normalized));
 }
 
 function assertProtectedPagePrerequisites(
@@ -668,7 +683,7 @@ function writeManifest(resolved: ResolvedSite): Rule {
 
 function deleteSite(tree: Tree, resolved: ResolvedSite, options: SiteSchema): void {
   if (!options.confirmDelete) {
-    throw new SchematicsException('site delete requires --confirmDelete=true.');
+    throw new SchematicsException('site delete requires --confirm-delete=true.');
   }
   if (!resolved.manifest) {
     throw new SchematicsException(

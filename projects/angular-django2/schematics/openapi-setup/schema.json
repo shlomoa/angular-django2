@@ -8,28 +8,33 @@
     "outputPath": {
       "type": "string",
       "description": "Output path for generated API models and services",
-      "default": "src/app/api"
+      "default": "src/app/api",
+      "aliases": ["output-path", "outputPath"]
     },
-    "openapi_spec_file": {
+    "openapiSpecFile": {
       "type": "string",
       "description": "Path to the OpenAPI schema file",
-      "default": "openapi.json"
+      "default": "openapi.json",
+      "aliases": ["openapi-spec-file", "openapiSpecFile", "openapi_spec_file"]
     },
     "helpersPath": {
       "type": "string",
       "format": "path",
       "description": "Directory for the generated Django integration helpers",
-      "default": "src/app/api-integration"
+      "default": "src/app/api-integration",
+      "aliases": ["helpers-path", "helpersPath"]
     },
     "skipHelpers": {
       "type": "boolean",
       "description": "When true, skips generating the Django auth/CSRF/transport and resource adapter helpers",
-      "default": false
+      "default": false,
+      "aliases": ["skip-helpers", "skipHelpers"]
     },
     "skipTests": {
       "type": "boolean",
       "description": "When true, does not generate spec files alongside the integration helpers",
-      "default": false
+      "default": false,
+      "aliases": ["skip-tests", "skipTests"]
     }
   }
 }

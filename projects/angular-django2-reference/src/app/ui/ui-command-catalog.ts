@@ -390,7 +390,7 @@ export const UI_COMMANDS: readonly UiCommand[] = [
     id: 'openapi-setup',
     categoryId: 'api-data',
     name: 'Bootstrap OpenAPI client generation',
-    command: 'ng generate angular-django2:openapi-setup --openapi_spec_file=openapi.json',
+    command: 'ng generate angular-django2:openapi-setup --openapi-spec-file=openapi.json',
     summary: 'Adds ng-openapi-gen configuration and the generate:api script.',
     effect: 'text',
     before: {

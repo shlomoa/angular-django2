@@ -10,6 +10,10 @@ software and not yet alpha. The current package version is `0.4.3`.
 a Django-friendly npm package. It ships an Angular CLI schematics collection
 for custom `ng generate` flows.
 
+For multiword schematic options, use kebab-case CLI flags (for example,
+`--openapi-spec-file` and `--auth-guard`). Matching camelCase schema property
+spellings remain supported, and `--openapi_spec_file` remains a legacy alias.
+
 It is designed to work especially well with
 [django-angular3](https://github.com/shlomoa/django-angular3), which owns the
 Django-side workspace lifecycle and can register this package automatically.
@@ -293,7 +297,7 @@ available:
 | `ng generate angular-django2:app-shell --project=<name>`                                   | Creates or updates the app shell                                                                     | Pass-through schematic for app shell generation                                                    |
 | `ng generate angular-django2:material-app <name>`                                          | Creates a complete app in one flow                                                                   | Defaults to no SSR, zoneless, and non-interactive defaults                                         |
 | `ng generate angular-django2:workspace-setup <name>`                                       | Writes workspace-wide bootstrap files, lint/Vitest setup, and optional application source-file hooks | Use before `material-app` in an empty workspace                                                    |
-| `ng generate angular-django2:openapi-setup --openapi_spec_file=<file>`                     | Bootstraps `ng-openapi-gen` and Django integration helpers                                           | Adds `generate:api` script and auth/CSRF/transport + resource adapter helpers                      |
+| `ng generate angular-django2:openapi-setup --openapi-spec-file=<file>`                     | Bootstraps `ng-openapi-gen` and Django integration helpers                                           | Adds `generate:api` script and auth/CSRF/transport + resource adapter helpers                      |
 | `ng generate angular-django2:data-service <resource>`                                      | Creates a typed `*DataService` wrapper                                                               | Designed for generated OpenAPI services                                                            |
 
 ### Recipes for a running Angular app
@@ -386,7 +390,7 @@ Notes:
 #### OpenAPI client workflow
 
 ```bash
-ng generate angular-django2:openapi-setup --openapi_spec_file=openapi.json
+ng generate angular-django2:openapi-setup --openapi-spec-file=openapi.json
 npm install
 npm run generate:api
 ng generate angular-django2:data-service users
@@ -397,14 +401,14 @@ This flow:
 - adds `ng-openapi-gen` to `devDependencies`
 - writes `ng-openapi-gen.json`
 - adds `npm run generate:api`
-- generates Django integration helpers under `--helpersPath` (default
+- generates Django integration helpers under `--helpers-path` (default
   `src/app/api-integration`): auth/CSRF/transport helpers
   (`provideDjangoApiTransport`, `readCsrfCookie`, `djangoAuthInterceptor`,
   `djangoCredentialsInterceptor`, `DJANGO_AUTH_TOKEN`) and an API-contract-derived
   `ResourceAdapter` with a DRF-style `PaginatedResult`
 - lets you wrap a generated `*ApiService` in a typed `*DataService`
 
-Pass `--skipHelpers` to bootstrap `ng-openapi-gen` only, or `--skipTests` to
+Pass `--skip-helpers` to bootstrap `ng-openapi-gen` only, or `--skip-tests` to
 omit the generated helper spec files.
 
 #### Composing components with embedding hooks

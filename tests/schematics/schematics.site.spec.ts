@@ -194,7 +194,7 @@ describe('site schematic', () => {
 
     await expect(
       runner.runSchematic('site', { project: 'demo', operation: 'delete' }, created),
-    ).rejects.toThrow('confirmDelete=true');
+    ).rejects.toThrow('confirm-delete=true');
 
     const deleted = await runner.runSchematic(
       'site',
@@ -204,5 +204,26 @@ describe('site schematic', () => {
     expect(deleted.readContent('/src/app/app.html')).toBe(MATERIAL_LAYOUT_TEMPLATE);
     expect(deleted.files).not.toContain('/.angular-django2/site/demo.json');
     expect(deleted.files).toContain('/src/app/features/home/home-page.ts');
+  });
+
+  it('TC-SITE-07: reads an assembly definition staged at the workspace root', async () => {
+    const tree = createMaterialApplicationTree();
+    tree.create(
+      '/.django-angular3/ui.json',
+      JSON.stringify({
+        pages: [{ name: 'home', navigation: { id: 'home', label: 'Home' } }],
+      }),
+    );
+
+    const result = await createRunner().runSchematic(
+      'site',
+      { project: 'demo', source: '.django-angular3/ui.json' },
+      tree,
+    );
+
+    expect(result.files).toContain('/src/app/features/home/home-page.ts');
+    expect(result.readContent('/.angular-django2/site/demo.json')).toContain(
+      '"source": ".django-angular3/ui.json"',
+    );
   });
 });

@@ -33,7 +33,8 @@
       "type": "string",
       "format": "path",
       "default": "src/app/shared/form-helpers",
-      "description": "Directory containing canonical form-field output to compose; absent fields use inline Material controls."
+      "description": "Directory containing canonical form-field output to compose; absent fields use inline Material controls.",
+      "aliases": ["primitives-path", "primitivesPath"]
     }
   },
   "required": ["name", "definition"],

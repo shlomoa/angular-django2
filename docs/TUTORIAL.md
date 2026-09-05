@@ -304,7 +304,7 @@ create/modify/delete lifecycle.
 If your Django backend exposes an OpenAPI schema, bootstrap `ng-openapi-gen`:
 
 ```bash
-npx ng generate angular-django2:openapi-setup --openapi_spec_file=openapi.json
+npx ng generate angular-django2:openapi-setup --openapi-spec-file=openapi.json
 npm install
 npm run generate:api
 ```
@@ -332,7 +332,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-Pass `--skipHelpers` to omit helper generation, or `--skipTests` to omit the
+Pass `--skip-helpers` to omit helper generation, or `--skip-tests` to omit the
 co-located spec files.
 
 After generating API services from your schema, create a typed data-service

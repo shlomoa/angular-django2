@@ -31,7 +31,7 @@ boundary.
 
 ## Site assembly definition contract
 
-`--source` is a source-root-relative `.json` file and is the only input used to
+`--source` is a workspace-relative `.json` file and is the only input used to
 discover pages, navigation, forms, and optional OpenAPI setup. No
 resource-operation definition is accepted, and the site assembly definition is
 not an OpenUI input. Form definition paths are also source-root-relative and
@@ -75,7 +75,7 @@ records the shell baseline and inspected definition in
 
 | Option               | Default       | Description                                     |
 | -------------------- | ------------- | ----------------------------------------------- |
-| `--source`           | —             | Source-root-relative site assembly JSON.        |
+| `--source`           | —             | Workspace-relative site assembly JSON.          |
 | `--defaults`         | `false`       | Generate only the documented Home-only default. |
 | `--project`          | inferred      | Target Angular application.                     |
 | `--operation`        | `create`      | `create`, `modify`, or `delete`.                |
