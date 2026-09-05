@@ -6,11 +6,13 @@ Angular workspaces. Choose the path that matches your goal.
 ## Use in a django-angular3-managed workspace
 
 `django-angular3` owns the Django-side workspace lifecycle and can register
-this collection. Continue with the [workspace and application workflow](cli/index.md#one-step-app-flow).
+this collection. Continue with the [CLI reference](cli/index.md) to select the
+appropriate workspace and application commands.
 
 ## Use in a standalone Angular workspace
 
-Create and configure an Angular workspace with the [Angular-only setup](cli/index.md#angular-only-setup).
+Create and configure an Angular workspace with the
+[CLI reference](cli/index.md), then follow the relevant command pages.
 
 ## Create a complete Material application
 
