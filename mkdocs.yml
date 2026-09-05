@@ -10,32 +10,39 @@ docs_dir: docs
 exclude_docs: |
   REQUIREMENTS.md
   INTEGRATION_TESTING.md
+  RELEASING.md
 
 nav:
-  - Home: index.md
-  - Tutorial: TUTORIAL.md
-  - Releasing: RELEASING.md
-  - CLI:
+  - Start here:
+      - Choose a journey: index.md
+      - Create a complete Material application: TUTORIAL.md
+  - Set up a workspace:
+      - Install and register: cli/ng-add.md
+      - Bootstrap an empty workspace: cli/workspace-setup.md
+      - Generate an application: cli/application.md
+      - Create a complete Material application: cli/material-app.md
+      - Configure Angular Material: cli/material-setup.md
+      - Create a project structure: cli/project-structure.md
+  - Generate application features:
+      - Components:
+          - Component: cli/component.md
+          - Embed a component: cli/embed-component.md
+          - Complex component: cli/complex-component.md
+      - Forms:
+          - Field component: cli/field-component.md
+          - Form field: cli/form-field.md
+          - Reactive form: cli/reactive-form.md
+      - Pages and sites:
+          - Page: cli/page.md
+          - Site: cli/site.md
+  - Integrate and extend:
+      - OpenAPI setup: cli/openapi-setup.md
+      - Data service: cli/data-service.md
+      - Service: cli/service.md
+      - Class: cli/class.md
+      - App shell: cli/app-shell.md
+  - CLI reference:
       - Overview: cli/index.md
-      - ng-add: cli/ng-add.md
-      - application: cli/application.md
-      - material-app: cli/material-app.md
-      - workspace-setup: cli/workspace-setup.md
-      - material-setup: cli/material-setup.md
-      - project-structure: cli/project-structure.md
-      - app-shell: cli/app-shell.md
-      - component: cli/component.md
-      - site: cli/site.md
-      - embed-component: cli/embed-component.md
-      - complex-component: cli/complex-component.md
-      - field-component: cli/field-component.md
-      - form-field: cli/form-field.md
-      - reactive-form: cli/reactive-form.md
-      - page: cli/page.md
-      - service: cli/service.md
-      - class: cli/class.md
-      - openapi-setup: cli/openapi-setup.md
-      - data-service: cli/data-service.md
 
 theme:
   name: material
