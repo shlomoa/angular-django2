@@ -12,6 +12,33 @@ function readRepositoryFile(relativePath: string): string {
 }
 
 describe('documentation validation', () => {
+  it('organizes the tutorial as focused workflows with canonical references', () => {
+    const tutorial = readRepositoryFile('docs/TUTORIAL.md');
+
+    for (const heading of [
+      '## Prerequisites and workspace choice',
+      '## Fastest complete Material app',
+      '## Explicit step-by-step composition',
+      '## Component composition',
+      '## Forms and validation',
+      '## Page and site generation',
+      '## OpenAPI client integration',
+    ]) {
+      expect(tutorial).toContain(heading);
+    }
+
+    expect(tutorial).toContain('[CLI reference](cli/index.md)');
+    expect(tutorial).toContain('[`material-app`](cli/material-app.md)');
+    expect(tutorial).toContain('[`reactive-form`](cli/reactive-form.md)');
+    expect(tutorial).toContain('[`site` reference](cli/site.md)');
+    expect(tutorial).toContain(
+      'https://github.com/shlomoa/angular-django2/blob/main/projects/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition',
+    );
+    expect(tutorial).toContain(
+      '"$schema": "./node_modules/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition"',
+    );
+  });
+
   it('provides a canonical strict MkDocs build command', () => {
     const packageJson = JSON.parse(readRepositoryFile('package.json')) as {
       scripts: Record<string, string>;
