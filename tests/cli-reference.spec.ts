@@ -31,8 +31,13 @@ describe('CLI reference', () => {
 
     expect(documentedNames).toEqual(schematicNames);
     expect(navigatedNames).toEqual(['index', ...schematicNames].sort());
+    expect(navSection).toContain('- Create a complete Material application: TUTORIAL.md');
+    expect(navSection).toContain('- Generate a complete Material application: cli/material-app.md');
     for (const schematic of schematicNames) {
-      expect(existsSync(join(cliDirectory, `${schematic}.md`))).toBe(true);
+      const schematicPage = join(cliDirectory, `${schematic}.md`);
+
+      expect(existsSync(schematicPage)).toBe(true);
+      expect(readFileSync(schematicPage, 'utf8')).toMatch(new RegExp(`^# ${schematic}$`, 'm'));
       expect(cliIndex).toContain(`](${schematic}.md)`);
     }
 

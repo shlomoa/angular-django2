@@ -20,7 +20,7 @@ nav:
       - Install and register: cli/ng-add.md
       - Bootstrap an empty workspace: cli/workspace-setup.md
       - Generate an application: cli/application.md
-      - Create a complete Material application: cli/material-app.md
+      - Generate a complete Material application: cli/material-app.md
       - Configure Angular Material: cli/material-setup.md
       - Create a project structure: cli/project-structure.md
   - Generate application features:

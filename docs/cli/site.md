@@ -1,4 +1,4 @@
-# `site`
+# site
 
 Assemble a routed Angular Material site from one bounded JSON site assembly
 definition. `site` is an orchestrator: it delegates page, reactive-form, and
