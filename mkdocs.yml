@@ -32,9 +32,8 @@ nav:
           - Field component: cli/field-component.md
           - Form field: cli/form-field.md
           - Reactive form: cli/reactive-form.md
-      - Pages and sites:
+      - Pages:
           - Page: cli/page.md
-          - Site: cli/site.md
   - Integrate and extend:
       - OpenAPI setup: cli/openapi-setup.md
       - Data service: cli/data-service.md

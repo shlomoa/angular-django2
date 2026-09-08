@@ -27,7 +27,7 @@ working Material application.
 - **Forms:** [field-component](cli/field-component.md),
   [form-field](cli/form-field.md), or
   [reactive-form](cli/reactive-form.md)
-- **Pages and sites:** [page](cli/page.md) or [site](cli/site.md)
+- **Pages:** [page](cli/page.md)
 - **OpenAPI integration:** [openapi-setup](cli/openapi-setup.md) and
   [data-service](cli/data-service.md)
 

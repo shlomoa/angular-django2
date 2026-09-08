@@ -26,12 +26,6 @@ const CAMEL_CASE_OPTIONS = {
     ['navigationIcon', 'navigation-icon'],
   ],
   'reactive-form': [['primitivesPath', 'primitives-path']],
-  site: [
-    ['confirmDelete', 'confirm-delete'],
-    ['authGuard', 'auth-guard'],
-    ['csrfCookieName', 'csrf-cookie-name'],
-    ['csrfHeaderName', 'csrf-header-name'],
-  ],
 } as const;
 
 interface SchemaProperty {

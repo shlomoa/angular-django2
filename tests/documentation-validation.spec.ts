@@ -21,7 +21,7 @@ describe('documentation validation', () => {
       '## Explicit step-by-step composition',
       '## Component composition',
       '## Forms and validation',
-      '## Page and site generation',
+      '## Page generation',
       '## OpenAPI client integration',
     ]) {
       expect(tutorial).toContain(heading);
@@ -30,7 +30,6 @@ describe('documentation validation', () => {
     expect(tutorial).toContain('[CLI reference](cli/index.md)');
     expect(tutorial).toContain('[`material-app`](cli/material-app.md)');
     expect(tutorial).toContain('[`reactive-form`](cli/reactive-form.md)');
-    expect(tutorial).toContain('[`site` reference](cli/site.md)');
     expect(tutorial).toContain(
       'https://github.com/shlomoa/angular-django2/blob/main/projects/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition',
     );

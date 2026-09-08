@@ -165,10 +165,10 @@ details.
 **Expected result:** the build succeeds and `src/app/features/contact-form/`
 contains a typed, OnPush form that creates against `/api/contacts/`.
 
-## Page and site generation
+## Page generation
 
-**Use this workflow** after a Material application exists when you want either
-one feature-owned lazy route or a complete site assembly.
+**Use this workflow** after a Material application exists when you want a
+feature-owned lazy route and page.
 
 For one page:
 
@@ -181,22 +181,8 @@ The command adds an `orders` lazy route and its navigation metadata without
 changing unrelated routes. For route guards and all constraints, see
 [`page`](cli/page.md).
 
-For a whole site, use a fresh, unmodified `material-app` shell; the `site`
-schematic refuses to replace a custom shell or navigation:
-
-```bash
-npx ng generate angular-django2:site --project=ngdj-tutorial --defaults
-npx ng build ngdj-tutorial
-```
-
-Use `--source=src/app/site/site.json` instead of `--defaults` when your
-workspace already has an explicit site assembly definition. The
-[`site` reference](cli/site.md) owns that JSON contract, lifecycle operations,
-and protected-page requirements.
-
-**Expected result:** the page workflow adds one lazy route, while the site
-workflow adds the documented Home page or exactly the routes and forms defined
-by its source file.
+**Expected result:** the page workflow adds one lazy route with OnPush
+change detection and responsive Material navigation.
 
 ## OpenAPI client integration
 
