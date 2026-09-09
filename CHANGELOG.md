@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.4.6]
+
+- **Breaking:** Removed the legacy `site` schematic, including its site-assembly definition and lifecycle contract. The `ng generate angular-django2:site` command is no longer available.
+- Updated the supported workflow to compose sites explicitly with `material-app` for the Material application shell and `page` for feature-owned lazy routes and navigation.
+
 ## [0.4.5]
 
 - Reorganized the public documentation around clearer user journeys and workflow-oriented tutorial guidance.

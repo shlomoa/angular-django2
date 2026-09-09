@@ -50,7 +50,6 @@ The current schematics collection includes:
 - `openapi-setup`
 - `data-service`
 - `page`
-- `site`
 
 ### Build, lint, and package this repository
 
