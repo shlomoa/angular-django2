@@ -36,7 +36,10 @@ sources over lower-priority ones.
   and the roles of its schema, catalog, and concrete UI document are
   defined by the
   [OpenUI artifact-role SSOT](https://github.com/shlomoa/openui-spec/blob/main/spec/README.md#specification-artifacts-grammar-vs-catalog).
-  This repository does not redefine that contract.
+  This repository does not redefine that contract. Schematics that accept an
+  OpenUI document must load and validate it with the bundled
+  [`@shlomoa/openui-spec`](https://www.npmjs.com/package/@shlomoa/openui-spec)
+  parser before mutating the workspace tree.
 
 ## 1. Repository Identity
 
