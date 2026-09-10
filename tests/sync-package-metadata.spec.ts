@@ -280,6 +280,8 @@ describe('sync-package-metadata', () => {
     );
 
     expect(syncPackageMetadata(rootPackage, libraryPackage)).toEqual(libraryPackage);
+    expect(rootPackage.dependencies['@shlomoa/openui-spec']).toBe('^0.1.1');
+    expect(libraryPackage.dependencies['@shlomoa/openui-spec']).toBe('^0.1.1');
     expect(boundaryPackage).toEqual({ type: 'commonjs' });
   });
 });
