@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { readOpenUiDocument } from '../../projects/angular-django2/schematics/utility/openui';
 
 const VALID_DOCUMENT = {
-  version: '0.1.0',
+  version: '0.2.0',
   id: 'root',
   type: 'html',
   children: [
@@ -50,6 +50,21 @@ describe('OpenUI document utility', () => {
     );
     expect(() => readOpenUiDocument(tree, 'documents/missing.json')).toThrow(
       'OpenUI document "documents/missing.json" was not found in the workspace.',
+    );
+  });
+
+  it('TC-OPENUI-04: rejects object types outside the exact, case-sensitive canonical catalog', () => {
+    const tree = Tree.empty();
+    tree.create(
+      '/documents/unknown-type.json',
+      JSON.stringify({
+        ...VALID_DOCUMENT,
+        children: [{ id: 'report', type: 'report' }],
+      }),
+    );
+
+    expect(() => readOpenUiDocument(tree, 'documents/unknown-type.json')).toThrow(
+      'OpenUI document "documents/unknown-type.json" is invalid:\nunknown OpenUI object type: report',
     );
   });
 });
