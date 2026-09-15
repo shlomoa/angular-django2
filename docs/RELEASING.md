@@ -196,7 +196,7 @@ version is already on npm.
    - **7.3** Create the release tag:
 
      ```bash
-     git tag vX.Y.Z
+     git tag -a vX.Y.Z -m "Release vX.Y.Z"
      ```
 
    - **7.4** Push the branch and tag:

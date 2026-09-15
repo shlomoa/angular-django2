@@ -1,6 +1,6 @@
 {
   "name": "angular-django2",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Angular workspace for a Django-friendly Angular CLI schematics collection.",
   "scripts": {
     "ng": "ng",
@@ -15,7 +15,7 @@
     "lint:fix": "ng lint --fix",
     "lint:reference-app": "ng lint angular-django2-reference",
     "pack:dry-run": "npm run build && npm pack ./dist/angular-django2 --dry-run",
-    "release:prepare": "npm run format:check && npm run lint && npm run test:ci && npm run pack:dry-run",
+    "release:prepare": "npm run format:check && npm run lint && npm run build && npm run test:ci && npm run pack:dry-run",
     "release:version": "node tools/release-version.mjs",
     "serve:reference-app": "ng serve angular-django2-reference",
     "sync:package-metadata": "node tools/sync-package-metadata.mjs",

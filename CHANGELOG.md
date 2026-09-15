@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.4.7]
+
+- Added the canonical `@shlomoa/openui-spec` dependency and OpenUI parsing utilities for validating and reading OpenUI documents.
+- Added documented mappings between OpenUI specification elements and the `ngdj` schematic workflows, with corresponding requirements coverage.
+- Added unit coverage for OpenUI parsing and package-metadata synchronization.
+- Aligned the release preparation command with CI by building distribution artifacts before schematic tests.
+
 ## [0.4.6]
 
 - **Breaking:** Removed the legacy `site` schematic, including its site-assembly definition and lifecycle contract. The `ng generate angular-django2:site` command is no longer available.
