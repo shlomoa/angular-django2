@@ -29,6 +29,6 @@
     "npm": ">=11"
   },
   "dependencies": {
-    "@shlomoa/openui-spec": "^0.1.1"
+    "@shlomoa/openui-spec": "^0.2.0"
   }
 }
