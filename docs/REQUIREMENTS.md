@@ -44,9 +44,9 @@ sources over lower-priority ones.
 ## 1. Repository Identity
 
 - The repository is an Angular 22 workspace.
-- The repository exists to produce a Django-friendly npm package named
+- The repository produces a Django-friendly npm package named
   `angular-django2`.
-- Treat the project as a publishable schematics package by default, not as an
+- The project is a publishable schematics package by default, not an
   Angular application, unless work explicitly targets app generation behavior.
 - The schematics source of truth is `projects/angular-django2`.
 - The repo-owned Angular Material tutorial/reference app lives in
