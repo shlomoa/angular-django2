@@ -3,6 +3,7 @@
 ### 1. Identify the Angular-side reference surface
 
 1.1. Search `angular-django2/docs/REQUIREMENTS.md` for exact occurrences of:
+
 - `django-angular3`
 - `djng`
 - `ngdj`
