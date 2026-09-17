@@ -13,23 +13,23 @@ are in [`README.md`](README.md).
 This is the replacement issue graph for mistakenly created
 `django-angular3` issues #176-#190. The source issues are closed as superseded.
 
-| Purpose | `angular-django2` issue |
-| --- | --- |
-| Epic | [#108](https://github.com/shlomoa/angular-django2/issues/108) |
-| Angular reference discovery | [#109](https://github.com/shlomoa/angular-django2/issues/109) |
-| Baseline requirement discovery | [#110](https://github.com/shlomoa/angular-django2/issues/110) |
-| Functional requirement discovery | [#111](https://github.com/shlomoa/angular-django2/issues/111) |
-| Quality requirement discovery | [#112](https://github.com/shlomoa/angular-django2/issues/112) |
-| App-builder requirement discovery | [#113](https://github.com/shlomoa/angular-django2/issues/113) |
+| Purpose                             | `angular-django2` issue                                       |
+| ----------------------------------- | ------------------------------------------------------------- |
+| Epic                                | [#108](https://github.com/shlomoa/angular-django2/issues/108) |
+| Angular reference discovery         | [#109](https://github.com/shlomoa/angular-django2/issues/109) |
+| Baseline requirement discovery      | [#110](https://github.com/shlomoa/angular-django2/issues/110) |
+| Functional requirement discovery    | [#111](https://github.com/shlomoa/angular-django2/issues/111) |
+| Quality requirement discovery       | [#112](https://github.com/shlomoa/angular-django2/issues/112) |
+| App-builder requirement discovery   | [#113](https://github.com/shlomoa/angular-django2/issues/113) |
 | AI-automation requirement discovery | [#114](https://github.com/shlomoa/angular-django2/issues/114) |
-| Discovery-output review | [#115](https://github.com/shlomoa/angular-django2/issues/115) |
-| Context-work-item coordination | [#116](https://github.com/shlomoa/angular-django2/issues/116) |
-| Mapping-work-item coordination | [#117](https://github.com/shlomoa/angular-django2/issues/117) |
-| Assessment-work-item coordination | [#118](https://github.com/shlomoa/angular-django2/issues/118) |
-| Proposal-batch selection | [#119](https://github.com/shlomoa/angular-django2/issues/119) |
-| Reference-edit proposal | [#120](https://github.com/shlomoa/angular-django2/issues/120) |
-| Apply approved links | [#121](https://github.com/shlomoa/angular-django2/issues/121) |
-| Validation | [#122](https://github.com/shlomoa/angular-django2/issues/122) |
+| Discovery-output review             | [#115](https://github.com/shlomoa/angular-django2/issues/115) |
+| Context-work-item coordination      | [#116](https://github.com/shlomoa/angular-django2/issues/116) |
+| Mapping-work-item coordination      | [#117](https://github.com/shlomoa/angular-django2/issues/117) |
+| Assessment-work-item coordination   | [#118](https://github.com/shlomoa/angular-django2/issues/118) |
+| Proposal-batch selection            | [#119](https://github.com/shlomoa/angular-django2/issues/119) |
+| Reference-edit proposal             | [#120](https://github.com/shlomoa/angular-django2/issues/120) |
+| Apply approved links                | [#121](https://github.com/shlomoa/angular-django2/issues/121) |
+| Validation                          | [#122](https://github.com/shlomoa/angular-django2/issues/122) |
 
 ## Execution order
 
