@@ -1,9 +1,8 @@
 .ui-command-category {
   display: grid;
   gap: 1.5rem;
-  margin: 0 auto;
-  max-width: 1120px;
   padding: 1.5rem 0;
+  width: 100%;
 }
 
 .ui-command-category__back-link,
@@ -29,13 +28,13 @@
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
-  max-width: 760px;
+  max-width: 960px;
 }
 
 .ui-command-category__layout {
   display: grid;
-  gap: 1.25rem;
-  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 1.5rem;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
 }
 
 .ui-command-category__command-list,
