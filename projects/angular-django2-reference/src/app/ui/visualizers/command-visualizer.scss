@@ -6,6 +6,13 @@
   background: var(--mat-sys-surface-container);
   border: 1px solid var(--mat-sys-primary);
   border-radius: 16px;
+  // Allow the visualizer and every direct child to shrink below content size
+  // so nested content wraps instead of forcing horizontal overflow.
+  min-width: 0;
+
+  > * {
+    min-width: 0;
+  }
 
   &__badge {
     display: inline-flex;
@@ -25,6 +32,7 @@
   &__subtitle {
     font-size: 0.8rem;
     color: var(--mat-sys-on-surface-variant);
+    overflow-wrap: anywhere;
   }
 
   &__sandbox {
@@ -74,7 +82,8 @@
       font-family: monospace;
       font-size: 0.75rem;
       color: #cdd6f4;
-      overflow-x: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
       line-height: 1.3;
     }
   }
@@ -112,10 +121,11 @@
 
     .filetree-item {
       display: flex;
-      align-items: center;
+      align-items: start;
       gap: 0.4rem;
       font-family: monospace;
       font-size: 0.75rem;
+      min-width: 0;
 
       .file-action {
         font-weight: 700;
@@ -133,7 +143,23 @@
 
       .file-path {
         color: var(--mat-sys-on-surface);
+        min-width: 0;
+        overflow-wrap: anywhere;
       }
     }
+  }
+}
+
+.interactive-component-demo {
+  // Material builds an internal, unscoped `.mat-mdc-card-header-text` wrapper
+  // that defaults to min-width:auto; ::ng-deep lets it shrink so the title
+  // wraps inside the narrow card instead of crossing the card boundary.
+  ::ng-deep .mat-mdc-card-header-text {
+    min-width: 0;
+  }
+
+  mat-card-title,
+  mat-card-subtitle {
+    overflow-wrap: anywhere;
   }
 }
