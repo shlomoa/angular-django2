@@ -28,7 +28,9 @@ projects/angular-django-validation/
     ├── utils/                 # Temp-area workspace allocation, cleanup, and runners
     ├── schematics.e2e.spec.ts # Real workspace generation & build validation
     ├── test_application.spec.ts # Application generation validation
-    └── playwright/            # Playwright browser automation suites for generated apps
+    └── playwright/            # Playwright browser automation suites
+        ├── app-smoke.spec.ts  # Application load and smoke testing
+        └── layout-placement.e2e.spec.ts # Responsive geometry, fluid layouts, and full-width visualizer placement
 ```
 
 ## Available Scripts
@@ -63,7 +65,7 @@ npm run test:e2e:debug
 # Clean up stale temp workspaces
 npm run cleanup:e2e
 
-# Run Playwright browser test specs
+# Run Playwright browser test specs (smoke tests & responsive layout placement across viewports)
 npm run test:playwright
 ```
 
