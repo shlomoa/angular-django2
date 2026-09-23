@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.5.0]
+
+- Restructured repository into a multi-project standalone architecture with 3 decoupled workspaces: `projects/angular-django2` (authoritative library & schematics), `projects/angular-django2-reference` (reference & tutorial app), and `projects/angular-django-validation` (unit, integration, and E2E validation).
+- Refactored layout and container architecture across schematics and reference app per `<ng-container>` zero-DOM Best Known Methods (BKMs), eliminating intermediate wrapper `<div>`s and redundant semantic enclosures.
+- Eliminated all hardcoded width sizes across stylesheets; transitioned containers to 100% fluid layouts with responsive `clamp()` padding, proportional rem grids, and typographic character measure (`max-inline-size: 70ch`).
+- Added dedicated Playwright E2E browser verification suite validating layout, geometry, and full-width visualizer placement across widescreen (1920x1080), laptop (1280x720), tablet (768x1024), and mobile (375x667) viewports.
+- Decoupled package manifests and retired metadata synchronization scripts; enabled standalone build, pack, and publish from `projects/angular-django2/dist`.
+- Updated multi-tier documentation across root docs, package-level READMEs, and Read the Docs (MkDocs).
+
 ## [0.4.7]
 
 - Added the canonical `@shlomoa/openui-spec` dependency and OpenUI parsing utilities for validating and reading OpenUI documents.

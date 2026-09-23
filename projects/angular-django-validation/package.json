@@ -1,6 +1,6 @@
 {
   "name": "angular-django-validation",
-  "version": "0.4.7",
+  "version": "0.5.0",
   "private": true,
   "description": "Standalone validation suite for angular-django2: unit tests (Vitest Browser) and E2E validation (Playwright).",
   "scripts": {
