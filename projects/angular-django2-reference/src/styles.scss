@@ -83,3 +83,244 @@ body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
+/* Command Visualizer Sandbox & Terminal Styles */
+.mini-app-frame,
+.mini-shell-frame {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--mat-sys-surface);
+}
+
+.mini-app-toolbar,
+.mini-shell-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  .toolbar-spacer {
+    flex: 1;
+  }
+}
+
+.mini-icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 2px;
+}
+
+.mini-app-body,
+.mini-shell-layout {
+  display: flex;
+  min-height: 120px;
+}
+
+.mini-app-drawer {
+  width: 110px;
+  background: var(--mat-sys-surface-container-low);
+  border-right: 1px solid var(--mat-sys-outline-variant);
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  .mini-drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.35rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+
+    mat-icon {
+      font-size: 0.9rem;
+      width: 0.9rem;
+      height: 0.9rem;
+    }
+
+    &.active {
+      background: var(--mat-sys-primary);
+      color: var(--mat-sys-on-primary);
+    }
+  }
+}
+
+.mini-app-content {
+  flex: 1;
+  padding: 0.5rem;
+
+  .mini-content-header {
+    h4 {
+      margin: 0;
+      font-size: 0.85rem;
+    }
+    p {
+      margin: 0.2rem 0;
+      font-size: 0.75rem;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  .mini-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.4rem;
+
+    .mini-card {
+      padding: 0.25rem;
+      border-radius: 8px;
+    }
+  }
+}
+
+.mini-shell-rail {
+  width: 36px;
+  background: var(--mat-sys-surface-container);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-right: 1px solid var(--mat-sys-outline-variant);
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: var(--mat-sys-primary);
+  }
+}
+
+.mini-shell-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+
+  .mini-shell-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.75rem;
+
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      color: var(--mat-sys-outline);
+    }
+  }
+}
+
+.interactive-component-demo {
+  display: flex;
+  justify-content: center;
+
+  .demo-card {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 12px;
+  }
+
+  .demo-counter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+
+    .counter-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--mat-sys-primary);
+    }
+  }
+
+  .demo-actions {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: flex-end;
+  }
+}
+
+.palette-swatches {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0.4rem 0;
+
+  .palette-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 999px;
+    background: var(--mat-sys-surface);
+    cursor: pointer;
+    font-size: 0.75rem;
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    &--active {
+      border-color: var(--mat-sys-primary);
+      background: var(--mat-sys-primary-container);
+      font-weight: 600;
+    }
+  }
+}
+
+.palette-preview-card {
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-top: 0.4rem;
+
+  .palette-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+}
+
+.app-bootstrap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.4rem;
+
+  .bootstrap-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.4rem;
+    background: var(--mat-sys-surface-container-low);
+    border-radius: 8px;
+    font-size: 0.75rem;
+
+    .item-icon {
+      color: var(--mat-sys-primary);
+      font-size: 1.1rem;
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+
+    span {
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+}

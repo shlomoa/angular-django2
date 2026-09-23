@@ -17,7 +17,9 @@ Create and configure an Angular workspace with the
 ## Create a complete Material application
 
 Follow the [step-by-step tutorial](TUTORIAL.md) from an empty directory to a
-working Material application.
+working Material application, or explore the repo-owned reference application
+at `projects/angular-django2-reference` for interactive command visualizations
+and Material 3 theming demonstrations.
 
 ## Generate focused features
 

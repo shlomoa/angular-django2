@@ -1,0 +1,139 @@
+.command-visualizer {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-primary);
+  border-radius: 16px;
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--mat-sys-primary);
+
+    mat-icon {
+      font-size: 1.15rem;
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+  }
+
+  &__subtitle {
+    font-size: 0.8rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__sandbox {
+    background: var(--mat-sys-surface);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  &__terminal {
+    background: #1e1e2e;
+    border-radius: 8px;
+    overflow: hidden;
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0.3rem 0.5rem;
+      background: #181825;
+      font-size: 0.7rem;
+      color: #a6adc8;
+
+      .terminal-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        &.red {
+          background: #f38ba8;
+        }
+        &.yellow {
+          background: #f9e2af;
+        }
+        &.green {
+          background: #a6e3a1;
+        }
+      }
+
+      .terminal-title {
+        margin-left: 0.3rem;
+      }
+    }
+
+    .terminal-body {
+      margin: 0;
+      padding: 0.5rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #cdd6f4;
+      overflow-x: auto;
+      line-height: 1.3;
+    }
+  }
+
+  &__filetree {
+    background: var(--mat-sys-surface-container-low);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 8px;
+    padding: 0.5rem;
+
+    .filetree-header {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--mat-sys-primary);
+      margin-bottom: 0.25rem;
+
+      mat-icon {
+        font-size: 0.9rem;
+        width: 0.9rem;
+        height: 0.9rem;
+      }
+    }
+
+    .filetree-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .filetree-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+
+      .file-action {
+        font-weight: 700;
+        font-size: 0.65rem;
+        padding: 0.05rem 0.25rem;
+        border-radius: 3px;
+        background: var(--mat-sys-secondary-container);
+        color: var(--mat-sys-on-secondary-container);
+
+        &.create {
+          background: color-mix(in srgb, #a6e3a1 25%, transparent);
+          color: #2e7d32;
+        }
+      }
+
+      .file-path {
+        color: var(--mat-sys-on-surface);
+      }
+    }
+  }
+}

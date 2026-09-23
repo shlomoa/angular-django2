@@ -1,4 +1,12 @@
 <mat-toolbar color="primary" class="app-toolbar">
+  <button
+    mat-icon-button
+    class="menu-toggle"
+    (click)="drawer.toggle()"
+    aria-label="Toggle navigation drawer"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
   <a class="brand-link" routerLink="/" aria-label="angular-django2 home">
     {{ title() }}
   </a>
@@ -28,76 +36,122 @@
   </a>
 </mat-toolbar>
 
-@if (isHomeRoute()) {
-  <main id="home" class="reference-shell">
-    <section class="hero">
-      <p class="eyebrow">Angular Material tutorial and online reference</p>
-      <h1>{{ title() }}</h1>
-      <p class="hero-copy">
-        A runnable workspace app for showing Django-friendly Angular configuration, Material UI
-        patterns, and the package behavior users should expect.
-      </p>
-      <div class="hero-actions">
-        <a
-          mat-flat-button
-          color="primary"
-          href="https://angular-django2.readthedocs.io/"
-          rel="noopener"
-          target="_blank"
-        >
-          Read documentation
-        </a>
-        <a
-          mat-stroked-button
-          href="https://github.com/shlomoa/django-angular3"
-          rel="noopener"
-          target="_blank"
-        >
-          Django companion
-        </a>
-      </div>
-    </section>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer mode="over" class="app-sidenav">
+    <div class="sidenav-header">
+      <mat-icon class="sidenav-logo-icon">palette</mat-icon>
+      <span class="sidenav-title">angular-django2</span>
+    </div>
+    <mat-divider></mat-divider>
+    <mat-nav-list class="sidenav-nav-list">
+      <a mat-list-item routerLink="/" (click)="drawer.close()">
+        <mat-icon matListItemIcon>home</mat-icon>
+        <span matListItemTitle>Home</span>
+      </a>
+      <a mat-list-item routerLink="/ui" (click)="drawer.close()">
+        <mat-icon matListItemIcon>widgets</mat-icon>
+        <span matListItemTitle>UI Commands</span>
+      </a>
+      <a mat-list-item routerLink="/guides" (click)="drawer.close()">
+        <mat-icon matListItemIcon>menu_book</mat-icon>
+        <span matListItemTitle>Guides</span>
+      </a>
+      <a
+        mat-list-item
+        href="https://angular-django2.readthedocs.io/"
+        target="_blank"
+        rel="noopener"
+      >
+        <mat-icon matListItemIcon>open_in_new</mat-icon>
+        <span matListItemTitle>Documentation</span>
+      </a>
+      <a
+        mat-list-item
+        href="https://github.com/shlomoa/django-angular3"
+        target="_blank"
+        rel="noopener"
+      >
+        <mat-icon matListItemIcon>link</mat-icon>
+        <span matListItemTitle>Django Companion</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
 
-    <section class="main-grid" aria-label="Reference app main page sections">
-      <mat-card id="ui" appearance="outlined" class="main-frame">
-        <mat-card-header>
-          <mat-icon mat-card-avatar aria-hidden="true">widgets</mat-icon>
-          <mat-card-title>Selected UI</mat-card-title>
-          <mat-card-subtitle>Three examples for the UI page</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <ul class="feature-list">
-            @for (item of uiItems; track item.name) {
-              <li>
-                <strong>{{ item.name }}</strong>
-                <span>{{ item.description }}</span>
-              </li>
-            }
-          </ul>
-          <a mat-button routerLink="/ui" aria-label="Open UI page">View UI page</a>
-        </mat-card-content>
-      </mat-card>
+  <mat-sidenav-content class="sidenav-content">
+    @if (isHomeRoute()) {
+      <main id="home" class="reference-shell">
+        <section class="hero">
+          <p class="eyebrow">Angular Material tutorial and online reference</p>
+          <h1>{{ title() }}</h1>
+          <p class="hero-copy">
+            A runnable workspace app for showing Django-friendly Angular configuration, Material UI
+            patterns, and the package behavior users should expect.
+          </p>
+          <div class="hero-actions">
+            <a
+              mat-flat-button
+              color="primary"
+              href="https://angular-django2.readthedocs.io/"
+              rel="noopener"
+              target="_blank"
+            >
+              Read documentation
+            </a>
+            <a
+              mat-stroked-button
+              href="https://github.com/shlomoa/django-angular3"
+              rel="noopener"
+              target="_blank"
+            >
+              Django companion
+            </a>
+          </div>
+        </section>
 
-      <mat-card id="documentation" appearance="outlined" class="main-frame">
-        <mat-card-header>
-          <mat-icon mat-card-avatar aria-hidden="true">menu_book</mat-icon>
-          <mat-card-title>Selected guides</mat-card-title>
-          <mat-card-subtitle>Three entry points for documentation</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <ul class="feature-list">
-            @for (guide of guides; track guide.name) {
-              <li>
-                <strong>{{ guide.name }}</strong>
-                <span>{{ guide.description }}</span>
-              </li>
-            }
-          </ul>
-          <a mat-button routerLink="/guides" aria-label="Open guides page"> View guides </a>
-        </mat-card-content>
-      </mat-card>
-    </section>
-  </main>
-}
+        <section class="main-grid" aria-label="Reference app main page sections">
+          <mat-card id="ui" appearance="outlined" class="main-frame">
+            <mat-card-header>
+              <mat-icon mat-card-avatar aria-hidden="true">widgets</mat-icon>
+              <mat-card-title>Selected UI</mat-card-title>
+              <mat-card-subtitle>Three examples for the UI page</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <ul class="feature-list">
+                @for (item of uiItems; track item.name) {
+                  <li>
+                    <strong>{{ item.name }}</strong>
+                    <span>{{ item.description }}</span>
+                  </li>
+                }
+              </ul>
+              <a mat-button routerLink="/ui" aria-label="Open UI page">View UI page</a>
+            </mat-card-content>
+          </mat-card>
 
-<router-outlet />
+          <mat-card id="documentation" appearance="outlined" class="main-frame">
+            <mat-card-header>
+              <mat-icon mat-card-avatar aria-hidden="true">menu_book</mat-icon>
+              <mat-card-title>Selected guides</mat-card-title>
+              <mat-card-subtitle>Three entry points for documentation</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <ul class="feature-list">
+                @for (guide of guides; track guide.name) {
+                  <li>
+                    <strong>{{ guide.name }}</strong>
+                    <span>{{ guide.description }}</span>
+                  </li>
+                }
+              </ul>
+              <a mat-button routerLink="/guides" aria-label="Open guides page"> View guides </a>
+            </mat-card-content>
+          </mat-card>
+        </section>
+      </main>
+    }
+
+    <div class="page-container" [class.page-container--padded]="!isHomeRoute()">
+      <router-outlet />
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

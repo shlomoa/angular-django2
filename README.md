@@ -137,21 +137,29 @@ This repository includes a repo-owned Angular Material reference app at
 `angular-django2`; the workspace project key uses the `-reference` suffix so it
 does not collide with the publishable library project named `angular-django2`.
 
-The reference app includes a routed UI command explorer at `/ui`. It groups the
-package schematics into category cards and detail pages, uses static
-illustrations for visual commands, and uses text-first before/after panels for
-commands without meaningful browser screenshots.
+The reference app is an authentic Angular Material 3 application featuring a
+responsive sidenav drawer shell, dynamic M3 color scheme switching (Azure, Rose,
+Magenta, Cyan), and an interactive command visualizer engine at `/ui`.
+
+It groups the package schematics into category cards and detail pages. When
+clicking **Apply Command**, it renders live interactive micro-sandboxes (such as
+functional mini-app drawers, reactive signal counters, and theme palette swatch
+demonstrators), along with simulated CLI terminal execution output and workspace
+file tree diffs.
 
 The app also includes a routed guides section at `/guides`. It lists guide cards
 for the basic tutorial, complex components, data flow and binding, forms and
 their interactions, quality, and security, and opens a detail page per guide
 that explains how to use the package and what to expect.
 
+The reference app operates as a self-contained subproject with its own dedicated
+`package.json`, `angular.json`, Vitest, ESLint, and Prettier configurations.
+
 Use these finite validation commands for the app infrastructure:
 
-- `npm run build:reference-app`
-- `npm run lint:reference-app`
-- `npm run test:reference-app`
+- `npm run build:reference-app` — builds the reference application production bundle
+- `npm run lint:reference-app` — runs ESLint against the reference application
+- `npm run test:reference-app` — runs the reference application unit test suite
 
 For local tutorial authoring, `npm run serve:reference-app` starts the dev
 server.

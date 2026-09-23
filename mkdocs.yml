@@ -11,6 +11,7 @@ exclude_docs: |
   REQUIREMENTS.md
   INTEGRATION_TESTING.md
   RELEASING.md
+  REFERENCE_APP.md
 
 nav:
   - Start here:

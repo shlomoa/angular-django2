@@ -1,19 +1,40 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgOptimizedImage } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatRippleModule } from '@angular/material/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
+import { BreadcrumbsComponent } from '../shared';
 import {
   UI_COMMAND_CATEGORIES,
   getUiCommandsByCategory,
   type UiCommand,
   type UiCommandId,
 } from './ui-command-catalog';
+import { CommandVisualizerComponent } from './visualizers';
 
 @Component({
   selector: 'app-ui-command-category-page',
-  imports: [NgOptimizedImage, RouterLink],
+  imports: [
+    BreadcrumbsComponent,
+    CommandVisualizerComponent,
+    MatButtonModule,
+    MatCardModule,
+    MatChipsModule,
+    MatDividerModule,
+    MatIconModule,
+    MatListModule,
+    MatRippleModule,
+    NgOptimizedImage,
+    RouterLink,
+  ],
   templateUrl: './ui-command-category-page.html',
   styleUrl: './ui-command-category-page.scss',
 })
