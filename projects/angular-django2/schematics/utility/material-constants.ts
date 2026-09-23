@@ -32,9 +32,7 @@ export const MATERIAL_LAYOUT_TEMPLATE = `<mat-toolbar color="primary">
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div class="content">
-      <router-outlet />
-    </div>
+    <router-outlet />
   </mat-sidenav-content>
 </mat-sidenav-container>
 `;
@@ -52,10 +50,6 @@ export const MATERIAL_LAYOUT_STYLES = `.sidenav-container {
 
 .sidenav {
   width: 250px;
-}
-
-.content {
-  padding: 20px;
 }
 
 mat-toolbar {

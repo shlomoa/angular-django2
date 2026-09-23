@@ -223,14 +223,10 @@ body {
 }
 
 .interactive-component-demo {
-  display: flex;
-  justify-content: center;
-
-  .demo-card {
-    width: 100%;
-    max-width: 360px;
-    border-radius: 12px;
-  }
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  border-radius: 12px;
 
   .demo-counter {
     display: flex;

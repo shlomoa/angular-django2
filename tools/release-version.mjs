@@ -1,8 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { syncPackageMetadata } from './sync-package-metadata.mjs';
-
 const rootPackagePath = new URL('../package.json', import.meta.url);
 const libraryPackagePath = new URL('../projects/angular-django2/package.json', import.meta.url);
 const packageLockPath = new URL('../package-lock.json', import.meta.url);
@@ -191,8 +189,8 @@ export async function updateReleaseVersionFiles(releaseTypeOrVersion = 'patch', 
     throw new Error('Expected the root package manifest to contain a string version field.');
   }
 
-  if (!isObject(libraryPackage)) {
-    throw new Error('Expected the publishable package manifest to contain a JSON object.');
+  if (!isObject(libraryPackage) || typeof libraryPackage.version !== 'string') {
+    throw new Error('Expected the publishable package manifest to contain a string version field.');
   }
 
   if (
@@ -213,7 +211,10 @@ export async function updateReleaseVersionFiles(releaseTypeOrVersion = 'patch', 
     ...rootPackage,
     version: nextVersion,
   };
-  const nextLibraryPackage = syncPackageMetadata(nextRootPackage, libraryPackage);
+  const nextLibraryPackage = {
+    ...libraryPackage,
+    version: nextVersion,
+  };
   const nextPackageLock = {
     ...packageLock,
     version: nextVersion,

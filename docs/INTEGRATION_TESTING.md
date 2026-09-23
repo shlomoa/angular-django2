@@ -16,30 +16,32 @@ E2E testing details.
 
 ## Scope and source files
 
-The current integration-testing surface lives in these files:
+The validation suite is organized under `projects/angular-django-validation`:
 
-- `tests/schematics.integration.spec.ts` — node-side schematic integration
+- `projects/angular-django-validation/unit/integration/schematics.integration.spec.ts` — node-side schematic integration
   tests using `SchematicTestRunner`
-- `tests/schematics.e2e.spec.ts` — end-to-end schematic tests against real
+- `projects/angular-django-validation/e2e/schematics.e2e.spec.ts` — end-to-end schematic tests against real
   Angular workspaces
-- `tests/test_application.spec.ts` — temp-area-backed application generation
+- `projects/angular-django-validation/e2e/test_application.spec.ts` — temp-area-backed application generation
   validation that installs the built package and verifies `ng generate
 angular-django2:application` can build
-- `tests/utils/temp_areas.spec.ts` — temp-area persistence and cleanup coverage
-- `tests/utils/temp_areas.ts` — the single shared temp-area implementation
+- `projects/angular-django-validation/playwright/` — Playwright end-to-end browser suites testing reference app shell navigation, guide reader, and UI interactive sandboxes
+- `projects/angular-django-validation/unit/browser/` — Vitest Browser component tests for UI visualizers
+- `projects/angular-django-validation/unit/utils/temp_areas.spec.ts` — temp-area persistence and cleanup coverage
+- `projects/angular-django-validation/e2e/utils/temp_areas.ts` — the single shared temp-area implementation
   used for OS temp-root helpers, repo-root E2E workspaces, stale workspace
   cleanup, and the E2E command entrypoint
 
 ## Node-side schematic integration tests
 
 The node-side integration suite is in
-`tests/schematics.integration.spec.ts`.
+`projects/angular-django-validation/unit/integration/schematics.integration.spec.ts`.
 
 These tests:
 
 - run under `npm run test:node`
 - use `SchematicTestRunner` from `@angular-devkit/schematics/testing`
-- execute compiled schematics from `dist/angular-django2/schematics/collection.json`
+- execute compiled schematics from `projects/angular-django2/dist/schematics/collection.json`
 - validate real file generation, workspace mutations, idempotency, and
   schematic chaining without creating a full on-disk Angular workspace
 
@@ -61,13 +63,13 @@ validate the package-owned behavior layered on top.
 
 ## End-to-end schematic tests
 
-The end-to-end suite is in `tests/schematics.e2e.spec.ts`.
+The end-to-end suite is in `projects/angular-django-validation/e2e/schematics.e2e.spec.ts`.
 
 These tests:
 
 - run under `npm run test:e2e`
 - create real Angular workspaces on disk
-- install the built package from `dist/angular-django2`
+- install the built package from `projects/angular-django2/dist`
 - execute real `ng add` and `ng generate` flows
 - verify generated projects can build successfully
 - include a live `ng serve` validation path in the first E2E scenario
@@ -103,7 +105,7 @@ Current E2E coverage includes:
   `project-structure`), verifying a production build, the theme and standard
   structure, and that the sidenav layout is absent (only `material-app` writes it)
 
-The E2E suite uses `tests/utils/temp_areas.ts` to anchor temporary workspaces
+The E2E suite uses `projects/angular-django-validation/e2e/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.
 
 It also centralizes the validated cross-platform command-launch behavior used by
@@ -124,22 +126,23 @@ the integration-oriented harnesses:
 The repository also contains helper utilities related to integration-oriented
 validation:
 
-- `tests/utils/temp_areas.ts` provides the reusable temp-area helpers that now
+- `projects/angular-django-validation/e2e/utils/temp_areas.ts` provides the reusable temp-area helpers that now
   cover both OS temp-root and repo-root workspace flows
 
 ## Command guide
 
-| Command                         | Coverage                                                                                           |
-| ------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `npm run build`                 | Required prerequisite for integration and E2E flows that consume compiled schematics               |
-| `npm run test:node`             | Node-side unit specs plus the schematic integration suite                                          |
-| `npm run test:node:watch`       | Watch mode for the same Node-side unit and integration specs                                       |
-| `npm run cleanup:e2e:tmp-areas` | Removes stale repo-root E2E temp workspaces from previous runs                                     |
-| `npm run test:e2e`              | End-to-end schematic suite in `tests/schematics.e2e.spec.ts`, with stale tmp-area cleanup          |
-| `npm run test:e2e:watch`        | Watch mode for the E2E suite, with stale tmp-area cleanup before watch starts                      |
-| `npm run test:e2e:debug`        | End-to-end schematic suite without temp-area cleanup, useful for failure debugging                 |
-| `npm run test:ci`               | `npm run test:node` plus Angular Material reference-app tests; does **not** run the E2E suite      |
-| `npm run test:node -- <spec>`   | Useful for running only a specific integration spec such as `tests/schematics.integration.spec.ts` |
+| Command                         | Coverage                                                                                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run build`                 | Required prerequisite for integration and E2E flows that consume compiled schematics                                                             |
+| `npm run test:node`             | Node-side unit specs plus the schematic integration suite                                                                                        |
+| `npm run test:node:watch`       | Watch mode for the same Node-side unit and integration specs                                                                                     |
+| `npm run cleanup:e2e:tmp-areas` | Removes stale repo-root E2E temp workspaces from previous runs                                                                                   |
+| `npm run test:e2e`              | End-to-end schematic suite in `projects/angular-django-validation/e2e/schematics.e2e.spec.ts`, with stale tmp-area cleanup                       |
+| `npm run test:e2e:watch`        | Watch mode for the E2E suite, with stale tmp-area cleanup before watch starts                                                                    |
+| `npm run test:e2e:debug`        | End-to-end schematic suite without temp-area cleanup, useful for failure debugging                                                               |
+| `npm run test:playwright`       | Playwright E2E browser tests for reference app shell, guides, and visualizer micro-sandboxes                                                     |
+| `npm run test:ci`               | `npm run test:node` plus Angular Material reference-app tests; does **not** run the E2E suite                                                    |
+| `npm run test:node -- <spec>`   | Useful for running only a specific integration spec such as `projects/angular-django-validation/unit/integration/schematics.integration.spec.ts` |
 
 ## Prerequisites and caveats
 
@@ -153,12 +156,12 @@ npm run build
 
 Why this matters:
 
-- `tests/schematics.integration.spec.ts` loads the compiled collection from
-  `dist/angular-django2/schematics/collection.json`
-- `tests/test_application.spec.ts` installs the built package from
-  `dist/angular-django2`
-- `tests/schematics.e2e.spec.ts` installs the built package from
-  `dist/angular-django2`
+- `projects/angular-django-validation/unit/integration/schematics.integration.spec.ts` loads the compiled collection from
+  `projects/angular-django2/dist/schematics/collection.json`
+- `projects/angular-django-validation/e2e/test_application.spec.ts` installs the built package from
+  `projects/angular-django2/dist`
+- `projects/angular-django-validation/e2e/schematics.e2e.spec.ts` installs the built package from
+  `projects/angular-django2/dist`
 
 ### E2E prerequisites
 
@@ -247,7 +250,7 @@ Debug flow:
 
 ## Temp-area harness configuration
 
-`tests/utils/temp_areas.ts` is the single temp-area implementation used across
+`projects/angular-django-validation/e2e/utils/temp_areas.ts` is the single temp-area implementation used across
 the repository. It supports persistent and non-persistent temp areas, repo-root
 workspace creation, stale workspace cleanup, and E2E debug-mode detection.
 

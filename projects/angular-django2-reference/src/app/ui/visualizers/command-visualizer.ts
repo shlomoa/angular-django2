@@ -133,33 +133,31 @@ import type { UiCommand } from '../ui-command-catalog';
               }
 
               @case ('component') {
-                <div class="interactive-component-demo">
-                  <mat-card appearance="outlined" class="demo-card">
-                    <mat-card-header>
-                      <mat-icon mat-card-avatar>extension</mat-icon>
-                      <mat-card-title>Generated Standalone Component</mat-card-title>
-                      <mat-card-subtitle>ChangeDetectionStrategy.OnPush</mat-card-subtitle>
-                    </mat-card-header>
-                    <mat-card-content>
-                      <p>
-                        This standalone component was generated with package defaults. Test its
-                        reactive signal state:
-                      </p>
-                      <div class="demo-counter">
-                        <span class="counter-label">Counter Signal:</span>
-                        <span class="counter-value">{{ counter() }}</span>
-                      </div>
-                    </mat-card-content>
-                    <mat-card-actions class="demo-actions">
-                      <button mat-stroked-button (click)="decrement()" [disabled]="counter() === 0">
-                        <mat-icon>remove</mat-icon> Decrement
-                      </button>
-                      <button mat-flat-button color="primary" (click)="increment()">
-                        <mat-icon>add</mat-icon> Increment
-                      </button>
-                    </mat-card-actions>
-                  </mat-card>
-                </div>
+                <mat-card appearance="outlined" class="interactive-component-demo demo-card">
+                  <mat-card-header>
+                    <mat-icon mat-card-avatar>extension</mat-icon>
+                    <mat-card-title>Generated Standalone Component</mat-card-title>
+                    <mat-card-subtitle>ChangeDetectionStrategy.OnPush</mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <p>
+                      This standalone component was generated with package defaults. Test its
+                      reactive signal state:
+                    </p>
+                    <div class="demo-counter">
+                      <span class="counter-label">Counter Signal:</span>
+                      <span class="counter-value">{{ counter() }}</span>
+                    </div>
+                  </mat-card-content>
+                  <mat-card-actions class="demo-actions">
+                    <button mat-stroked-button (click)="decrement()" [disabled]="counter() === 0">
+                      <mat-icon>remove</mat-icon> Decrement
+                    </button>
+                    <button mat-flat-button color="primary" (click)="increment()">
+                      <mat-icon>add</mat-icon> Increment
+                    </button>
+                  </mat-card-actions>
+                </mat-card>
               }
 
               @case ('material-setup') {
@@ -199,23 +197,21 @@ import type { UiCommand } from '../ui-command-catalog';
               }
 
               @case ('application') {
-                <div class="interactive-app-demo">
-                  <div class="app-bootstrap-grid">
-                    <div class="bootstrap-item">
-                      <mat-icon class="item-icon">speed</mat-icon>
-                      <strong>Zoneless Mode</strong>
-                      <span>Experimental zoneless change detection enabled</span>
-                    </div>
-                    <div class="bootstrap-item">
-                      <mat-icon class="item-icon">alt_route</mat-icon>
-                      <strong>Standalone Routing</strong>
-                      <span>Router tree configured without NgModule wrapper</span>
-                    </div>
-                    <div class="bootstrap-item">
-                      <mat-icon class="item-icon">palette</mat-icon>
-                      <strong>SCSS Styling</strong>
-                      <span>Pre-configured with Sass inline style support</span>
-                    </div>
+                <div class="app-bootstrap-grid">
+                  <div class="bootstrap-item">
+                    <mat-icon class="item-icon">speed</mat-icon>
+                    <strong>Zoneless Mode</strong>
+                    <span>Experimental zoneless change detection enabled</span>
+                  </div>
+                  <div class="bootstrap-item">
+                    <mat-icon class="item-icon">alt_route</mat-icon>
+                    <strong>Standalone Routing</strong>
+                    <span>Router tree configured without NgModule wrapper</span>
+                  </div>
+                  <div class="bootstrap-item">
+                    <mat-icon class="item-icon">palette</mat-icon>
+                    <strong>SCSS Styling</strong>
+                    <span>Pre-configured with Sass inline style support</span>
                   </div>
                 </div>
               }

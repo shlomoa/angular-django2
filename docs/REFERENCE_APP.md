@@ -58,6 +58,7 @@ projects/angular-django2-reference/src/app/
 ### UI Command Explorer & Visualizer
 
 - When navigating to `/ui/:categoryId`, selecting a command from the `<mat-action-list>` and clicking `<button mat-flat-button class="ui-command-category__apply-button">Apply Command</button>` reveals the `<app-command-visualizer>`:
+  - **Flattened Grid Integration**: In accordance with modern CSS Grid BKM, `<app-command-visualizer>` is placed directly under `.ui-command-category__state-grid` (`display: block; grid-column: 1 / -1; min-width: 0;`), avoiding layout-intercepting wrapper `<div>`s.
   - **`material-app`**: Renders a mini-application frame with functioning drawer toggle and Django API connectivity cards.
   - **`app-shell`**: Renders a responsive sidenav rail shell with router-outlet placeholder.
   - **`component`**: Renders an interactive OnPush card with reactive counter signal buttons.
@@ -65,6 +66,16 @@ projects/angular-django2-reference/src/app/
   - **`application`**: Renders an architecture matrix showcasing zoneless change detection and standalone routing.
   - **Terminal Simulation**: Displays Catppuccin-styled CLI output demonstrating schematic execution.
   - **Workspace File Tree**: Details file creation and update actions (`CREATE`, `UPDATE`).
+
+### Interactive Guides Section
+
+The reference application provides a dedicated guides section at `/guides` that walks through package capabilities:
+
+- **Basic Tutorial**: End-to-end walkthrough from `ng add angular-django2` to a running Angular Material application.
+- **Complex Components**: Authoring multi-slot projected components following `<ng-container>` projection BKM and dialog overlays.
+- **Forms & Validation**: Typed reactive forms, custom CVA fields, and Django REST Framework server error mappings.
+- **Data Flow & OpenAPI**: Bootstrapping `ng-openapi-gen` and wiring typed Django transport services.
+- **Quality & Security**: Zoneless testing, CSRF cookie handling, and production style budget enforcement.
 
 ## Standalone Subproject Configuration
 
@@ -79,7 +90,7 @@ The reference application is designed to be fully functional both within the par
 
 Angular CLI enforces the `anyComponentStyle` budget (warning at `4.00 kB`, error at `8.00 kB`):
 
-- Keep scoped component SCSS (`command-visualizer.scss`) lightweight by focusing strictly on component-specific layout and host borders.
+- Keep scoped component SCSS (`command-visualizer.scss`, `ui-command-category-page.scss`) lightweight by focusing strictly on component-specific layout and host borders.
 - Reusable or global demo styles (such as mini-app frames, terminal windows, and palette swatches) should reside in `src/styles.scss`.
 - This ensures component style encapsulation (`[_ngcontent-%COMP%]`) does not bloat bundle size and keeps builds free of budget warnings.
 
@@ -96,6 +107,9 @@ npm run lint:reference-app
 
 # Run all reference app unit tests
 npm run test:reference-app
+
+# Run end-to-end Playwright tests against the reference app
+npm run test:playwright
 
 # Serve locally for manual testing and preview
 npm run serve:reference-app

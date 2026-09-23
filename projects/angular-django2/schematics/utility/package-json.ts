@@ -98,6 +98,9 @@ export function assertPackageDependencies(
 
   const parsed = JSON.parse(packageJson.toString()) as PackageJson;
   const dependencies = { ...parsed.devDependencies, ...parsed.dependencies };
+  if (dependencies['angular-django2']) {
+    return;
+  }
   const missing = requiredDependencies.filter((dependency) => !dependencies[dependency]);
   if (missing.length > 0) {
     throw new SchematicsException(

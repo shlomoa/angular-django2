@@ -24,11 +24,11 @@ Features are comma-separated and limited to:
   the parent directory, then wires them into the parent through
   `embed-component`.
 - `projection`: documents and creates header, default, and actions projection
-  slots.
+  slots. Consumers should project multiple sibling elements via `<ng-container <name>-actions>` or `<ng-container <name>-header>` to avoid layout-distorting wrapper `<div>` tags.
 - `cdk-overlay`: adds explicit CDK overlay and Material button imports plus a
   minimal connected-overlay example.
 
-The component source documents its public inputs, outputs, and projection slots.
+The component source documents its public inputs, outputs, projection slots, and `<ng-container>` projection BKM.
 `@angular/material` and `@angular/cdk` must already be installed.
 
 Use `--mode=modify` to apply additional selected features to an existing complex

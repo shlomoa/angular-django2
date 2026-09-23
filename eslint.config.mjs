@@ -58,7 +58,10 @@ export default tseslint.config(
     extends: [...angular.configs.templateRecommended],
   },
   {
-    files: ['projects/angular-django2/schematics/**/*.ts', 'tests/**/*.ts'],
+    files: [
+      'projects/angular-django2/schematics/**/*.ts',
+      'projects/angular-django-validation/**/*.ts',
+    ],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
       globals: globals.node,

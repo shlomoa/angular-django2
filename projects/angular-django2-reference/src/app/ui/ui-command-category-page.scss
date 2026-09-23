@@ -3,7 +3,7 @@
   gap: 1.5rem;
   margin: 0 auto;
   max-width: 1120px;
-  padding: 3rem 1rem;
+  padding: 1.5rem 0;
 }
 
 .ui-command-category__back-link,
@@ -12,22 +12,19 @@
   font-weight: 600;
 }
 
-.ui-command-category__header,
-.ui-command-category__unknown {
+.ui-command-category__header {
   display: grid;
   gap: 1rem;
 }
 
-.ui-command-category__header h2,
-.ui-command-category__unknown h2 {
+.ui-command-category__header h2 {
   color: var(--mat-sys-on-surface);
   font-size: clamp(2rem, 6vw, 4rem);
   line-height: 1;
   margin: 0;
 }
 
-.ui-command-category__header p:not(.eyebrow),
-.ui-command-category__unknown p:not(.eyebrow) {
+.ui-command-category__header p:not(.eyebrow) {
   color: var(--mat-sys-on-surface-variant);
   font-size: 1.1rem;
   line-height: 1.6;
@@ -85,10 +82,6 @@
   background: var(--mat-sys-tertiary);
 }
 
-.ui-command-category__apply-button:focus-visible {
-  outline: 3px solid var(--mat-sys-primary);
-}
-
 .ui-command-category__command-list nav,
 .ui-command-category__detail-panel {
   display: grid;
@@ -115,6 +108,7 @@
   border-color: var(--mat-sys-primary);
 }
 
+.ui-command-category__apply-button:focus-visible,
 .ui-command-category__command-button:focus-visible {
   outline: 3px solid var(--mat-sys-primary);
 }
@@ -124,7 +118,6 @@
   font-weight: 700;
 }
 
-code,
 .ui-command-category__command-example {
   background: var(--mat-sys-secondary-container);
   border-radius: 0.45rem;
@@ -198,6 +191,12 @@ code,
 
 .ui-command-category__state-section--pending {
   border-style: dashed;
+}
+
+.ui-command-category__visualization {
+  display: block;
+  grid-column: 1 / -1;
+  min-width: 0;
 }
 
 @media (width < 860px) {

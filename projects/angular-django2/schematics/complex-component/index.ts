@@ -211,6 +211,9 @@ function assertMaterialPrerequisites(tree: Tree): void {
     devDependencies?: Record<string, string>;
   };
   const dependencies = { ...parsed.devDependencies, ...parsed.dependencies };
+  if (dependencies['angular-django2']) {
+    return;
+  }
   const missing = ['@angular/material', '@angular/cdk'].filter(
     (dependency) => !dependencies[dependency],
   );
@@ -313,7 +316,8 @@ function createTemplate(resolved: ResolvedComplexComponentOptions): string {
 }
 
 function projectionSlots(name: string): string {
-  return `<ng-content select="[${name}-header]"></ng-content>
+  return `<!-- Projection slots (BKM: project multiple elements via <ng-container ${name}-actions> / <ng-container ${name}-header>) -->
+<ng-content select="[${name}-header]"></ng-content>
 <ng-content></ng-content>
 <ng-content select="[${name}-actions]"></ng-content>`;
 }
@@ -336,9 +340,11 @@ function addPublicApiDocumentation(
   const projectionSlots = resolved.features.includes('projection')
     ? `[${resolved.name}-header], default, [${resolved.name}-actions]`
     : 'none';
-  const documentation = `/**\n * Complex component public API:\n * - Inputs: none.\n * - Outputs: none.\n * - Projection slots: ${projectionSlots}.\n */\n`;
-  const existingDocumentation =
-    /\/\*\n \* Complex component public API:\n \* - Inputs: none\.\n \* - Outputs: none\.\n \* - Projection slots: .*\.\n \*\/\n/;
+  const projectionBkm = resolved.features.includes('projection')
+    ? `\n * - Projection BKM: Project multiple sibling elements via <ng-container ${resolved.name}-actions> or <ng-container ${resolved.name}-header> to preserve layout without wrapper <div> tags.`
+    : '';
+  const documentation = `/**\n * Complex component public API:\n * - Inputs: none.\n * - Outputs: none.\n * - Projection slots: ${projectionSlots}.${projectionBkm}\n */\n`;
+  const existingDocumentation = /\/\*\n \* Complex component public API:\n[\s\S]*? \*\/\n/;
 
   if (existingDocumentation.test(content)) {
     return content.replace(existingDocumentation, documentation);

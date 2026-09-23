@@ -134,11 +134,6 @@
                     <li>{{ highlight }}</li>
                   }
                 </ul>
-
-                <app-command-visualizer
-                  [command]="command"
-                  [applied]="isSelectedCommandApplied()"
-                />
               } @else {
                 <p>Apply this command to reveal the resulting state.</p>
                 <p>
@@ -151,12 +146,23 @@
                 </p>
               }
             </section>
+
+            @if (isSelectedCommandApplied()) {
+              <app-command-visualizer
+                class="ui-command-category__visualization"
+                [command]="command"
+                [applied]="isSelectedCommandApplied()"
+              />
+            }
           </div>
         }
       </article>
     </div>
   } @else {
-    <section class="ui-command-category__unknown" aria-labelledby="ui-command-category-title">
+    <section
+      class="ui-command-category__unknown ui-command-category__header"
+      aria-labelledby="ui-command-category-title"
+    >
       <p class="eyebrow">Command explorer</p>
       <h2 id="ui-command-category-title">Unknown UI command category</h2>
       <p>The requested category is not part of the angular-django2 command catalog.</p>
