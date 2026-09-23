@@ -28,13 +28,13 @@
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
-  max-width: 960px;
+  max-inline-size: 70ch;
 }
 
 .ui-command-category__layout {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  grid-template-columns: clamp(16rem, 20vw, 22rem) minmax(0, 1fr);
 }
 
 .ui-command-category__command-list,

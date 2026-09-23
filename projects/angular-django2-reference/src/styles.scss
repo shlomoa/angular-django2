@@ -170,7 +170,7 @@ body {
 
   .mini-card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
     gap: 0.4rem;
 
     .mini-card {
@@ -224,7 +224,7 @@ body {
 
 .interactive-component-demo {
   width: 100%;
-  max-width: 360px;
+  max-inline-size: 24rem;
   margin: 0 auto;
   border-radius: 12px;
 
@@ -296,7 +296,7 @@ body {
 
 .app-bootstrap-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
   gap: 0.4rem;
 
   .bootstrap-item {
