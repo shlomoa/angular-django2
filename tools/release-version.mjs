@@ -1,10 +1,16 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { syncPackageMetadata } from './sync-package-metadata.mjs';
-
 const rootPackagePath = new URL('../package.json', import.meta.url);
 const libraryPackagePath = new URL('../projects/angular-django2/package.json', import.meta.url);
+const referencePackagePath = new URL(
+  '../projects/angular-django2-reference/package.json',
+  import.meta.url,
+);
+const validationPackagePath = new URL(
+  '../projects/angular-django-validation/package.json',
+  import.meta.url,
+);
 const packageLockPath = new URL('../package-lock.json', import.meta.url);
 
 const releaseTypes = new Set(['patch', 'minor', 'major', 'prerelease']);
@@ -174,11 +180,14 @@ export function parseCommandLineArgs(args) {
 }
 
 export async function updateReleaseVersionFiles(releaseTypeOrVersion = 'patch', options = {}) {
+  const isDefaultRun = !options.rootManifestPath;
   const {
     preid = 'rc',
     rootManifestPath = rootPackagePath,
     libraryManifestPath = libraryPackagePath,
     lockfilePath = packageLockPath,
+    referenceManifestPath = isDefaultRun ? referencePackagePath : null,
+    validationManifestPath = isDefaultRun ? validationPackagePath : null,
   } = options;
 
   const [rootPackage, libraryPackage, packageLock] = await Promise.all(
@@ -187,12 +196,30 @@ export async function updateReleaseVersionFiles(releaseTypeOrVersion = 'patch', 
     ),
   );
 
+  let referencePackage = null;
+  if (referenceManifestPath) {
+    try {
+      referencePackage = JSON.parse(await readFile(referenceManifestPath, 'utf8'));
+    } catch {
+      referencePackage = null;
+    }
+  }
+
+  let validationPackage = null;
+  if (validationManifestPath) {
+    try {
+      validationPackage = JSON.parse(await readFile(validationManifestPath, 'utf8'));
+    } catch {
+      validationPackage = null;
+    }
+  }
+
   if (!isObject(rootPackage) || typeof rootPackage.version !== 'string') {
     throw new Error('Expected the root package manifest to contain a string version field.');
   }
 
-  if (!isObject(libraryPackage)) {
-    throw new Error('Expected the publishable package manifest to contain a JSON object.');
+  if (!isObject(libraryPackage) || typeof libraryPackage.version !== 'string') {
+    throw new Error('Expected the publishable package manifest to contain a string version field.');
   }
 
   if (
@@ -213,7 +240,17 @@ export async function updateReleaseVersionFiles(releaseTypeOrVersion = 'patch', 
     ...rootPackage,
     version: nextVersion,
   };
-  const nextLibraryPackage = syncPackageMetadata(nextRootPackage, libraryPackage);
+  const nextLibraryPackage = {
+    ...libraryPackage,
+    version: nextVersion,
+  };
+  const nextReferencePackage = referencePackage
+    ? { ...referencePackage, version: nextVersion }
+    : null;
+  const nextValidationPackage = validationPackage
+    ? { ...validationPackage, version: nextVersion }
+    : null;
+
   const nextPackageLock = {
     ...packageLock,
     version: nextVersion,
@@ -223,21 +260,61 @@ export async function updateReleaseVersionFiles(releaseTypeOrVersion = 'patch', 
         ...packageLock.packages[''],
         version: nextVersion,
       },
+      ...(packageLock.packages['projects/angular-django2']
+        ? {
+            'projects/angular-django2': {
+              ...packageLock.packages['projects/angular-django2'],
+              version: nextVersion,
+            },
+          }
+        : {}),
+      ...(packageLock.packages['projects/angular-django2-reference']
+        ? {
+            'projects/angular-django2-reference': {
+              ...packageLock.packages['projects/angular-django2-reference'],
+              version: nextVersion,
+            },
+          }
+        : {}),
+      ...(packageLock.packages['projects/angular-django-validation']
+        ? {
+            'projects/angular-django-validation': {
+              ...packageLock.packages['projects/angular-django-validation'],
+              version: nextVersion,
+            },
+          }
+        : {}),
     },
   };
 
-  await Promise.all([
+  const writes = [
     writeFile(rootManifestPath, `${JSON.stringify(nextRootPackage, null, 2)}\n`),
     writeFile(libraryManifestPath, `${JSON.stringify(nextLibraryPackage, null, 2)}\n`),
     writeFile(lockfilePath, `${JSON.stringify(nextPackageLock, null, 2)}\n`),
-  ]);
+  ];
+  const changedFiles = [
+    normalizePath(rootManifestPath),
+    normalizePath(libraryManifestPath),
+    normalizePath(lockfilePath),
+  ];
+
+  if (referenceManifestPath && nextReferencePackage) {
+    writes.push(
+      writeFile(referenceManifestPath, `${JSON.stringify(nextReferencePackage, null, 2)}\n`),
+    );
+    changedFiles.push(normalizePath(referenceManifestPath));
+  }
+  if (validationManifestPath && nextValidationPackage) {
+    writes.push(
+      writeFile(validationManifestPath, `${JSON.stringify(nextValidationPackage, null, 2)}\n`),
+    );
+    changedFiles.push(normalizePath(validationManifestPath));
+  }
+
+  await Promise.all(writes);
 
   return {
-    changedFiles: [
-      normalizePath(rootManifestPath),
-      normalizePath(libraryManifestPath),
-      normalizePath(lockfilePath),
-    ],
+    changedFiles,
     currentVersion,
     nextVersion,
     preid,

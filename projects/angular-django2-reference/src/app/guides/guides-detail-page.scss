@@ -5,9 +5,8 @@
 .guides-detail {
   display: grid;
   gap: 2rem;
-  margin: 0 auto;
-  max-width: 900px;
-  padding: 3rem 1rem;
+  padding: 1.5rem 0;
+  width: 100%;
 }
 
 .guides-detail__back-link {
@@ -52,6 +51,7 @@
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
+  max-inline-size: 70ch;
 }
 
 .guides-detail__sections {

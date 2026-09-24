@@ -4,16 +4,18 @@ import { Location, NgOptimizedImage } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
+import { ThemeService } from './core';
 import { GUIDES } from './guides/guides-catalog';
-
-type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-orange';
 
 @Component({
   selector: 'app-root',
@@ -27,9 +29,12 @@ type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
+    MatDividerModule,
     MatFormFieldModule,
     MatIconModule,
+    MatListModule,
     MatSelectModule,
+    MatSidenavModule,
     MatToolbarModule,
     NgOptimizedImage,
     RouterLink,
@@ -41,16 +46,13 @@ type MaterialColorScheme = 'rose-red' | 'azure-blue' | 'magenta-violet' | 'cyan-
 export class App {
   private readonly location = inject(Location);
   private readonly router = inject(Router);
+  private readonly themeService = inject(ThemeService);
   private readonly currentUrl = signal(this.location.path() || this.router.url);
 
   protected readonly title = signal('angular-django2');
-  protected readonly selectedColorScheme = signal<MaterialColorScheme>('azure-blue');
-  protected readonly colorSchemes: readonly { value: MaterialColorScheme; label: string }[] = [
-    { value: 'rose-red', label: 'Rose & Red' },
-    { value: 'azure-blue', label: 'Azure & Blue' },
-    { value: 'magenta-violet', label: 'Magenta & Violet' },
-    { value: 'cyan-orange', label: 'Cyan & Orange' },
-  ];
+  protected readonly selectedColorScheme = this.themeService.selectedColorScheme;
+  protected readonly colorSchemes = this.themeService.colorSchemes;
+
   protected readonly uiItems = [
     {
       name: 'Provider setup',
@@ -65,6 +67,7 @@ export class App {
       description: 'Browse schematic commands grouped into category cards and detail pages.',
     },
   ];
+
   protected readonly guides = GUIDES.slice(0, 3).map((guide) => ({
     name: guide.name,
     description: guide.summary,
@@ -72,7 +75,6 @@ export class App {
 
   protected readonly isHomeRoute = computed(() => {
     const url = this.currentUrl();
-
     return url === '/' || url === '' || url.startsWith('/#') || url.startsWith('/?');
   });
 

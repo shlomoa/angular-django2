@@ -1,0 +1,37 @@
+{
+  "name": "angular-django2-reference",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Angular Material tutorial and online reference application for angular-django2.",
+  "scripts": {
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test --watch=false",
+    "test:watch": "ng test",
+    "test:vitest": "vitest run",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "angular-django2": "file:../angular-django2/dist"
+  },
+  "devDependencies": {
+    "@angular-devkit/core": "^22.0.9",
+    "@angular-devkit/schematics": "^22.0.9",
+    "@angular-eslint/builder": "^22.1.0",
+    "@angular/build": "^22.0.9",
+    "@angular/cli": "^22.0.9",
+    "@angular/compiler-cli": "^22.0.8",
+    "@eslint/js": "^10.0.1",
+    "angular-eslint": "^22.1.0",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
+  }
+}

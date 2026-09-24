@@ -11,11 +11,14 @@ exclude_docs: |
   REQUIREMENTS.md
   INTEGRATION_TESTING.md
   RELEASING.md
+  ngdj-openui-spec-mapping.md
+  openui-spec-implementation-plan.md
 
 nav:
   - Start here:
       - Choose a journey: index.md
       - Create a complete Material application: TUTORIAL.md
+      - Explore the reference application: REFERENCE_APP.md
   - Set up a workspace:
       - Install and register: cli/ng-add.md
       - Bootstrap an empty workspace: cli/workspace-setup.md

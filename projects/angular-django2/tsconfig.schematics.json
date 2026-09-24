@@ -11,7 +11,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "rootDir": "schematics",
-    "outDir": "../../dist/angular-django2/schematics",
+    "outDir": "dist/schematics",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "sourceMap": true,

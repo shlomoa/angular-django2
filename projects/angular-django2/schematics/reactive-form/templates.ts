@@ -438,13 +438,11 @@ export function reactiveFormTemplate(options: ReactiveFormTemplateOptions): stri
   lines.push(`  </h2>`);
   lines.push('');
   lines.push(`  @if (formErrors().length > 0) {`);
-  lines.push(`    <div class="${options.fileName}__errors" role="alert">`);
-  lines.push(`      <ul>`);
-  lines.push(`        @for (message of formErrors(); track message) {`);
-  lines.push(`          <li>{{ message }}</li>`);
-  lines.push(`        }`);
-  lines.push(`      </ul>`);
-  lines.push(`    </div>`);
+  lines.push(`    <ul class="${options.fileName}__errors" role="alert">`);
+  lines.push(`      @for (message of formErrors(); track message) {`);
+  lines.push(`        <li>{{ message }}</li>`);
+  lines.push(`      }`);
+  lines.push(`    </ul>`);
   lines.push(`  }`);
 
   for (const field of options.fields) {
@@ -482,7 +480,8 @@ export function reactiveFormStylesheet(options: ReactiveFormTemplateOptions): st
   max-width: 32rem;
 }
 
-.${options.fileName}__errors ul {
+.${options.fileName}__errors {
+  color: var(--mat-sys-error, #ba1a1a);
   margin: 0;
   padding-inline-start: 1.25rem;
 }

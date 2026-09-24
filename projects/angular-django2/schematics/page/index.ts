@@ -167,6 +167,9 @@ function assertMaterialPrerequisites(tree: Tree): void {
   }
 
   const dependencies = { ...parsed.devDependencies, ...parsed.dependencies };
+  if (dependencies['angular-django2']) {
+    return;
+  }
   const missing = ['@angular/material', '@angular/cdk', '@angular/router'].filter(
     (dependency) => !dependencies[dependency],
   );
