@@ -27,10 +27,18 @@ an Angular Material component — into the parent:
   `mat-date-range-picker`).
 - `--inputs`, `--outputs` — comma-separated names wired on the element.
 
+**Slots** (add `--slot`, either mode) choose the parent template section:
+`content` (the default `children` section), `header`, or `actions`. The
+`header` and `actions` sections exist in parents compiled from OpenUI
+containers by [`component`](component.md#openui-surface-containers) and
+[`complex-component`](complex-component.md#openui-composite-containers); an
+explicit `--slot` fails when the parent template lacks the section markers.
+
 ## What it does
 
 - Adds the child element after the parent template's
-  `<!-- Begin children section -->` marker, feeding each input as
+  `<!-- Begin children section -->` marker (or the `--slot` section's marker),
+  indented like the marker, feeding each input as
   `[input]="undefined"` and binding each output to `(output)="on<Output>($event)"`.
 - Imports the child class and registers it in the parent's standalone `imports`
   array (after the `// End import section` marker when present).

@@ -7,7 +7,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Kebab-case name of the complex component.",
+      "description": "Kebab-case name of the complex component. Required unless --document is given; defaults to the dasherized node id.",
       "$default": {
         "$source": "argv",
         "index": 0
@@ -24,7 +24,7 @@
     },
     "features": {
       "type": "string",
-      "description": "Required comma-separated feature list: mixins, nested, projection, cdk-overlay."
+      "description": "Comma-separated feature list: mixins, nested, projection, cdk-overlay. Required unless --document is given; not allowed with --document."
     },
     "mode": {
       "type": "string",
@@ -36,7 +36,17 @@
       "type": "boolean",
       "default": false,
       "description": "Explicitly confirm deletion when --mode=delete."
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a SurfaceContainers node into a Material card with header, content, and actions slots; children are compiled and embedded, and an OverlayContainers child adds the CDK overlay. Supports only --mode=create."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID within the OpenUI document to compile. When omitted, targets the first SurfaceContainers element. Requires --document.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
     }
   },
-  "required": ["name", "path", "features"]
+  "required": ["path"]
 }

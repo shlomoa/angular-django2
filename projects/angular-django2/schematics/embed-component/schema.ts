@@ -1,3 +1,6 @@
+/** Named projection slot of a parent generated from an OpenUI container. */
+export type EmbedSlot = 'header' | 'content' | 'actions';
+
 export interface EmbedComponentSchema {
   /**
    * In file mode (default), the workspace-relative path to the child component
@@ -44,4 +47,14 @@ export interface EmbedComponentSchema {
    * @example 'opened,closed'
    */
   outputs?: string;
+
+  /**
+   * Named slot of the parent template to embed into: `header`, `content`, or
+   * `actions`. `content` is the default `children` section; `header` and
+   * `actions` require the matching section markers, which parents compiled from
+   * OpenUI containers carry. When omitted, the child goes into the `children`
+   * section.
+   * @example 'actions'
+   */
+  slot?: EmbedSlot;
 }

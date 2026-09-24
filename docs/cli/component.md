@@ -33,3 +33,32 @@ marker in the component template.
 
 Use [`embed-component`](embed-component.md) to wire a generated component into
 a parent using those markers.
+
+## OpenUI surface containers
+
+With `--document`, the schematic compiles one OpenUI `SurfaceContainers` node
+(the first one, or the one named by `--node-id`) and every child below it.
+`--name` defaults to the dasherized node id and `--path` to the application's
+`app` directory.
+
+```bash
+ng generate angular-django2:component --document=src/app/app.openui.json --node-id=settingsPanel
+```
+
+The template is a Layer 1 HTML5 region with three slot sections:
+
+| OpenUI                        | Generated template             |
+| :---------------------------- | :----------------------------- |
+| `SurfaceContainers`           | `<section>`                    |
+| `[title]`                     | `<h2>` inside `<header>`       |
+| child with `[slot]="header"`  | `<header>` (`header` section)  |
+| child without `[slot]`        | body (`children` section)      |
+| child with `[slot]="actions"` | `<footer>` (`actions` section) |
+
+Each child compiles into its own component in a subdirectory and is embedded
+with [`embed-component`](embed-component.md) logic, in document order within
+its slot. Supported children are `SurfaceContainers` (recursively), `Form`
+(see [`reactive-form`](reactive-form.md)), and `TextInputs` / `RangeControl`
+(see [`form-field`](form-field.md)). A child's bracketed attributes that name
+one of the child component's inputs are bound as string literals, for example
+`[label]="'Email'"`.

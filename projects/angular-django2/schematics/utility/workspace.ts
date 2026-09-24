@@ -65,3 +65,30 @@ export function requireWorkspaceProject(
 
   return project;
 }
+
+/**
+ * Return `requestedProject`, or the single project with an application
+ * `sourceRoot` when none is requested.
+ *
+ * @throws SchematicsException when no project is requested and the workspace
+ * does not have exactly one application sourceRoot.
+ */
+export function resolveApplicationProjectName(
+  workspace: WorkspaceConfig,
+  requestedProject: string | undefined,
+): string {
+  if (requestedProject) {
+    return requestedProject;
+  }
+
+  const applicationProjects = Object.entries(workspace.projects ?? {})
+    .filter(([, project]) => !!project.sourceRoot)
+    .map(([name]) => name);
+  if (applicationProjects.length !== 1) {
+    throw new SchematicsException(
+      'Specify --project when the workspace does not have exactly one application sourceRoot.',
+    );
+  }
+
+  return applicationProjects[0];
+}

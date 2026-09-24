@@ -197,17 +197,30 @@ Each schematic is architected into two decoupled components:
 
 ### Phase 3: Component and Composition Schematics Conversion (`component`, `complex-component`, `embed-component`)
 
-- [ ] **3.1. Convert `component` to Surface Container Compiler**:
+- [x] **3.1. Convert `component` to Surface Container Compiler**:
   - Update [`component/schema.json`](../projects/angular-django2/schematics/component/schema.json) to accept `--document` and `--nodeId`.
   - When invoked with an AST container node (`surfaceContainers`), extract container title, styling tokens, and child slots to seed embedding hooks.
-- [ ] **3.2. Convert `complex-component` to Composite AST Compiler**:
+- [x] **3.2. Convert `complex-component` to Composite AST Compiler**:
   - Update [`complex-component/schema.json`](../projects/angular-django2/schematics/complex-component/schema.json) to accept `--document` and `--nodeId`.
   - Map OpenUI composite containers to multi-slot layouts with header/content/actions projections and optional overlay configurations.
-- [ ] **3.3. Upgrade `embed-component` to Native AST Composition Engine**:
+- [x] **3.3. Upgrade `embed-component` to Native AST Composition Engine**:
   - Update [`embed-component/schema.json`](../projects/angular-django2/schematics/embed-component/schema.json).
   - Implement programmatic AST recursive embedding: when compiling a parent AST element with child AST nodes, the compiler automatically invokes `embed-component` logic to splice child imports, signals, and template tags into the parent's embedding hooks without manual CLI invocation.
-- [ ] **3.4. Validate Component Composition**:
+- [x] **3.4. Validate Component Composition**:
   - Verify automated embedding of nested OpenUI elements (e.g. Card $\rightarrow$ Form $\rightarrow$ Controls) in unit tests.
+
+- **Phase 3 implementation notes** (maintainer decisions and resolved low-ambiguity decisions):
+  - Maintainer decision: every child node compiles into its own component and is embedded into the parent in document order, reusing `embed-component` logic; a child picks a named projection slot with `[slot]` (`header` | `content` | `actions`), otherwise `content`.
+  - `component --document` compiles a `SurfaceContainers` node (`component/ast.ts`) into a Layer 1 `<section>`: `[title]` → `<h2>` in `<header>`; slot sections `header` (`<header>`), `children` (body; the content slot, same marker as legacy components), and `actions` (`<footer>`). `--name` defaults to the dasherized node id, `--path` to `<sourceRoot>/app`.
+  - Styling tokens (3.1): OpenUI 0.2.0 `SurfaceContainers` declares no styling-token inputs, so none are read here; presentation tokens belong to the Phase 4 presentation compiler. Unknown attributes are rejected, so nothing is dropped silently.
+  - `complex-component --document` compiles a `SurfaceContainers` node into the Material card: `[title]` → `<mat-card-title>`; `<mat-card-header>`, `<mat-card-content>`, and `<mat-card-actions>` each keep the consumer `ng-content` projection slot and host the `header`, `children`, and `actions` sections. `--features` is rejected with `--document` (projection is implied, `nested` is replaced by document children) and only `--mode=create` is supported; `mixins` has no OpenUI equivalent yet and stays CLI-only.
+  - Overlay configuration: one optional `OverlayContainers` child enables `cdk-overlay`; its `[label]` is the toggle text (default `Toggle details`) and its children are embedded into an `overlay` section inside the overlay card. It is a configuration of the composite, not a separate component; overlay children cannot set `[slot]`.
+  - Composable child types: `SurfaceContainers` (recursive), `Form` (via `compileNestedFormFromAst`, default primitives directory), and `TextInputs` / `RangeControl` (via `compileFormFieldFromAst`). Children are generated in a subdirectory of the parent named after the dasherized id (`Form` → `<id>-form`, controls → `<[name] or id>-field`, as in Phase 2). Other types are rejected with the supported list.
+  - The composition engine (`embed-component/compose.ts`) strips `[slot]` before calling the child compiler and binds the child node's bracketed attributes that name a child input as string literals (`[label]="'Email'"`), so the output passes strict template type checking; unbound inputs keep their defaults. Legacy `embed-component` still binds every input to `undefined`. Outputs keep the legacy `on<Output>()` stub binding.
+  - `embed-component` inserts after a section's begin marker, so the engine embeds children last-to-first to keep document order. Inserted elements now take the marker's indentation (cosmetic; applies to legacy embedding too).
+  - `embed-component --slot` (`header` | `content` | `actions`) exposes the slot sections on the CLI; an explicit slot fails when the parent template lacks the section markers.
+  - `component` forwards options to `@schematics/angular:component`, which rejects unknown keys even with `undefined` values, so `document` and `nodeId` are removed before forwarding.
+  - The duplicated project-name resolution in `complex-component`, `reactive-form`, and `form-field` moved to `resolveApplicationProjectName` in `utility/workspace.ts`.
 
 ---
 
