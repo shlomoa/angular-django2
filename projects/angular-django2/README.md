@@ -38,7 +38,7 @@ The collection provides 18 specialized schematics grouped by functional domain:
 
 - **`material-app`**: Generates a complete standalone Angular app configured with Angular Material 3 in a single step (routing, zoneless change detection, theme setup, standard directory structure, and responsive sidenav layout).
 - **`application`**: Scaffolds a lean, standalone, zoneless Angular application with strict SCSS and routing.
-- **`app-shell`**: Generates an application shell with responsive navigation.
+- **`app-shell`**: Passes through to Angular's SSR/prerendering app-shell schematic.
 
 ### Workspace & Setup
 

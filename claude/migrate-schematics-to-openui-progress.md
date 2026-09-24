@@ -143,10 +143,19 @@ commit, a confirmed push, and a browser demo with a screenshot.
 Not follow-ups of this plan:
 
 - `app-shell` and `material-setup` need no `--document`: `app-shell` is a
-  pass-through to Angular's SSR app-shell generator with nothing a node could
-  describe, and `material-setup`'s options are exactly the `Presentation`
+  pass-through to Angular's SSR app-shell generator with no OpenUI
+  counterpart (`ShellPage` is `material-app`'s layout), and `material-setup`'s options are exactly the `Presentation`
   tokens, which `material-app --document` already reads and passes on.
 - The widget schematics (`table`, `dialog`,
   `stepper`, `tabs`, `accordion`) appear in this plan only as _(Planned)_ rows
   of the section 2 inventory; no phase step builds them. They are scheduled by
   `docs/openui-spec-implementation-plan.md` (its phases 1–2).
+
+## Mapping correction (2026-09-24)
+
+- Maintainer decision: keep the `app-shell` name (it mirrors Angular's
+  `@schematics/angular:app-shell`) and fix the mapping instead. `ShellPage`
+  maps to `material-app`'s layout; `app-shell` is SSR/prerender tooling with no
+  OpenUI counterpart. Updated the mapping doc, the plan inventory and notes,
+  and the package README's `app-shell` description, which had described
+  `material-app`'s navigation layout.
