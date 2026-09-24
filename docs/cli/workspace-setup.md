@@ -47,7 +47,7 @@ Each hook accepts exactly one content source:
 
 ## OpenUI host documents
 
-With `--document`, the first `IndexHtml` and `Favicon` nodes of an OpenUI
+With `--document`, the first `html` and icon `link` nodes of an OpenUI
 document describe the host files; `files.indexHtml` and `files.favicon` are not
 allowed alongside it.
 
@@ -55,8 +55,8 @@ allowed alongside it.
 ng generate angular-django2:workspace-setup --name=shop --project=shop --document=app.openui.json
 ```
 
-- `IndexHtml` `[lang]` and `[dir]` (`ltr`, `rtl`, or `auto`) are set on the
+- `html` `[lang]` and `[dir]` (`ltr`, `rtl`, or `auto`) are set on the
   existing `<html>` element and `[title]` replaces the `<title>` text.
-- `Favicon` `[href]` names a workspace-relative icon file that replaces the
+- `link` `[href]` with `[rel]` set to `icon` names a workspace-relative icon file that replaces the
   application favicon (`<project root>/public/favicon.ico` when present,
   otherwise `<sourceRoot>/favicon.ico`).

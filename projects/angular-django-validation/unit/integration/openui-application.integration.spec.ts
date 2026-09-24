@@ -27,16 +27,37 @@ const APP = '/projects/shop/src/app';
 const application: OpenUiElement = {
   id: 'shop',
   type: 'Application',
-  attrs: { '[title]': 'Shop admin' },
   children: [
-    { id: 'routing', type: 'Routing' },
+    {
+      id: 'routing',
+      type: 'Routing',
+      children: [
+        {
+          id: 'profileRoute',
+          type: 'Route',
+          attrs: { '[path]': 'profile', '[target]': '"profile"', '[title]': 'My profile' },
+        },
+      ],
+    },
+    {
+      id: 'navigation',
+      type: 'Navigation',
+      attrs: { '[ariaLabel]': 'Primary' },
+      children: [
+        {
+          id: 'profileNavigation',
+          type: 'NavItem',
+          attrs: { '[label]': 'My profile', '[route]': '"profileRoute"', '[icon]': 'person' },
+        },
+      ],
+    },
     { id: 'look', type: 'Presentation', attrs: { '[theme]': 'purple-green' } },
-    { id: 'host', type: 'IndexHtml', attrs: { '[lang]': 'en', '[title]': 'Shop' } },
+    { id: 'host', type: 'html', attrs: { '[lang]': 'en', '[title]': 'Shop admin' } },
   ],
 };
 
 const appDocument: OpenUiDocument = {
-  version: '0.2.0',
+  version: '0.3.0',
   id: 'root',
   type: 'html',
   children: [
@@ -114,7 +135,9 @@ describe('OpenUI application compilation (plan phase 5)', () => {
     );
     expect(generated.readContent(`${APP}/app.ts`)).toContain("title = 'Shop admin';");
     expect(generated.readContent(`${APP}/app.html`)).toContain('routerLink="/profile"');
-    expect(generated.readContent('/projects/shop/src/index.html')).toContain('<title>Shop</title>');
+    expect(generated.readContent('/projects/shop/src/index.html')).toContain(
+      '<title>Shop admin</title>',
+    );
 
     // 2. Routed pages registered in app.routes.ts, with composed children.
     const routes = generated.readContent(`${APP}/app.routes.ts`);
@@ -156,11 +179,15 @@ describe('OpenUI application compilation (plan phase 5)', () => {
       [[], 'must have exactly one root Application element; found 0'],
       [[application, { id: 'other', type: 'Application' }], 'found 2'],
       [
-        [application, { id: 'grid', type: 'Grid' }],
+        [application, { id: 'profile', type: 'DashboardPage' }, { id: 'grid', type: 'Grid' }],
         'which the OpenUI application compiler cannot compile at the document root',
       ],
       [
-        [application, { id: 'panel', type: 'SurfaceContainers', attrs: { '[color]': 'red' } }],
+        [
+          application,
+          { id: 'profile', type: 'DashboardPage' },
+          { id: 'panel', type: 'SurfaceContainers', attrs: { '[color]': 'red' } },
+        ],
         'unsupported attribute(s): [color]',
       ],
     ];
@@ -169,7 +196,7 @@ describe('OpenUI application compilation (plan phase 5)', () => {
       await expect(
         compileApplication(
           DOCUMENT_PATH,
-          await createWorkspace({ version: '0.2.0', id: 'root', type: 'html', children }),
+          await createWorkspace({ version: '0.3.0', id: 'root', type: 'html', children }),
         ),
       ).rejects.toThrow(message);
     }

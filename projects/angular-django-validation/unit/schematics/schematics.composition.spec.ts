@@ -67,7 +67,7 @@ const settingsPanel: OpenUiElement = {
 };
 
 function openUiDocument(...children: OpenUiElement[]): string {
-  return JSON.stringify({ version: '0.2.0', id: 'root', type: 'html', children });
+  return JSON.stringify({ version: '0.3.0', id: 'root', type: 'html', children });
 }
 
 describe('OpenUI composition (plan phase 3)', () => {

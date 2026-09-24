@@ -219,7 +219,7 @@ sources over lower-priority ones.
 ### OpenUI document input contracts
 
 - Schematics that compile UI accept `--document=<path>` (a workspace-relative
-  OpenUI 0.2.0 JSON document) and, where a document can hold several
+  OpenUI 0.3.0 JSON document) and, where a document can hold several
   candidates, `--node-id=<id>`; without `--node-id` they compile the first
   element of a supported type. The document is loaded and validated with
   `@shlomoa/openui-spec` before any mutation.
@@ -241,7 +241,7 @@ sources over lower-priority ones.
   | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `[slot]` sections                                  |
   | [`page`](cli/page.md#openui-page-nodes)                                                                                              | `DashboardPage` or `EmptyPage` with `[title]`, `[route]`, `[icon]`, `[access]`, `[authGuard]`             |
   | [`application`](cli/application.md#openui-application-documents), [`material-app`](cli/material-app.md#openui-application-documents) | `Application` with `Routing`, `Presentation`; `material-app` adds sidenav links for `DashboardPage` nodes |
-  | [`workspace-setup`](cli/workspace-setup.md#openui-host-documents)                                                                    | `IndexHtml` (`[lang]`, `[dir]`, `[title]`) and `Favicon` (`[href]`)                                       |
+  | [`workspace-setup`](cli/workspace-setup.md#openui-host-documents)                                                                    | `html` (`[lang]`, `[dir]`, `[title]`) and `link` (`[rel]`, `[href]`)                                      |
   | [`data-service`](cli/data-service.md#openui-data-bindings)                                                                           | any element with `[data]="<apiPath>#<ApiService>"`                                                        |
 
 - `app-shell`, `material-setup`, `openapi-setup`, `project-structure`,

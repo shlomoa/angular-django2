@@ -658,7 +658,7 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
   };
 
   function documentOf(...forms: unknown[]): string {
-    return JSON.stringify({ version: '0.2.0', id: 'root', type: 'html', children: forms });
+    return JSON.stringify({ version: '0.3.0', id: 'root', type: 'html', children: forms });
   }
 
   function createDocumentTree(document: string = documentOf(CONTACT_FORM)): UnitTestTree {
