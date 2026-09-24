@@ -1,0 +1,5 @@
+dist
+node_modules
+.angular
+e2e/temp
+_tmp_*

@@ -1,5 +1,14 @@
 <section class="ui-command-category" aria-labelledby="ui-command-category-title">
-  <a class="ui-command-category__back-link" routerLink="/ui">Back to UI categories</a>
+  @if (category(); as selectedCategory) {
+    <app-breadcrumbs
+      [items]="[{ label: 'UI Commands', url: '/ui' }, { label: selectedCategory.name }]"
+    />
+  }
+
+  <a mat-button class="ui-command-category__back-link" routerLink="/ui">
+    <mat-icon>arrow_back</mat-icon>
+    Back to UI categories
+  </a>
 
   @if (category(); as selectedCategory) {
     <header class="ui-command-category__header">
@@ -12,20 +21,27 @@
       <aside class="ui-command-category__command-list" aria-labelledby="ui-command-list-title">
         <h3 id="ui-command-list-title">Commands</h3>
         <nav aria-label="Commands in this category">
-          @for (command of commands(); track command.id) {
-            <button
-              class="ui-command-category__command-button"
-              [class.ui-command-category__command-button--active]="isSelectedCommand(command)"
-              type="button"
-              [attr.aria-controls]="'ui-command-detail-panel'"
-              [attr.aria-pressed]="isSelectedCommand(command)"
-              [attr.data-command-id]="command.id"
-              (click)="selectCommand(command)"
-            >
-              <span class="ui-command-category__command-name">{{ command.name }}</span>
-              <code>{{ command.command }}</code>
-            </button>
-          }
+          <mat-action-list class="ui-command-category__action-list">
+            @for (command of commands(); track command.id) {
+              <button
+                mat-list-item
+                class="ui-command-category__command-button"
+                [class.ui-command-category__command-button--active]="isSelectedCommand(command)"
+                type="button"
+                [attr.aria-controls]="'ui-command-detail-panel'"
+                [attr.aria-pressed]="isSelectedCommand(command)"
+                [attr.data-command-id]="command.id"
+                (click)="selectCommand(command)"
+              >
+                <span matListItemTitle class="ui-command-category__command-name">{{
+                  command.name
+                }}</span>
+                <span matListItemLine>
+                  <code>{{ command.command }}</code>
+                </span>
+              </button>
+            }
+          </mat-action-list>
         </nav>
       </aside>
 
@@ -41,12 +57,15 @@
               <h3>{{ command.name }}</h3>
             </div>
             <button
+              mat-flat-button
+              color="primary"
               class="ui-command-category__apply-button"
               type="button"
               aria-controls="ui-command-effect-panel"
               [attr.aria-pressed]="isSelectedCommandApplied()"
               (click)="applySelectedCommand()"
             >
+              <mat-icon>{{ isSelectedCommandApplied() ? 'check_circle' : 'play_arrow' }}</mat-icon>
               {{ isSelectedCommandApplied() ? 'Command applied' : 'Apply Command' }}
             </button>
           </div>
@@ -127,16 +146,27 @@
                 </p>
               }
             </section>
+
+            @if (isSelectedCommandApplied()) {
+              <app-command-visualizer
+                class="ui-command-category__visualization"
+                [command]="command"
+                [applied]="isSelectedCommandApplied()"
+              />
+            }
           </div>
         }
       </article>
     </div>
   } @else {
-    <section class="ui-command-category__unknown" aria-labelledby="ui-command-category-title">
+    <section
+      class="ui-command-category__unknown ui-command-category__header"
+      aria-labelledby="ui-command-category-title"
+    >
       <p class="eyebrow">Command explorer</p>
       <h2 id="ui-command-category-title">Unknown UI command category</h2>
       <p>The requested category is not part of the angular-django2 command catalog.</p>
-      <a routerLink="/ui">Return to UI command categories</a>
+      <a mat-button routerLink="/ui">Return to UI command categories</a>
     </section>
   }
 </section>

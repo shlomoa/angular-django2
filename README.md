@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/v/angular-django2)](https://www.npmjs.com/angular-django2)
 
 **Note:** `angular-django2` is published to npm, but it is still pre-release
-software and not yet alpha. The current package version is `0.4.7`.
+software and not yet alpha. The current package version is `0.5.0`.
 
 `angular-django2` (also referred to as `ngdj`) is an Angular 22 workspace for
 a Django-friendly npm package. It ships an Angular CLI schematics collection
@@ -21,14 +21,12 @@ reference, see the [public documentation](https://angular-django2.readthedocs.io
 
 ### What this repository contains
 
-- `projects/angular-django2/schematics`: the schematics collection source
-- `projects/angular-django2-reference`: the Angular Material tutorial and
-  online reference application for this package
-- `tests`: unit, integration, and end-to-end validation for schematics and
-  tooling
-- `tools`: repository automation such as release/version helpers
+- `projects/angular-django2`: the authoritative library & schematics collection package (source, standalone build/pack configs, and full dependencies)
+- `projects/angular-django2-reference`: the Angular Material tutorial and online reference application for this package
+- `projects/angular-django-validation`: standalone validation suite containing unit tests (Vitest Browser), integration tests, and Playwright E2E suites
+- `tools`: repository automation such as release and version helpers
 - `docs`: release and testing documentation
-- `dist/angular-django2`: the publishable build output after `npm run build`
+- `projects/angular-django2/dist`: the publishable build output after `npm run build`
 
 The current schematics collection includes:
 
@@ -67,24 +65,23 @@ npm install
 
 #### Common repository commands
 
-| Command                               | What it does                                                                                         |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `npm run build`                       | Validates source metadata, builds the schematics package, and validates its distribution metadata    |
-| `npm run build:reference-app`         | Builds the Angular Material reference app                                                            |
-| `npm run docs:build`                  | Builds the MkDocs site in strict mode                                                                |
-| `npm run lint`                        | Runs ESLint across schematics, tests, and tools                                                      |
-| `npm run lint:reference-app`          | Runs ESLint for the reference app project                                                            |
-| `npm run lint:fix`                    | Applies fixable ESLint changes                                                                       |
-| `npm run serve:reference-app`         | Starts the reference app dev server                                                                  |
-| `npm run format:check`                | Checks file formatting with Prettier                                                                 |
-| `npm run format`                      | Fixes file formatting with Prettier                                                                  |
-| `npm run pack:dry-run`                | Rebuilds and verifies the npm tarball without publishing                                             |
-| `npm run sync:package-metadata`       | Explicitly synchronizes publishable package metadata from the root manifest                          |
-| `npm run check:package-metadata`      | Checks the source package manifest without modifying it                                              |
-| `npm run check:dist-package-metadata` | Checks the generated distribution manifest without modifying it; requires `npm run build` beforehand |
-| `npm run release:prepare`             | Runs the release verification flow                                                                   |
+| Command                       | What it does                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run build`               | Builds the authoritative schematics package into `projects/angular-django2/dist`               |
+| `npm run build:reference-app` | Builds the Angular Material reference app production bundle                                    |
+| `npm run docs:build`          | Builds the MkDocs site in strict mode                                                          |
+| `npm run lint`                | Runs ESLint across all 3 workspace projects (`angular-django2`, reference app, and validation) |
+| `npm run lint:reference-app`  | Runs ESLint for the reference app project                                                      |
+| `npm run lint:validation`     | Runs ESLint for the validation suite project                                                   |
+| `npm run lint:fix`            | Applies fixable ESLint changes across the workspace                                            |
+| `npm run serve:reference-app` | Starts the reference app dev server                                                            |
+| `npm run format:check`        | Checks file formatting with Prettier                                                           |
+| `npm run format`              | Fixes file formatting with Prettier                                                            |
+| `npm run pack:dry-run`        | Rebuilds and verifies the npm tarball in `projects/angular-django2/dist` without publishing    |
+| `npm run release:version`     | Calculates next package version and synchronizes root and package manifests directly           |
+| `npm run release:prepare`     | Runs the complete release verification flow                                                    |
 
-`npm run build` produces the publishable output in `dist/angular-django2`,
+`npm run build` produces the publishable output in `projects/angular-django2/dist`,
 including the compiled schematics collection.
 
 #### Documentation validation
@@ -137,21 +134,29 @@ This repository includes a repo-owned Angular Material reference app at
 `angular-django2`; the workspace project key uses the `-reference` suffix so it
 does not collide with the publishable library project named `angular-django2`.
 
-The reference app includes a routed UI command explorer at `/ui`. It groups the
-package schematics into category cards and detail pages, uses static
-illustrations for visual commands, and uses text-first before/after panels for
-commands without meaningful browser screenshots.
+The reference app is an authentic Angular Material 3 application featuring a
+responsive sidenav drawer shell, dynamic M3 color scheme switching (Azure, Rose,
+Magenta, Cyan), and an interactive command visualizer engine at `/ui`.
+
+It groups the package schematics into category cards and detail pages. When
+clicking **Apply Command**, it renders live interactive micro-sandboxes (such as
+functional mini-app drawers, reactive signal counters, and theme palette swatch
+demonstrators), along with simulated CLI terminal execution output and workspace
+file tree diffs.
 
 The app also includes a routed guides section at `/guides`. It lists guide cards
 for the basic tutorial, complex components, data flow and binding, forms and
 their interactions, quality, and security, and opens a detail page per guide
 that explains how to use the package and what to expect.
 
+The reference app operates as a self-contained subproject with its own dedicated
+`package.json`, `angular.json`, Vitest, ESLint, and Prettier configurations.
+
 Use these finite validation commands for the app infrastructure:
 
-- `npm run build:reference-app`
-- `npm run lint:reference-app`
-- `npm run test:reference-app`
+- `npm run build:reference-app` — builds the reference application production bundle
+- `npm run lint:reference-app` — runs ESLint against the reference application
+- `npm run test:reference-app` — runs the reference application unit test suite
 
 For local tutorial authoring, `npm run serve:reference-app` starts the dev
 server.
@@ -161,7 +166,7 @@ coverage, E2E scenarios, build prerequisites, temp-workspace helpers,
 cross-platform command-launch behavior, and platform caveats — see
 `docs/INTEGRATION_TESTING.md`.
 
-For the broader repository test index, see `tests/README.md`.
+For the broader repository test index, see `projects/angular-django-validation/README.md`.
 
 The current integration and E2E harnesses are intended to be OS agnostic. In
 particular, the shared test helper owns the Angular CLI/Vitest launch strategy,
@@ -204,7 +209,7 @@ release verification flow.
    from the build output when ready:
 
    ```bash
-   npm publish ./dist/angular-django2 --access public
+   npm publish ./projects/angular-django2/dist --access public
    ```
 
 The checked-in GitHub Actions publish workflow currently authenticates with

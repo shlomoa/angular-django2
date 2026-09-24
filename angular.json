@@ -34,6 +34,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "outputPath": "projects/angular-django2-reference/dist",
             "browser": "projects/angular-django2-reference/src/main.ts",
             "tsConfig": "projects/angular-django2-reference/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -94,6 +95,20 @@
               "projects/angular-django2-reference/src/**/*.ts",
               "projects/angular-django2-reference/src/**/*.html"
             ]
+          }
+        }
+      }
+    },
+    "angular-django-validation": {
+      "projectType": "application",
+      "root": "projects/angular-django-validation",
+      "sourceRoot": "projects/angular-django-validation",
+      "prefix": "val",
+      "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["projects/angular-django-validation/**/*.ts"]
           }
         }
       }

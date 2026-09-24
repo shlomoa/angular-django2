@@ -1,0 +1,43 @@
+{
+  "name": "angular-django-validation",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Standalone validation suite for angular-django2: unit tests (Vitest Browser) and E2E validation (Playwright).",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run --config vitest.config.mts",
+    "test:unit:watch": "vitest --config vitest.config.mts",
+    "test:unit:browser": "vitest run --config vitest.config.mts --browser.enabled=true",
+    "test:e2e": "node --no-warnings --experimental-strip-types e2e/utils/temp_areas.ts run",
+    "test:e2e:watch": "node --no-warnings --experimental-strip-types e2e/utils/temp_areas.ts watch",
+    "test:e2e:debug": "node --no-warnings --experimental-strip-types e2e/utils/temp_areas.ts debug",
+    "cleanup:e2e": "node --no-warnings --experimental-strip-types e2e/utils/temp_areas.ts cleanup",
+    "test:playwright": "playwright test --config playwright.config.ts"
+  },
+  "dependencies": {
+    "angular-django2": "file:../angular-django2/dist"
+  },
+  "devDependencies": {
+    "@angular-devkit/core": "^22.0.9",
+    "@angular-devkit/schematics": "^22.0.9",
+    "@schematics/angular": "^22.0.1",
+    "@angular/cli": "^22.0.9",
+    "@angular/build": "^22.0.9",
+    "@angular/compiler-cli": "^22.0.8",
+    "@playwright/test": "^1.52.0",
+    "playwright": "^1.52.0",
+    "vitest": "^4.1.10",
+    "@vitest/browser": "^4.1.10",
+    "jsdom": "^30.0.1",
+    "@types/node": "^26.1.2",
+    "typescript": "~6.0.3",
+    "eslint": "^10.8.0",
+    "@eslint/js": "^10.0.1",
+    "typescript-eslint": "^8.65.0",
+    "prettier": "^3.9.6"
+  }
+}

@@ -1,14 +1,25 @@
 import { Component } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatRipple } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
+import { BreadcrumbsComponent } from '../shared';
 import { UI_COMMAND_CATEGORIES } from './ui-command-catalog';
 
 @Component({
   selector: 'app-ui-command-overview-page',
-  imports: [MatIconModule, MatRipple, NgOptimizedImage, RouterLink],
+  imports: [
+    BreadcrumbsComponent,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatRipple,
+    NgOptimizedImage,
+    RouterLink,
+  ],
   templateUrl: './ui-command-overview-page.html',
   styleUrl: './ui-command-overview-page.scss',
 })

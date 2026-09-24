@@ -8,8 +8,9 @@ new source of truth. If this file drifts, resolve mismatches in this order:
    `angular.json`, `projects/angular-django2/schematics`, and
    `.github/workflows/publish.yml`
 2. this repo's maintained docs such as `README.md`,
-   `projects/angular-django2/README.md`, `tests/README.md`,
-   `docs/INTEGRATION_TESTING.md`, and `docs/RELEASING.md`
+   `projects/angular-django2/README.md`, `projects/angular-django2-reference/README.md`,
+   `projects/angular-django-validation/README.md`, `docs/INTEGRATION_TESTING.md`, and
+   `docs/RELEASING.md`
 3. the `django-angular3` repo for Django-side integration details not specified
    here
 4. other directly relevant `shlomoa` repos if higher-priority sources are
@@ -53,7 +54,8 @@ sources over lower-priority ones.
   `projects/angular-django2-reference`; its displayed app name is
   `angular-django2`, while the workspace project key remains distinct from the
   publishable schematics project.
-- The publishable build output is `dist/angular-django2`.
+- The validation and testing suite lives in `projects/angular-django-validation`.
+- The publishable build output is `projects/angular-django2/dist`.
 - Shared commands are defined in the root `package.json`.
 
 ## 2. Product Requirements
@@ -236,7 +238,6 @@ sources over lower-priority ones.
   dev-server scripts available without making the library project an
   application.
 - The most important verification commands called out in repo guidance are:
-  - `npm run check:package-metadata`
   - `npm run format:check`
   - `npm run lint`
   - `npm run build`
@@ -248,7 +249,7 @@ sources over lower-priority ones.
   - `npm run lint`
   - `npm run test:ci`
   - `npm run pack:dry-run`
-- Packaging validation should use `npm pack ./dist/angular-django2 --dry-run`
+- Packaging validation should use `npm pack ./projects/angular-django2/dist --dry-run`
   rather than `npm publish --dry-run`.
 
 ## 6. Environment Requirements
@@ -265,7 +266,8 @@ sources over lower-priority ones.
 - At minimum, keep these files synchronized with reality:
   - `README.md`
   - `projects/angular-django2/README.md`
-  - `tests/README.md`
+  - `projects/angular-django2-reference/README.md`
+  - `projects/angular-django-validation/README.md`
   - `docs/INTEGRATION_TESTING.md`
   - `docs/RELEASING.md`
   - `.github/copilot-instructions.md`
@@ -294,7 +296,7 @@ sources over lower-priority ones.
 ## 9. Release Requirements
 
 - The release flow must build from the publishable output in
-  `dist/angular-django2`.
+  `projects/angular-django2/dist`.
 - The published tarball is expected to contain:
   - the compiled schematics collection
   - the generated package README and manifest
@@ -307,7 +309,7 @@ sources over lower-priority ones.
 - npm Trusted Publisher is not the active publish path yet. If that changes,
   update `docs/RELEASING.md`, `.github/workflows/publish.yml`, and this file
   together.
-- Local publishing, when used, should publish `./dist/angular-django2`.
+- Local publishing, when used, should publish `./projects/angular-django2/dist`.
 
 ## 10. Non-Goals And Boundaries
 

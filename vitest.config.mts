@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['tests/**/*.spec.ts'],
-    exclude: ['tests/schematics.e2e.spec.ts'],
+    include: ['projects/angular-django-validation/unit/**/*.spec.ts'],
+    exclude: ['projects/angular-django-validation/e2e/**'],
   },
 });

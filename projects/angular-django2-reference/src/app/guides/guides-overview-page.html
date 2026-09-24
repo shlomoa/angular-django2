@@ -1,10 +1,12 @@
 <section class="guides-overview" aria-labelledby="guides-overview-title">
+  <app-breadcrumbs [items]="[{ label: 'Guides' }]" />
+
   <header class="guides-overview__header">
-    <p class="eyebrow">Guides</p>
+    <p class="eyebrow">Documentation</p>
     <h2 id="guides-overview-title">Reference app guides</h2>
     <p>
-      Learn how to use angular-django2 and what to expect, from a basic tutorial to data flow,
-      forms, quality, and security. Open a guide to read its walkthrough.
+      Learn how to use angular-django2 and what to expect when combining Angular with Django in a
+      multi-project workspace.
     </p>
   </header>
 
@@ -20,12 +22,11 @@
         <span class="guides-overview__icon-frame" aria-hidden="true">
           <mat-icon>{{ guide.icon }}</mat-icon>
         </span>
-
         <span class="guides-overview__card-body">
-          <span class="guides-overview__card-order">{{ guide.order }}</span>
-          <span class="guides-overview__card-title">{{ guide.name }}</span>
-          <span class="guides-overview__card-summary">{{ guide.summary }}</span>
-          <span class="guides-overview__card-action">
+          <span class="guides-overview__order">Guide {{ guide.order }}</span>
+          <span class="guides-overview__name">{{ guide.name }}</span>
+          <span class="guides-overview__summary">{{ guide.summary }}</span>
+          <span class="guides-overview__action">
             Read guide
             <mat-icon aria-hidden="true">arrow_forward</mat-icon>
           </span>
