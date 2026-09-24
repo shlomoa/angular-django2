@@ -2,9 +2,14 @@ import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
 import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import type { MaterialAppSchema } from './schema';
-import { applicationFromAst, presentationFromAst } from '../application/ast';
+import {
+  applicationFromAst,
+  indexHtmlFromAst,
+  navigationLinksFromAst,
+  presentationFromAst,
+  type NavigationAstLink,
+} from '../application/ast';
 import { escapeTemplateText } from '../component/ast';
-import { pageNavigationLinks, type PageNavigationLink } from '../page/ast';
 import { readOpenUiDocument } from '../utility/openui';
 import { ensureDependency, readPackageJson, writePackageJson } from '../utility/package-json';
 import type { WorkspaceConfig } from '../utility/workspace';
@@ -27,7 +32,7 @@ export interface MaterialLayoutOptions {
   /** Toolbar title; defaults to the project name. */
   title?: string;
   /** Links added after the Home link, in order. */
-  navigation?: readonly PageNavigationLink[];
+  navigation?: readonly NavigationAstLink[];
 }
 
 /** Options the OpenUI document describes; they cannot be combined with `--document`. */
@@ -76,13 +81,8 @@ function resolveMaterialAppOptions(
   const document = readOpenUiDocument(tree, documentPath);
   const app = applicationFromAst(document, documentPath, nodeId);
   const presentation = presentationFromAst(app.node, documentPath);
-  const navigation = pageNavigationLinks(document, documentPath);
-  if (navigation.length > 0 && !app.routing) {
-    throw new SchematicsException(
-      `OpenUI document "${documentPath}" declares DashboardPage navigation but its Application node ` +
-        'has no Routing child. Add a Routing child to enable routing.',
-    );
-  }
+  const navigation = navigationLinksFromAst(app.node, document, documentPath);
+  const host = indexHtmlFromAst(document, documentPath);
 
   return {
     ...DEFAULT_MATERIAL_APP_OPTIONS,
@@ -93,7 +93,7 @@ function resolveMaterialAppOptions(
       DEFAULT_MATERIAL_APP_OPTIONS.theme) as ResolvedMaterialAppSchema['theme'],
     typography: presentation.typography ?? DEFAULT_MATERIAL_APP_OPTIONS.typography,
     animations: presentation.animations ?? DEFAULT_MATERIAL_APP_OPTIONS.animations,
-    layout: { title: app.title, navigation },
+    layout: { title: host?.title, navigation },
   };
 }
 
@@ -351,11 +351,14 @@ export function generateMaterialLayout(
  *
  * @internal exported for direct unit testing.
  */
-export function materialLayoutTemplate(navigation: readonly PageNavigationLink[]): string {
+export function materialLayoutTemplate(navigation: readonly NavigationAstLink[]): string {
   const links = navigation.map((link) => {
     const icon = link.icon ? `        <mat-icon matListItemIcon>${link.icon}</mat-icon>\n` : '';
+    const linkAttributes = link.disabled
+      ? ' aria-disabled="true" tabindex="-1"'
+      : ` routerLink="/${link.route}" routerLinkActive="active"`;
     return (
-      `      <a mat-list-item routerLink="/${link.route}" routerLinkActive="active">\n` +
+      `      <a mat-list-item${linkAttributes}>\n` +
       icon +
       `        <span matListItemTitle>${escapeTemplateText(link.label)}</span>\n` +
       '      </a>\n'

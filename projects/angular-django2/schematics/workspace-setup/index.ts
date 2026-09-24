@@ -23,8 +23,8 @@ export interface WorkspaceSetupSchema {
   project?: string;
   files?: Partial<Record<AppSourceFileKey, FileHook>>;
   /**
-   * Workspace-relative path to an OpenUI document whose `IndexHtml` and
-   * `Favicon` nodes describe the host document and icon.
+   * Workspace-relative path to an OpenUI document whose `html` and icon `link`
+   * nodes describe the host document and icon.
    */
   document?: string;
 }
@@ -322,7 +322,7 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
 }
 
 /**
- * Compile the `IndexHtml` and `Favicon` nodes of `--document` into host file
+ * Compile the `html` and icon `link` nodes of `--document` into host file
  * edits: `[lang]`, `[dir]`, and `[title]` update the existing index.html, and
  * the `[href]` icon file replaces the application favicon (`public/favicon.ico`
  * when present, else `<sourceRoot>/favicon.ico` as for the `favicon` file hook).
@@ -335,7 +335,7 @@ function resolveHostFileEdits(tree: Tree, options: WorkspaceSetupSchema): HostFi
   if (conflicting.length > 0) {
     throw new SchematicsException(
       `--document cannot be combined with files.${conflicting.join(', files.')}; ` +
-        'describe them with the OpenUI IndexHtml and Favicon nodes instead.',
+        'describe them with the OpenUI html and link nodes instead.',
     );
   }
 

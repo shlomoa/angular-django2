@@ -193,7 +193,7 @@ describe('field-component schematic', () => {
 
   it('TC-FIELD-OPENUI-01: compiles a TextInputs node exactly like the matching --kind', async () => {
     const document = JSON.stringify({
-      version: '0.2.0',
+      version: '0.3.0',
       id: 'root',
       type: 'html',
       children: [
