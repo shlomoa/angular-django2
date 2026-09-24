@@ -44,14 +44,16 @@ earlier research is lost.
 
 ## 2. Verified Findings (Reusable)
 
-### 2.1 Canonical OpenUI 0.2.0 vocabulary
+### 2.1 Canonical OpenUI 0.3.0 vocabulary
 
-Source: `spec/openui.json` in `@shlomoa/openui-spec` 0.2.0 (the version pinned in
-[`package.json`](../package.json)). Scope paths are `<category>/<id>`.
+Source: `spec/openui.json` in `@shlomoa/openui-spec` 0.3.0 (the version pinned in
+[`package.json`](../package.json) since #131). Scope paths are `<category>/<id>`.
+Compared with 0.2.0, only `application` changed: 0.3.0 adds `route`, `navItem`,
+`navGroup`, `toolBarRow`, and `toolAction`.
 
 | Category          | Scope ids                                                                                                                                                                         |
 | :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `application`     | `routing`, `navigation`, `toolBars`, `favicon`, `indexHtml`                                                                                                                       |
+| `application`     | `routing`, `route`, `navigation`, `navItem`, `navGroup`, `toolBars`, `toolBarRow`, `toolAction`, `favicon`, `indexHtml`                                                           |
 | `behaviors`       | `dragAndDrop`, `resizable`, `collapsible`                                                                                                                                         |
 | `containers`      | `grid`, `expandablePanels`, `tabs`, `surfaceContainers`, `sheetContainers`, `overlayContainers`, `structuralContainers`, `splitters`                                              |
 | `controls`        | `native`, `actionControls`, `textInputs`, `choiceControls`, `pickerControl`, `rangeControl`, `drawingAndCapture`, `displayPrimitives`, `statusIndicator`, `linkAndScrollControls` |
@@ -72,39 +74,43 @@ Vocabulary facts to enforce in both documents:
 - `dateTimePickers` is under `widgets/`, not `controls/`.
 - `dashboard`, `emptyPage`, `shellPage` are under `pages/`, not `views/`.
   `views/` holds only `report` and `form`.
-- `accordion` does **not** appear anywhere in the 0.2.0 catalog. It is an
+- `accordion` does **not** appear anywhere in the 0.3.0 catalog. It is an
   Angular Material term; the OpenUI scope is `containers/expandablePanels`.
   (The migration plan calls it an "alias"; the docs must not present it as an
   OpenUI identifier.) The same applies to `bottom-sheet`, `menu`, `feedback`,
   and `date-picker` as proposed schematic names.
+- Scope type and document type differ for some scopes. Documents use the
+  instance type: `toolBars` → `ToolBar`, `favicon` → `link`, `indexHtml` →
+  `html`, `dashboard` → `DashboardPage`.
 - The package is `@shlomoa/openui-spec`. The placeholder `@openui/spec` in the
   implementation plan diagram is wrong.
 - Singular ids are discrete concepts (`chart`, `table`, `dataGrid`, `list`,
   `stepper`, `dialog`, `form`, `report`, `pickerControl`, `rangeControl`,
-  `statusIndicator`, `native`, `grid`, `dashboard`, `shellPage`, `emptyPage`).
+  `statusIndicator`, `native`, `grid`, `dashboard`, `shellPage`, `emptyPage`,
+  `route`, `navItem`, `navGroup`, `toolBarRow`, `toolAction`).
   Plural or grouped ids are families (`feedbackWidgets`, `mediaWidgets`,
   `navigationWidgets`, `menuWidgets`, `dateTimePickers`, `expandablePanels`,
   `tabs`, `surfaceContainers`, `sheetContainers`, `overlayContainers`,
   `structuralContainers`, `splitters`, `actionControls`, `textInputs`,
   `choiceControls`, `drawingAndCapture`, `displayPrimitives`,
   `linkAndScrollControls`, `toolBars`). The current "Naming Conventions"
-  section of the mapping document lists pre-0.2.0 names and must be rewritten
+  section of the mapping document lists pre-0.3.0 names and must be rewritten
   from this list.
 
-### 2.2 `widgets/table` facts (OpenUI v0.2.0)
+### 2.2 `widgets/table` facts (OpenUI v0.3.0)
 
 - Catalog: scope `id: table`, `type: Table`; instance element `type: table`
   with `tr` row children (`tableRow`).
 - Normative attributes, from
-  [`scopes/Widgets/table.scope.md`](https://github.com/shlomoa/openui-spec/blob/v0.2.0/spec/scopes/Widgets/table.scope.md):
+  [`scopes/Widgets/table.scope.md`](https://github.com/shlomoa/openui-spec/blob/v0.3.0/spec/scopes/Widgets/table.scope.md):
   only `(sort)`, `(filter)`, `(paginate)`.
 - `[data]`, `[selection]`, `[loading]`, `[error]`, `(selectionChange)`, and the
   column / pagination / empty-state children come from
-  [`examples/Widgets/table.example.json`](https://github.com/shlomoa/openui-spec/blob/v0.2.0/spec/examples/Widgets/table.example.json).
+  [`examples/Widgets/table.example.json`](https://github.com/shlomoa/openui-spec/blob/v0.3.0/spec/examples/Widgets/table.example.json).
   They are illustrative, not normative. The implementation plan §4 currently
   presents them as the scope contract and gives the identity as
   `type: table`; both must be corrected.
-- `spec/scopes/Controls/` in v0.2.0 has no `Table` scope, which confirms that
+- `spec/scopes/Controls/` in v0.3.0 has no `Table` scope, which confirms that
   `Controls/Table/` was retired.
 
 ### 2.3 Issue status and ownership boundary
@@ -116,6 +122,7 @@ Vocabulary facts to enforce in both documents:
 | [#101](https://github.com/shlomoa/angular-django2/issues/101) | Closed | Integration of the `@shlomoa/openui-spec` npm package.                |
 | [#103](https://github.com/shlomoa/angular-django2/issues/103) | Closed | Schematics pipeline integration. Not "pending", as the old plan said. |
 | [#104](https://github.com/shlomoa/angular-django2/issues/104) | Closed | openui-spec 0.2.0 integration.                                        |
+| [#131](https://github.com/shlomoa/angular-django2/pull/131)   | Merged | openui-spec 0.3.0 integration (PR); current pinned version.           |
 
 Ownership boundary (#27):
 
@@ -151,7 +158,7 @@ The refreshed docs must not describe a public `compile` schematic.
   generates data transport only; no report UI exists.
 - `dialog` appears both as an active mapping (§1) and as missing (§3).
 - Obsolete scope names throughout (§2.1), and the naming-conventions section is
-  pre-0.2.0.
+  pre-0.3.0.
 
 `docs/openui-spec-implementation-plan.md`:
 
@@ -164,6 +171,13 @@ The refreshed docs must not describe a public `compile` schematic.
 - §4 table facts need the correction in §2.2.
 
 ### 2.5 Verified schematic evidence on `main` (Phase 2 result)
+
+> **Stale: re-run required.** §2.5 and §2.6 were verified on `7e7047a` against
+> openui-spec 0.2.0. `main` has since moved to `55efb54` (#131, openui-spec
+> 0.3.0), which changed `application`, `material-app`, and `workspace-setup`
+> (`IndexHtml` / `Favicon` → `html` / `link`, `Application[title]` removed,
+> `Routing` / `Navigation` compiled). Per Phase 1 step 1, re-run Phase 2 on
+> 0.3.0 and replace both sections before Phase 3.
 
 Verified on `7e7047a` from code (`schematics/<name>/{index,ast}.ts`,
 `utility/ast-compiler.ts`, `utility/openui.ts`) and from the named tests, which
@@ -236,7 +250,7 @@ Phase 4 is blocked until #129 is resolved (see Phase 4).
 
 ### 3.1 `docs/ngdj-openui-spec-mapping.md`
 
-Every schematic and every 0.2.0 catalog scope appears in exactly one class:
+Every schematic and every 0.3.0 catalog scope appears in exactly one class:
 
 | Section | Class                          | Content                                                                                                                                                                                                                                                                                                                                   |
 | :------ | :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -245,7 +259,7 @@ Every schematic and every 0.2.0 catalog scope appears in exactly one class:
 | §2      | **Conceptual / CLI by design** | Schematics that correspond to OpenUI concepts but deliberately take CLI options (`material-setup`, `app-shell`), plus indirect primitives (for example the `complex-component` overlay vs. `widgets/dialog`).                                                                                                                             |
 | §3      | **Planned**                    | Spec-first schematics not yet built (`table`, `dialog`, `stepper`, `tabs`, `accordion`, `bottom-sheet`, `menu`, `feedback`, `date-picker`, `data-grid`, `chart`), with their OpenUI scopes.                                                                                                                                               |
 | §4      | **Tooling only**               | `ng-add`, `project-structure`, `openapi-setup`, `service`, `class` (and `workspace-setup` only if Phase 2 shows no OpenUI input).                                                                                                                                                                                                         |
-| §5      | **Missing**                    | Every remaining 0.2.0 scope with no schematic, no primitive coverage, and no plan (for example `list`, `navigationWidgets`, `mediaWidgets`, `grid`, `splitters`, `choiceControls`, `pickerControl`, `displayPrimitives`, `statusIndicator`, `drawingAndCapture`, `linkAndScrollControls`, `native`, `behaviors/*`, cross-cutting scopes). |
+| §5      | **Missing**                    | Every remaining 0.3.0 scope with no schematic, no primitive coverage, and no plan (for example `list`, `navigationWidgets`, `mediaWidgets`, `grid`, `splitters`, `choiceControls`, `pickerControl`, `displayPrimitives`, `statusIndicator`, `drawingAndCapture`, `linkAndScrollControls`, `native`, `behaviors/*`, cross-cutting scopes). |
 | §6      | Naming conventions             | Rewritten from §2.1.                                                                                                                                                                                                                                                                                                                      |
 
 ### 3.2 `docs/openui-spec-implementation-plan.md`
@@ -256,7 +270,7 @@ Every schematic and every 0.2.0 catalog scope appears in exactly one class:
   master compiler is validation-only.
 - §1.x: parser ownership and integration status with issue links (§2.3) and
   test evidence.
-- §2: diagram with `@shlomoa/openui-spec` 0.2.0, labelled as the target pipeline.
+- §2: diagram with `@shlomoa/openui-spec` 0.3.0, labelled as the target pipeline.
 - §3: scope matrix using canonical scope paths, every row marked Planned, and a
   note that Material-style schematic names are not OpenUI ids.
 - §4: `table` facts corrected per §2.2.
@@ -311,11 +325,11 @@ rather than keeping it next to the new one.
 ### Phase 5: Cross-Document Validation
 
 1. Relative links and heading anchors resolve (script in Appendix A).
-2. Every backticked `<category>/<id>` is a real 0.2.0 scope, and every 0.2.0
+2. Every backticked `<category>/<id>` is a real 0.3.0 scope, and every 0.3.0
    scope is classified in the mapping (script in Appendix A).
 3. `rg` finds no obsolete name (§2.1) outside the naming-conventions
    "obsolete names" sentence, and no `@openui/spec`.
-4. Terms, package name, version (0.2.0), status legend, and roadmap items match
+4. Terms, package name, version (0.3.0), status legend, and roadmap items match
    between the two documents.
 5. `npm run format:check`, `npm run lint`, `npm run test:node`,
    `npm run docs:build` pass.
@@ -348,7 +362,7 @@ the exclusion. For the demo:
       schematic integration.
 - [ ] Every active mapping has a supporting schematic contract and test
       evidence (Phase 2 table).
-- [ ] OpenUI vocabulary matches exact canonical 0.2.0 names and casing.
+- [ ] OpenUI vocabulary matches exact canonical 0.3.0 names and casing.
 - [ ] Ownership boundaries align with #27, and the validation-only compiler
       decision is respected.
 - [ ] Documentation links are valid.
