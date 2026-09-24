@@ -13,7 +13,7 @@ exclude_docs: |
   RELEASING.md
   ngdj-openui-spec-mapping.md
   openui-spec-implementation-plan.md
-
+  issue_106_plan.md
 nav:
   - Start here:
       - Choose a journey: index.md
