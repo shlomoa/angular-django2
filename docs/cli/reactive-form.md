@@ -1,7 +1,8 @@
 # reactive-form
 
-Generate a typed standalone, `OnPush` Angular Material **reactive form** from a
-single JSON definition. The generated component creates one Django REST
+Generate a typed standalone, `OnPush` Angular Material **reactive form** from an
+OpenUI `Form` node (`--document`) or from a single legacy JSON definition
+(`--definition`). The generated component creates one Django REST
 Framework resource; it is not a resource-operation shell, and it does not
 generate list, retrieve, update, or delete operations.
 
@@ -13,20 +14,84 @@ ng generate angular-django2:reactive-form contact \
   --primitives-path=src/app/shared/form-helpers
 ```
 
-`--name` must be kebab-case. `--definition` is required and is a
-workspace-relative path to a `.json` file that already exists in the workspace.
+`--name` must be kebab-case. Pass exactly one of `--document` or
+`--definition`; each is a workspace-relative path to a `.json` file that already
+exists in the workspace.
 Select `--project` when the workspace has more than one application. The
 schematic requires `@angular/forms`, `@angular/material`, and `@angular/cdk`
 before it writes output.
 
 Supported options are limited to:
 
-- `--definition=<path>` (required) — workspace-relative `.json` definition file
+- `--document=<path>` — workspace-relative OpenUI document (see
+  [OpenUI Form documents](#openui-form-documents))
+- `--node-id=<id>` — `Form` element to compile; defaults to the first `Form`
+  (requires `--document`)
+- `--definition=<path>` — workspace-relative legacy `.json` definition file
 - `--path=<path>` (default `src/app/features`) — output directory, which must
   remain within the selected application's `sourceRoot`
 - `--primitives-path=<path>` (default `src/app/shared/form-helpers`) — directory
   searched for reusable field primitives
 - `--project=<name>` — target application
+
+## OpenUI Form documents
+
+With `--document`, the schematic reads the OpenUI 0.2.0 document with the
+canonical `@shlomoa/openui-spec` validator and compiles one `Form` node.
+A `--definition` file is translated into the same synthetic `Form` node first,
+so both inputs produce identical output and share every contract rule below.
+
+```bash
+ng generate angular-django2:reactive-form contact \
+  --document=src/app/app.openui.json \
+  --node-id=contactForm
+```
+
+```json
+{
+  "version": "0.2.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "contactForm",
+      "type": "Form",
+      "attrs": {
+        "[title]": "Create contact",
+        "[action]": "/api/contacts/",
+        "(submit)": "src/app/api-integration/contact-submit.ts#ContactSubmitService.create"
+      },
+      "children": [
+        {
+          "id": "firstName",
+          "type": "TextInputs",
+          "attrs": { "[name]": "first_name", "[label]": "First name", "[required]": "true" }
+        },
+        {
+          "id": "seats",
+          "type": "RangeControl",
+          "attrs": { "[label]": "Seats", "[min]": "1" }
+        },
+        { "id": "contactSubmit", "type": "ActionControls", "attrs": { "[label]": "Create" } }
+      ]
+    }
+  ]
+}
+```
+
+| Definition key         | OpenUI `Form` subtree                                                    |
+| :--------------------- | :----------------------------------------------------------------------- |
+| `title`                | `Form` `[title]`                                                         |
+| `endpoint`             | `Form` `[action]`                                                        |
+| `integration`          | `Form` `(submit)` = `<artifact>#<Symbol>.<method>`                       |
+| `submitLabel`          | `[label]` of the single optional `ActionControls` child                  |
+| `fields`               | `TextInputs` / `RangeControl` children, in order                         |
+| field keys, validators | control attributes, see [form-field](form-field.md#openui-control-nodes) |
+
+Attribute values are strings (`"true"`, `"120"`). Unknown attributes, other
+child types, and more than one `ActionControls` child are rejected.
+Diagnostics name the node as `<document>#<nodeId>`; `fields[<n>]` is the n-th
+control child.
 
 ## Definition contract
 

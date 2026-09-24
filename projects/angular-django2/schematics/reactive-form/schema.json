@@ -17,7 +17,17 @@
     "definition": {
       "type": "string",
       "format": "path",
-      "description": "Workspace-relative path of the JSON form definition file described by definitions/reactiveFormDefinition."
+      "description": "Workspace-relative path of the JSON form definition file described by definitions/reactiveFormDefinition. Mutually exclusive with --document."
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a Form node (catalog-style attributes: [title], [action], (submit)); mutually exclusive with --definition."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID within the OpenUI document to compile. When omitted, targets the first element of a supported type. Requires --document.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
     },
     "path": {
       "type": "string",
@@ -37,7 +47,7 @@
       "aliases": ["primitives-path", "primitivesPath"]
     }
   },
-  "required": ["name", "definition"],
+  "required": ["name"],
   "definitions": {
     "reactiveFormDefinition": {
       "title": "angular-django2 reactive-form definition contract",

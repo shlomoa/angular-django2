@@ -101,6 +101,20 @@ export function parseReactiveFormDefinition(
     throw definitionError(definitionPath, 'the file is not valid JSON.');
   }
 
+  return validateReactiveFormDefinition(parsed, definitionPath);
+}
+
+/**
+ * Validate an already-parsed form definition object. This is the single set of
+ * contract rules shared by legacy definition files and OpenUI `Form` nodes.
+ *
+ * @param definitionPath Diagnostic subject (a file path or `<document>#<nodeId>`).
+ * @throws SchematicsException for any contract violation.
+ */
+export function validateReactiveFormDefinition(
+  parsed: unknown,
+  definitionPath: string,
+): ReactiveFormDefinition {
   const definition = requireDefinitionObject(parsed, definitionPath);
   assertKnownKeys(definition, DEFINITION_KEYS, definitionPath, 'definition');
 

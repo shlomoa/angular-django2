@@ -6,6 +6,13 @@ import {
   formFieldPrimitiveDescriptor,
   type FormFieldPrimitiveDescriptor,
 } from '../form-field/generate';
+import type { OpenUiElement } from '@shlomoa/openui-spec';
+import {
+  astNodeSubject,
+  readAstNode,
+  type AstCompilationContext,
+  type AstCompilationResult,
+} from '../utility/ast-compiler';
 import { assertPackageDependencies } from '../utility/package-json';
 import { resolveApplicationTargetDirectory } from '../utility/project-relative-path';
 import {
@@ -13,6 +20,7 @@ import {
   requireWorkspaceProject,
   type WorkspaceProject,
 } from '../utility/workspace';
+import { FORM_AST_TYPE, reactiveFormDefinitionFromAst, reactiveFormDefinitionToAst } from './ast';
 import { parseReactiveFormDefinition } from './definition';
 import type {
   ReactiveFormDefinition,
@@ -33,60 +41,149 @@ import {
 
 const DEFAULT_PATH = 'src/app/features';
 const DEFAULT_PRIMITIVES_PATH = 'src/app/shared/form-helpers';
-const ALLOWED_OPTIONS = new Set(['name', 'definition', 'path', 'project', 'primitivesPath']);
+const ALLOWED_OPTIONS = new Set([
+  'name',
+  'definition',
+  'document',
+  'nodeId',
+  'path',
+  'project',
+  'primitivesPath',
+]);
 const REQUIRED_DEPENDENCIES = ['@angular/forms', '@angular/material', '@angular/cdk'] as const;
 
-interface ResolvedReactiveFormOptions {
-  templateOptions: ReactiveFormTemplateOptions;
-  componentPath: string;
-  templatePath: string;
-  stylesheetPath: string;
-  existingOutputs: readonly string[];
+/** Options that stay on the CLI when a form is compiled from an OpenUI node. */
+export interface FormCompilationOptions {
+  /** Kebab-case base name for the generated form component. */
+  readonly name: string;
+  /** Workspace-relative directory scanned for reusable field primitives. */
+  readonly primitivesDirectory: string;
+  /** Diagnostic subject for the node (a definition path or `<document>#<nodeId>`). */
+  readonly subject: string;
 }
 
 /**
- * Generate a typed standalone OnPush Angular Material reactive form from a
- * single isolated JSON definition contract.
+ * Generate a typed standalone OnPush Angular Material reactive form from an
+ * OpenUI `Form` node (`--document`) or from a legacy isolated JSON definition
+ * (`--definition`), which is first translated into a synthetic `Form` node.
  *
- * All validation runs before the first tree mutation, so an invalid definition,
- * an ambiguous field primitive, or a missing integration artifact never leaves
- * partial output behind.
+ * All validation runs before the first tree mutation, so an invalid document or
+ * definition, an ambiguous field primitive, or a missing integration artifact
+ * never leaves partial output behind.
  */
 export function reactiveForm(options: ReactiveFormSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const resolved = resolveOptions(tree, options);
-
-    if (resolved.existingOutputs.length > 0) {
-      context.logger.warn(
-        `${resolved.componentPath} already exists; skipping reactive-form generation.`,
-      );
-      return tree;
+    assertSupportedOptions(options);
+    if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(options.name ?? '')) {
+      throw new SchematicsException('The reactive-form name must be non-empty kebab-case.');
     }
 
-    tree.create(resolved.componentPath, reactiveFormComponentSource(resolved.templateOptions));
-    tree.create(resolved.templatePath, reactiveFormTemplate(resolved.templateOptions));
-    tree.create(resolved.stylesheetPath, reactiveFormStylesheet(resolved.templateOptions));
+    const workspace = readWorkspace(tree);
+    const projectName = resolveProjectName(workspace.projects ?? {}, options.project);
+    const project = requireWorkspaceProject(workspace, projectName);
+    const destinationPath = resolveApplicationTargetDirectory(project, options.path, DEFAULT_PATH);
+    const primitivesDirectory = resolveApplicationTargetDirectory(
+      project,
+      options.primitivesPath,
+      DEFAULT_PRIMITIVES_PATH,
+    );
+    assertPackageDependencies(tree, 'reactive-form', REQUIRED_DEPENDENCIES);
+
+    const { node, subject } = resolveFormNode(tree, options);
+    compileFormFromAst(
+      node,
+      { tree, context, workspace, projectName, project, destinationPath },
+      { name: options.name, primitivesDirectory, subject },
+    );
 
     return tree;
   };
 }
 
-function resolveOptions(tree: Tree, options: ReactiveFormSchema): ResolvedReactiveFormOptions {
-  assertSupportedOptions(options);
-  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(options.name ?? '')) {
-    throw new SchematicsException('The reactive-form name must be non-empty kebab-case.');
+/**
+ * Pure AST compiler: generate the reactive-form component for one OpenUI
+ * `Form` node into `context.destinationPath`.
+ *
+ * When every output already exists it logs a warning and writes nothing; a
+ * partially present output is rejected.
+ *
+ * @throws SchematicsException for any invalid input, before the first mutation.
+ */
+export function compileFormFromAst(
+  form: OpenUiElement,
+  context: AstCompilationContext,
+  options: FormCompilationOptions,
+): AstCompilationResult {
+  const { tree } = context;
+  const definition = reactiveFormDefinitionFromAst(form, options.subject);
+
+  const names = reactiveFormNames(options.name);
+  const componentDirectory = path.posix.join(context.destinationPath, names.fileName);
+  const fields = definition.fields.map((field) =>
+    resolveField(tree, field, options.primitivesDirectory, componentDirectory),
+  );
+  const integration = definition.integration
+    ? resolveIntegration(tree, context.project, definition.integration, componentDirectory)
+    : undefined;
+
+  const componentPath = path.posix.join(componentDirectory, `${names.fileName}.ts`);
+  const templatePath = path.posix.join(componentDirectory, `${names.fileName}.html`);
+  const stylesheetPath = path.posix.join(componentDirectory, `${names.fileName}.scss`);
+  const outputs = [componentPath, templatePath, stylesheetPath];
+  const result: AstCompilationResult = {
+    nodeId: form.id,
+    files: outputs,
+    symbolName: names.className,
+    selector: names.selector,
+    importPath: componentPath.replace(/\.ts$/, ''),
+  };
+
+  const existingOutputs = outputs.filter((output) => tree.exists(output));
+  if (existingOutputs.length > 0 && existingOutputs.length !== outputs.length) {
+    throw new SchematicsException(
+      `reactive-form output is only partially present: ${existingOutputs.join(', ')}. ` +
+        'Remove the remaining files or choose another name; reactive-form never rewrites part of a form.',
+    );
+  }
+  if (existingOutputs.length > 0) {
+    context.context.logger.warn(
+      `${componentPath} already exists; skipping reactive-form generation.`,
+    );
+    return result;
   }
 
-  const workspace = readWorkspace(tree);
-  const projectName = resolveProjectName(workspace.projects ?? {}, options.project);
-  const project = requireWorkspaceProject(workspace, projectName);
-  const targetDirectory = resolveApplicationTargetDirectory(project, options.path, DEFAULT_PATH);
-  const primitivesDirectory = resolveApplicationTargetDirectory(
-    project,
-    options.primitivesPath,
-    DEFAULT_PRIMITIVES_PATH,
+  const templateOptions = buildTemplateOptions(
+    options.name,
+    names,
+    definition,
+    fields,
+    integration,
   );
-  assertPackageDependencies(tree, 'reactive-form', REQUIRED_DEPENDENCIES);
+  tree.create(componentPath, reactiveFormComponentSource(templateOptions));
+  tree.create(templatePath, reactiveFormTemplate(templateOptions));
+  tree.create(stylesheetPath, reactiveFormStylesheet(templateOptions));
+
+  return result;
+}
+
+/**
+ * Schema resolver / CLI adapter: resolve the `Form` node from `--document`, or
+ * translate a legacy `--definition` file into a synthetic `Form` node.
+ */
+function resolveFormNode(
+  tree: Tree,
+  options: ReactiveFormSchema,
+): { node: OpenUiElement; subject: string } {
+  if (options.document !== undefined) {
+    if (options.definition !== undefined) {
+      throw new SchematicsException('Pass either --definition or --document, not both.');
+    }
+    const node = readAstNode(tree, options.document, options.nodeId, FORM_AST_TYPE);
+    return { node, subject: astNodeSubject(options.document, node) };
+  }
+  if (options.nodeId !== undefined) {
+    throw new SchematicsException('--nodeId requires --document.');
+  }
 
   const definitionPath = resolveDefinitionPath(options.definition);
   const definitionContent = tree.read(`/${definitionPath}`);
@@ -97,33 +194,9 @@ function resolveOptions(tree: Tree, options: ReactiveFormSchema): ResolvedReacti
   }
   const definition = parseReactiveFormDefinition(definitionContent.toString(), definitionPath);
 
-  const names = reactiveFormNames(options.name);
-  const componentDirectory = path.posix.join(targetDirectory, names.fileName);
-  const fields = definition.fields.map((field) =>
-    resolveField(tree, field, primitivesDirectory, componentDirectory),
-  );
-  const integration = definition.integration
-    ? resolveIntegration(tree, project, definition.integration, componentDirectory)
-    : undefined;
-
-  const componentPath = path.posix.join(componentDirectory, `${names.fileName}.ts`);
-  const templatePath = path.posix.join(componentDirectory, `${names.fileName}.html`);
-  const stylesheetPath = path.posix.join(componentDirectory, `${names.fileName}.scss`);
-  const outputs = [componentPath, templatePath, stylesheetPath];
-  const existingOutputs = outputs.filter((output) => tree.exists(output));
-  if (existingOutputs.length > 0 && existingOutputs.length !== outputs.length) {
-    throw new SchematicsException(
-      `reactive-form output is only partially present: ${existingOutputs.join(', ')}. ` +
-        'Remove the remaining files or choose another name; reactive-form never rewrites part of a form.',
-    );
-  }
-
   return {
-    templateOptions: buildTemplateOptions(options.name, names, definition, fields, integration),
-    componentPath,
-    templatePath,
-    stylesheetPath,
-    existingOutputs,
+    node: reactiveFormDefinitionToAst(definition, options.name),
+    subject: definitionPath,
   };
 }
 
@@ -176,7 +249,8 @@ function resolveDefinitionPath(definition: string | undefined): string {
   const normalized = normalizeWorkspacePath(definition ?? '');
   if (!normalized || (definition ?? '').split(/[\\/]+/).includes('..')) {
     throw new SchematicsException(
-      'Pass --definition with the workspace-relative path of the JSON form definition.',
+      'Pass --definition with the workspace-relative path of the JSON form definition, ' +
+        'or --document with an OpenUI document.',
     );
   }
   if (!normalized.endsWith('.json')) {

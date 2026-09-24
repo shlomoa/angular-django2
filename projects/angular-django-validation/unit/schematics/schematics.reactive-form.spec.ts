@@ -10,6 +10,11 @@ import {
   REACTIVE_FORM_VALIDATOR_KINDS,
 } from '../../../../projects/angular-django2/schematics/reactive-form/schema';
 import type { ReactiveFormSchema } from '../../../../projects/angular-django2/schematics/reactive-form/schema';
+import {
+  reactiveFormDefinitionFromAst,
+  reactiveFormDefinitionToAst,
+} from '../../../../projects/angular-django2/schematics/reactive-form/ast';
+import { parseReactiveFormDefinition } from '../../../../projects/angular-django2/schematics/reactive-form/definition';
 import { schematicSchemaPath } from './schematics.helpers';
 
 const COMPONENT_PATH = '/src/app/features/contact-form/contact-form.ts';
@@ -383,7 +388,15 @@ export class ContactSubmitService {
     const definition = schema.definitions.reactiveFormDefinition;
 
     expect(schema.properties.name.$default).toEqual({ $source: 'argv', index: 0 });
-    expect(schema.required).toEqual(['name', 'definition']);
+    // --definition and --document are mutually exclusive, so only name is schema-required.
+    expect(schema.required).toEqual(['name']);
+    expect(schema.properties.document.format).toBe('path');
+    expect(schema.properties.nodeId.aliases).toEqual([
+      'element-id',
+      'elementId',
+      'node-id',
+      'nodeId',
+    ]);
     expect(definition.additionalProperties).toBe(false);
     expect(definition.required).toEqual(['title', 'endpoint', 'fields']);
     expect(Object.keys(definition.properties).sort()).toEqual([
@@ -603,5 +616,254 @@ export class ContactSubmitService {
       'value: this.formBuilder.control<string | null>(null, [Validators.required]),',
     );
     expect(component.match(/Validators\.required/g)).toHaveLength(1);
+  });
+});
+
+describe('reactive-form schematic: OpenUI Form documents', () => {
+  const DOCUMENT_PATH = 'documents/app.openui.json';
+  const INTEGRATION_ARTIFACT = `export class ContactSubmitService {
+  create(payload: unknown): unknown {
+    return payload;
+  }
+}
+`;
+
+  /** OpenUI equivalent of DEFINITION, using catalog-style attributes. */
+  const CONTACT_FORM = {
+    id: 'contactForm',
+    type: 'Form',
+    attrs: { '[title]': 'Create contact', '[action]': '/api/contacts/' },
+    children: [
+      {
+        id: 'firstName',
+        type: 'TextInputs',
+        attrs: {
+          '[name]': 'first_name',
+          '[label]': 'First name',
+          '[required]': 'true',
+          '[hint]': 'Given name on the record',
+          '[autocomplete]': 'given-name',
+        },
+      },
+      {
+        id: 'email',
+        type: 'TextInputs',
+        attrs: { '[type]': 'email', '[label]': 'Email', '[required]': 'true' },
+      },
+      { id: 'seats', type: 'RangeControl', attrs: { '[label]': 'Seats' } },
+      { id: 'notes', type: 'TextInputs', attrs: { '[type]': 'textarea', '[label]': 'Notes' } },
+      { id: 'contactSubmit', type: 'ActionControls', attrs: { '[label]': 'Create contact' } },
+    ],
+  };
+
+  function documentOf(...forms: unknown[]): string {
+    return JSON.stringify({ version: '0.2.0', id: 'root', type: 'html', children: forms });
+  }
+
+  function createDocumentTree(document: string = documentOf(CONTACT_FORM)): UnitTestTree {
+    const tree = createApplicationTree();
+    tree.create(`/${DOCUMENT_PATH}`, document);
+    return tree;
+  }
+
+  function generateFromDocument(
+    tree: Tree,
+    options: Partial<ReactiveFormSchema> = {},
+  ): UnitTestTree {
+    return generate(tree, { definition: undefined, document: DOCUMENT_PATH, ...options });
+  }
+
+  function outputs(tree: Tree): string[] {
+    return [COMPONENT_PATH, TEMPLATE_PATH, STYLESHEET_PATH].map((path) => readContent(tree, path));
+  }
+
+  it('TC-REACTIVE-FORM-OPENUI-01: compiles a Form node to output identical to the legacy definition', () => {
+    const fromDefinition = generate(createApplicationTree());
+    const fromDocument = generateFromDocument(createDocumentTree());
+
+    expect(outputs(fromDocument)).toEqual(outputs(fromDefinition));
+  });
+
+  it('TC-REACTIVE-FORM-OPENUI-02: maps (submit) to the typed integration identically to the legacy definition', () => {
+    const integration = {
+      artifact: 'src/app/api-integration/contact-submit.ts',
+      symbol: 'ContactSubmitService',
+      method: 'create',
+    };
+    const legacyTree = createApplicationTree({ ...DEFINITION, integration });
+    legacyTree.create(`/${integration.artifact}`, INTEGRATION_ARTIFACT);
+    const documentTree = createDocumentTree(
+      documentOf({
+        ...CONTACT_FORM,
+        attrs: {
+          ...CONTACT_FORM.attrs,
+          '(submit)': 'src/app/api-integration/contact-submit.ts#ContactSubmitService.create',
+        },
+      }),
+    );
+    documentTree.create(`/${integration.artifact}`, INTEGRATION_ARTIFACT);
+
+    expect(outputs(generateFromDocument(documentTree))).toEqual(outputs(generate(legacyTree)));
+  });
+
+  it('TC-REACTIVE-FORM-OPENUI-03: round-trips every legacy definition feature through the Form AST', () => {
+    const source = {
+      title: 'Profile',
+      endpoint: '/api/profiles/',
+      submitLabel: 'Save',
+      fields: [
+        {
+          name: 'user_name',
+          label: 'User name',
+          control: 'text',
+          initialValue: 'guest',
+          required: false,
+          validators: [
+            { type: 'required' },
+            { type: 'email' },
+            { type: 'minLength', value: 3 },
+            { type: 'maxLength', value: 40 },
+            { type: 'pattern', value: '^[a-z_]+$' },
+          ],
+          placeholder: 'e.g. ada',
+        },
+        // Differs from user_name only by camel case: ids stay unique because they are positional.
+        { name: 'userName', label: 'Alias', control: 'password' },
+        {
+          name: 'age',
+          label: 'Age',
+          control: 'number',
+          initialValue: null,
+          validators: [
+            { type: 'min', value: 0 },
+            { type: 'max', value: 120.5 },
+          ],
+        },
+      ],
+      integration: { artifact: 'src/app/api/profile.ts', symbol: 'ProfileApi', method: 'create' },
+    };
+    const definition = parseReactiveFormDefinition(JSON.stringify(source), 'profile.json');
+    const form = reactiveFormDefinitionToAst(definition, 'profile');
+
+    expect(form.id).toBe('profile');
+    expect(form.children?.map((child) => child.id)).toEqual([
+      'profileField0',
+      'profileField1',
+      'profileField2',
+      'profileSubmitAction',
+    ]);
+    expect(form.children?.[0].attrs).toMatchObject({
+      '[required]': 'true',
+      '[email]': 'true',
+      '[minLength]': '3',
+    });
+
+    const decoded = reactiveFormDefinitionFromAst(form, 'profile.json');
+    // `required: false` plus a required validator is emitted as `[required]="true"`.
+    expect(decoded).toEqual({
+      ...definition,
+      fields: [
+        {
+          ...definition.fields[0],
+          required: true,
+          validators: definition.fields[0].validators?.filter((entry) => entry.type !== 'required'),
+        },
+        ...definition.fields.slice(1),
+      ],
+    });
+  });
+
+  it('TC-REACTIVE-FORM-OPENUI-04: selects a Form by --nodeId and defaults to the first Form', () => {
+    const second = {
+      ...CONTACT_FORM,
+      id: 'otherForm',
+      attrs: { ...CONTACT_FORM.attrs, '[title]': 'Other form' },
+      children: [{ id: 'otherNotes', type: 'TextInputs', attrs: { '[label]': 'Notes' } }],
+    };
+    const document = documentOf(CONTACT_FORM, second);
+
+    expect(
+      readContent(generateFromDocument(createDocumentTree(document)), TEMPLATE_PATH),
+    ).toContain('Create contact');
+    expect(
+      readContent(
+        generateFromDocument(createDocumentTree(document), { nodeId: 'otherForm' }),
+        TEMPLATE_PATH,
+      ),
+    ).toContain('Other form');
+    expect(() =>
+      generateFromDocument(createDocumentTree(document), { nodeId: 'otherNotes' }),
+    ).toThrow('OpenUI node "otherNotes" has type "TextInputs" but this schematic expects "Form".');
+  });
+
+  it.each([
+    [
+      'an unsupported Form attribute',
+      { ...CONTACT_FORM, attrs: { ...CONTACT_FORM.attrs, '(validate)': 'check()' } },
+      'OpenUI node "documents/app.openui.json#contactForm" has unsupported attribute(s): (validate).',
+    ],
+    [
+      'a malformed (submit) binding',
+      { ...CONTACT_FORM, attrs: { ...CONTACT_FORM.attrs, '(submit)': 'save()' } },
+      'attribute "(submit)" must be "<artifact>#<Symbol>.<method>", not "save()".',
+    ],
+    [
+      'a non-numeric validator',
+      {
+        ...CONTACT_FORM,
+        children: [
+          { id: 'seats', type: 'RangeControl', attrs: { '[label]': 'Seats', '[min]': 'x' } },
+        ],
+      },
+      'OpenUI node "documents/app.openui.json#contactForm/seats": attribute "[min]" must be a finite number, not "x".',
+    ],
+    [
+      'a control kind that contradicts its node type',
+      {
+        ...CONTACT_FORM,
+        children: [
+          { id: 'seats', type: 'TextInputs', attrs: { '[type]': 'number', '[label]': 'S' } },
+        ],
+      },
+      '[type]="number" requires a "RangeControl" node, not "TextInputs".',
+    ],
+    [
+      'an unsupported control type',
+      { ...CONTACT_FORM, children: [{ id: 'agree', type: 'ChoiceControls' }] },
+      'has type "ChoiceControls", which is not a supported form control.',
+    ],
+    [
+      'two submit actions',
+      {
+        ...CONTACT_FORM,
+        children: [
+          ...CONTACT_FORM.children,
+          { id: 'secondSubmit', type: 'ActionControls', attrs: { '[label]': 'Again' } },
+        ],
+      },
+      'declares 2 "ActionControls" children; a reactive form has exactly one submit action.',
+    ],
+    [
+      'a contract violation (missing label)',
+      { ...CONTACT_FORM, children: [{ id: 'notes', type: 'TextInputs' }] },
+      'reactive-form definition "documents/app.openui.json#contactForm": "fields[0].label" must be a non-empty string.',
+    ],
+  ])('TC-REACTIVE-FORM-OPENUI-05: rejects %s before creating output', (_case, form, message) => {
+    const tree = createDocumentTree(documentOf(form));
+
+    expect(() => generateFromDocument(tree)).toThrow(message);
+    expect(tree.exists(COMPONENT_PATH)).toBe(false);
+  });
+
+  it('TC-REACTIVE-FORM-OPENUI-06: requires exactly one of --definition and --document', () => {
+    expect(() =>
+      generate(createDocumentTree(), { definition: 'contact-form.json', document: DOCUMENT_PATH }),
+    ).toThrow('Pass either --definition or --document, not both.');
+    expect(() => generate(createApplicationTree(), { nodeId: 'contactForm' })).toThrow(
+      '--nodeId requires --document.',
+    );
+    expect(() => generate(createApplicationTree(), { definition: undefined })).toThrow(
+      'or --document with an OpenUI document.',
+    );
   });
 });

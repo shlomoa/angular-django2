@@ -1,8 +1,10 @@
 import { Tree } from '@angular-devkit/schematics';
 import type { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it } from 'vitest';
+import type { FormFieldSchema } from '../../../../projects/angular-django2/schematics/form-field/schema';
 
 import { formField } from '../../../../projects/angular-django2/schematics/form-field/index';
+import { createSchematicContext } from './schematics.helpers';
 
 function createApplicationTree(projects = { demo: { root: '', sourceRoot: 'src' } }): UnitTestTree {
   const tree = Tree.empty() as UnitTestTree;
@@ -143,5 +145,111 @@ describe('form-field schematic', () => {
 
     expect(() => formField({ name: 'email' })(first)).toThrow('already exists');
     expect(readContent(first, componentPath)).toBe('// maintained field');
+  });
+});
+
+describe('form-field schematic: OpenUI control nodes', () => {
+  const DOCUMENT_PATH = 'documents/controls.openui.json';
+  const HELPERS = '/src/app/shared/form-helpers';
+
+  const CONTROLS = [
+    {
+      id: 'contactForm',
+      type: 'Form',
+      children: [
+        {
+          id: 'contactEmail',
+          type: 'TextInputs',
+          attrs: {
+            '[name]': 'work_email',
+            '[type]': 'email',
+            '[label]': 'Work email',
+            '[appearance]': 'outline',
+            '[subscriptSizing]': 'dynamic',
+          },
+        },
+        { id: 'seats', type: 'RangeControl', attrs: { '[label]': 'Seats' } },
+        { id: 'accepted', type: 'ChoiceControls' },
+      ],
+    },
+  ];
+
+  function createDocumentTree(children: unknown[] = CONTROLS): UnitTestTree {
+    const tree = createApplicationTree();
+    tree.create(
+      `/${DOCUMENT_PATH}`,
+      JSON.stringify({ version: '0.2.0', id: 'root', type: 'html', children }),
+    );
+    return tree;
+  }
+
+  function compile(tree: Tree, options: Partial<FormFieldSchema>): UnitTestTree {
+    return formField({ document: DOCUMENT_PATH, ...options })(
+      tree,
+      createSchematicContext(),
+    ) as UnitTestTree;
+  }
+
+  function outputs(tree: Tree, name: string): string[] {
+    return ['ts', 'html', 'scss'].map((extension) =>
+      readContent(tree, `${HELPERS}/${name}-field/${name}-field.${extension}`),
+    );
+  }
+
+  it('TC-FORM-FIELD-OPENUI-01: compiles a control node to output identical to the legacy flags', () => {
+    const fromFlags = formField({
+      name: 'work-email',
+      controlType: 'email',
+      appearance: 'outline',
+      subscriptSizing: 'dynamic',
+    })(createApplicationTree()) as UnitTestTree;
+    // The name defaults to the dasherized [name] attribute, matching reactive-form composition.
+    const fromDocument = compile(createDocumentTree(), { nodeId: 'contactEmail' });
+
+    expect(outputs(fromDocument, 'work-email')).toEqual(outputs(fromFlags, 'work-email'));
+  });
+
+  it('TC-FORM-FIELD-OPENUI-02: compiles RangeControl as number, honours --name, and defaults to the first control', () => {
+    const range = compile(createDocumentTree(), { nodeId: 'seats', name: 'seat-count' });
+    expect(outputs(range, 'seat-count')).toEqual(
+      outputs(
+        formField({ name: 'seat-count', controlType: 'number' })(
+          createApplicationTree(),
+        ) as UnitTestTree,
+        'seat-count',
+      ),
+    );
+
+    expect(
+      compile(createDocumentTree(), {}).exists(`${HELPERS}/work-email-field/work-email-field.ts`),
+    ).toBe(true);
+  });
+
+  it('TC-FORM-FIELD-OPENUI-03: rejects conflicting flags, unsupported nodes, and invalid attributes', () => {
+    expect(() => compile(createDocumentTree(), { controlType: 'text' })).toThrow(
+      '--document cannot be combined with --controlType;',
+    );
+    expect(() => formField({ name: 'email', nodeId: 'contactEmail' })).toThrow(
+      '--nodeId requires --document.',
+    );
+    expect(() => compile(createDocumentTree(), { nodeId: 'accepted' })).toThrow(
+      'OpenUI node "accepted" has type "ChoiceControls" but this schematic expects "TextInputs" or "RangeControl".',
+    );
+    expect(() =>
+      compile(
+        createDocumentTree([
+          { id: 'title', type: 'TextInputs', attrs: { '[appearance]': 'outlined' } },
+        ]),
+        {},
+      ),
+    ).toThrow('Unsupported form-field appearance "outlined".');
+    expect(() =>
+      compile(
+        createDocumentTree([{ id: 'title', type: 'TextInputs', attrs: { color: 'red' } }]),
+        {},
+      ),
+    ).toThrow(
+      'OpenUI node "documents/controls.openui.json#title" has unsupported attribute(s): color.',
+    );
   });
 });

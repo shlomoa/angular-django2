@@ -58,4 +58,17 @@ describe('schematic option schemas', () => {
       'openapi_spec_file',
     ]);
   });
+
+  it('TC-SCHEMA-ALIASES-03: accepts --node-id, --nodeId, --element-id, and --elementId for OpenUI node selection', () => {
+    // The Angular CLI keys a multi-alias option by its last camelCase alias, so
+    // `nodeId` must come last or `--node-id` is rejected as `elementId`.
+    for (const schematic of ['form-field', 'field-component', 'reactive-form']) {
+      expect(readSchema(schematic).properties.nodeId.aliases).toEqual([
+        'element-id',
+        'elementId',
+        'node-id',
+        'nodeId',
+      ]);
+    }
+  });
 });

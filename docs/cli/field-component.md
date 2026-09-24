@@ -16,10 +16,15 @@ one application.
 
 ## Options
 
-- `--name` (required): non-empty kebab-case component name.
+- `--name`: non-empty kebab-case component name; required unless `--document`
+  is given, where it defaults to the node's dasherized `[name]` or id.
 - `--path`: destination within the selected application source tree.
 - `--project`: selected Angular application project.
 - `--kind`: one of `text` (default), `email`, `password`, or `textarea`.
+- `--document`: OpenUI document; compiles a `TextInputs` node using the
+  [shared control attributes](form-field.md#openui-control-nodes). Cannot be
+  combined with `--kind`.
+- `--node-id`: `TextInputs` element to compile; defaults to the first one.
 
 Every supported control kind uses a string value model. The generated component
 exposes `fieldId`, `label`, `required`, `disabled`, `hint`, `placeholder`,

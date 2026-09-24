@@ -3,7 +3,11 @@ import type { OpenUiDocument } from '@shlomoa/openui-spec';
 import { describe, expect, it } from 'vitest';
 
 import {
+  assertAstAttributes,
   createAstNodeResolver,
+  readAstBoolean,
+  readAstNode,
+  readAstNumber,
   createSyntheticAstDocument,
   createSyntheticAstNode,
   resolveAstNode,
@@ -176,6 +180,46 @@ describe('OpenUI AST compiler core', () => {
       expect(toAstNodeId('UserProfile')).toBe('userProfile');
       expect(toAstNodeId('user_profile')).toBe('userProfile');
       expect(toAstNodeId('profile')).toBe('profile');
+    });
+  });
+
+  describe('document and attribute helpers', () => {
+    it('TC-AST-13: resolves any of several accepted types and reads nodes from the tree', () => {
+      const tree = Tree.empty();
+      tree.create(`/${DOCUMENT_PATH}`, JSON.stringify(APP_DOCUMENT));
+
+      expect(readAstNode(tree, DOCUMENT_PATH, undefined, ['TextInputs', 'Form']).id).toBe(
+        'profileForm',
+      );
+      expect(() => readAstNode(tree, DOCUMENT_PATH, 'dashboard', ['TextInputs', 'Form'])).toThrow(
+        'OpenUI node "dashboard" has type "DashboardPage" but this schematic expects "TextInputs" or "Form".',
+      );
+      expect(() => readAstNode(tree, DOCUMENT_PATH, undefined, ['Table', 'Chart'])).toThrow(
+        'OpenUI document contains no "Table" or "Chart" element.',
+      );
+    });
+
+    it('TC-AST-14: reads typed attributes and rejects unsupported or malformed ones', () => {
+      const node = {
+        id: 'age',
+        type: 'RangeControl',
+        attrs: { '[min]': '0', '[max]': 'many', '[required]': 'true', '[hint]': null },
+      };
+
+      expect(readAstNumber(node, '[min]', 'doc#age')).toBe(0);
+      expect(readAstNumber(node, '[step]', 'doc#age')).toBeUndefined();
+      expect(() => readAstNumber(node, '[max]', 'doc#age')).toThrow(
+        'OpenUI node "doc#age": attribute "[max]" must be a finite number, not "many".',
+      );
+      expect(readAstBoolean(node, '[required]', 'doc#age')).toBe(true);
+      expect(readAstBoolean(node, '[hint]', 'doc#age')).toBeUndefined();
+      expect(() =>
+        readAstBoolean({ ...node, attrs: { '[required]': 'yes' } }, '[required]', 'doc#age'),
+      ).toThrow('attribute "[required]" must be "true" or "false", not "yes".');
+      expect(() => assertAstAttributes(node, ['[min]', '[max]'], 'doc#age')).toThrow(
+        'OpenUI node "doc#age" has unsupported attribute(s): [required], [hint]. ' +
+          'Supported attributes for "RangeControl": [min], [max].',
+      );
     });
   });
 });

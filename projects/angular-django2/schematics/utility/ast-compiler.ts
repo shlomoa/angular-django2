@@ -17,7 +17,7 @@ import { SchematicsException } from '@angular-devkit/schematics';
 import type { SchematicContext, Tree } from '@angular-devkit/schematics';
 import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
 
-import { validateOpenUiDocument } from './openui';
+import { readOpenUiDocument, validateOpenUiDocument } from './openui';
 import type { WorkspaceConfig, WorkspaceProject } from './workspace';
 
 /**
@@ -103,6 +103,9 @@ export function createAstNodeResolver(document: OpenUiDocument): AstNodeResolver
  * - only `expectedType` given: the first element of that type in pre-order.
  * - neither given: the document root.
  *
+ * `expectedType` may list several accepted types (for example the control
+ * types a leaf compiler supports).
+ *
  * Missing-node diagnostics reuse the canonical `openui-spec` wording
  * (`object not found: <id>`).
  *
@@ -111,9 +114,11 @@ export function createAstNodeResolver(document: OpenUiDocument): AstNodeResolver
 export function resolveAstNode(
   document: OpenUiDocument,
   nodeId?: string,
-  expectedType?: string,
+  expectedType?: string | readonly string[],
 ): OpenUiElement {
   const resolver = createAstNodeResolver(document);
+  const expectedTypes = typeof expectedType === 'string' ? [expectedType] : expectedType;
+  const expectedLabel = expectedTypes?.map((type) => `"${type}"`).join(' or ');
 
   if (nodeId !== undefined) {
     const node = resolver.findById(nodeId);
@@ -123,27 +128,117 @@ export function resolveAstNode(
           'Pass an existing element id with --nodeId.',
       );
     }
-    if (expectedType !== undefined && node.type !== expectedType) {
+    if (expectedTypes !== undefined && !expectedTypes.includes(node.type)) {
       throw new SchematicsException(
-        `OpenUI node "${nodeId}" has type "${node.type}" but this schematic expects "${expectedType}". ` +
-          `Pass the id of a "${expectedType}" element with --nodeId.`,
+        `OpenUI node "${nodeId}" has type "${node.type}" but this schematic expects ${expectedLabel}. ` +
+          `Pass the id of a ${expectedLabel} element with --nodeId.`,
       );
     }
     return node;
   }
 
-  if (expectedType !== undefined) {
-    const node = resolver.findByType(expectedType);
+  if (expectedTypes !== undefined) {
+    const node = [...resolver.walk()].find((candidate) => expectedTypes.includes(candidate.type));
     if (!node) {
       throw new SchematicsException(
-        `OpenUI document contains no "${expectedType}" element. ` +
-          `Add one or pass the id of a "${expectedType}" element with --nodeId.`,
+        `OpenUI document contains no ${expectedLabel} element. ` +
+          `Add one or pass the id of a ${expectedLabel} element with --nodeId.`,
       );
     }
     return node;
   }
 
   return document;
+}
+
+/**
+ * Read `documentPath` from the tree, validate it, and resolve the compiled node.
+ * This is the `--document` / `--nodeId` half of every schema resolver.
+ *
+ * @throws SchematicsException when the document is invalid or the node cannot be resolved.
+ */
+export function readAstNode(
+  tree: Tree,
+  documentPath: string,
+  nodeId?: string,
+  expectedType?: string | readonly string[],
+): OpenUiElement {
+  return resolveAstNode(readOpenUiDocument(tree, documentPath), nodeId, expectedType);
+}
+
+/** Diagnostic subject naming one element of one document: `<documentPath>#<nodeId>`. */
+export function astNodeSubject(documentPath: string, node: OpenUiElement): string {
+  return `${documentPath}#${node.id}`;
+}
+
+/**
+ * Reject attributes a compiler does not understand, so no document content is
+ * silently dropped.
+ *
+ * @throws SchematicsException naming the unsupported keys.
+ */
+export function assertAstAttributes(
+  node: OpenUiElement,
+  allowed: readonly string[],
+  subject: string,
+): void {
+  const unknown = Object.keys(node.attrs ?? {}).filter((key) => !allowed.includes(key));
+  if (unknown.length > 0) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}" has unsupported attribute(s): ${unknown.join(', ')}. ` +
+        `Supported attributes for "${node.type}": ${allowed.join(', ')}.`,
+    );
+  }
+}
+
+/** Read a string attribute; absent and `null` values read as `undefined`. */
+export function readAstString(node: OpenUiElement, key: string): string | undefined {
+  return node.attrs?.[key] ?? undefined;
+}
+
+/**
+ * Read a boolean attribute encoded as `"true"` or `"false"`.
+ *
+ * @throws SchematicsException for any other value.
+ */
+export function readAstBoolean(
+  node: OpenUiElement,
+  key: string,
+  subject: string,
+): boolean | undefined {
+  const value = readAstString(node, key);
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value !== 'true' && value !== 'false') {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": attribute "${key}" must be "true" or "false", not "${value}".`,
+    );
+  }
+  return value === 'true';
+}
+
+/**
+ * Read a finite number attribute encoded as a decimal string.
+ *
+ * @throws SchematicsException for any other value.
+ */
+export function readAstNumber(
+  node: OpenUiElement,
+  key: string,
+  subject: string,
+): number | undefined {
+  const value = readAstString(node, key);
+  if (value === undefined) {
+    return undefined;
+  }
+  const parsed = value.trim() === '' ? Number.NaN : Number(value);
+  if (!Number.isFinite(parsed)) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": attribute "${key}" must be a finite number, not "${value}".`,
+    );
+  }
+  return parsed;
 }
 
 /** Attribute values accepted from legacy CLI options before normalization. */

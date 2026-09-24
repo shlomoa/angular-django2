@@ -190,4 +190,46 @@ describe('field-component schematic', () => {
       ),
     ).toBe(false);
   });
+
+  it('TC-FIELD-OPENUI-01: compiles a TextInputs node exactly like the matching --kind', async () => {
+    const document = JSON.stringify({
+      version: '0.2.0',
+      id: 'root',
+      type: 'html',
+      children: [
+        { id: 'seats', type: 'RangeControl' },
+        { id: 'secret', type: 'TextInputs', attrs: { '[type]': 'password' } },
+      ],
+    });
+    const documentTree = await createApplicationTree();
+    documentTree.create('/documents/fields.openui.json', document);
+    const flagTree = await createApplicationTree();
+    const componentPath = '/projects/demo-app/src/app/forms/secret-field/secret-field.ts';
+
+    const fromDocument = fieldComponent({
+      document: 'documents/fields.openui.json',
+      path: 'src/app/forms',
+    })(documentTree, createSchematicContext()) as UnitTestTree;
+    const fromFlags = fieldComponent({
+      name: 'secret-field',
+      kind: 'password',
+      path: 'src/app/forms',
+    })(flagTree, createSchematicContext()) as UnitTestTree;
+
+    expect(fromDocument.readContent(componentPath)).toBe(fromFlags.readContent(componentPath));
+    expect(() =>
+      fieldComponent({ document: 'documents/fields.openui.json', nodeId: 'seats' })(
+        documentTree,
+        createSchematicContext(),
+      ),
+    ).toThrow(
+      'OpenUI node "seats" has type "RangeControl" but this schematic expects "TextInputs".',
+    );
+    expect(() =>
+      fieldComponent({
+        document: 'documents/fields.openui.json',
+        kind: 'text',
+      } as FieldComponentSchema),
+    ).toThrow('--document cannot be combined with --kind;');
+  });
 });
