@@ -244,9 +244,10 @@ sources over lower-priority ones.
   | [`workspace-setup`](cli/workspace-setup.md#openui-host-documents)                                                                    | `IndexHtml` (`[lang]`, `[dir]`, `[title]`) and `Favicon` (`[href]`)                                       |
   | [`data-service`](cli/data-service.md#openui-data-bindings)                                                                           | any element with `[data]="<apiPath>#<ApiService>"`                                                        |
 
-- `app-shell` (`ShellPage`), `material-setup` (standalone `Presentation`),
-  `openapi-setup`, `project-structure`, `service`, `class`, and `ng-add` stay
-  CLI-driven.
+- `app-shell`, `material-setup`, `openapi-setup`, `project-structure`,
+  `service`, `class`, and `ng-add` are CLI-driven by design: they have no UI
+  content for a document to describe. `material-setup` receives the
+  `Presentation` tokens through `material-app --document`.
 
 ## 4. Django Integration Requirements
 

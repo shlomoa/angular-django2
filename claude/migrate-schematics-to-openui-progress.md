@@ -126,7 +126,7 @@ commit, a confirmed push, and a browser demo with a screenshot.
 ## Phase 7 log
 
 - Docs: REQUIREMENTS OpenUI input contracts, mapping-doc AST coverage table
-  (honest coverage: app-shell and standalone material-setup stay CLI-only),
+  (app-shell and material-setup are CLI-driven by design),
   implementation-plan milestone, CLI index OpenUI section, `--document`
   examples for application and workspace-setup, tutorial form moved to an
   OpenUI document.
@@ -139,10 +139,14 @@ commit, a confirmed push, and a browser demo with a screenshot.
 
 - django-angular3: switch reactive-form calls to `--document` before
   `--definition` is removed.
-- Not converted by any plan step: `app-shell` (`ShellPage`) and standalone
-  `material-setup --document` (`Presentation`).
 
-Not follow-ups of this plan: the widget schematics (`table`, `dialog`,
-`stepper`, `tabs`, `accordion`) appear in this plan only as _(Planned)_ rows
-of the section 2 inventory; no phase step builds them. They are scheduled by
-`docs/openui-spec-implementation-plan.md` (its phases 1–2).
+Not follow-ups of this plan:
+
+- `app-shell` and `material-setup` need no `--document`: `app-shell` is a
+  pass-through to Angular's SSR app-shell generator with nothing a node could
+  describe, and `material-setup`'s options are exactly the `Presentation`
+  tokens, which `material-app --document` already reads and passes on.
+- The widget schematics (`table`, `dialog`,
+  `stepper`, `tabs`, `accordion`) appear in this plan only as _(Planned)_ rows
+  of the section 2 inventory; no phase step builds them. They are scheduled by
+  `docs/openui-spec-implementation-plan.md` (its phases 1–2).
