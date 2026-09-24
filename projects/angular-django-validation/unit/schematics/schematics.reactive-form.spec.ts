@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { Tree } from '@angular-devkit/schematics';
 import type { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it, vi } from 'vitest';
@@ -734,6 +735,33 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
       documentContext as never,
     );
     expect(documentContext.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('TC-REACTIVE-FORM-OPENUI-TUTORIAL: the tutorial Form document compiles like its former definition', () => {
+    const tutorial = readFileSync(join(__dirname, '../../../../docs/TUTORIAL.md'), 'utf8');
+    const section = tutorial.slice(tutorial.indexOf('`forms/contact.openui.json`'));
+    const start = section.indexOf('```json\n') + '```json\n'.length;
+    const document = section.slice(start, section.indexOf('\n```', start));
+    const formerDefinition = {
+      title: 'Create contact',
+      endpoint: '/api/contacts/',
+      submitLabel: 'Create contact',
+      fields: [
+        { name: 'email', label: 'Email', control: 'email', required: true, autocomplete: 'email' },
+        {
+          name: 'fullName',
+          label: 'Full name',
+          control: 'text',
+          validators: [{ type: 'required' }, { type: 'maxLength', value: 120 }],
+        },
+        { name: 'notes', label: 'Notes', control: 'textarea', hint: 'Optional context' },
+      ],
+    };
+
+    const fromTutorial = generateFromDocument(createDocumentTree(document), { nodeId: 'contact' });
+    expect(outputs(fromTutorial)).toEqual(
+      outputs(generate(createApplicationTree(formerDefinition))),
+    );
   });
 
   it('TC-REACTIVE-FORM-OPENUI-03: round-trips every legacy definition feature through the Form AST', () => {

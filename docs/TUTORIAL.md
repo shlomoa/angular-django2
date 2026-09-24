@@ -118,40 +118,54 @@ npx ng generate angular-django2:field-component email-field --project=ngdj-tutor
 npx ng generate angular-django2:form-field headcount --project=ngdj-tutorial --control-type=number --appearance=outline --subscript-sizing=dynamic
 ```
 
-To generate a complete form, create `forms/contact-form.json`:
+To generate a complete form, describe it as an OpenUI `Form` node in
+`forms/contact.openui.json`:
 
 ```json
 {
-  "$schema": "./node_modules/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition",
-  "title": "Create contact",
-  "endpoint": "/api/contacts/",
-  "submitLabel": "Create contact",
-  "fields": [
+  "version": "0.2.0",
+  "id": "root",
+  "type": "html",
+  "children": [
     {
-      "name": "email",
-      "label": "Email",
-      "control": "email",
-      "required": true,
-      "autocomplete": "email"
-    },
-    {
-      "name": "fullName",
-      "label": "Full name",
-      "control": "text",
-      "validators": [{ "type": "required" }, { "type": "maxLength", "value": 120 }]
-    },
-    { "name": "notes", "label": "Notes", "control": "textarea", "hint": "Optional context" }
+      "id": "contact",
+      "type": "Form",
+      "attrs": { "[title]": "Create contact", "[action]": "/api/contacts/" },
+      "children": [
+        {
+          "id": "email",
+          "type": "TextInputs",
+          "attrs": {
+            "[type]": "email",
+            "[label]": "Email",
+            "[required]": "true",
+            "[autocomplete]": "email"
+          }
+        },
+        {
+          "id": "fullName",
+          "type": "TextInputs",
+          "attrs": { "[label]": "Full name", "[required]": "true", "[maxLength]": "120" }
+        },
+        {
+          "id": "notes",
+          "type": "TextInputs",
+          "attrs": { "[type]": "textarea", "[label]": "Notes", "[hint]": "Optional context" }
+        },
+        { "id": "submit", "type": "ActionControls", "attrs": { "[label]": "Create contact" } }
+      ]
+    }
   ]
 }
 ```
 
-The `$schema` value is an installed-package path, so it resolves after
-`npm install angular-django2`. Readers of this documentation can inspect the
-[published reactive-form definition schema](https://github.com/shlomoa/angular-django2/blob/main/projects/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition)
-online.
+Each control's id is its payload key, `[type]` picks the native control
+(`text` by default), and validators are bracketed attributes with string
+values. See [OpenUI Form documents](cli/reactive-form.md#openui-form-documents)
+for the full attribute vocabulary.
 
 ```bash
-npx ng generate angular-django2:reactive-form contact --definition=forms/contact-form.json --project=ngdj-tutorial --path=src/app/features
+npx ng generate angular-django2:reactive-form contact --document=forms/contact.openui.json --node-id=contact --project=ngdj-tutorial --path=src/app/features
 npx ng build ngdj-tutorial
 ```
 

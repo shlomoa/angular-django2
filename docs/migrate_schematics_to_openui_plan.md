@@ -301,14 +301,21 @@ Each schematic is architected into two decoupled components:
 
 ### Phase 7: Verification, Test Matrix, and Documentation Alignment
 
-- [ ] **7.1. Verification Suite Execution**:
+- [x] **7.1. Verification Suite Execution**:
   - Verify formatting: `npm run format:check`
   - Verify linting: `npm run lint`
   - Verify full build: `npm run build`
   - Verify unit test suite: `npm run test:ci`
   - Verify packaging: `npm run pack:dry-run`
-- [ ] **7.2. Documentation Alignment**:
+- [x] **7.2. Documentation Alignment**:
   - Update [`docs/openui-spec-implementation-plan.md`](openui-spec-implementation-plan.md) to mark schematic AST conversion milestones as active/complete.
   - Update [`docs/ngdj-openui-spec-mapping.md`](ngdj-openui-spec-mapping.md) to record 100% active functional AST input compilation.
   - Update [`docs/REQUIREMENTS.md`](REQUIREMENTS.md) to document the OpenUI AST document input contracts.
   - Update CLI reference documentation in [`docs/cli/`](cli/index.md) (especially [`docs/cli/reactive-form.md`](cli/reactive-form.md)) with `--document` examples.
+
+- **Phase 7 implementation notes** (resolved low-ambiguity decisions):
+  - 7.1: `format:check`, `lint` (plus `lint:validation`), `build` (from a clean `dist`), `test:ci`, and `pack:dry-run` all pass; the strict MkDocs build (`mkdocs build --strict`, as in CI) passes too.
+  - The mapping doc records the actual AST-input coverage instead of "100%": every schematic converted by phases 2–4 compiles from OpenUI, while `app-shell` (`ShellPage`) and standalone `material-setup` (`Presentation`) stay CLI-driven because no plan step converts them (`material-app` reads `Presentation` and passes it on). Spec-first widgets (`Table`, `Dialog`, …) are listed as not yet available.
+  - `docs/REQUIREMENTS.md` gains an "OpenUI document input contracts" subsection that summarizes the shared rules and links each schematic's CLI page as the canonical attribute reference (no duplicated vocabulary).
+  - `docs/TUTORIAL.md` now generates its form from an OpenUI `Form` document (`--document`) instead of the deprecated `--definition`. A spec compiles the tutorial's JSON block and checks it produces output identical to the former definition; the documentation spec checks the tutorial no longer mentions `--definition`.
+  - `docs/openui-spec-implementation-plan.md` marks the AST ingestion milestone complete; its widget milestones are separate spec-first work.

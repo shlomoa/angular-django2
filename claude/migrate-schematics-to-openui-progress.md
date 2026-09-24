@@ -18,7 +18,7 @@ holds status, standing decisions, and environment notes.
 | 4     | `page`, `material-app`, `application`, `app-shell`, ... | Done   | #127        |
 | 5     | Validation-only master document compiler                | Done   | #127        |
 | 6     | Deprecation and legacy adapter                          | Done   | #127        |
-| 7     | Verification and documentation alignment                | Next   | #127        |
+| 7     | Verification and documentation alignment                | Done   | #127        |
 
 Branch: `shlomoa/migrate_schematics_to_openui_phase3` (PR #127, against `main`).
 
@@ -122,3 +122,24 @@ commit, a confirmed push, and a browser demo with a screenshot.
   identical output; no warning with `--document`).
 - Follow-up outside this repo: django-angular3 should switch its
   reactive-form calls to `--document`.
+
+## Phase 7 log
+
+- Docs: REQUIREMENTS OpenUI input contracts, mapping-doc AST coverage table
+  (honest coverage: app-shell and standalone material-setup stay CLI-only),
+  implementation-plan milestone, CLI index OpenUI section, `--document`
+  examples for application and workspace-setup, tutorial form moved to an
+  OpenUI document.
+- Tests: TC-REACTIVE-FORM-OPENUI-TUTORIAL (tutorial JSON compiles identically to
+  the former definition); documentation spec updated.
+- Checks: full suite plus `lint:validation` and strict MkDocs build (scratch
+  venv from `docs/requirements.txt`).
+
+## Open follow-ups
+
+- django-angular3: switch reactive-form calls to `--document` before
+  `--definition` is removed.
+- Not converted by any plan step: `app-shell` (`ShellPage`) and standalone
+  `material-setup --document` (`Presentation`).
+- Spec-first widget schematics (`Table`, `Dialog`, `Stepper`, `Tabs`,
+  `ExpandablePanels`) remain future work.

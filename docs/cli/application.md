@@ -19,3 +19,7 @@ instead when the responsive Material sidenav layout is also needed.
 With `--document`, `--name` defaults to the dasherized id of the OpenUI
 `Application` node (the first, or the one named by `--node-id`), and routing is
 enabled when that node has a `Routing` child; `--routing` is not allowed.
+
+```bash
+ng generate angular-django2:application --document=app.openui.json
+```

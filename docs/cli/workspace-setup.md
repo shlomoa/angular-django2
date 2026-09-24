@@ -51,6 +51,10 @@ With `--document`, the first `IndexHtml` and `Favicon` nodes of an OpenUI
 document describe the host files; `files.indexHtml` and `files.favicon` are not
 allowed alongside it.
 
+```bash
+ng generate angular-django2:workspace-setup --name=shop --project=shop --document=app.openui.json
+```
+
 - `IndexHtml` `[lang]` and `[dir]` (`ltr`, `rtl`, or `auto`) are set on the
   existing `<html>` element and `[title]` replaces the `<title>` text.
 - `Favicon` `[href]` names a workspace-relative icon file that replaces the
