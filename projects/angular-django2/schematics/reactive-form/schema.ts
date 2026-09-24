@@ -116,8 +116,17 @@ export interface ReactiveFormSchema {
   /** Kebab-case base name for the generated form component. */
   name: string;
 
-  /** Workspace-relative path of the JSON form definition file. */
-  definition: string;
+  /**
+   * Workspace-relative path of the legacy JSON form definition file.
+   * Mutually exclusive with `document`.
+   */
+  definition?: string;
+
+  /** Workspace-relative path of an OpenUI document containing the `Form` node to compile. */
+  document?: string;
+
+  /** Id of the `Form` node to compile; defaults to the first `Form` in the document. */
+  nodeId?: string;
 
   /** Destination directory, relative to the selected project root. */
   path?: string;

@@ -24,8 +24,12 @@ export type FormFieldPrimitiveBinding = (typeof FORM_FIELD_PRIMITIVE_BINDINGS)[n
 
 /** Options accepted by the form-field schematic. */
 export interface FormFieldSchema {
-  /** Kebab-case base name for the generated component. */
-  name: string;
+  /**
+   * Kebab-case base name for the generated component. Required unless
+   * `document` is given, in which case it defaults to the node's dasherized
+   * `[name]` attribute or id.
+   */
+  name?: string;
 
   /** Destination directory, relative to the selected project root. */
   path?: string;
@@ -41,4 +45,10 @@ export interface FormFieldSchema {
 
   /** Angular Material hint/error subscript sizing behavior. */
   subscriptSizing?: FormFieldSubscriptSizing;
+
+  /** Workspace-relative path to an OpenUI JSON document describing the control. */
+  document?: string;
+
+  /** Id of the `TextInputs` or `RangeControl` node to compile; defaults to the first one. */
+  nodeId?: string;
 }

@@ -2,6 +2,8 @@ import { strings } from '@angular-devkit/core';
 import type { Rule, Tree } from '@angular-devkit/schematics';
 import { SchematicsException } from '@angular-devkit/schematics';
 import * as path from 'node:path';
+import type { OpenUiElement } from '@shlomoa/openui-spec';
+import { createSyntheticAstNode, readAstString } from '../utility/ast-compiler';
 import { assertPackageDependencies } from '../utility/package-json';
 import { resolveApplicationTargetDirectory } from '../utility/project-relative-path';
 import {
@@ -19,6 +21,7 @@ import {
   type FormFieldPrimitiveBinding,
   type FormFieldSubscriptSizing,
 } from './schema';
+import { CONTROL_ATTRIBUTES, controlAstType, controlName, controlTypeFromAst } from './ast';
 import { formFieldComponentSource, formFieldTemplate } from './templates';
 
 const DEFAULT_PATH = 'src/app/shared/form-helpers';
@@ -73,10 +76,63 @@ export function formFieldPrimitiveDescriptor(
   };
 }
 
-/** @internal Shared implementation for Material native-control CVA schematics. */
+/** @internal Options that stay on the CLI when a control is compiled from an OpenUI node. */
+export interface FormFieldAstOptions {
+  /** Kebab-case base name; defaults to the dasherized node `[name]` or id. */
+  name?: string;
+  path?: string;
+  project?: string;
+}
+
+/**
+ * @internal Legacy CLI adapter: translate flat options into a synthetic OpenUI
+ * control node and compile it through the same pipeline as `--document`.
+ */
 export function generateFormField(options: CanonicalFormFieldOptions): Rule {
+  assertFieldName(options.name);
+  const node = createSyntheticAstNode({
+    id: options.name,
+    type: controlAstType(options.controlType ?? 'text'),
+    attrs: {
+      [CONTROL_ATTRIBUTES.type]: options.controlType,
+      [CONTROL_ATTRIBUTES.appearance]: options.appearance,
+      [CONTROL_ATTRIBUTES.subscriptSizing]: options.subscriptSizing,
+    },
+  });
+
+  return compileFormFieldFromAst(
+    node,
+    { name: options.name, path: options.path, project: options.project },
+    options.name,
+  );
+}
+
+/**
+ * @internal Pure AST leaf compiler: generate the standalone typed CVA Material
+ * form field described by an OpenUI control node (`TextInputs` or `RangeControl`).
+ *
+ * @param subject Diagnostic subject for the node (see `astNodeSubject`).
+ */
+export function compileFormFieldFromAst(
+  node: OpenUiElement,
+  options: FormFieldAstOptions,
+  subject: string,
+): Rule {
+  const controlType = controlTypeFromAst(node, subject) as FormFieldControlType;
+  const flatOptions: CanonicalFormFieldOptions = {
+    name: options.name ?? strings.dasherize(controlName(node)),
+    path: options.path,
+    project: options.project,
+    controlType,
+    appearance: readAstString(node, CONTROL_ATTRIBUTES.appearance) as FormFieldAppearance,
+    subscriptSizing: readAstString(
+      node,
+      CONTROL_ATTRIBUTES.subscriptSizing,
+    ) as FormFieldSubscriptSizing,
+  };
+
   return (tree: Tree) => {
-    const resolved = resolveOptions(tree, options);
+    const resolved = resolveOptions(tree, flatOptions);
     assertNoCollision(tree, resolved);
 
     tree.create(
@@ -94,10 +150,14 @@ export function generateFormField(options: CanonicalFormFieldOptions): Rule {
   };
 }
 
-function resolveOptions(tree: Tree, options: CanonicalFormFieldOptions): ResolvedFormFieldOptions {
-  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(options.name)) {
+function assertFieldName(name: string): void {
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name ?? '')) {
     throw new SchematicsException('The field name must be non-empty kebab-case.');
   }
+}
+
+function resolveOptions(tree: Tree, options: CanonicalFormFieldOptions): ResolvedFormFieldOptions {
+  assertFieldName(options.name);
 
   const workspace = readWorkspace(tree);
   const projectName = resolveProjectName(workspace.projects ?? {}, options.project);

@@ -8,7 +8,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Kebab-case name for the form-field component.",
+      "description": "Kebab-case name for the form-field component. Required unless --document is given; defaults to the node [name] attribute or id.",
       "$default": {
         "$source": "argv",
         "index": 0
@@ -27,23 +27,29 @@
     "controlType": {
       "type": "string",
       "enum": ["text", "email", "password", "number", "textarea"],
-      "default": "text",
-      "description": "Native control kind: text, email, password, number, or textarea.",
+      "description": "Native control kind: text, email, password, number, or textarea. Defaults to text. Not allowed with --document.",
       "aliases": ["control-type", "controlType"]
     },
     "appearance": {
       "type": "string",
       "enum": ["fill", "outline"],
-      "default": "fill",
-      "description": "Angular Material form-field appearance."
+      "description": "Angular Material form-field appearance. Defaults to fill. Not allowed with --document."
     },
     "subscriptSizing": {
       "type": "string",
       "enum": ["fixed", "dynamic"],
-      "default": "fixed",
-      "description": "Angular Material hint and error subscript sizing.",
+      "description": "Angular Material hint and error subscript sizing. Defaults to fixed. Not allowed with --document.",
       "aliases": ["subscript-sizing", "subscriptSizing"]
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a TextInputs or RangeControl node; [type], [appearance], and [subscriptSizing] come from the node."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID within the OpenUI document to compile. When omitted, targets the first element of a supported type. Requires --document.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
     }
-  },
-  "required": ["name"]
+  }
 }
