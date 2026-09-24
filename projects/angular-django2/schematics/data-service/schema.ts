@@ -1,8 +1,9 @@
 export interface DataServiceSchema {
   /**
-   * The name of the resource (e.g., 'users' for UsersDataService)
+   * The name of the resource (e.g., 'users' for UsersDataService). Required
+   * unless `document` is given; defaults to the dasherized bound node id.
    */
-  name: string;
+  name?: string;
 
   /**
    * The destination path for the data service
@@ -38,4 +39,13 @@ export interface DataServiceSchema {
    * @default false
    */
   skipTests?: boolean;
+
+  /**
+   * Workspace-relative path to an OpenUI document whose bound node carries
+   * `[data]="<apiPath>#<ApiService>"`.
+   */
+  document?: string;
+
+  /** Id of the bound node. Requires `document`; defaults to the first node with `[data]`. */
+  nodeId?: string;
 }

@@ -1,7 +1,11 @@
 import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
-import { chain, externalSchematic } from '@angular-devkit/schematics';
+import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import type { MaterialAppSchema } from './schema';
+import { applicationFromAst, presentationFromAst } from '../application/ast';
+import { escapeTemplateText } from '../component/ast';
+import { pageNavigationLinks, type PageNavigationLink } from '../page/ast';
+import { readOpenUiDocument } from '../utility/openui';
 import { ensureDependency, readPackageJson, writePackageJson } from '../utility/package-json';
 import type { WorkspaceConfig } from '../utility/workspace';
 import { ANGULAR_JSON_PATH, readWorkspace, requireWorkspaceProject } from '../utility/workspace';
@@ -13,7 +17,21 @@ import {
   MATERIAL_LAYOUT_TEMPLATE,
 } from '../utility/material-constants';
 
-type ResolvedMaterialAppSchema = Required<MaterialAppSchema>;
+type ResolvedMaterialAppSchema = Required<Omit<MaterialAppSchema, 'document' | 'nodeId'>> & {
+  /** Layout customizations compiled from an OpenUI document. */
+  layout?: MaterialLayoutOptions;
+};
+
+/** Toolbar title and extra sidenav links for the Material layout. */
+export interface MaterialLayoutOptions {
+  /** Toolbar title; defaults to the project name. */
+  title?: string;
+  /** Links added after the Home link, in order. */
+  navigation?: readonly PageNavigationLink[];
+}
+
+/** Options the OpenUI document describes; they cannot be combined with `--document`. */
+const NODE_DESCRIBED_OPTIONS = ['theme', 'typography', 'animations', 'routing'] as const;
 
 const DEFAULT_MATERIAL_APP_OPTIONS = {
   theme: 'indigo-pink',
@@ -28,16 +46,64 @@ const DEFAULT_MATERIAL_APP_OPTIONS = {
   prefix: 'app',
 } as const satisfies Omit<ResolvedMaterialAppSchema, 'name'>;
 
-function resolveMaterialAppOptions(options: MaterialAppSchema): ResolvedMaterialAppSchema {
+function resolveMaterialAppOptions(
+  tree: Tree,
+  options: MaterialAppSchema,
+): ResolvedMaterialAppSchema {
+  const { document: documentPath, nodeId, ...givenOptions } = options;
+  // Keys with undefined values must not override the defaults below.
+  const cliOptions = Object.fromEntries(
+    Object.entries(givenOptions).filter(([, value]) => value !== undefined),
+  ) as Omit<MaterialAppSchema, 'document' | 'nodeId'>;
+  if (documentPath === undefined) {
+    if (nodeId !== undefined) {
+      throw new SchematicsException('--nodeId requires --document.');
+    }
+    if (!cliOptions.name) {
+      throw new SchematicsException('Option "name" is required unless --document is given.');
+    }
+    return { ...DEFAULT_MATERIAL_APP_OPTIONS, ...cliOptions, name: cliOptions.name };
+  }
+
+  const conflicting = NODE_DESCRIBED_OPTIONS.filter((option) => options[option] !== undefined);
+  if (conflicting.length > 0) {
+    throw new SchematicsException(
+      `--document cannot be combined with ${conflicting.map((option) => `--${option}`).join(', ')}; ` +
+        'describe them with the OpenUI Application node (Routing and Presentation children) instead.',
+    );
+  }
+
+  const document = readOpenUiDocument(tree, documentPath);
+  const app = applicationFromAst(document, documentPath, nodeId);
+  const presentation = presentationFromAst(app.node, documentPath);
+  const navigation = pageNavigationLinks(document, documentPath);
+  if (navigation.length > 0 && !app.routing) {
+    throw new SchematicsException(
+      `OpenUI document "${documentPath}" declares DashboardPage navigation but its Application node ` +
+        'has no Routing child. Add a Routing child to enable routing.',
+    );
+  }
+
   return {
     ...DEFAULT_MATERIAL_APP_OPTIONS,
-    ...options,
+    ...cliOptions,
+    name: cliOptions.name ?? app.name,
+    routing: app.routing,
+    theme: (presentation.theme ??
+      DEFAULT_MATERIAL_APP_OPTIONS.theme) as ResolvedMaterialAppSchema['theme'],
+    typography: presentation.typography ?? DEFAULT_MATERIAL_APP_OPTIONS.typography,
+    animations: presentation.animations ?? DEFAULT_MATERIAL_APP_OPTIONS.animations,
+    layout: { title: app.title, navigation },
   };
 }
 
+/**
+ * Generate or configure an Angular Material application from CLI options or,
+ * with `--document`, from an OpenUI `Application` node.
+ */
 export function materialApp(options: MaterialAppSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const resolvedOptions = resolveMaterialAppOptions(options);
+    const resolvedOptions = resolveMaterialAppOptions(tree, options);
 
     if (!workspaceProjectExists(tree, resolvedOptions.name)) {
       context.logger.info(`Generating Angular application '${resolvedOptions.name}'.`);
@@ -121,7 +187,7 @@ function generateProjectStructure(options: ResolvedMaterialAppSchema): Rule {
 function finalizeMaterialLayoutRule(options: ResolvedMaterialAppSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
     updateIndexHtmlWithMaterialIcons(tree, context, options.name);
-    generateMaterialLayout(tree, context, options.name, options.style);
+    generateMaterialLayout(tree, context, options.name, options.style, options.layout);
     return tree;
   };
 }
@@ -217,6 +283,7 @@ export function generateMaterialLayout(
   context: SchematicContext,
   projectName: string,
   style: string,
+  layout: MaterialLayoutOptions = {},
 ): void {
   // Read angular.json to get the actual project root
   const workspace = readWorkspace(tree);
@@ -231,7 +298,7 @@ export function generateMaterialLayout(
   const htmlPaths = [`${appRoot}/app.html`, `${appRoot}/app.component.html`];
   const htmlPath = htmlPaths.find((p) => tree.exists(p));
   if (htmlPath) {
-    tree.overwrite(htmlPath, MATERIAL_LAYOUT_TEMPLATE);
+    tree.overwrite(htmlPath, materialLayoutTemplate(layout.navigation ?? []));
     context.logger.info(`Updated Material layout template ${htmlPath}.`);
   } else {
     context.logger.warn(`Could not find app template file for project "${projectName}".`);
@@ -262,7 +329,10 @@ export function generateMaterialLayout(
       : `app.component.${styleExtension}`;
     const className = tsPath.endsWith('app.ts') ? 'App' : 'AppComponent';
 
-    const componentContent = MATERIAL_LAYOUT_COMPONENT_TS.replace('REPLACE_APP_NAME', projectName)
+    const componentContent = MATERIAL_LAYOUT_COMPONENT_TS.replace(
+      'REPLACE_APP_NAME',
+      escapeSingleQuotedString(layout.title ?? projectName),
+    )
       .replace('TEMPLATE_FILE', templateFile)
       .replace('STYLE_FILE', styleFile)
       .replace('CLASS_NAME', className);
@@ -273,4 +343,31 @@ export function generateMaterialLayout(
       `Could not find app component TypeScript file for project "${projectName}".`,
     );
   }
+}
+
+/**
+ * The Material layout template with one sidenav link per navigation entry
+ * after the Home link.
+ *
+ * @internal exported for direct unit testing.
+ */
+export function materialLayoutTemplate(navigation: readonly PageNavigationLink[]): string {
+  const links = navigation.map((link) => {
+    const icon = link.icon ? `        <mat-icon matListItemIcon>${link.icon}</mat-icon>\n` : '';
+    return (
+      `      <a mat-list-item routerLink="/${link.route}" routerLinkActive="active">\n` +
+      icon +
+      `        <span matListItemTitle>${escapeTemplateText(link.label)}</span>\n` +
+      '      </a>\n'
+    );
+  });
+
+  return MATERIAL_LAYOUT_TEMPLATE.replace(
+    '    </mat-nav-list>',
+    `${links.join('')}    </mat-nav-list>`,
+  );
+}
+
+function escapeSingleQuotedString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }

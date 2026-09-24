@@ -15,8 +15,8 @@ holds status, standing decisions, and environment notes.
 | 1     | Shared AST compiler infrastructure                      | Done   | #126        |
 | 2     | `reactive-form`, `form-field`, `field-component`        | Done   | #126        |
 | 3     | `component`, `complex-component`, `embed-component`     | Done   | #127        |
-| 4     | `page`, `material-app`, `application`, `app-shell`, ... | Next   | #127        |
-| 5     | Master `compile` schematic                              | —      |             |
+| 4     | `page`, `material-app`, `application`, `app-shell`, ... | Done   | #127        |
+| 5     | Master `compile` schematic                              | Next   | #127        |
 | 6     | Deprecation and legacy adapter                          | —      |             |
 | 7     | Verification and documentation alignment                | —      |             |
 
@@ -32,6 +32,12 @@ Branch: `shlomoa/migrate_schematics_to_openui_phase3` (PR #127, against `main`).
   inserted into the parent in document order, reusing `embed-component` logic.
   A child chooses a named projection slot with `[slot]` (`header` | `content` |
   `actions`); otherwise it goes in `content`.
+
+- Phase 4 vocabulary (asked 2026-09-24): page nodes carry `[title]`, `[route]`,
+  `[icon]`, `[access]`, `[authGuard]`; theme tokens come from a `Presentation`
+  child of `Application` (`[theme]`, `[typography]`, `[animations]`);
+  `[data]="<apiPath>#<ApiService>"` drives `data-service`; `IndexHtml`
+  `[lang]`/`[dir]`/`[title]` and `Favicon` `[href]` drive `workspace-setup`.
 
 Low-ambiguity decisions taken during each phase are recorded in the plan doc's
 "Phase N implementation notes".
@@ -69,3 +75,14 @@ commit, a confirmed push, and a browser demo with a screenshot.
   document with `complex-component --document` (Card → header summary,
   Form → Email/Age controls, actions Nickname field, overlay details), built
   with strict templates and rendered in Chromium with no console errors.
+
+## Phase 4 log
+
+- New: `page/ast.ts`, `application/ast.ts`, `data-service/ast.ts`;
+  `--document` / `--nodeId` on `page`, `application`, `material-app`,
+  `data-service`; `--document` on `workspace-setup`.
+- `[data]` path semantics: `<apiPath>` is the generated `services` module
+  (like `--apiPath`), e.g. `src/app/api/services#UsersApiService`, not a
+  service file; a file path would break the derived `strict-http-response`
+  import.
+- Tests: `schematics.openui-app.spec.ts` (TC-APP-01…13).

@@ -1,8 +1,11 @@
 export type PageAccessMode = 'public' | 'protected';
 
 export interface PageSchema {
-  /** Kebab-case feature/page name used for generated artifacts. */
-  name: string;
+  /**
+   * Kebab-case feature/page name used for generated artifacts. Required unless
+   * `document` is given; defaults to the dasherized node id.
+   */
+  name?: string;
 
   /** Destination feature directory within the selected application source tree. */
   path: string;
@@ -24,4 +27,10 @@ export interface PageSchema {
 
   /** Optional Material icon name exposed as route navigation metadata. */
   navigationIcon?: string;
+
+  /** Workspace-relative path to an OpenUI document with a `DashboardPage` or `EmptyPage` node. */
+  document?: string;
+
+  /** Element id within `document` to compile. Requires `document`. */
+  nodeId?: string;
 }

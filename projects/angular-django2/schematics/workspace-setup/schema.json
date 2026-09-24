@@ -22,18 +22,45 @@
       "description": "Per-file hooks for the Angular application source files described at https://angular.dev/reference/configs/file-structure#application-source-files. Each entry accepts exactly one of: `content` (inline body), `path` (local filesystem path read at schematic time), or `template` (literal body whose `{{key}}` placeholders are replaced from `params`).",
       "additionalProperties": false,
       "properties": {
-        "favicon": { "$ref": "#/definitions/fileHook" },
-        "indexHtml": { "$ref": "#/definitions/fileHook" },
-        "mainTs": { "$ref": "#/definitions/fileHook" },
-        "stylesCss": { "$ref": "#/definitions/fileHook" },
-        "appConfigTs": { "$ref": "#/definitions/fileHook" },
-        "appComponentTs": { "$ref": "#/definitions/fileHook" },
-        "appComponentHtml": { "$ref": "#/definitions/fileHook" },
-        "appComponentCss": { "$ref": "#/definitions/fileHook" },
-        "appComponentSpecTs": { "$ref": "#/definitions/fileHook" },
-        "appModuleTs": { "$ref": "#/definitions/fileHook" },
-        "appRoutesTs": { "$ref": "#/definitions/fileHook" }
+        "favicon": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "indexHtml": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "mainTs": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "stylesCss": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "appConfigTs": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "appComponentTs": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "appComponentHtml": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "appComponentCss": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "appComponentSpecTs": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "appModuleTs": {
+          "$ref": "#/definitions/fileHook"
+        },
+        "appRoutesTs": {
+          "$ref": "#/definitions/fileHook"
+        }
       }
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). The first IndexHtml node's [lang], [dir], and [title] update index.html; the first Favicon node's [href] (a workspace-relative icon file) replaces the favicon. Cannot be combined with files.indexHtml or files.favicon."
     }
   },
   "required": ["name"],

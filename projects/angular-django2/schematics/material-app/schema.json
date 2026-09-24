@@ -7,7 +7,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "The application name.",
+      "description": "The application name. Required unless --document is given; defaults to the dasherized Application node id.",
       "$default": {
         "$source": "argv",
         "index": 0
@@ -15,24 +15,20 @@
     },
     "theme": {
       "type": "string",
-      "description": "Angular Material prebuilt theme name.",
-      "default": "indigo-pink",
+      "description": "Angular Material prebuilt theme name. Defaults to indigo-pink. Not allowed with --document.",
       "enum": ["indigo-pink", "deeppurple-amber", "pink-bluegrey", "purple-green", "custom"]
     },
     "typography": {
       "type": "boolean",
-      "description": "Include Material typography styles.",
-      "default": true
+      "description": "Include Material typography styles. Defaults to true. Not allowed with --document."
     },
     "animations": {
       "type": "boolean",
-      "description": "Enable Angular animations.",
-      "default": true
+      "description": "Enable Angular animations. Defaults to true. Not allowed with --document."
     },
     "routing": {
       "type": "boolean",
-      "description": "Enable routing.",
-      "default": true
+      "description": "Enable routing. Defaults to true. Not allowed with --document."
     },
     "standalone": {
       "type": "boolean",
@@ -63,7 +59,16 @@
       "type": "string",
       "description": "Component selector prefix.",
       "default": "app"
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles an Application node: name, toolbar [title], routing (Routing child), Presentation [theme]/[typography]/[animations], and sidenav links for every DashboardPage."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID of the Application node. When omitted, targets the first Application element. Requires --document.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
     }
-  },
-  "required": ["name"]
+  }
 }
