@@ -139,18 +139,24 @@ Each schematic is architected into two decoupled components:
 
 ### Phase 1: Shared AST Compiler Infrastructure & Types
 
-- [ ] **1.1. Define Compiler Core Interfaces**:
+- [x] **1.1. Define Compiler Core Interfaces**:
   - Create `projects/angular-django2/schematics/utility/ast-compiler.ts` defining:
     - `AstCompilationContext`: Workspace state, application project configuration, destination paths, and schematic context logger.
     - `AstNodeResolver`: Functions to traverse an `OpenUiDocument` and resolve elements by `id` or `type`.
     - `AstCompilationResult`: Generated file paths, exported symbol names, selectors, and embedding metadata.
-- [ ] **1.2. Implement AST Node Resolver and Query Engine**:
+- [x] **1.2. Implement AST Node Resolver and Query Engine**:
   - Implement `resolveAstNode(document: OpenUiDocument, nodeId?: string, expectedType?: string): OpenUiElement` with strict validation.
   - Reject missing nodes or type mismatches with actionable DevKit diagnostics matching canonical `openui-spec` errors.
-- [ ] **1.3. Establish Shared Synthetic AST Adapters**:
+- [x] **1.3. Establish Shared Synthetic AST Adapters**:
   - Build helper adapters that map legacy CLI arguments into in-memory `OpenUiElement` AST nodes so legacy invocations execute through the identical compilation pipeline.
-- [ ] **1.4. Add Unit Tests for Compiler Core**:
+- [x] **1.4. Add Unit Tests for Compiler Core**:
   - Create `projects/angular-django-validation/unit/schematics/ast-compiler.spec.ts` covering node resolution, traversal, type validation, missing node diagnostics, and synthetic adapter transformations.
+
+- **Phase 1 implementation notes** (resolved low-ambiguity decisions):
+  - `AstNodeResolver` is an interface returned by `createAstNodeResolver(document)` (`walk`, `findById`, `findByType`); traversal is depth-first pre-order including the root.
+  - `resolveAstNode` with only `expectedType` returns the first pre-order match; with neither argument it returns the document root. Missing-node errors embed the canonical `openui-spec` wording `object not found: <id>`.
+  - OpenUI 0.2.0 attributes are `attrs: Record<string, string | null>`, so synthetic adapters stringify numbers/booleans and drop `undefined`; ids are normalized with `strings.camelize` to satisfy the schema id pattern `^[a-z][A-Za-z0-9]*$`.
+  - Synthetic nodes are validated inside a synthetic document (`version: 0.2.0`, root type `html`) via the shared `validateOpenUiDocument()` in `utility/openui.ts`, which now owns the single mapping of `openui-spec` errors to DevKit diagnostics.
 
 ---
 
