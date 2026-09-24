@@ -12,7 +12,8 @@ ng generate angular-django2:complex-component dashboard-card \
   --features=mixins,nested,projection,cdk-overlay
 ```
 
-`--name`, `--path`, and `--features` are required. Names must be kebab-case and
+`--path` is required. `--name` and `--features` are required unless
+`--document` is given (see [OpenUI composite containers](#openui-composite-containers)). Names must be kebab-case and
 the path must remain inside the selected application's `sourceRoot`. When the
 workspace has more than one application source root, pass `--project`.
 
@@ -34,3 +35,26 @@ The component source documents its public inputs, outputs, projection slots, and
 Use `--mode=modify` to apply additional selected features to an existing complex
 component. Use `--mode=delete --confirm=true` to remove its generated directory
 and its registered theme mixin.
+
+## OpenUI composite containers
+
+With `--document`, the component is compiled from an OpenUI `SurfaceContainers`
+node instead of a feature list. `--features` is not allowed, only
+`--mode=create` is supported, and `--name` defaults to the dasherized node id.
+
+```bash
+ng generate angular-django2:complex-component --document=src/app/app.openui.json \
+  --node-id=profileCard --path=src/app/features
+```
+
+The node becomes a Material card whose header, content, and actions each keep a
+consumer projection slot and host the embedded document children:
+
+- `[title]` becomes `<mat-card-title>`.
+- Children are placed by `[slot]` (`header`, `content`, or `actions`; default
+  `content`) and compiled as described for [`component`](component.md#openui-surface-containers).
+  A `Form` child with `TextInputs` children produces Card → Form → Controls.
+- One optional `OverlayContainers` child adds the CDK connected overlay: its
+  `[label]` is the toggle button text (default `Toggle details`) and its
+  children are embedded inside the overlay card. Overlay children cannot set
+  `[slot]`.

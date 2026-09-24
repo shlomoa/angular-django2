@@ -30,12 +30,12 @@ describe('documentation validation', () => {
     expect(tutorial).toContain('[CLI reference](cli/index.md)');
     expect(tutorial).toContain('[`material-app`](cli/material-app.md)');
     expect(tutorial).toContain('[`reactive-form`](cli/reactive-form.md)');
+    expect(tutorial).toContain('--document=forms/contact.openui.json --node-id=contact');
     expect(tutorial).toContain(
-      'https://github.com/shlomoa/angular-django2/blob/main/projects/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition',
+      '[OpenUI Form documents](cli/reactive-form.md#openui-form-documents)',
     );
-    expect(tutorial).toContain(
-      '"$schema": "./node_modules/angular-django2/schematics/reactive-form/schema.json#/definitions/reactiveFormDefinition"',
-    );
+    expect(tutorial).not.toContain('--definition');
+    expect(tutorial).not.toContain('reactiveFormDefinition');
   });
 
   it('provides a canonical strict MkDocs build command', () => {

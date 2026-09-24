@@ -151,8 +151,10 @@ sources over lower-priority ones.
     reject collisions before writes, and use the same field identity,
     accessibility, and host/server validation-error behavior.
   - `reactive-form`: generate a typed standalone OnPush Angular Material
-    reactive form from a single JSON definition file supplied through
-    `--definition`. The definition contract is published in the schematic
+    reactive form from an OpenUI `Form` node (`--document`) or, deprecated,
+    from a single JSON definition file supplied through `--definition`, which
+    is translated into the same `Form` node and logs a deprecation warning
+    carrying that node. The definition contract is published in the schematic
     schema and is validated atomically before any file is written: exactly one
     definition per file, a `/`-prefixed Django endpoint, unique lower-camelCase
     or snake_case fields limited to `text`, `email`, `password`, `number`, and
@@ -213,6 +215,39 @@ sources over lower-priority ones.
     ng-openapi-gen `*ApiService` with search and CRUD helpers; options:
     `--api-service`, `--api-path` (default: `../api/services`), `--path`,
     `--flat`, `--skip-tests`
+
+### OpenUI document input contracts
+
+- Schematics that compile UI accept `--document=<path>` (a workspace-relative
+  OpenUI 0.2.0 JSON document) and, where a document can hold several
+  candidates, `--node-id=<id>`; without `--node-id` they compile the first
+  element of a supported type. The document is loaded and validated with
+  `@shlomoa/openui-spec` before any mutation.
+- Attributes use the OpenUI catalog style: `[input]` for inputs and `(event)`
+  for events; values are strings (booleans are `"true"` / `"false"`, numbers
+  are decimal strings). Unsupported attributes are rejected, never ignored.
+- Options that a node describes cannot be combined with `--document`; the
+  schematic reports the conflicting flags. Legacy CLI flags are translated into
+  synthetic OpenUI nodes and compiled by the same code path.
+- Accepted nodes, by schematic (the linked CLI pages are the canonical
+  attribute reference):
+
+  | Schematic                                                                                                                            | OpenUI input                                                                                              |
+  | :----------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+  | [`reactive-form`](cli/reactive-form.md#openui-form-documents)                                                                        | `Form` with `TextInputs` / `RangeControl` / `ActionControls` children                                     |
+  | [`form-field`](cli/form-field.md#openui-control-nodes), [`field-component`](cli/field-component.md)                                  | `TextInputs` or `RangeControl`                                                                            |
+  | [`component`](cli/component.md#openui-surface-containers)                                                                            | `SurfaceContainers`; children compiled and embedded by `[slot]`                                           |
+  | [`complex-component`](cli/complex-component.md#openui-composite-containers)                                                          | `SurfaceContainers` as a Material card; optional `OverlayContainers` child                                |
+  | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `[slot]` sections                                  |
+  | [`page`](cli/page.md#openui-page-nodes)                                                                                              | `DashboardPage` or `EmptyPage` with `[title]`, `[route]`, `[icon]`, `[access]`, `[authGuard]`             |
+  | [`application`](cli/application.md#openui-application-documents), [`material-app`](cli/material-app.md#openui-application-documents) | `Application` with `Routing`, `Presentation`; `material-app` adds sidenav links for `DashboardPage` nodes |
+  | [`workspace-setup`](cli/workspace-setup.md#openui-host-documents)                                                                    | `IndexHtml` (`[lang]`, `[dir]`, `[title]`) and `Favicon` (`[href]`)                                       |
+  | [`data-service`](cli/data-service.md#openui-data-bindings)                                                                           | any element with `[data]="<apiPath>#<ApiService>"`                                                        |
+
+- `app-shell`, `material-setup`, `openapi-setup`, `project-structure`,
+  `service`, `class`, and `ng-add` are CLI-driven by design: they have no UI
+  content for a document to describe. `material-setup` receives the
+  `Presentation` tokens through `material-app --document`.
 
 ## 4. Django Integration Requirements
 

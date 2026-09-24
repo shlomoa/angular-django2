@@ -17,7 +17,8 @@
     "definition": {
       "type": "string",
       "format": "path",
-      "description": "Workspace-relative path of the JSON form definition file described by definitions/reactiveFormDefinition. Mutually exclusive with --document."
+      "description": "Workspace-relative path of the JSON form definition file described by definitions/reactiveFormDefinition. Mutually exclusive with --document.",
+      "x-deprecated": "compile an OpenUI Form document with --document instead; the reactive-form warning prints the equivalent Form node."
     },
     "document": {
       "type": "string",
@@ -51,7 +52,7 @@
   "definitions": {
     "reactiveFormDefinition": {
       "title": "angular-django2 reactive-form definition contract",
-      "description": "A single, isolated, create-only form definition. It carries no resource-operation semantics: it never describes list, retrieve, update, or delete operations. Use data-service or openapi-setup for resource operations.",
+      "description": "A single, isolated, create-only form definition. It carries no resource-operation semantics: it never describes list, retrieve, update, or delete operations. Use data-service or openapi-setup for resource operations. Deprecated: use an OpenUI 0.2.0 Form document with --document instead.",
       "type": "object",
       "additionalProperties": false,
       "properties": {

@@ -60,3 +60,29 @@ through their declared interfaces when building out the generated feature.
 
 Run `ng add @angular/material` and generate the Angular application with
 routing enabled before running this schematic.
+
+## OpenUI page nodes
+
+With `--document`, the schematic compiles one OpenUI page node: the first
+`DashboardPage` or `EmptyPage`, or the one named by `--node-id`. The node
+carries the routing and navigation metadata, so `--route-path`, `--access`,
+`--auth-guard`, `--navigation-label`, and `--navigation-icon` are not allowed.
+
+```bash
+ng generate angular-django2:page --document=src/app/app.openui.json \
+  --node-id=profile --path=src/app/features/profile
+```
+
+| Page attribute | Page option          | Default              |
+| :------------- | :------------------- | :------------------- |
+| id             | `--name`             | dasherized id        |
+| `[title]`      | `--navigation-label` | classified page name |
+| `[route]`      | `--route-path`       | page name            |
+| `[icon]`       | `--navigation-icon`  | none                 |
+| `[access]`     | `--access`           | `public`             |
+| `[authGuard]`  | `--auth-guard`       | `authGuard`          |
+
+`--name` still overrides the id-derived name. A `DashboardPage`'s children are
+compiled and embedded into the page card's header, content, and actions slots,
+as for [`component`](component.md#openui-surface-containers). An `EmptyPage`
+has no content and cannot have children.

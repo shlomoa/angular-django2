@@ -37,6 +37,11 @@
     "outputs": {
       "type": "string",
       "description": "Comma-separated list of output names to bind to on<Output>() handlers (package mode only)."
+    },
+    "slot": {
+      "type": "string",
+      "enum": ["header", "content", "actions"],
+      "description": "Named slot of the parent template to embed into: header, content, or actions. content is the default children section; header and actions require the section markers that parents compiled from OpenUI containers carry."
     }
   }
 }

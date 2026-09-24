@@ -13,6 +13,8 @@ import type { WorkspaceConfig } from '../utility/workspace';
 import { ANGULAR_JSON_PATH, requireWorkspaceProject, writeWorkspace } from '../utility/workspace';
 import type { AppSourceFileKey, FileHook } from './file-hooks';
 import { applyFileHooks, writeOrOverwrite } from './file-hooks';
+import { faviconHrefFromAst, indexHtmlFromAst, type IndexHtmlAstOptions } from '../application/ast';
+import { readOpenUiDocument } from '../utility/openui';
 
 export type { AppSourceFileKey, FileHook } from './file-hooks';
 
@@ -20,6 +22,20 @@ export interface WorkspaceSetupSchema {
   name: string;
   project?: string;
   files?: Partial<Record<AppSourceFileKey, FileHook>>;
+  /**
+   * Workspace-relative path to an OpenUI document whose `IndexHtml` and
+   * `Favicon` nodes describe the host document and icon.
+   */
+  document?: string;
+}
+
+/** File hooks an OpenUI document describes; they cannot be combined with `--document`. */
+const DOCUMENT_DESCRIBED_FILES: readonly AppSourceFileKey[] = ['indexHtml', 'favicon'];
+
+/** Host file edits compiled from an OpenUI document, resolved before any mutation. */
+interface HostFileEdits {
+  indexHtml?: { path: string; content: string };
+  favicon?: { path: string; content: Buffer };
 }
 
 const README_TEMPLATE_PATH = join(__dirname, '../../README.md');
@@ -270,6 +286,8 @@ export function workspaceSetup(options: WorkspaceSetupSchema): Rule {
     if (!name) {
       throw new SchematicsException('Option "name" is required.');
     }
+    const hostFileEdits =
+      options.document === undefined ? undefined : resolveHostFileEdits(tree, options);
 
     writeOrOverwrite(
       tree,
@@ -292,7 +310,129 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       const sourceRoot = resolveSourceRoot(tree, options.project);
       applyFileHooks(tree, sourceRoot, options.files);
     }
+    if (hostFileEdits?.indexHtml) {
+      tree.overwrite(hostFileEdits.indexHtml.path, hostFileEdits.indexHtml.content);
+    }
+    if (hostFileEdits?.favicon) {
+      writeOrOverwrite(tree, hostFileEdits.favicon.path, hostFileEdits.favicon.content);
+    }
 
     return tree;
   };
+}
+
+/**
+ * Compile the `IndexHtml` and `Favicon` nodes of `--document` into host file
+ * edits: `[lang]`, `[dir]`, and `[title]` update the existing index.html, and
+ * the `[href]` icon file replaces the application favicon (`public/favicon.ico`
+ * when present, else `<sourceRoot>/favicon.ico` as for the `favicon` file hook).
+ *
+ * @throws SchematicsException for conflicting file hooks, invalid nodes, or missing files.
+ */
+function resolveHostFileEdits(tree: Tree, options: WorkspaceSetupSchema): HostFileEdits {
+  const documentPath = options.document!;
+  const conflicting = DOCUMENT_DESCRIBED_FILES.filter((key) => options.files?.[key] !== undefined);
+  if (conflicting.length > 0) {
+    throw new SchematicsException(
+      `--document cannot be combined with files.${conflicting.join(', files.')}; ` +
+        'describe them with the OpenUI IndexHtml and Favicon nodes instead.',
+    );
+  }
+
+  const document = readOpenUiDocument(tree, documentPath);
+  const sourceRoot = resolveSourceRoot(tree, options.project);
+  const edits: HostFileEdits = {};
+
+  const indexHtml = indexHtmlFromAst(document, documentPath);
+  if (indexHtml) {
+    const indexPath = `${sourceRoot}/index.html`;
+    const content = tree.read(indexPath)?.toString();
+    if (content === undefined) {
+      throw new SchematicsException(
+        `OpenUI document "${documentPath}" describes index.html, but ${indexPath} does not exist.`,
+      );
+    }
+    edits.indexHtml = { path: indexPath, content: updateIndexHtml(content, indexHtml, indexPath) };
+  }
+
+  const faviconHref = faviconHrefFromAst(document, documentPath);
+  if (faviconHref !== undefined) {
+    const iconPath = `/${faviconHref.replace(/\\/g, '/').replace(/^\.?\/+/, '')}`;
+    const icon = faviconHref.split(/[\\/]+/).includes('..') ? null : tree.read(iconPath);
+    if (!icon) {
+      throw new SchematicsException(
+        `The favicon file "${faviconHref}" from OpenUI document "${documentPath}" was not found in the workspace.`,
+      );
+    }
+    const publicFavicon = `${resolveProjectRoot(tree, options.project)}/public/favicon.ico`;
+    edits.favicon = {
+      path: tree.exists(publicFavicon) ? publicFavicon : `${sourceRoot}/favicon.ico`,
+      content: icon,
+    };
+  }
+
+  return edits;
+}
+
+/**
+ * Set `lang` and `dir` on the `<html>` element and the `<title>` text.
+ *
+ * @internal exported for direct unit testing.
+ */
+export function updateIndexHtml(
+  content: string,
+  options: IndexHtmlAstOptions,
+  indexPath = 'index.html',
+): string {
+  let result = content;
+  for (const attribute of ['lang', 'dir'] as const) {
+    const value = options[attribute];
+    if (value === undefined) {
+      continue;
+    }
+    const htmlTag = /<html\b[^>]*>/i.exec(result);
+    if (!htmlTag) {
+      throw new SchematicsException(`${indexPath} has no <html> element.`);
+    }
+    const existing = new RegExp(`\\s${attribute}\\s*=\\s*("[^"]*"|'[^']*'|[^\\s>]+)`, 'i');
+    const assignment = ` ${attribute}="${escapeHtml(value)}"`;
+    const updatedTag = existing.test(htmlTag[0])
+      ? htmlTag[0].replace(existing, assignment)
+      : htmlTag[0].replace(/\s*\/?>$/, (end) => `${assignment}${end}`);
+    result = result.replace(htmlTag[0], updatedTag);
+  }
+
+  if (options.title !== undefined) {
+    const title = `<title>${escapeHtml(options.title)}</title>`;
+    if (/<title>[\s\S]*?<\/title>/i.test(result)) {
+      result = result.replace(/<title>[\s\S]*?<\/title>/i, title);
+    } else if (/^([ \t]*)<\/head>/im.test(result)) {
+      result = result.replace(/^([ \t]*)<\/head>/im, (match, indent: string) => {
+        return `${indent}  ${title}\n${match}`;
+      });
+    } else {
+      throw new SchematicsException(`${indexPath} has no <title> or </head> to set the title.`);
+    }
+  }
+
+  return result;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function resolveProjectRoot(tree: Tree, project: string | undefined): string {
+  const angularJsonBuffer = tree.read(ANGULAR_JSON_PATH);
+  if (!project || !angularJsonBuffer) {
+    return '';
+  }
+
+  const workspace = JSON.parse(angularJsonBuffer.toString()) as WorkspaceConfig;
+  const root = requireWorkspaceProject(workspace, project).root ?? '';
+  return root ? `/${root.replace(/^\/+|\/+$/g, '')}` : '';
 }

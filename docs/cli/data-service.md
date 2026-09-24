@@ -27,3 +27,23 @@ Options:
 | `--api-path`    | `../api/services`            | Import path to the generated API services.                                 |
 | `--flat`        | `false`                      | Create the service directly in `path` instead of a subdirectory.           |
 | `--skip-tests`  | `false`                      | Do not create a spec file.                                                 |
+
+## OpenUI data bindings
+
+With `--document`, the service is generated for a node bound with
+`[data]="<apiPath>#<ApiService>"` (the first such node, or the one named by
+`--node-id`); `--api-service` and `--api-path` are not allowed.
+
+```json
+{
+  "id": "orderRows",
+  "type": "Table",
+  "attrs": { "[data]": "src/app/api/services#OrdersApiService" }
+}
+```
+
+`<apiPath>` is the application path of the generated `services` module, turned
+into an import relative to the generated service; `<ApiService>` is the service
+class. `--name` defaults to the dasherized node id, and paths resolve inside the
+selected project. `(paginate)`, `(sort)`, and `(filter)` are left to the widget
+compilers.

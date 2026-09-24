@@ -7,7 +7,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "The component name.",
+      "description": "The component name. Required unless --document is given; defaults to the dasherized node id.",
       "$default": {
         "$source": "argv",
         "index": 0
@@ -30,7 +30,16 @@
       "type": "string",
       "default": "OnPush",
       "aliases": ["change-detection", "changeDetection"]
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a SurfaceContainers node into the component and compiles and embeds its children."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID within the OpenUI document to compile. When omitted, targets the first SurfaceContainers element. Requires --document.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
     }
-  },
-  "required": ["name"]
+  }
 }

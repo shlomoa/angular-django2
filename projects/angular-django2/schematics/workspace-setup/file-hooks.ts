@@ -57,7 +57,7 @@ const APP_SOURCE_FILE_PATHS: Record<AppSourceFileKey, string> = {
   appRoutesTs: 'app/app.routes.ts',
 };
 
-export function writeOrOverwrite(tree: Tree, filePath: string, content: string): void {
+export function writeOrOverwrite(tree: Tree, filePath: string, content: string | Buffer): void {
   if (tree.exists(filePath)) {
     tree.overwrite(filePath, content);
     return;

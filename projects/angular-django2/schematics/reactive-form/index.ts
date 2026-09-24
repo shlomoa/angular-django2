@@ -18,6 +18,7 @@ import { resolveApplicationTargetDirectory } from '../utility/project-relative-p
 import {
   readWorkspace,
   requireWorkspaceProject,
+  resolveApplicationProjectName,
   type WorkspaceProject,
 } from '../utility/workspace';
 import { FORM_AST_TYPE, reactiveFormDefinitionFromAst, reactiveFormDefinitionToAst } from './ast';
@@ -79,7 +80,7 @@ export function reactiveForm(options: ReactiveFormSchema): Rule {
     }
 
     const workspace = readWorkspace(tree);
-    const projectName = resolveProjectName(workspace.projects ?? {}, options.project);
+    const projectName = resolveApplicationProjectName(workspace, options.project);
     const project = requireWorkspaceProject(workspace, projectName);
     const destinationPath = resolveApplicationTargetDirectory(project, options.path, DEFAULT_PATH);
     const primitivesDirectory = resolveApplicationTargetDirectory(
@@ -90,10 +91,62 @@ export function reactiveForm(options: ReactiveFormSchema): Rule {
     assertPackageDependencies(tree, 'reactive-form', REQUIRED_DEPENDENCIES);
 
     const { node, subject } = resolveFormNode(tree, options);
+    if (options.document === undefined) {
+      context.logger.warn(definitionDeprecationWarning(subject, node));
+    }
     compileFormFromAst(
       node,
       { tree, context, workspace, projectName, project, destinationPath },
       { name: options.name, primitivesDirectory, subject },
+    );
+
+    return tree;
+  };
+}
+
+/** Options for a `Form` node nested in a composed OpenUI container. */
+export interface NestedFormCompilationOptions {
+  /** Kebab-case base name for the generated form component. */
+  readonly name: string;
+  /** Target Angular project name. */
+  readonly project: string;
+  /** Workspace-relative directory that receives the form component directory. */
+  readonly destinationPath: string;
+  /** Diagnostic subject for the node (`<document>#<nodeId>`). */
+  readonly subject: string;
+}
+
+/**
+ * Rule form of `compileFormFromAst` for a `Form` node nested in a composed
+ * OpenUI container (plan step 3.3). Uses the default primitives directory.
+ */
+export function compileNestedFormFromAst(
+  form: OpenUiElement,
+  options: NestedFormCompilationOptions,
+): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    const workspace = readWorkspace(tree);
+    const project = requireWorkspaceProject(workspace, options.project);
+    assertPackageDependencies(tree, 'reactive-form', REQUIRED_DEPENDENCIES);
+    compileFormFromAst(
+      form,
+      {
+        tree,
+        context,
+        workspace,
+        projectName: options.project,
+        project,
+        destinationPath: options.destinationPath,
+      },
+      {
+        name: options.name,
+        primitivesDirectory: resolveApplicationTargetDirectory(
+          project,
+          undefined,
+          DEFAULT_PRIMITIVES_PATH,
+        ),
+        subject: options.subject,
+      },
     );
 
     return tree;
@@ -167,6 +220,22 @@ export function compileFormFromAst(
 }
 
 /**
+ * Non-breaking deprecation warning for `--definition` (plan step 6.1). It
+ * carries the equivalent OpenUI `Form` node, so converting a definition needs
+ * no separate tool.
+ *
+ * @internal exported for direct unit testing.
+ */
+export function definitionDeprecationWarning(definitionPath: string, form: OpenUiElement): string {
+  return (
+    `--definition (reactiveFormDefinition) is deprecated; compile an OpenUI Form document with ` +
+    `--document instead. To convert "${definitionPath}", add this Form node to the children of an ` +
+    'OpenUI 0.2.0 document (see docs/cli/reactive-form.md#openui-form-documents) and pass ' +
+    `--document=<document> --nodeId=${form.id}:\n${JSON.stringify(form, null, 2)}`
+  );
+}
+
+/**
  * Schema resolver / CLI adapter: resolve the `Form` node from `--document`, or
  * translate a legacy `--definition` file into a synthetic `Form` node.
  */
@@ -223,26 +292,6 @@ function assertSupportedOptions(options: ReactiveFormSchema): void {
   if (unknown.length > 0) {
     throw new SchematicsException(`Unsupported reactive-form option(s): ${unknown.join(', ')}.`);
   }
-}
-
-function resolveProjectName(
-  projects: Record<string, WorkspaceProject>,
-  requestedProject: string | undefined,
-): string {
-  if (requestedProject) {
-    return requestedProject;
-  }
-
-  const applicationProjects = Object.entries(projects)
-    .filter(([, project]) => !!project.sourceRoot)
-    .map(([name]) => name);
-  if (applicationProjects.length !== 1) {
-    throw new SchematicsException(
-      'Specify --project when the workspace does not have exactly one application sourceRoot.',
-    );
-  }
-
-  return applicationProjects[0];
 }
 
 function resolveDefinitionPath(definition: string | undefined): string {

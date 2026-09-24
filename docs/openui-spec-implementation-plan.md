@@ -152,7 +152,7 @@ Following the resolution of the OpenUI specification defect (where `Controls/Tab
 
 ### Phase 1: High-Priority Data Presentation & Dialog Scopes
 
-- [ ] Ingest/consume canonical OpenUI TypeScript AST types from `openui-spec`.
+- [x] Ingest/consume canonical OpenUI TypeScript AST types from `openui-spec` (schematic AST conversion complete for the existing schematics; see [`migrate_schematics_to_openui_plan.md`](migrate_schematics_to_openui_plan.md)).
 - [ ] Implement `ng generate angular-django2:table` schematic conforming to `Widgets/table.scope.md`.
 - [ ] Implement `ng generate angular-django2:dialog` schematic conforming to `Widgets/dialog.scope.md`.
 - [ ] Implement `ng generate angular-django2:stepper` schematic conforming to `Widgets/stepper.scope.md`.

@@ -1,9 +1,19 @@
 import { strings } from '@angular-devkit/core';
-import type { Rule, Tree } from '@angular-devkit/schematics';
+import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { SchematicsException } from '@angular-devkit/schematics';
 import * as path from 'node:path';
 import * as ts from 'typescript';
 import type { PageAccessMode, PageSchema } from './schema';
+import {
+  NAVIGATION_ICON_PATTERN,
+  PAGE_AST_TYPES,
+  pageOptionsFromAst,
+  ROUTE_PATH_PATTERN,
+} from './ast';
+import { compileAstChild } from '../component/ast';
+import { composeAstChildren } from '../embed-component/compose';
+import { templateSectionMarkers } from '../embed-component/index';
+import { astNodeSubject, readAstNode } from '../utility/ast-compiler';
 import { resolveApplicationTargetDirectory } from '../utility/project-relative-path';
 import {
   readWorkspace,
@@ -13,8 +23,18 @@ import {
 
 const ACCESS_MODES: readonly PageAccessMode[] = ['public', 'protected'];
 
+/** Options the OpenUI page node describes; they cannot be combined with `--document`. */
+const NODE_DESCRIBED_OPTIONS = [
+  'routePath',
+  'access',
+  'authGuard',
+  'navigationLabel',
+  'navigationIcon',
+] as const;
+
 interface ResolvedPageOptions {
   name: string;
+  project: string;
   className: string;
   routePath: string;
   access: PageAccessMode;
@@ -28,6 +48,8 @@ interface ResolvedPageOptions {
   appRoutesPath: string;
   appConfigPath: string;
   routeModuleImport: string;
+  /** Template with header, children, and actions sections for composed OpenUI children. */
+  composable: boolean;
 }
 
 interface GuardImport {
@@ -43,23 +65,62 @@ interface GuardImport {
  * route configuration remains in the generated, feature-owned route module.
  */
 export function page(options: PageSchema): Rule {
-  return (tree: Tree) => {
-    const resolved = resolveOptions(tree, options);
-    assertMaterialPrerequisites(tree);
-    const appRoutesSource = readRoutingPrerequisites(tree, resolved);
-    const guard =
-      resolved.access === 'protected' ? findConfiguredGuard(appRoutesSource, resolved) : undefined;
+  if (options.document === undefined) {
+    if (options.nodeId !== undefined) {
+      throw new SchematicsException('--nodeId requires --document.');
+    }
+    return (tree: Tree) => {
+      writePage(tree, resolveOptions(tree, options, false));
+      return tree;
+    };
+  }
 
-    assertRoutePathAvailable(tree, resolved);
-    assertOwnedFilesAreSafe(tree, resolved, guard);
-    updateAppRouteRegistration(tree, resolved);
-    createOwnedFiles(tree, resolved, guard);
+  const conflicting = NODE_DESCRIBED_OPTIONS.filter((option) => options[option] !== undefined);
+  if (conflicting.length > 0) {
+    throw new SchematicsException(
+      `--document cannot be combined with ${conflicting.map((option) => `--${option}`).join(', ')}; ` +
+        'set the matching attributes on the OpenUI page node instead.',
+    );
+  }
 
-    return tree;
+  const documentPath = options.document;
+  return (tree: Tree, context: SchematicContext) => {
+    const node = readAstNode(tree, documentPath, options.nodeId, PAGE_AST_TYPES);
+    const described = pageOptionsFromAst(node, astNodeSubject(documentPath, node), options.name);
+    const resolved = resolveOptions(
+      tree,
+      { ...described, path: options.path, project: options.project },
+      true,
+    );
+    const target = {
+      directory: path.posix.dirname(resolved.componentPath).slice(1),
+      project: resolved.project,
+      documentPath,
+    };
+    const children = (node.children ?? []).map((child) => compileAstChild(child, target));
+
+    writePage(tree, resolved);
+    return composeAstChildren(resolved.componentPath.slice(1), children)(tree, context);
   };
 }
 
-function resolveOptions(tree: Tree, options: PageSchema): ResolvedPageOptions {
+/**
+ * Validate prerequisites, register the route, and write the owned page files.
+ * All validation runs before the first mutation.
+ */
+function writePage(tree: Tree, resolved: ResolvedPageOptions): void {
+  assertMaterialPrerequisites(tree);
+  const appRoutesSource = readRoutingPrerequisites(tree, resolved);
+  const guard =
+    resolved.access === 'protected' ? findConfiguredGuard(appRoutesSource, resolved) : undefined;
+
+  assertRoutePathAvailable(tree, resolved);
+  assertOwnedFilesAreSafe(tree, resolved, guard);
+  updateAppRouteRegistration(tree, resolved);
+  createOwnedFiles(tree, resolved, guard);
+}
+
+function resolveOptions(tree: Tree, options: PageSchema, composable: boolean): ResolvedPageOptions {
   if (!options.name || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(options.name)) {
     throw new SchematicsException('The page name must be non-empty kebab-case.');
   }
@@ -72,7 +133,7 @@ function resolveOptions(tree: Tree, options: PageSchema): ResolvedPageOptions {
   }
 
   const routePath = options.routePath ?? options.name;
-  if (!/^[a-z0-9]+(?:[-/][a-z0-9]+)*$/.test(routePath)) {
+  if (!ROUTE_PATH_PATTERN.test(routePath)) {
     throw new SchematicsException(
       'The route path must contain lowercase URL segments separated by hyphens or slashes.',
     );
@@ -85,7 +146,7 @@ function resolveOptions(tree: Tree, options: PageSchema): ResolvedPageOptions {
   if (!options.navigationLabel?.trim() && options.navigationLabel !== undefined) {
     throw new SchematicsException('The navigation label must not be empty.');
   }
-  if (options.navigationIcon && !/^[a-z0-9_]+$/.test(options.navigationIcon)) {
+  if (options.navigationIcon && !NAVIGATION_ICON_PATTERN.test(options.navigationIcon)) {
     throw new SchematicsException(
       'The navigation icon must be a lowercase Angular Material icon identifier.',
     );
@@ -113,6 +174,8 @@ function resolveOptions(tree: Tree, options: PageSchema): ResolvedPageOptions {
 
   return {
     name: options.name,
+    project: projectName,
+    composable,
     className: `${strings.classify(options.name)}Page`,
     routePath,
     access,
@@ -330,6 +393,22 @@ export class ${resolved.className} {}
 }
 
 function templateSource(resolved: ResolvedPageOptions): string {
+  if (resolved.composable) {
+    return `<mat-card>
+  <mat-card-header>
+    <mat-card-title>${htmlText(resolved.navigationLabel)}</mat-card-title>
+${templateSectionMarkers('header', '    ')}
+  </mat-card-header>
+  <mat-card-content>
+${templateSectionMarkers('children', '    ')}
+  </mat-card-content>
+  <mat-card-actions>
+${templateSectionMarkers('actions', '    ')}
+  </mat-card-actions>
+</mat-card>
+`;
+  }
+
   return `<mat-card>
   <mat-card-header>
     <mat-card-title>${htmlText(resolved.navigationLabel)}</mat-card-title>

@@ -11,11 +11,11 @@
         "$source": "argv",
         "index": 0
       },
-      "description": "The application name."
+      "description": "The application name. Required unless --document is given; defaults to the dasherized Application node id."
     },
     "routing": {
       "type": "boolean",
-      "default": true
+      "description": "Enable routing. Defaults to true. Not allowed with --document (routing follows the Application node's Routing child)."
     },
     "standalone": {
       "type": "boolean",
@@ -35,7 +35,16 @@
       "type": "string",
       "default": "scss",
       "description": "The stylesheet format. Defaults to scss."
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles an Application node: the name defaults to its dasherized id and routing is enabled when it has a Routing child."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID of the Application node. When omitted, targets the first Application element. Requires --document.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
     }
-  },
-  "required": ["name"]
+  }
 }

@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { Tree } from '@angular-devkit/schematics';
 import type { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it, vi } from 'vitest';
@@ -704,6 +705,63 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
     documentTree.create(`/${integration.artifact}`, INTEGRATION_ARTIFACT);
 
     expect(outputs(generateFromDocument(documentTree))).toEqual(outputs(generate(legacyTree)));
+  });
+
+  it('TC-REACTIVE-FORM-OPENUI-DEPRECATION: warns on --definition with a Form node that compiles identically', () => {
+    const legacyContext = createContext() as unknown as {
+      logger: { warn: ReturnType<typeof vi.fn> };
+    };
+    const legacyTree = createApplicationTree();
+    reactiveForm({ name: 'contact', definition: 'contact-form.json' } as ReactiveFormSchema)(
+      legacyTree,
+      legacyContext as never,
+    );
+
+    const warning = String(legacyContext.logger.warn.mock.calls[0][0]);
+    expect(warning).toContain('--definition (reactiveFormDefinition) is deprecated');
+    expect(warning).toContain('--nodeId=contact:');
+
+    const form = JSON.parse(warning.slice(warning.indexOf(':\n') + 2));
+    const fromWarning = generateFromDocument(createDocumentTree(documentOf(form)), {
+      nodeId: form.id,
+    });
+    expect(outputs(fromWarning)).toEqual(outputs(legacyTree));
+
+    const documentContext = createContext() as unknown as {
+      logger: { warn: ReturnType<typeof vi.fn> };
+    };
+    reactiveForm({ name: 'contact', document: DOCUMENT_PATH } as ReactiveFormSchema)(
+      createDocumentTree(),
+      documentContext as never,
+    );
+    expect(documentContext.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('TC-REACTIVE-FORM-OPENUI-TUTORIAL: the tutorial Form document compiles like its former definition', () => {
+    const tutorial = readFileSync(join(__dirname, '../../../../docs/TUTORIAL.md'), 'utf8');
+    const section = tutorial.slice(tutorial.indexOf('`forms/contact.openui.json`'));
+    const start = section.indexOf('```json\n') + '```json\n'.length;
+    const document = section.slice(start, section.indexOf('\n```', start));
+    const formerDefinition = {
+      title: 'Create contact',
+      endpoint: '/api/contacts/',
+      submitLabel: 'Create contact',
+      fields: [
+        { name: 'email', label: 'Email', control: 'email', required: true, autocomplete: 'email' },
+        {
+          name: 'fullName',
+          label: 'Full name',
+          control: 'text',
+          validators: [{ type: 'required' }, { type: 'maxLength', value: 120 }],
+        },
+        { name: 'notes', label: 'Notes', control: 'textarea', hint: 'Optional context' },
+      ],
+    };
+
+    const fromTutorial = generateFromDocument(createDocumentTree(document), { nodeId: 'contact' });
+    expect(outputs(fromTutorial)).toEqual(
+      outputs(generate(createApplicationTree(formerDefinition))),
+    );
   });
 
   it('TC-REACTIVE-FORM-OPENUI-03: round-trips every legacy definition feature through the Form AST', () => {

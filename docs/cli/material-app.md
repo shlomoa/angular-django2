@@ -31,3 +31,23 @@ Supported options:
 | `--defaults`   | `true`                       | Disable interactive prompts for options that have defaults.                                                       |
 | `--style`      | `scss`                       | Stylesheet format.                                                                                                |
 | `--prefix`     | `app`                        | Component selector prefix.                                                                                        |
+
+## OpenUI application documents
+
+With `--document`, the application is compiled from an OpenUI `Application`
+node (the first, or the one named by `--node-id`); `--theme`, `--typography`,
+`--animations`, and `--routing` are not allowed.
+
+```bash
+ng generate angular-django2:material-app --document=app.openui.json
+```
+
+- `--name` defaults to the dasherized `Application` id; `[title]` sets the
+  toolbar title.
+- Routing is enabled when the `Application` has a `Routing` child.
+- A `Presentation` child sets `[theme]` (a `--theme` value) and `[typography]`
+  / `[animations]` (`"true"` or `"false"`).
+- Every `DashboardPage` in the document adds a sidenav link after Home, using
+  the page's `[route]`, `[title]`, and `[icon]` (see [`page`](page.md#openui-page-nodes)).
+  `EmptyPage` nodes have no navigation. Navigation links require a `Routing`
+  child.

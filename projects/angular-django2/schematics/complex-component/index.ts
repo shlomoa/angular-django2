@@ -1,6 +1,7 @@
 import { strings } from '@angular-devkit/core';
 import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
+import type { OpenUiElement } from '@shlomoa/openui-spec';
 import * as path from 'node:path';
 import type {
   ComplexComponentFeature,
@@ -8,8 +9,23 @@ import type {
   ComplexComponentSchema,
 } from './schema';
 import {
+  compileAstChild,
+  escapeTemplateText,
+  SURFACE_CONTAINER_AST_TYPE,
+  SURFACE_CONTAINER_ATTRIBUTES,
+} from '../component/ast';
+import { AST_SLOT_ATTRIBUTE, composeAstChildren } from '../embed-component/compose';
+import { templateSectionMarkers } from '../embed-component/index';
+import {
+  assertAstAttributes,
+  astNodeSubject,
+  readAstNode,
+  readAstString,
+} from '../utility/ast-compiler';
+import {
   readWorkspace,
   requireWorkspaceProject,
+  resolveApplicationProjectName,
   type WorkspaceProject,
 } from '../utility/workspace';
 
@@ -21,6 +37,25 @@ const FEATURES: readonly ComplexComponentFeature[] = [
 ];
 const NESTED_CHILD_SUFFIXES = ['header', 'content'] as const;
 
+/** OpenUI catalog type of the optional overlay configuration child. */
+export const OVERLAY_CONTAINER_AST_TYPE = 'OverlayContainers';
+
+/** Catalog-style attribute keys understood on the overlay configuration child. */
+export const OVERLAY_CONTAINER_ATTRIBUTES = { label: '[label]' } as const;
+
+const DEFAULT_OVERLAY_LABEL = 'Toggle details';
+
+/** A complex component compiled from an OpenUI `SurfaceContainers` node. */
+interface ComplexComponentDocument {
+  documentPath: string;
+  node: OpenUiElement;
+  title: string | undefined;
+  /** Children composed into the header, content, and actions slots. */
+  children: readonly OpenUiElement[];
+  /** The `OverlayContainers` child, when present. */
+  overlay: OpenUiElement | undefined;
+}
+
 interface ResolvedComplexComponentOptions {
   name: string;
   project: string;
@@ -30,16 +65,22 @@ interface ResolvedComplexComponentOptions {
   templatePath: string;
   features: readonly ComplexComponentFeature[];
   mode: ComplexComponentMode;
+  document: ComplexComponentDocument | undefined;
 }
 
 /**
  * Generate or maintain an Angular Material component that composes the
  * collection's component and embed-component schematics for common advanced
  * component features.
+ *
+ * With `--document`, the component is compiled from an OpenUI
+ * `SurfaceContainers` node instead of a feature list: its children are compiled
+ * and embedded into the header, content, and actions slots, and an
+ * `OverlayContainers` child adds the CDK overlay.
  */
 export function complexComponent(options: ComplexComponentSchema): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const resolved = resolveOptions(tree, options);
+    const resolved = resolveOptions(tree, options, resolveDocument(tree, options));
 
     if (resolved.mode === 'delete') {
       if (!options.confirm) {
@@ -65,6 +106,10 @@ export function complexComponent(options: ComplexComponentSchema): Rule {
     }
 
     rules.push(applyComplexFeatures(resolved));
+
+    if (resolved.document) {
+      rules.push(composeDocumentChildren(resolved, resolved.document));
+    }
 
     if (resolved.features.includes('nested')) {
       for (const suffix of NESTED_CHILD_SUFFIXES) {
@@ -96,18 +141,82 @@ export function complexComponent(options: ComplexComponentSchema): Rule {
   };
 }
 
+/**
+ * Schema resolver for `--document`: resolve and validate the `SurfaceContainers`
+ * node before any mutation.
+ */
+function resolveDocument(
+  tree: Tree,
+  options: ComplexComponentSchema,
+): ComplexComponentDocument | undefined {
+  if (options.document === undefined) {
+    if (options.nodeId !== undefined) {
+      throw new SchematicsException('--nodeId requires --document.');
+    }
+    return undefined;
+  }
+  if (options.features !== undefined) {
+    throw new SchematicsException(
+      '--document cannot be combined with --features; the OpenUI node describes the component.',
+    );
+  }
+  if ((options.mode ?? 'create') !== 'create') {
+    throw new SchematicsException('--document supports only --mode=create.');
+  }
+
+  const documentPath = options.document;
+  const node = readAstNode(tree, documentPath, options.nodeId, SURFACE_CONTAINER_AST_TYPE);
+  const subject = astNodeSubject(documentPath, node);
+  assertAstAttributes(node, Object.values(SURFACE_CONTAINER_ATTRIBUTES), subject);
+
+  const overlays = (node.children ?? []).filter(
+    (child) => child.type === OVERLAY_CONTAINER_AST_TYPE,
+  );
+  if (overlays.length > 1) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}" has ${overlays.length} ${OVERLAY_CONTAINER_AST_TYPE} children; at most one is supported.`,
+    );
+  }
+  const overlay = overlays[0];
+  if (overlay) {
+    const overlaySubject = astNodeSubject(documentPath, overlay);
+    assertAstAttributes(overlay, Object.values(OVERLAY_CONTAINER_ATTRIBUTES), overlaySubject);
+    const slotted = (overlay.children ?? []).find(
+      (child) => readAstString(child, AST_SLOT_ATTRIBUTE) !== undefined,
+    );
+    if (slotted) {
+      throw new SchematicsException(
+        `OpenUI node "${astNodeSubject(documentPath, slotted)}" is inside an ${OVERLAY_CONTAINER_AST_TYPE} ` +
+          `and cannot choose a ${AST_SLOT_ATTRIBUTE}; overlay children always go into the overlay.`,
+      );
+    }
+  }
+
+  return {
+    documentPath,
+    node,
+    title: readAstString(node, SURFACE_CONTAINER_ATTRIBUTES.title),
+    children: (node.children ?? []).filter((child) => child !== overlay),
+    overlay,
+  };
+}
+
 function resolveOptions(
   tree: Tree,
   options: ComplexComponentSchema,
+  document: ComplexComponentDocument | undefined,
 ): ResolvedComplexComponentOptions {
-  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(options.name)) {
+  const name = options.name ?? (document ? strings.dasherize(document.node.id) : '');
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name)) {
     throw new SchematicsException('The component name must be non-empty kebab-case.');
   }
 
-  const features = parseFeatures(options.features);
+  const features: ComplexComponentFeature[] = document
+    ? ['projection', ...(document.overlay ? (['cdk-overlay'] as const) : [])]
+    : parseFeatures(options.features ?? '');
   const mode = options.mode ?? 'create';
   const workspace = readWorkspace(tree);
-  const projectName = resolveProjectName(workspace.projects ?? {}, options.project);
+  const projectName = resolveApplicationProjectName(workspace, options.project);
   const project = requireWorkspaceProject(workspace, projectName);
   const sourceRoot = normalizeWorkspacePath(project.sourceRoot ?? '');
   if (!sourceRoot) {
@@ -115,18 +224,41 @@ function resolveOptions(
   }
 
   const targetDirectory = resolveTargetDirectory(options.path, project, sourceRoot);
-  const componentDirectory = path.posix.join(targetDirectory, options.name);
+  const componentDirectory = path.posix.join(targetDirectory, name);
 
   return {
-    name: options.name,
+    name,
     project: projectName,
     sourceRoot,
     componentDirectory,
-    componentPath: path.posix.join(componentDirectory, `${options.name}.ts`),
-    templatePath: path.posix.join(componentDirectory, `${options.name}.html`),
+    componentPath: path.posix.join(componentDirectory, `${name}.ts`),
+    templatePath: path.posix.join(componentDirectory, `${name}.html`),
     features,
     mode,
+    document,
   };
+}
+
+/**
+ * Compile every document child into its own component under the complex
+ * component's directory and embed it: slot children by their `[slot]`, overlay
+ * children into the `overlay` section.
+ */
+function composeDocumentChildren(
+  resolved: ResolvedComplexComponentOptions,
+  document: ComplexComponentDocument,
+): Rule {
+  const target = {
+    directory: withoutLeadingSlash(resolved.componentDirectory),
+    project: resolved.project,
+    documentPath: document.documentPath,
+  };
+  const children = [
+    ...document.children.map((child) => compileAstChild(child, target)),
+    ...(document.overlay?.children ?? []).map((child) => compileAstChild(child, target, 'overlay')),
+  ];
+
+  return composeAstChildren(withoutLeadingSlash(resolved.componentPath), children);
 }
 
 function parseFeatures(value: string): ComplexComponentFeature[] {
@@ -149,26 +281,6 @@ function parseFeatures(value: string): ComplexComponentFeature[] {
   }
 
   return [...new Set(features)] as ComplexComponentFeature[];
-}
-
-function resolveProjectName(
-  projects: Record<string, WorkspaceProject>,
-  requestedProject: string | undefined,
-): string {
-  if (requestedProject) {
-    return requestedProject;
-  }
-
-  const applicationProjects = Object.entries(projects)
-    .filter(([, project]) => !!project.sourceRoot)
-    .map(([name]) => name);
-  if (applicationProjects.length !== 1) {
-    throw new SchematicsException(
-      'Specify --project when the workspace does not have exactly one application sourceRoot.',
-    );
-  }
-
-  return applicationProjects[0];
 }
 
 function resolveTargetDirectory(
@@ -297,6 +409,10 @@ function updateComponentTemplate(
 }
 
 function createTemplate(resolved: ResolvedComplexComponentOptions): string {
+  if (resolved.document) {
+    return documentTemplate(resolved.name, resolved.document);
+  }
+
   const advancedContent = [
     resolved.features.includes('projection')
       ? projectionSlots(resolved.name)
@@ -315,6 +431,44 @@ function createTemplate(resolved: ResolvedComplexComponentOptions): string {
 `;
 }
 
+/**
+ * Material 3 card compiled from an OpenUI node: each slot projects consumer
+ * content and hosts the embedded document children in its section.
+ */
+function documentTemplate(name: string, document: ComplexComponentDocument): string {
+  const title =
+    document.title === undefined
+      ? ''
+      : `    <mat-card-title>${escapeTemplateText(document.title)}</mat-card-title>\n`;
+  const overlay = document.overlay
+    ? `\n  ${overlayTemplate(
+        name,
+        readAstString(document.overlay, OVERLAY_CONTAINER_ATTRIBUTES.label) ??
+          DEFAULT_OVERLAY_LABEL,
+        templateSectionMarkers('overlay', '    '),
+      )
+        .split('\n')
+        .join('\n  ')}\n`
+    : '';
+
+  return `<!-- Projection slots (BKM: project multiple elements via <ng-container ${name}-actions> / <ng-container ${name}-header>) -->
+<mat-card>
+  <mat-card-header>
+${title}    <ng-content select="[${name}-header]"></ng-content>
+${templateSectionMarkers('header', '    ')}
+  </mat-card-header>
+  <mat-card-content>
+    <ng-content></ng-content>
+${templateSectionMarkers('children', '    ')}
+  </mat-card-content>
+  <mat-card-actions>
+    <ng-content select="[${name}-actions]"></ng-content>
+${templateSectionMarkers('actions', '    ')}
+  </mat-card-actions>
+${overlay}</mat-card>
+`;
+}
+
 function projectionSlots(name: string): string {
   return `<!-- Projection slots (BKM: project multiple elements via <ng-container ${name}-actions> / <ng-container ${name}-header>) -->
 <ng-content select="[${name}-header]"></ng-content>
@@ -322,14 +476,21 @@ function projectionSlots(name: string): string {
 <ng-content select="[${name}-actions]"></ng-content>`;
 }
 
-function overlayTemplate(name: string): string {
+function overlayTemplate(
+  name: string,
+  label = DEFAULT_OVERLAY_LABEL,
+  content = 'Overlay content',
+): string {
   const originName = `${strings.camelize(name)}OverlayOrigin`;
+  const card = content.includes('\n')
+    ? `<mat-card>\n${content}\n  </mat-card>`
+    : `<mat-card>${content}</mat-card>`;
 
   return `<button mat-button type="button" cdkOverlayOrigin #${originName}="cdkOverlayOrigin" (click)="overlayOpen.set(!overlayOpen())">
-  Toggle details
+  ${escapeTemplateText(label)}
 </button>
 <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="${originName}" [cdkConnectedOverlayOpen]="overlayOpen()">
-  <mat-card>Overlay content</mat-card>
+  ${card}
 </ng-template>`;
 }
 

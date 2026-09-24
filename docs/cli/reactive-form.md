@@ -95,6 +95,12 @@ control child.
 
 ## Definition contract
 
+> **Deprecated:** `--definition` and `definitions/reactiveFormDefinition` are
+> deprecated in favor of `--document`. They keep working, and each run logs a
+> warning that contains the equivalent OpenUI `Form` node. Add that node to an
+> OpenUI 0.2.0 document and pass `--document=<document> --node-id=<id>`; the
+> generated form is identical.
+
 The definition file describes exactly one form. Its contract is published with
 the schematic in `reactive-form/schema.json` under
 `definitions/reactiveFormDefinition`, so editors that resolve `$schema` can

@@ -9,7 +9,7 @@ import { resolveApplicationTargetDirectory } from '../utility/project-relative-p
 import {
   readWorkspace,
   requireWorkspaceProject,
-  type WorkspaceProject,
+  resolveApplicationProjectName,
 } from '../utility/workspace';
 import {
   FORM_FIELD_APPEARANCES,
@@ -160,7 +160,7 @@ function resolveOptions(tree: Tree, options: CanonicalFormFieldOptions): Resolve
   assertFieldName(options.name);
 
   const workspace = readWorkspace(tree);
-  const projectName = resolveProjectName(workspace.projects ?? {}, options.project);
+  const projectName = resolveApplicationProjectName(workspace, options.project);
   const project = requireWorkspaceProject(workspace, projectName);
   const targetDirectory = resolveApplicationTargetDirectory(project, options.path, DEFAULT_PATH);
   assertPackageDependencies(tree, 'Material form-field generation', [
@@ -212,24 +212,4 @@ function assertEnum<T extends string>(
       `Unsupported form-field ${label} "${value}". Supported values: ${allowed.join(', ')}.`,
     );
   }
-}
-
-function resolveProjectName(
-  projects: Record<string, WorkspaceProject>,
-  requestedProject: string | undefined,
-): string {
-  if (requestedProject) {
-    return requestedProject;
-  }
-
-  const applicationProjects = Object.entries(projects)
-    .filter(([, project]) => !!project.sourceRoot)
-    .map(([name]) => name);
-  if (applicationProjects.length !== 1) {
-    throw new SchematicsException(
-      'Specify --project when the workspace does not have exactly one application sourceRoot.',
-    );
-  }
-
-  return applicationProjects[0];
 }
