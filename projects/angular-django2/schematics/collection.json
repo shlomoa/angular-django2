@@ -90,6 +90,11 @@
       "description": "Generate a data service wrapper for OpenAPI-generated services with search and CRUD operations.",
       "factory": "./data-service/index#dataService",
       "schema": "./data-service/schema.json"
+    },
+    "compile": {
+      "description": "Compile a complete Angular Material application from one OpenUI document.",
+      "factory": "./compile/index#compile",
+      "schema": "./compile/schema.json"
     }
   }
 }

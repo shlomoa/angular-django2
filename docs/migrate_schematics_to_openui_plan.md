@@ -256,10 +256,10 @@ Each schematic is architected into two decoupled components:
 
 ### Phase 5: Top-Level Master Document Compiler Schematic (`compile`)
 
-- [ ] **5.1. Design and Implement Master Schematic**:
+- [x] **5.1. Design and Implement Master Schematic**:
   - Create new schematic `angular-django2:compile` in [`projects/angular-django2/schematics/collection.json`](../projects/angular-django2/schematics/collection.json).
   - Schema requires a single `--document=<path>` argument (pointing to `app.openui.json`).
-- [ ] **5.2. Implement Hierarchical Document Dispatcher**:
+- [x] **5.2. Implement Hierarchical Document Dispatcher**:
   - Parse and validate the document via [`readOpenUiDocument()`](../projects/angular-django2/schematics/utility/openui.ts).
   - Traverse the AST top-down:
     1. Compile root `application` $\rightarrow$ scaffold app shell, styles, and routing module.
@@ -267,8 +267,16 @@ Each schematic is architected into two decoupled components:
     3. Compile views and containers (`views/form`, `widgets/table`, `surfaceContainers`) $\rightarrow$ generate child components.
     4. Splicing/Embedding $\rightarrow$ automatically embed child components into their declared parent layout slots.
     5. Data Services $\rightarrow$ generate `data-service` adapters for all endpoints declared on widgets and forms.
-- [ ] **5.3. End-to-End Deterministic Verification**:
+- [x] **5.3. End-to-End Deterministic Verification**:
   - Add integration tests verifying full application generation from a single `app.openui.json` file without human interaction.
+
+- **Phase 5 implementation notes** (resolved low-ambiguity decisions):
+  - `compile` dispatches through the collection's own schematics (`externalSchematic('angular-django2', …)`, as `complex-component` already does), so each element gets exactly the behavior and validation of its `--document` schematic; the dispatcher only classifies root elements (`planCompilation`).
+  - The document needs exactly one root `Application`; the Angular project is named after its dasherized id. The application step uses `material-app` because pages and composed cards are Material components.
+  - Host files: `Application` `IndexHtml` / `Favicon` are applied right after `material-app` with the `workspace-setup` host-file logic (`hostFilesFromDocument`), without `workspace-setup`'s other workspace scaffolding (README, ESLint, Vitest).
+  - Root dispatch: `DashboardPage` / `EmptyPage` → `page` under `src/app/features/<page>`; `SurfaceContainers` → `component` and `Form` → `reactive-form` (name = dasherized id) under `src/app/features`; every element with `[data]`, anywhere, → `data-service`. Nested children are embedded by the page and component compilers (step 3.3), so step 5.2.4 needs no separate pass.
+  - A root element of another type is rejected, unless it carries `[data]`: it then produces only its data service, with a warning that its markup has no compiler yet (for example `Table`, until the spec-first widget schematics exist). Nothing is dropped silently.
+  - Verification: `unit/integration/openui-compile.integration.spec.ts` generates a complete application from one document, checks each dispatch step, and checks that two runs produce identical files. The browser demo builds and renders the compiled application.
 
 ---
 

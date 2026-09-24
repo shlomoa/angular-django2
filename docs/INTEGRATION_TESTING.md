@@ -20,6 +20,8 @@ The validation suite is organized under `projects/angular-django-validation`:
 
 - `projects/angular-django-validation/unit/integration/schematics.integration.spec.ts` — node-side schematic integration
   tests using `SchematicTestRunner`
+- `projects/angular-django-validation/unit/integration/openui-compile.integration.spec.ts` — full application
+  generation from a single OpenUI document with the `compile` schematic, using `SchematicTestRunner`
 - `projects/angular-django-validation/e2e/schematics.e2e.spec.ts` — end-to-end schematic tests against real
   Angular workspaces
 - `projects/angular-django-validation/e2e/test_application.spec.ts` — temp-area-backed application generation
@@ -156,7 +158,8 @@ npm run build
 
 Why this matters:
 
-- `projects/angular-django-validation/unit/integration/schematics.integration.spec.ts` loads the compiled collection from
+- `projects/angular-django-validation/unit/integration/schematics.integration.spec.ts` and
+  `openui-compile.integration.spec.ts` load the compiled collection from
   `projects/angular-django2/dist/schematics/collection.json`
 - `projects/angular-django-validation/e2e/test_application.spec.ts` installs the built package from
   `projects/angular-django2/dist`

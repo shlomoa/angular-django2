@@ -16,8 +16,8 @@ holds status, standing decisions, and environment notes.
 | 2     | `reactive-form`, `form-field`, `field-component`        | Done   | #126        |
 | 3     | `component`, `complex-component`, `embed-component`     | Done   | #127        |
 | 4     | `page`, `material-app`, `application`, `app-shell`, ... | Done   | #127        |
-| 5     | Master `compile` schematic                              | Next   | #127        |
-| 6     | Deprecation and legacy adapter                          | —      |             |
+| 5     | Master `compile` schematic                              | Done   | #127        |
+| 6     | Deprecation and legacy adapter                          | Next   | #127        |
 | 7     | Verification and documentation alignment                | —      |             |
 
 Branch: `shlomoa/migrate_schematics_to_openui_phase3` (PR #127, against `main`).
@@ -58,6 +58,12 @@ commit, a confirmed push, and a browser demo with a screenshot.
   builds.
 - Playwright's bundled headless shell is missing; launch Chromium with
   `executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`.
+- Demo workspaces borrow the repo's `node_modules` through symlinks. Schematics
+  that schedule `npm install` (Angular's `application`, so `material-app` and
+  `compile`) would then write into the repo's `node_modules`: run them with
+  `npm_config_dry_run=true`. `ng new` refuses to run here; create the empty
+  workspace with the `@schematics/angular:workspace` schematic instead, and link
+  `node_modules/angular-django2` to `projects/angular-django2/dist`.
 - Unit specs run against `projects/angular-django2/dist`, so run
   `npm run build` before `npm run test:node`.
 
@@ -86,3 +92,12 @@ commit, a confirmed push, and a browser demo with a screenshot.
   service file; a file path would break the derived `strict-http-response`
   import.
 - Tests: `schematics.openui-app.spec.ts` (TC-APP-01…13).
+
+## Phase 5 log
+
+- New: `compile` schematic (`compile/index.ts`, `planCompilation`), exported
+  `hostFilesFromDocument` from `workspace-setup`; CLI page `docs/cli/compile.md`
+  (mkdocs nav, CLI index, READMEs, REQUIREMENTS list).
+- Tests: `unit/integration/openui-compile.integration.spec.ts` (INT-OPENUI-01…04).
+- Demo: real Angular CLI `ng generate angular-django2:compile app.openui.json`
+  in an empty workspace, then `ng build` and Chromium.

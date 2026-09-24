@@ -105,6 +105,7 @@ sources over lower-priority ones.
   - `openapi-setup`
   - `data-service`
   - `page`
+  - `compile`
 - The documented defaults and behavior currently expected are:
   - `ng-add`: register or prepend `angular-django2` in
     `cli.schematicCollections`
