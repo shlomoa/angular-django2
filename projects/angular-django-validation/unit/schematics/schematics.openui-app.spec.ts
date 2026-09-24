@@ -4,7 +4,7 @@ import type { OpenUiElement } from '@shlomoa/openui-spec';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { materialLayoutTemplate } from '../../../../projects/angular-django2/schematics/material-app/index';
-import { pageNavigationLinks } from '../../../../projects/angular-django2/schematics/page/ast';
+import { navigationLinksFromAst } from '../../../../projects/angular-django2/schematics/application/ast';
 import { updateIndexHtml } from '../../../../projects/angular-django2/schematics/workspace-setup/index';
 import { angularCollectionPath, collectionPath } from './schematics.helpers';
 
@@ -31,9 +31,36 @@ const profilePage: OpenUiElement = {
 const application: OpenUiElement = {
   id: 'shop',
   type: 'Application',
-  attrs: { '[title]': "Shop's admin" },
   children: [
-    { id: 'routing', type: 'Routing' },
+    {
+      id: 'routing',
+      type: 'Routing',
+      children: [
+        {
+          id: 'profileRoute',
+          type: 'Route',
+          attrs: { '[path]': 'me/profile', '[target]': '"profile"', '[title]': 'My profile' },
+        },
+        {
+          id: 'ordersRoute',
+          type: 'Route',
+          attrs: { '[path]': 'orders', '[target]': '"orders"', '[title]': 'Orders' },
+        },
+      ],
+    },
+    {
+      id: 'navigation',
+      type: 'Navigation',
+      attrs: { '[ariaLabel]': 'Primary' },
+      children: [
+        {
+          id: 'profileNavigation',
+          type: 'NavItem',
+          attrs: { '[label]': 'My profile', '[route]': '"profileRoute"', '[icon]': 'person' },
+        },
+        { id: 'ordersNavigation', type: 'NavItem', attrs: { '[label]': 'Orders', '[route]': '"ordersRoute"' } },
+      ],
+    },
     {
       id: 'look',
       type: 'Presentation',
@@ -41,10 +68,10 @@ const application: OpenUiElement = {
     },
     {
       id: 'host',
-      type: 'IndexHtml',
+      type: 'html',
       attrs: { '[lang]': 'he', '[dir]': 'rtl', '[title]': 'Shop & Co' },
     },
-    { id: 'icon', type: 'Favicon', attrs: { '[href]': 'branding/shop.ico' } },
+    { id: 'icon', type: 'link', attrs: { '[rel]': 'icon', '[href]': 'branding/shop.ico' } },
   ],
 };
 
@@ -61,7 +88,7 @@ const ordersTable: OpenUiElement = {
 };
 
 function openUiDocument(...children: OpenUiElement[]): string {
-  return JSON.stringify({ version: '0.2.0', id: 'root', type: 'html', children });
+  return JSON.stringify({ version: '0.3.0', id: 'root', type: 'html', children });
 }
 
 describe('OpenUI page and application compilers (plan phase 4)', () => {
@@ -250,7 +277,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
       expect(angularJson.projects.shop.architect.build.options.styles).toContain(
         '@angular/material/prebuilt-themes/purple-green.css',
       );
-      expect(generated.readContent(`${APP}/app.ts`)).toContain("title = 'Shop\\'s admin';");
+      expect(generated.readContent(`${APP}/app.ts`)).toContain("title = 'Shop & Co';");
       expect(template).toContain(
         '<a mat-list-item routerLink="/me/profile" routerLinkActive="active">\n        <mat-icon matListItemIcon>person</mat-icon>\n        <span matListItemTitle>My profile</span>',
       );
@@ -272,14 +299,17 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         'Option "name" is required unless --document is given.',
       );
 
-      const withoutRouting = { ...application, children: [] };
+      const withoutRouting = {
+        ...application,
+        children: application.children?.filter((child) => child.type !== 'Routing'),
+      };
       await expect(
         runner.runSchematic(
           'material-app',
           { document: DOCUMENT_PATH },
           await createWorkspace(openUiDocument(withoutRouting, ...pages)),
         ),
-      ).rejects.toThrow('has no Routing child');
+      ).rejects.toThrow('requires an Application Routing child');
       await expect(
         runner.runSchematic(
           'material-app',
@@ -296,7 +326,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
   });
 
   describe('workspace-setup --document', () => {
-    it('TC-APP-08: updates index.html and replaces the favicon from IndexHtml and Favicon nodes', async () => {
+    it('TC-APP-08: updates index.html and replaces the favicon from html and link nodes', async () => {
       const tree = await createApplication(openUiDocument(application));
       tree.create('/branding/shop.ico', Buffer.from([0, 0, 1, 0, 42]));
       const generated = await runner.runSchematic(
@@ -408,15 +438,62 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
   });
 
   describe('helpers', () => {
-    it('TC-APP-13: derives navigation links from DashboardPage nodes only', () => {
-      const document = JSON.parse(openUiDocument(application, ...pages));
-      expect(pageNavigationLinks(document, DOCUMENT_PATH)).toEqual([
-        { route: 'me/profile', label: 'My profile', icon: 'person' },
-        { route: 'orders', label: 'Orders', icon: undefined },
+    it('TC-APP-13: derives navigation links from NavItem Route references', () => {
+      expect(navigationLinksFromAst(application, JSON.parse(openUiDocument(application, ...pages)), DOCUMENT_PATH)).toEqual([
+        { route: 'me/profile', label: 'My profile', icon: 'person', disabled: false },
+        { route: 'orders', label: 'Orders', icon: undefined, disabled: false },
       ]);
       expect(materialLayoutTemplate([{ route: 'a', label: '{a}', icon: undefined }])).toContain(
         '<a mat-list-item routerLink="/a" routerLinkActive="active">\n        <span matListItemTitle>&#123;a&#125;</span>\n      </a>\n    </mat-nav-list>',
       );
     });
+  });
+
+  it('TC-APP-14: rejects unresolved and unquoted application references', () => {
+    const unknownRoute = {
+      ...application,
+      children: application.children?.map((child) =>
+        child.type === 'Navigation'
+          ? {
+              ...child,
+              children: [
+                { id: 'brokenNavigation', type: 'NavItem', attrs: { '[label]': 'Broken', '[route]': '"missing"' } },
+              ],
+            }
+          : child,
+      ),
+    };
+    const unquotedTarget = {
+      ...application,
+      children: application.children?.map((child) =>
+        child.type === 'Routing'
+          ? {
+              ...child,
+              children: [
+                {
+                  id: 'profileRoute',
+                  type: 'Route',
+                  attrs: { '[path]': 'profile', '[target]': 'profile' },
+                },
+              ],
+            }
+          : child,
+      ),
+    };
+
+    expect(() =>
+      navigationLinksFromAst(
+        unknownRoute,
+        JSON.parse(openUiDocument(unknownRoute, ...pages)),
+        DOCUMENT_PATH,
+      ),
+    ).toThrow('references unknown Route "missing"');
+    expect(() =>
+      navigationLinksFromAst(
+        unquotedTarget,
+        JSON.parse(openUiDocument(unquotedTarget, ...pages)),
+        DOCUMENT_PATH,
+      ),
+    ).toThrow('must be a quoted element-id string');
   });
 });

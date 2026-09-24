@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { readOpenUiDocument } from '../../../../projects/angular-django2/schematics/utility/openui';
 
 const VALID_DOCUMENT = {
-  version: '0.2.0',
+  version: '0.3.0',
   id: 'root',
   type: 'html',
   children: [

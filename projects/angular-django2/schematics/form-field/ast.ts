@@ -2,7 +2,7 @@
  * OpenUI control vocabulary shared by every schematic that compiles form
  * controls (`form-field`, `field-component`, `reactive-form`).
  *
- * OpenUI 0.2.0 control types are coarse (`TextInputs` covers text, email,
+ * OpenUI 0.3.0 control types are coarse (`TextInputs` covers text, email,
  * password, and textarea), so the concrete native kind is carried by the
  * catalog-style `[type]` input attribute, the same way the catalog's native
  * `input` element does. Every other control setting is a bracketed input

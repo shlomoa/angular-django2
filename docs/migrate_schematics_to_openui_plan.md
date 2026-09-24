@@ -37,7 +37,7 @@ As specified in [`docs/openui-spec-implementation-plan.md`](openui-spec-implemen
 graph TD
     subgraph Input["Input Boundary"]
         DOC["OpenUI JSON Document (app.openui.json, form.openui.json)"]
-        PARSER["readOpenUiDocument() (@shlomoa/openui-spec 0.2.0)"]
+        PARSER["readOpenUiDocument() (@shlomoa/openui-spec 0.3.0)"]
         DOC --> PARSER
     end
 
@@ -75,7 +75,7 @@ graph TD
 
 ## 2. Schematic Inventory and Conversion Matrix
 
-Every schematic currently published in [`projects/angular-django2/schematics/collection.json`](../projects/angular-django2/schematics/collection.json) is mapped to its OpenUI 0.2.0 AST counterpart:
+Every schematic currently published in [`projects/angular-django2/schematics/collection.json`](../projects/angular-django2/schematics/collection.json) is mapped to its OpenUI 0.3.0 AST counterpart:
 
 | Schematic                                             | Current Input Contract                                                                      | Current Schema Limitation                                           | Target OpenUI AST Representation (0.2.0)                                                               | Conversion Strategy                                                                                             |
 | :---------------------------------------------------- | :------------------------------------------------------------------------------------------ | :------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
@@ -160,8 +160,8 @@ Each schematic is architected into two decoupled components:
 - **Phase 1 implementation notes** (resolved low-ambiguity decisions):
   - `AstNodeResolver` is an interface returned by `createAstNodeResolver(document)` (`walk`, `findById`, `findByType`); traversal is depth-first pre-order including the root.
   - `resolveAstNode` with only `expectedType` returns the first pre-order match; with neither argument it returns the document root. Missing-node errors embed the canonical `openui-spec` wording `object not found: <id>`.
-  - OpenUI 0.2.0 attributes are `attrs: Record<string, string | null>`, so synthetic adapters stringify numbers/booleans and drop `undefined`; ids are normalized with `strings.camelize` to satisfy the schema id pattern `^[a-z][A-Za-z0-9]*$`.
-  - Synthetic nodes are validated inside a synthetic document (`version: 0.2.0`, root type `html`) via the shared `validateOpenUiDocument()` in `utility/openui.ts`, which now owns the single mapping of `openui-spec` errors to DevKit diagnostics.
+  - OpenUI 0.3.0 attributes are `attrs: Record<string, string | null>`, so synthetic adapters stringify numbers/booleans and drop `undefined`; ids are normalized with `strings.camelize` to satisfy the schema id pattern `^[a-z][A-Za-z0-9]*$`.
+  - Synthetic nodes are validated inside a synthetic document (`version: 0.3.0`, root type `html`) via the shared `validateOpenUiDocument()` in `utility/openui.ts`, which now owns the single mapping of `openui-spec` errors to DevKit diagnostics.
 
 ---
 
@@ -212,7 +212,7 @@ Each schematic is architected into two decoupled components:
 - **Phase 3 implementation notes** (maintainer decisions and resolved low-ambiguity decisions):
   - Maintainer decision: every child node compiles into its own component and is embedded into the parent in document order, reusing `embed-component` logic; a child picks a named projection slot with `[slot]` (`header` | `content` | `actions`), otherwise `content`.
   - `component --document` compiles a `SurfaceContainers` node (`component/ast.ts`) into a Layer 1 `<section>`: `[title]` → `<h2>` in `<header>`; slot sections `header` (`<header>`), `children` (body; the content slot, same marker as legacy components), and `actions` (`<footer>`). `--name` defaults to the dasherized node id, `--path` to `<sourceRoot>/app`.
-  - Styling tokens (3.1): OpenUI 0.2.0 `SurfaceContainers` declares no styling-token inputs, so none are read here; presentation tokens belong to the Phase 4 presentation compiler. Unknown attributes are rejected, so nothing is dropped silently.
+  - Styling tokens (3.1): OpenUI 0.3.0 `SurfaceContainers` declares no styling-token inputs, so none are read here; presentation tokens belong to the Phase 4 presentation compiler. Unknown attributes are rejected, so nothing is dropped silently.
   - `complex-component --document` compiles a `SurfaceContainers` node into the Material card: `[title]` → `<mat-card-title>`; `<mat-card-header>`, `<mat-card-content>`, and `<mat-card-actions>` each keep the consumer `ng-content` projection slot and host the `header`, `children`, and `actions` sections. `--features` is rejected with `--document` (projection is implied, `nested` is replaced by document children) and only `--mode=create` is supported; `mixins` has no OpenUI equivalent yet and stays CLI-only.
   - Overlay configuration: one optional `OverlayContainers` child enables `cdk-overlay`; its `[label]` is the toggle text (default `Toggle details`) and its children are embedded into an `overlay` section inside the overlay card. It is a configuration of the composite, not a separate component; overlay children cannot set `[slot]`.
   - Composable child types: `SurfaceContainers` (recursive), `Form` (via `compileNestedFormFromAst`, default primitives directory), and `TextInputs` / `RangeControl` (via `compileFormFieldFromAst`). Children are generated in a subdirectory of the parent named after the dasherized id (`Form` → `<id>-form`, controls → `<[name] or id>-field`, as in Phase 2). Other types are rejected with the supported list.
@@ -242,10 +242,10 @@ Each schematic is architected into two decoupled components:
   - Maintainer decision: a page node carries its own routing and navigation metadata: `[title]` (navigation label), `[route]`, `[icon]`, `[access]` (`public` | `protected`), `[authGuard]`. Defaults match the CLI (name = dasherized id, route = name, label = classified name, access `public`, guard `authGuard`). The vocabulary lives in `page/ast.ts`.
   - Maintainer decision: presentation tokens come from a `Presentation` child of `Application` with `[theme]`, `[typography]`, `[animations]` (the existing `material-setup` options).
   - Maintainer decision: `[data]="<apiPath>#<ApiService>"` on the bound node drives `data-service`; `(paginate)`, `(sort)`, `(filter)` generate nothing yet.
-  - Maintainer decision: `IndexHtml` `[lang]`, `[dir]`, `[title]` update index.html; `Favicon` `[href]` is a workspace-relative icon file copied to the favicon.
+  - Maintainer decision: `html` `[lang]`, `[dir]`, `[title]` update index.html; an icon `link` `[href]` is a workspace-relative icon file copied to the favicon.
   - `page` compiles `DashboardPage` and `EmptyPage`; `ShellPage` is `material-app`'s layout (toolbar, sidenav links, router outlet), built from the `Application` and `DashboardPage` nodes; `app-shell` is Angular's SSR/prerender tooling with no OpenUI counterpart (see `ngdj-openui-spec-mapping.md`). A `DashboardPage`'s children are composed with the Phase 3 engine into header / children / actions sections of the page card. `EmptyPage` ("no content") rejects children and, having no navigation, adds no sidenav link.
   - Re-running `page --document` on a page whose template already holds embedded children is refused by the existing "modified page artifacts" guard.
-  - `application` / `material-app`: `--name` defaults to the dasherized `Application` id; routing is `true` exactly when the `Application` has a `Routing` child; `Application[title]` sets the `material-app` toolbar title. Allowed `Application` children: `Routing`, `Navigation`, `ToolBars`, `Presentation`, `IndexHtml`, `Favicon` (others are rejected); at most one `Routing` / `Presentation`.
+  - `application` / `material-app`: `--name` defaults to the dasherized `Application` id; routing is `true` exactly when the `Application` has a `Routing` child. `Route` owns paths and targets; `NavItem` owns sidenav labels and icons and references its route by quoted id. Allowed `Application` children: `Routing`, `Navigation`, `ToolBar`, `Presentation`, `html`, `link` (others are rejected); at most one `Routing` / `Presentation`.
   - `material-app` builds one sidenav link per `DashboardPage` anywhere in the document, after the Home link, with the same defaults as `page`, so each value lives only on the page node. Navigation without a `Routing` child is rejected. Pages themselves are generated by `page` (Phase 5 dispatches them).
   - `material-setup` keeps its CLI options: `material-app --document` passes the `Presentation` tokens to it. A standalone `material-setup --document` is not part of the plan steps.
   - Schema defaults for options the document describes (`page` access / authGuard, `material-app` theme / typography / animations / routing, `application` routing, `data-service` apiPath) moved into code so a conflict with `--document` can be detected (same as Phase 2). Option keys with `undefined` values no longer override code defaults.
@@ -276,7 +276,7 @@ Each schematic is architected into two decoupled components:
 
 - **Phase 5 implementation notes** (resolved low-ambiguity decisions):
   - The compiler is a `Rule` run with `SchematicTestRunner.callRule` against the built collection. It dispatches through the public `--document` schematics (`externalSchematic('angular-django2', …)`), so it validates exactly their behavior; it only classifies root elements (`planCompilation`).
-  - The document needs exactly one root `Application`; the Angular project is named after its dasherized id. The application step uses `material-app` because pages and composed cards are Material components, followed by `workspace-setup --document` for `IndexHtml` / `Favicon`.
+  - The document needs exactly one root `Application`; the Angular project is named after its dasherized id. The application step uses `material-app` because pages and composed cards are Material components, followed by `workspace-setup --document` for `html` / icon `link`.
   - Root dispatch: `DashboardPage` / `EmptyPage` → `page` under `src/app/features/<page>`; `SurfaceContainers` → `component` and `Form` → `reactive-form` (name = dasherized id) under `src/app/features`; every element with `[data]`, anywhere, → `data-service`. Nested children are embedded by the page and component compilers (step 3.3), so step 5.2.4 needs no separate pass.
   - A root element of another type is rejected, unless it carries `[data]`: it then produces only its data service, with a warning that its markup has no compiler yet (for example `Table`). Nothing is dropped silently.
   - Verification: `unit/integration/openui-application.integration.spec.ts` generates a complete application from one document, checks each dispatch step, and checks that two runs produce identical files.
@@ -287,7 +287,7 @@ Each schematic is architected into two decoupled components:
 
 - [x] **6.1. Deprecate Proprietary Schemas**:
   - Mark `definitions/reactiveFormDefinition` in [`reactive-form/schema.json`](../projects/angular-django2/schematics/reactive-form/schema.json) as deprecated in favor of OpenUI AST documents.
-  - Log non-breaking deprecation warnings when legacy `--definition` files are supplied, including instructions for converting to OpenUI 0.2.0 form documents.
+  - Log non-breaking deprecation warnings when legacy `--definition` files are supplied, including instructions for converting to OpenUI 0.3.0 form documents.
 - [x] **6.2. Document Migration Tooling / Script** _(dropped; see notes)_:
   - Provide an internal migration utility (`ngdj-migrate-form-definition`) converting legacy `reactiveFormDefinition` JSON files to OpenUI `form` documents.
 
