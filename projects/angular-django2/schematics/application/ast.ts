@@ -282,7 +282,11 @@ function collectNavigationLinks(
   }
 }
 
-function readElementReference(node: OpenUiElement, key: string, subject: string): string | undefined {
+function readElementReference(
+  node: OpenUiElement,
+  key: string,
+  subject: string,
+): string | undefined {
   const value = readAstString(node, key);
   if (value === undefined) {
     return undefined;
@@ -367,7 +371,8 @@ export function faviconHrefFromAst(
   documentPath: string,
 ): string | undefined {
   const node = [...createAstNodeResolver(document).walk()].find(
-    (candidate) => candidate.type === 'link' && readAstString(candidate, FAVICON_ATTRIBUTES.rel) === 'icon',
+    (candidate) =>
+      candidate.type === 'link' && readAstString(candidate, FAVICON_ATTRIBUTES.rel) === 'icon',
   );
   if (!node) {
     return undefined;

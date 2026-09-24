@@ -58,7 +58,11 @@ const application: OpenUiElement = {
           type: 'NavItem',
           attrs: { '[label]': 'My profile', '[route]': '"profileRoute"', '[icon]': 'person' },
         },
-        { id: 'ordersNavigation', type: 'NavItem', attrs: { '[label]': 'Orders', '[route]': '"ordersRoute"' } },
+        {
+          id: 'ordersNavigation',
+          type: 'NavItem',
+          attrs: { '[label]': 'Orders', '[route]': '"ordersRoute"' },
+        },
       ],
     },
     {
@@ -439,7 +443,13 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
 
   describe('helpers', () => {
     it('TC-APP-13: derives navigation links from NavItem Route references', () => {
-      expect(navigationLinksFromAst(application, JSON.parse(openUiDocument(application, ...pages)), DOCUMENT_PATH)).toEqual([
+      expect(
+        navigationLinksFromAst(
+          application,
+          JSON.parse(openUiDocument(application, ...pages)),
+          DOCUMENT_PATH,
+        ),
+      ).toEqual([
         { route: 'me/profile', label: 'My profile', icon: 'person', disabled: false },
         { route: 'orders', label: 'Orders', icon: undefined, disabled: false },
       ]);
@@ -457,7 +467,11 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
           ? {
               ...child,
               children: [
-                { id: 'brokenNavigation', type: 'NavItem', attrs: { '[label]': 'Broken', '[route]': '"missing"' } },
+                {
+                  id: 'brokenNavigation',
+                  type: 'NavItem',
+                  attrs: { '[label]': 'Broken', '[route]': '"missing"' },
+                },
               ],
             }
           : child,

@@ -135,7 +135,9 @@ describe('OpenUI application compilation (plan phase 5)', () => {
     );
     expect(generated.readContent(`${APP}/app.ts`)).toContain("title = 'Shop admin';");
     expect(generated.readContent(`${APP}/app.html`)).toContain('routerLink="/profile"');
-    expect(generated.readContent('/projects/shop/src/index.html')).toContain('<title>Shop admin</title>');
+    expect(generated.readContent('/projects/shop/src/index.html')).toContain(
+      '<title>Shop admin</title>',
+    );
 
     // 2. Routed pages registered in app.routes.ts, with composed children.
     const routes = generated.readContent(`${APP}/app.routes.ts`);
