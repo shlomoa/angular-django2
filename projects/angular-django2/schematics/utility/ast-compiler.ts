@@ -24,7 +24,7 @@ import type { WorkspaceConfig, WorkspaceProject } from './workspace';
  * OpenUI specification version stamped on synthetic documents.
  * Keep aligned with the `@shlomoa/openui-spec` dependency in package.json.
  */
-export const SYNTHETIC_OPENUI_VERSION = '0.2.0';
+export const SYNTHETIC_OPENUI_VERSION = '0.3.0';
 
 /** Root type used for synthetic documents; matches the canonical catalog root. */
 export const SYNTHETIC_OPENUI_ROOT_TYPE = 'html';

@@ -35,7 +35,7 @@ For an end-to-end setup path, see the [tutorial](../TUTORIAL.md).
 ## OpenUI documents
 
 The UI schematics also compile from an
-[OpenUI](https://github.com/shlomoa/openui-spec) 0.2.0 JSON document: pass
+[OpenUI](https://github.com/shlomoa/openui-spec) 0.3.0 JSON document: pass
 `--document=<path>` and, when the document holds several candidates,
 `--node-id=<id>`. Attributes use the catalog style (`[input]`, `(event)`) with
 string values. Each command page has an _OpenUI_ section listing the node types

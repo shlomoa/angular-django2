@@ -178,7 +178,7 @@ describe('form-field schematic: OpenUI control nodes', () => {
     const tree = createApplicationTree();
     tree.create(
       `/${DOCUMENT_PATH}`,
-      JSON.stringify({ version: '0.2.0', id: 'root', type: 'html', children }),
+      JSON.stringify({ version: '0.3.0', id: 'root', type: 'html', children }),
     );
     return tree;
   }
