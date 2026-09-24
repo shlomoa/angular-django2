@@ -225,9 +225,10 @@ Phase 1 baseline on `7e7047a` (Linux, Node 24.15.0, npm 11.12.1, platform-native
    (as do `TC-01` and `TC-02` in the `ng-add` and `pass-through` specs).
    Evidence links must name the spec file with the ID.
 
-Decision needed before Phase 4: document findings 1 and 2 as known limitations,
-or fix the code first (reject `Navigation` / `ToolBars` or compile them, and
-check `Routing`). Fixing them is outside the scope of #106.
+Maintainer decision: finding 1 is fixed outside #106 by **compiling**
+`Navigation`, `ToolBars`, and `Routing` content, tracked in
+[#129](https://github.com/shlomoa/angular-django2/issues/129) with its own PR.
+Phase 4 is blocked until #129 is resolved (see Phase 4).
 
 ---
 
@@ -297,6 +298,12 @@ Every schematic and every 0.2.0 catalog scope appears in exactly one class:
 Apply §2.1, §2.2, §2.3, and §3.2.
 
 ### Phase 4: Refresh `docs/ngdj-openui-spec-mapping.md`
+
+**Blocked by [#129](https://github.com/shlomoa/angular-django2/issues/129).**
+Do not start this phase until #129 is closed as completed and its PR is merged
+into `main`. Then merge `main` into this branch, re-verify the `application`
+and `material-app` rows of §2.5 and finding 1 of §2.6 against the new code and
+tests, and document the resolved behavior.
 
 Apply §2.1, §2.4, §3.1, and the Phase 2 evidence table. Remove the old §1 table
 rather than keeping it next to the new one.
