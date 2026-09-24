@@ -254,11 +254,15 @@ Each schematic is architected into two decoupled components:
 
 ---
 
-### Phase 5: Top-Level Master Document Compiler Schematic (`compile`)
+### Phase 5: Validation-Only Master Document Compiler
 
-- [x] **5.1. Design and Implement Master Schematic**:
-  - Create new schematic `angular-django2:compile` in [`projects/angular-django2/schematics/collection.json`](../projects/angular-django2/schematics/collection.json).
-  - Schema requires a single `--document=<path>` argument (pointing to `app.openui.json`).
+> **Maintainer decision:** the master document compiler exists for validation
+> only. It is not a schematic, is not shipped in the `angular-django2` package,
+> is not accessible to any external package, and appears in no user-facing
+> code, documentation, or configuration.
+
+- [x] **5.1. Design and Implement the Validation-Only Compiler**:
+  - `compileOpenUiApplication(documentPath)` in the private validation project (`projects/angular-django-validation/unit/integration/openui-application-compiler.ts`), taking a single OpenUI document (`app.openui.json`).
 - [x] **5.2. Implement Hierarchical Document Dispatcher**:
   - Parse and validate the document via [`readOpenUiDocument()`](../projects/angular-django2/schematics/utility/openui.ts).
   - Traverse the AST top-down:
@@ -271,12 +275,11 @@ Each schematic is architected into two decoupled components:
   - Add integration tests verifying full application generation from a single `app.openui.json` file without human interaction.
 
 - **Phase 5 implementation notes** (resolved low-ambiguity decisions):
-  - `compile` dispatches through the collection's own schematics (`externalSchematic('angular-django2', …)`, as `complex-component` already does), so each element gets exactly the behavior and validation of its `--document` schematic; the dispatcher only classifies root elements (`planCompilation`).
-  - The document needs exactly one root `Application`; the Angular project is named after its dasherized id. The application step uses `material-app` because pages and composed cards are Material components.
-  - Host files: `Application` `IndexHtml` / `Favicon` are applied right after `material-app` with the `workspace-setup` host-file logic (`hostFilesFromDocument`), without `workspace-setup`'s other workspace scaffolding (README, ESLint, Vitest).
+  - The compiler is a `Rule` run with `SchematicTestRunner.callRule` against the built collection. It dispatches through the public `--document` schematics (`externalSchematic('angular-django2', …)`), so it validates exactly their behavior; it only classifies root elements (`planCompilation`).
+  - The document needs exactly one root `Application`; the Angular project is named after its dasherized id. The application step uses `material-app` because pages and composed cards are Material components, followed by `workspace-setup --document` for `IndexHtml` / `Favicon`.
   - Root dispatch: `DashboardPage` / `EmptyPage` → `page` under `src/app/features/<page>`; `SurfaceContainers` → `component` and `Form` → `reactive-form` (name = dasherized id) under `src/app/features`; every element with `[data]`, anywhere, → `data-service`. Nested children are embedded by the page and component compilers (step 3.3), so step 5.2.4 needs no separate pass.
-  - A root element of another type is rejected, unless it carries `[data]`: it then produces only its data service, with a warning that its markup has no compiler yet (for example `Table`, until the spec-first widget schematics exist). Nothing is dropped silently.
-  - Verification: `unit/integration/openui-compile.integration.spec.ts` generates a complete application from one document, checks each dispatch step, and checks that two runs produce identical files. The browser demo builds and renders the compiled application.
+  - A root element of another type is rejected, unless it carries `[data]`: it then produces only its data service, with a warning that its markup has no compiler yet (for example `Table`). Nothing is dropped silently.
+  - Verification: `unit/integration/openui-application.integration.spec.ts` generates a complete application from one document, checks each dispatch step, and checks that two runs produce identical files.
 
 ---
 

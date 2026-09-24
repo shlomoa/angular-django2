@@ -310,37 +310,15 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       const sourceRoot = resolveSourceRoot(tree, options.project);
       applyFileHooks(tree, sourceRoot, options.files);
     }
-    if (hostFileEdits) {
-      applyHostFileEdits(tree, hostFileEdits);
+    if (hostFileEdits?.indexHtml) {
+      tree.overwrite(hostFileEdits.indexHtml.path, hostFileEdits.indexHtml.content);
+    }
+    if (hostFileEdits?.favicon) {
+      writeOrOverwrite(tree, hostFileEdits.favicon.path, hostFileEdits.favicon.content);
     }
 
     return tree;
   };
-}
-
-/**
- * Rule applying the `IndexHtml` and `Favicon` nodes of an OpenUI document to
- * the host files of `project` (used by the `compile` schematic).
- *
- * @internal
- */
-export function hostFilesFromDocument(documentPath: string, project: string): Rule {
-  return (tree: Tree) => {
-    applyHostFileEdits(
-      tree,
-      resolveHostFileEdits(tree, { name: project, project, document: documentPath }),
-    );
-    return tree;
-  };
-}
-
-function applyHostFileEdits(tree: Tree, edits: HostFileEdits): void {
-  if (edits.indexHtml) {
-    tree.overwrite(edits.indexHtml.path, edits.indexHtml.content);
-  }
-  if (edits.favicon) {
-    writeOrOverwrite(tree, edits.favicon.path, edits.favicon.content);
-  }
 }
 
 /**

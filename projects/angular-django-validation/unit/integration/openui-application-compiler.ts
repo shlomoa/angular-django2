@@ -1,35 +1,44 @@
 /**
- * Master OpenUI document compiler (migration plan, phase 5).
+ * Validation-only OpenUI application compiler (migration plan, phase 5).
  *
- * Compiles a complete Angular Material application from one OpenUI document by
- * dispatching each element to the schematic that owns it, top-down:
+ * Not part of the published angular-django2 package: it lives in the private
+ * validation project and exists only to verify that the public `--document`
+ * schematics compose into a complete application from one OpenUI document.
  *
- * 1. the `Application` node → `material-app` (app shell, theme, routing,
- *    navigation), then its `IndexHtml` / `Favicon` → host files;
- * 2. every root `DashboardPage` / `EmptyPage` → `page` (routed page registered
+ * It dispatches each element to the schematic that owns it, top-down:
+ *
+ * 1. the `Application` node -> `material-app` (app shell, theme, routing,
+ *    navigation), then `workspace-setup` for its `IndexHtml` / `Favicon`;
+ * 2. every root `DashboardPage` / `EmptyPage` -> `page` (routed page registered
  *    in `app.routes.ts`, children composed into its slots);
- * 3. every root `SurfaceContainers` → `component` and root `Form` →
+ * 3. every root `SurfaceContainers` -> `component` and root `Form` ->
  *    `reactive-form`, under `src/app/features`;
  * 4. embedding of nested children into their parent slots happens inside the
  *    page and component compilers (plan step 3.3);
- * 5. every element with a `[data]` binding → `data-service`.
+ * 5. every element with a `[data]` binding -> `data-service`.
  *
- * All dispatch decisions are validated before the first schematic runs.
+ * Run it with `SchematicTestRunner.callRule` on a runner registered for the
+ * built `angular-django2` collection.
  */
 import { strings } from '@angular-devkit/core';
 import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
 
-import { APPLICATION_AST_TYPE, applicationFromAst } from '../application/ast';
-import { SURFACE_CONTAINER_AST_TYPE } from '../component/ast';
-import { DATA_ATTRIBUTE } from '../data-service/ast';
-import { PAGE_AST_TYPES } from '../page/ast';
-import { FORM_AST_TYPE } from '../reactive-form/ast';
-import { astNodeSubject, createAstNodeResolver, readAstString } from '../utility/ast-compiler';
-import { readOpenUiDocument } from '../utility/openui';
-import { hostFilesFromDocument } from '../workspace-setup/index';
-import type { CompileSchema } from './schema';
+import {
+  APPLICATION_AST_TYPE,
+  applicationFromAst,
+} from '../../../angular-django2/schematics/application/ast';
+import { SURFACE_CONTAINER_AST_TYPE } from '../../../angular-django2/schematics/component/ast';
+import { DATA_ATTRIBUTE } from '../../../angular-django2/schematics/data-service/ast';
+import { PAGE_AST_TYPES } from '../../../angular-django2/schematics/page/ast';
+import { FORM_AST_TYPE } from '../../../angular-django2/schematics/reactive-form/ast';
+import {
+  astNodeSubject,
+  createAstNodeResolver,
+  readAstString,
+} from '../../../angular-django2/schematics/utility/ast-compiler';
+import { readOpenUiDocument } from '../../../angular-django2/schematics/utility/openui';
 
 const COLLECTION = 'angular-django2';
 
@@ -57,14 +66,9 @@ export interface CompilationPlan {
   dataOnly: readonly OpenUiElement[];
 }
 
-/** Compile a complete application from `--document`. */
-export function compile(options: CompileSchema): Rule {
+/** Compile a complete application from the OpenUI document at `documentPath`. */
+export function compileOpenUiApplication(documentPath: string): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    if (!options.document?.trim()) {
-      throw new SchematicsException('Pass the OpenUI application document with --document.');
-    }
-
-    const documentPath = options.document;
     const plan = planCompilation(readOpenUiDocument(tree, documentPath), documentPath);
     for (const node of plan.dataOnly) {
       context.logger.warn(
@@ -77,7 +81,7 @@ export function compile(options: CompileSchema): Rule {
     const document = documentPath;
     return chain([
       externalSchematic(COLLECTION, 'material-app', { document }),
-      hostFilesFromDocument(documentPath, project),
+      externalSchematic(COLLECTION, 'workspace-setup', { name: project, project, document }),
       ...plan.pages.map((node) =>
         externalSchematic(COLLECTION, 'page', {
           document,
@@ -143,7 +147,7 @@ export function planCompilation(document: OpenUiDocument, documentPath: string):
   if (unsupported) {
     throw new SchematicsException(
       `OpenUI node "${astNodeSubject(documentPath, unsupported)}" has type "${unsupported.type}", ` +
-        'which the compile schematic cannot compile at the document root. ' +
+        'which the OpenUI application compiler cannot compile at the document root. ' +
         `Supported root types: ${COMPILABLE_ROOT_AST_TYPES.join(', ')}, or any element with a ${DATA_ATTRIBUTE} binding.`,
     );
   }

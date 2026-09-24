@@ -16,7 +16,6 @@ for options, defaults, constraints, prerequisites, and generated output.
 | Prepare an empty workspace for a generated application        | [`workspace-setup`](workspace-setup.md)                                                                        |
 | Generate an Angular application with package defaults         | [`application`](application.md)                                                                                |
 | Generate a complete Material application and sidenav layout   | [`material-app`](material-app.md)                                                                              |
-| Compile a complete application from one OpenUI document       | [`compile`](compile.md)                                                                                        |
 | Configure Material in an existing application                 | [`material-setup`](material-setup.md)                                                                          |
 | Add the standard `core`, `shared`, and `features` directories | [`project-structure`](project-structure.md)                                                                    |
 | Add Angular's SSR/prerendering app shell                      | [`app-shell`](app-shell.md)                                                                                    |

@@ -16,7 +16,7 @@ holds status, standing decisions, and environment notes.
 | 2     | `reactive-form`, `form-field`, `field-component`        | Done   | #126        |
 | 3     | `component`, `complex-component`, `embed-component`     | Done   | #127        |
 | 4     | `page`, `material-app`, `application`, `app-shell`, ... | Done   | #127        |
-| 5     | Master `compile` schematic                              | Done   | #127        |
+| 5     | Validation-only master document compiler                | Done   | #127        |
 | 6     | Deprecation and legacy adapter                          | Done   | #127        |
 | 7     | Verification and documentation alignment                | Next   | #127        |
 
@@ -63,8 +63,8 @@ commit, a confirmed push, and a browser demo with a screenshot.
 - Playwright's bundled headless shell is missing; launch Chromium with
   `executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`.
 - Demo workspaces borrow the repo's `node_modules` through symlinks. Schematics
-  that schedule `npm install` (Angular's `application`, so `material-app` and
-  `compile`) would then write into the repo's `node_modules`: run them with
+  that schedule `npm install` (Angular's `application`, so `material-app`)
+  would then write into the repo's `node_modules`: run them with
   `npm_config_dry_run=true`. `ng new` refuses to run here; create the empty
   workspace with the `@schematics/angular:workspace` schematic instead, and link
   `node_modules/angular-django2` to `projects/angular-django2/dist`.
@@ -99,12 +99,19 @@ commit, a confirmed push, and a browser demo with a screenshot.
 
 ## Phase 5 log
 
-- New: `compile` schematic (`compile/index.ts`, `planCompilation`), exported
-  `hostFilesFromDocument` from `workspace-setup`; CLI page `docs/cli/compile.md`
-  (mkdocs nav, CLI index, READMEs, REQUIREMENTS list).
-- Tests: `unit/integration/openui-compile.integration.spec.ts` (INT-OPENUI-01…04).
-- Demo: real Angular CLI `ng generate angular-django2:compile app.openui.json`
-  in an empty workspace, then `ng build` and Chromium.
+- First implemented as a public `angular-django2:compile` schematic
+  (`381f6c4`) without asking the maintainer: a new public API is a high-ambiguity
+  decision and should have been raised first.
+- Maintainer decision (2026-09-24): keep the compiler for validation only; no
+  exposure to external packages and no traces in user-facing code,
+  documentation, or configuration. It now lives in the private validation
+  project as `compileOpenUiApplication`
+  (`unit/integration/openui-application-compiler.ts`), and the public
+  schematic, its CLI page, collection entry, README / REQUIREMENTS /
+  INTEGRATION_TESTING / mkdocs entries, and the `workspace-setup` export were
+  removed.
+- Tests: `unit/integration/openui-application.integration.spec.ts`
+  (INT-OPENUI-01…04).
 
 ## Phase 6 log
 

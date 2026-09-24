@@ -1,15 +1,16 @@
 /**
- * Integration tests for the master OpenUI compiler (migration plan, phase 5):
- * a complete application is generated from a single app.openui.json without
- * any other input.
+ * Validation of the OpenUI `--document` schematics as a whole (migration plan,
+ * phase 5): the validation-only application compiler generates a complete
+ * application from a single app.openui.json without any other input.
  */
 import { Tree } from '@angular-devkit/schematics';
-import { SchematicTestRunner, type UnitTestTree } from '@angular-devkit/schematics/testing';
+import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
 import { beforeEach, describe, expect, it } from 'vitest';
 import * as path from 'node:path';
+import { lastValueFrom } from 'rxjs';
 
-import { planCompilation } from '../../../../projects/angular-django2/schematics/compile/index';
+import { compileOpenUiApplication, planCompilation } from './openui-application-compiler';
 
 const collectionPath = path.join(
   __dirname,
@@ -78,7 +79,7 @@ const appDocument: OpenUiDocument = {
   ],
 };
 
-describe('OpenUI compile schematic (plan phase 5)', () => {
+describe('OpenUI application compilation (plan phase 5)', () => {
   let runner: SchematicTestRunner;
   let angularRunner: SchematicTestRunner;
 
@@ -97,12 +98,14 @@ describe('OpenUI compile schematic (plan phase 5)', () => {
     return tree;
   }
 
-  it('INT-OPENUI-01: generates a complete application from a single app.openui.json', async () => {
-    const generated = await runner.runSchematic(
-      'compile',
-      { document: DOCUMENT_PATH },
-      await createWorkspace(appDocument),
+  async function compileApplication(documentPath: string, tree: Tree): Promise<UnitTestTree> {
+    return new UnitTestTree(
+      await lastValueFrom(runner.callRule(compileOpenUiApplication(documentPath), tree)),
     );
+  }
+
+  it('INT-OPENUI-01: generates a complete application from a single app.openui.json', async () => {
+    const generated = await compileApplication(DOCUMENT_PATH, await createWorkspace(appDocument));
 
     // 1. Application shell, theme, navigation, and host files.
     const angularJson = JSON.parse(generated.readContent('/angular.json'));
@@ -139,16 +142,8 @@ describe('OpenUI compile schematic (plan phase 5)', () => {
   });
 
   it('INT-OPENUI-02: is deterministic for the same document', async () => {
-    const first = await runner.runSchematic(
-      'compile',
-      { document: DOCUMENT_PATH },
-      await createWorkspace(appDocument),
-    );
-    const second = await runner.runSchematic(
-      'compile',
-      { document: DOCUMENT_PATH },
-      await createWorkspace(appDocument),
-    );
+    const first = await compileApplication(DOCUMENT_PATH, await createWorkspace(appDocument));
+    const second = await compileApplication(DOCUMENT_PATH, await createWorkspace(appDocument));
 
     expect([...second.files].sort()).toEqual([...first.files].sort());
     for (const file of first.files.filter((name) => name.startsWith(`${APP}/`))) {
@@ -162,7 +157,7 @@ describe('OpenUI compile schematic (plan phase 5)', () => {
       [[application, { id: 'other', type: 'Application' }], 'found 2'],
       [
         [application, { id: 'grid', type: 'Grid' }],
-        'which the compile schematic cannot compile at the document root',
+        'which the OpenUI application compiler cannot compile at the document root',
       ],
       [
         [application, { id: 'panel', type: 'SurfaceContainers', attrs: { '[color]': 'red' } }],
@@ -172,19 +167,14 @@ describe('OpenUI compile schematic (plan phase 5)', () => {
 
     for (const [children, message] of cases) {
       await expect(
-        runner.runSchematic(
-          'compile',
-          { document: DOCUMENT_PATH },
+        compileApplication(
+          DOCUMENT_PATH,
           await createWorkspace({ version: '0.2.0', id: 'root', type: 'html', children }),
         ),
       ).rejects.toThrow(message);
     }
     await expect(
-      runner.runSchematic(
-        'compile',
-        { document: 'missing.json' },
-        await createWorkspace(appDocument),
-      ),
+      compileApplication('missing.json', await createWorkspace(appDocument)),
     ).rejects.toThrow('OpenUI document "missing.json" was not found');
   });
 

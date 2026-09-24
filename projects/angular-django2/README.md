@@ -37,7 +37,6 @@ The collection provides 18 specialized schematics grouped by functional domain:
 ### Application Generation
 
 - **`material-app`**: Generates a complete standalone Angular app configured with Angular Material 3 in a single step (routing, zoneless change detection, theme setup, standard directory structure, and responsive sidenav layout).
-- **`compile`**: Compiles a complete Angular Material application (app shell, theme, routed pages, composed components, forms, and data services) from one OpenUI document.
 - **`application`**: Scaffolds a lean, standalone, zoneless Angular application with strict SCSS and routing.
 - **`app-shell`**: Generates an application shell with responsive navigation.
 
