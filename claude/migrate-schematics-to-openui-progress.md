@@ -141,5 +141,8 @@ commit, a confirmed push, and a browser demo with a screenshot.
   `--definition` is removed.
 - Not converted by any plan step: `app-shell` (`ShellPage`) and standalone
   `material-setup --document` (`Presentation`).
-- Spec-first widget schematics (`Table`, `Dialog`, `Stepper`, `Tabs`,
-  `ExpandablePanels`) remain future work.
+
+Not follow-ups of this plan: the widget schematics (`table`, `dialog`,
+`stepper`, `tabs`, `accordion`) appear in this plan only as _(Planned)_ rows
+of the section 2 inventory; no phase step builds them. They are scheduled by
+`docs/openui-spec-implementation-plan.md` (its phases 1–2).

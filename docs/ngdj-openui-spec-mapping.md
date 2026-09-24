@@ -34,20 +34,20 @@ These schematics compile directly from a validated OpenUI 0.2.0 document
 synthetic nodes. See [`migrate_schematics_to_openui_plan.md`](https://github.com/shlomoa/angular-django2/blob/main/docs/migrate_schematics_to_openui_plan.md)
 for the decisions behind each mapping.
 
-| OpenUI element(s)                                         | angular-django2 schematic       | AST input                              |
-| :-------------------------------------------------------- | :------------------------------ | :------------------------------------- |
-| `Form` (+ `TextInputs`, `RangeControl`, `ActionControls`) | `reactive-form`                 | Active                                 |
-| `TextInputs`, `RangeControl`                              | `form-field`, `field-component` | Active                                 |
-| `SurfaceContainers` (+ composed children by `[slot]`)     | `component`                     | Active                                 |
-| `SurfaceContainers` card (+ `OverlayContainers`)          | `complex-component`             | Active                                 |
-| `[slot]` placement of composed children                   | `embed-component` (`--slot`)    | Active                                 |
-| `DashboardPage`, `EmptyPage`                              | `page`                          | Active                                 |
-| `Application` (+ `Routing`, `Presentation`)               | `application`, `material-app`   | Active                                 |
-| `IndexHtml`, `Favicon`                                    | `workspace-setup`               | Active                                 |
-| `[data]` bindings                                         | `data-service`                  | Active                                 |
-| `ShellPage`                                               | `app-shell`                     | CLI only                               |
-| `Presentation` (standalone)                               | `material-setup`                | CLI only (read through `material-app`) |
-| `Table`, `Dialog`, `Stepper`, `Tabs`, `ExpandablePanels`  | _planned spec-first schematics_ | Not yet                                |
+| OpenUI element(s)                                         | angular-django2 schematic                                                  | AST input                              |
+| :-------------------------------------------------------- | :------------------------------------------------------------------------- | :------------------------------------- |
+| `Form` (+ `TextInputs`, `RangeControl`, `ActionControls`) | `reactive-form`                                                            | Active                                 |
+| `TextInputs`, `RangeControl`                              | `form-field`, `field-component`                                            | Active                                 |
+| `SurfaceContainers` (+ composed children by `[slot]`)     | `component`                                                                | Active                                 |
+| `SurfaceContainers` card (+ `OverlayContainers`)          | `complex-component`                                                        | Active                                 |
+| `[slot]` placement of composed children                   | `embed-component` (`--slot`)                                               | Active                                 |
+| `DashboardPage`, `EmptyPage`                              | `page`                                                                     | Active                                 |
+| `Application` (+ `Routing`, `Presentation`)               | `application`, `material-app`                                              | Active                                 |
+| `IndexHtml`, `Favicon`                                    | `workspace-setup`                                                          | Active                                 |
+| `[data]` bindings                                         | `data-service`                                                             | Active                                 |
+| `ShellPage`                                               | `app-shell`                                                                | CLI only                               |
+| `Presentation` (standalone)                               | `material-setup`                                                           | CLI only (read through `material-app`) |
+| `Table`, `Dialog`, `Stepper`, `Tabs`, `ExpandablePanels`  | _planned in [the implementation plan](openui-spec-implementation-plan.md)_ | Not yet                                |
 
 ---
 
