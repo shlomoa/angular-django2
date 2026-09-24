@@ -7,7 +7,9 @@ This document establishes the detailed, enumerated execution plan to transition 
 ## 1. Architectural Purpose and Background
 
 ### 1.1 The Problem: Fragmented, Schematic-Specific Schemas
+
 Currently, `angular-django2` public schematics published in [`projects/angular-django2/schematics/collection.json`](../projects/angular-django2/schematics/collection.json) are driven by individual Angular DevKit JSON schemas (`schema.json`). This model has several critical limitations:
+
 1. **Proprietary Embedded Document Schemas**:
    - `reactive-form` relies on an ad-hoc JSON contract defined under `definitions/reactiveFormDefinition` in [`projects/angular-django2/schematics/reactive-form/schema.json`](../projects/angular-django2/schematics/reactive-form/schema.json). It defines custom structures for fields, controls, validators, and backend endpoints that duplicate concepts standardized in OpenUI.
    - `workspace-setup` relies on `definitions/fileHook` in [`projects/angular-django2/schematics/workspace-setup/schema.json`](../projects/angular-django2/schematics/workspace-setup/schema.json).
@@ -18,12 +20,15 @@ Currently, `angular-django2` public schematics published in [`projects/angular-d
    - External orchestrators (such as `django-angular3` / `djng`) and UI designers produce technology-independent OpenUI documents. Requiring orchestration to break an OpenUI document into dozens of CLI commands with custom arguments creates friction, parser drift, and brittle generation scripts.
 
 ### 1.2 The Target: Document-Driven JSON-First Compiler (Option A)
+
 As specified in [`docs/openui-spec-implementation-plan.md`](openui-spec-implementation-plan.md):
+
 - `angular-django2` operates as a deterministic compiler consuming canonical OpenUI AST documents.
 - The document parsing and validation utility [`readOpenUiDocument()`](../projects/angular-django2/schematics/utility/openui.ts) is already implemented and validated by unit tests in [`projects/angular-django-validation/unit/schematics/schematics.openui.spec.ts`](../projects/angular-django-validation/unit/schematics/schematics.openui.spec.ts).
 - This plan establishes the phased roadmap to convert all schematic-specific input schemas to consume and compile directly from the OpenUI AST.
 
 ### 1.3 Repository Ownership Boundary (Issue #27)
+
 - **`openui-spec` Authority**: Owns the specification grammar, JSON Schema (`openui.schema.json`), vocabulary catalog (`openui.json`), and the canonical TypeScript parser/validator library (`@shlomoa/openui-spec`).
 - **`angular-django2` Authority**: Owns its public schematic contracts, deterministic Three-Layer code generation (Layer 1: HTML5/ARIA, Layer 2: Material 3/CDK, Layer 3: Signals/DRF), and Angular workspace files.
 - **`django-angular3` (`djng`) Authority**: Owns Django-side artifact selection, canonical OpenUI-to-schematic mapping, wrappers, orchestration, stage gating, and final generated-app acceptance.
@@ -72,32 +77,33 @@ graph TD
 
 Every schematic currently published in [`projects/angular-django2/schematics/collection.json`](../projects/angular-django2/schematics/collection.json) is mapped to its OpenUI 0.2.0 AST counterpart:
 
-| Schematic | Current Input Contract | Current Schema Limitation | Target OpenUI AST Representation (0.2.0) | Conversion Strategy |
-| :--- | :--- | :--- | :--- | :--- |
-| **`reactive-form`** | `--definition=<path>` pointing to `reactiveFormDefinition` | Bespoke proprietary JSON schema with custom field/validator objects | `views/form` (`id: form`, `type: Form`) with child `controls` and validation attributes | **Direct Replacement**: Deprecate `reactiveFormDefinition`; compile directly from `Form` AST subtree |
-| **`form-field`** | `--controlType`, `--appearance`, `--subscriptSizing` | Flat CLI flags for control kind and Material attributes | `controls/textInputs`, `rangeControl`, `choiceControls`, `pickerControl` | **AST Leaf Compiler**: Accepts `--document` + `--nodeId` pointing to control AST node |
-| **`field-component`** | `--kind` (text, email, password, textarea) | Convenience CLI wrapper over `form-field` | Leaf control primitive AST nodes | **AST Leaf Compiler**: Derives configuration from control node properties |
-| **`page`** | `--name`, `--routePath`, `--access`, `--authGuard`, `--navigationLabel`, `--navigationIcon` | CLI option bag mixing routing, security, and navigation metadata | `views/dashboard`, `views/emptyPage`, `shellPage`, or routed page AST nodes | **Page AST Compiler**: Maps OpenUI page identity, title, navigation, and nested containers to route & component |
-| **`component`** | `--name`, `--path`, `--standalone`, `--changeDetection` | Basic Angular CLI generator with embedding hooks | `containers/surfaceContainers` (`id: surfaceContainers`) | **Container AST Compiler**: Generates container component from surface container AST node |
-| **`complex-component`** | `--name`, `--features` (mixins, nested, projection, cdk-overlay), `--mode` | String-based feature flag list | Composite container AST with nested child slots or overlay containers | **Composite AST Compiler**: Generates component hierarchy driven by AST child elements |
-| **`embed-component`** | `--component`, `--parent`, `--selector`, `--inputs`, `--outputs` | Manual wiring of parent/child via CLI arguments | AST Tree Hierarchy (`parent.children = [child]`) | **AST Composition Engine**: Automated child injection at parent embedding hooks during recursive compilation |
-| **`material-app`** | `--name`, `--theme`, `--typography`, `--animations`, `--routing`, `--zoneless` | Monolithic application flags | `application` root element + `navigation` shell + `presentation` tokens | **App Shell Compiler**: Compiles root OpenUI application document into workspace shell |
-| **`application`** | `--name`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--style` | CLI application generator options | `application` root element | **Base App Compiler**: Standard OpenUI app structure without Material extras |
-| **`app-shell`** | `--project` | CLI project identifier | `shellPage` AST element | **Shell Compiler**: SSR/prerender shell mapped to `shellPage` |
-| **`material-setup`** | `--project`, `--theme`, `--typography`, `--animations` | Workspace styling flags | `presentation` (color, typography, visual states) | **Presentation Compiler**: Configures global theme tokens from OpenUI presentation model |
-| **`workspace-setup`** | `--name`, `--files` pointing to `fileHook` | Custom per-file content/template hooks | OpenUI static host assets (`indexHtml`, `favicon`) + workspace bootstrap | **Workspace Compiler**: Ingests host document assets from OpenUI root metadata |
-| **`data-service`** | `--name`, `--apiService`, `--apiPath`, `--flat`, `--skipTests` | CLI flags pointing to OpenAPI artifacts | `[data]`, `(sort)`, `(filter)`, `(paginate)` bindings in `widgets` and `views/report` | **Data Binding Compiler**: Ingests endpoint bindings from AST to generate typed service bridge |
-| **`openapi-setup`** | `--outputPath`, `--openapiSpecFile`, `--helpersPath` | CLI setup paths for external tool `ng-openapi-gen` | External contract configuration | **Infrastructure Tooling**: Stays CLI/config-driven; referenced by OpenUI data bindings |
-| **`project-structure`** | `--project`, `--prefix` | CLI project config | Application scaffold convention | **Infrastructure Tooling**: Executed as part of OpenUI application compilation |
-| **`service`** / **`class`** | `--name`, `--path`, `--project` | Generic Angular / TS generators | Framework primitives | **Utility Tooling**: Kept for ad-hoc generation; underlying models driven by AST |
-| **`ng-add`** | `{}` | Package installer | Tooling registration | **Unchanged**: Pure DevKit installation lifecycle |
-| **`table`, `dialog`, `stepper`, `tabs`** | *(Planned)* | — | `widgets/table`, `widgets/dialog`, `widgets/stepper`, `containers/tabs` | **Spec-First Schematics**: Built natively from day 1 to compile directly from OpenUI AST |
+| Schematic                                | Current Input Contract                                                                      | Current Schema Limitation                                           | Target OpenUI AST Representation (0.2.0)                                                | Conversion Strategy                                                                                             |
+| :--------------------------------------- | :------------------------------------------------------------------------------------------ | :------------------------------------------------------------------ | :-------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| **`reactive-form`**                      | `--definition=<path>` pointing to `reactiveFormDefinition`                                  | Bespoke proprietary JSON schema with custom field/validator objects | `views/form` (`id: form`, `type: Form`) with child `controls` and validation attributes | **Direct Replacement**: Deprecate `reactiveFormDefinition`; compile directly from `Form` AST subtree            |
+| **`form-field`**                         | `--controlType`, `--appearance`, `--subscriptSizing`                                        | Flat CLI flags for control kind and Material attributes             | `controls/textInputs`, `rangeControl`, `choiceControls`, `pickerControl`                | **AST Leaf Compiler**: Accepts `--document` + `--nodeId` pointing to control AST node                           |
+| **`field-component`**                    | `--kind` (text, email, password, textarea)                                                  | Convenience CLI wrapper over `form-field`                           | Leaf control primitive AST nodes                                                        | **AST Leaf Compiler**: Derives configuration from control node properties                                       |
+| **`page`**                               | `--name`, `--routePath`, `--access`, `--authGuard`, `--navigationLabel`, `--navigationIcon` | CLI option bag mixing routing, security, and navigation metadata    | `views/dashboard`, `views/emptyPage`, `shellPage`, or routed page AST nodes             | **Page AST Compiler**: Maps OpenUI page identity, title, navigation, and nested containers to route & component |
+| **`component`**                          | `--name`, `--path`, `--standalone`, `--changeDetection`                                     | Basic Angular CLI generator with embedding hooks                    | `containers/surfaceContainers` (`id: surfaceContainers`)                                | **Container AST Compiler**: Generates container component from surface container AST node                       |
+| **`complex-component`**                  | `--name`, `--features` (mixins, nested, projection, cdk-overlay), `--mode`                  | String-based feature flag list                                      | Composite container AST with nested child slots or overlay containers                   | **Composite AST Compiler**: Generates component hierarchy driven by AST child elements                          |
+| **`embed-component`**                    | `--component`, `--parent`, `--selector`, `--inputs`, `--outputs`                            | Manual wiring of parent/child via CLI arguments                     | AST Tree Hierarchy (`parent.children = [child]`)                                        | **AST Composition Engine**: Automated child injection at parent embedding hooks during recursive compilation    |
+| **`material-app`**                       | `--name`, `--theme`, `--typography`, `--animations`, `--routing`, `--zoneless`              | Monolithic application flags                                        | `application` root element + `navigation` shell + `presentation` tokens                 | **App Shell Compiler**: Compiles root OpenUI application document into workspace shell                          |
+| **`application`**                        | `--name`, `--routing`, `--standalone`, `--ssr`, `--zoneless`, `--style`                     | CLI application generator options                                   | `application` root element                                                              | **Base App Compiler**: Standard OpenUI app structure without Material extras                                    |
+| **`app-shell`**                          | `--project`                                                                                 | CLI project identifier                                              | `shellPage` AST element                                                                 | **Shell Compiler**: SSR/prerender shell mapped to `shellPage`                                                   |
+| **`material-setup`**                     | `--project`, `--theme`, `--typography`, `--animations`                                      | Workspace styling flags                                             | `presentation` (color, typography, visual states)                                       | **Presentation Compiler**: Configures global theme tokens from OpenUI presentation model                        |
+| **`workspace-setup`**                    | `--name`, `--files` pointing to `fileHook`                                                  | Custom per-file content/template hooks                              | OpenUI static host assets (`indexHtml`, `favicon`) + workspace bootstrap                | **Workspace Compiler**: Ingests host document assets from OpenUI root metadata                                  |
+| **`data-service`**                       | `--name`, `--apiService`, `--apiPath`, `--flat`, `--skipTests`                              | CLI flags pointing to OpenAPI artifacts                             | `[data]`, `(sort)`, `(filter)`, `(paginate)` bindings in `widgets` and `views/report`   | **Data Binding Compiler**: Ingests endpoint bindings from AST to generate typed service bridge                  |
+| **`openapi-setup`**                      | `--outputPath`, `--openapiSpecFile`, `--helpersPath`                                        | CLI setup paths for external tool `ng-openapi-gen`                  | External contract configuration                                                         | **Infrastructure Tooling**: Stays CLI/config-driven; referenced by OpenUI data bindings                         |
+| **`project-structure`**                  | `--project`, `--prefix`                                                                     | CLI project config                                                  | Application scaffold convention                                                         | **Infrastructure Tooling**: Executed as part of OpenUI application compilation                                  |
+| **`service`** / **`class`**              | `--name`, `--path`, `--project`                                                             | Generic Angular / TS generators                                     | Framework primitives                                                                    | **Utility Tooling**: Kept for ad-hoc generation; underlying models driven by AST                                |
+| **`ng-add`**                             | `{}`                                                                                        | Package installer                                                   | Tooling registration                                                                    | **Unchanged**: Pure DevKit installation lifecycle                                                               |
+| **`table`, `dialog`, `stepper`, `tabs`** | _(Planned)_                                                                                 | —                                                                   | `widgets/table`, `widgets/dialog`, `widgets/stepper`, `containers/tabs`                 | **Spec-First Schematics**: Built natively from day 1 to compile directly from OpenUI AST                        |
 
 ---
 
 ## 3. Unified Schematic Input Contract Architecture
 
 ### 3.1 Standard AST Options Schema
+
 All schematics producing UI components or application structure are enhanced with standardized document options:
 
 ```json
@@ -116,7 +122,9 @@ All schematics producing UI components or application structure are enhanced wit
 ```
 
 ### 3.2 Pure AST Compiler Core Pattern
+
 Each schematic is architected into two decoupled components:
+
 1. **Schema Resolver / CLI Adapter**:
    - If `--document` is supplied: reads and validates the document with [`readOpenUiDocument()`](../projects/angular-django2/schematics/utility/openui.ts). Resolves the target `OpenUiElement` node.
    - If legacy CLI flags are supplied: translates the flat CLI flags into a temporary, synthetic `OpenUiElement` AST node conforming to `@shlomoa/openui-spec`.
