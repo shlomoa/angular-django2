@@ -91,6 +91,9 @@ export function reactiveForm(options: ReactiveFormSchema): Rule {
     assertPackageDependencies(tree, 'reactive-form', REQUIRED_DEPENDENCIES);
 
     const { node, subject } = resolveFormNode(tree, options);
+    if (options.document === undefined) {
+      context.logger.warn(definitionDeprecationWarning(subject, node));
+    }
     compileFormFromAst(
       node,
       { tree, context, workspace, projectName, project, destinationPath },
@@ -214,6 +217,22 @@ export function compileFormFromAst(
   tree.create(stylesheetPath, reactiveFormStylesheet(templateOptions));
 
   return result;
+}
+
+/**
+ * Non-breaking deprecation warning for `--definition` (plan step 6.1). It
+ * carries the equivalent OpenUI `Form` node, so converting a definition needs
+ * no separate tool.
+ *
+ * @internal exported for direct unit testing.
+ */
+export function definitionDeprecationWarning(definitionPath: string, form: OpenUiElement): string {
+  return (
+    `--definition (reactiveFormDefinition) is deprecated; compile an OpenUI Form document with ` +
+    `--document instead. To convert "${definitionPath}", add this Form node to the children of an ` +
+    'OpenUI 0.2.0 document (see docs/cli/reactive-form.md#openui-form-documents) and pass ' +
+    `--document=<document> --nodeId=${form.id}:\n${JSON.stringify(form, null, 2)}`
+  );
 }
 
 /**

@@ -282,11 +282,17 @@ Each schematic is architected into two decoupled components:
 
 ### Phase 6: Deprecation, Legacy Adapter Layer, and Clean-Up
 
-- [ ] **6.1. Deprecate Proprietary Schemas**:
+- [x] **6.1. Deprecate Proprietary Schemas**:
   - Mark `definitions/reactiveFormDefinition` in [`reactive-form/schema.json`](../projects/angular-django2/schematics/reactive-form/schema.json) as deprecated in favor of OpenUI AST documents.
   - Log non-breaking deprecation warnings when legacy `--definition` files are supplied, including instructions for converting to OpenUI 0.2.0 form documents.
-- [ ] **6.2. Document Migration Tooling / Script**:
+- [x] **6.2. Document Migration Tooling / Script** _(dropped; see notes)_:
   - Provide an internal migration utility (`ngdj-migrate-form-definition`) converting legacy `reactiveFormDefinition` JSON files to OpenUI `form` documents.
+
+- **Phase 6 implementation notes** (maintainer decisions and resolved low-ambiguity decisions):
+  - Maintainer decision (6.2): no `ngdj-migrate-form-definition` utility. `reactiveFormDefinition` files exist only in this repository's specs and docs and in `django-angular3`, so there is no external population to migrate. The two repositories move to `--document` directly.
+  - The `--definition` deprecation warning (6.1) is the conversion instruction: it prints the equivalent OpenUI `Form` node (from the existing `reactiveFormDefinitionToAst` mapping) and the `--document` / `--nodeId` to use. A spec checks that this node compiles to output identical to the legacy definition.
+  - `--definition` carries `x-deprecated`, which the Angular CLI shows in `--help` and reports when the option is used. `definitions/reactiveFormDefinition` states the deprecation in its `description`, because a non-standard deprecation keyword could trip strict schema validation. Behavior is unchanged: legacy files still compile through the synthetic `Form` node.
+  - `docs/TUTORIAL.md` still teaches `--definition`; moving it to `--document` is part of Phase 7 documentation alignment.
 
 ---
 

@@ -706,6 +706,36 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
     expect(outputs(generateFromDocument(documentTree))).toEqual(outputs(generate(legacyTree)));
   });
 
+  it('TC-REACTIVE-FORM-OPENUI-DEPRECATION: warns on --definition with a Form node that compiles identically', () => {
+    const legacyContext = createContext() as unknown as {
+      logger: { warn: ReturnType<typeof vi.fn> };
+    };
+    const legacyTree = createApplicationTree();
+    reactiveForm({ name: 'contact', definition: 'contact-form.json' } as ReactiveFormSchema)(
+      legacyTree,
+      legacyContext as never,
+    );
+
+    const warning = String(legacyContext.logger.warn.mock.calls[0][0]);
+    expect(warning).toContain('--definition (reactiveFormDefinition) is deprecated');
+    expect(warning).toContain('--nodeId=contact:');
+
+    const form = JSON.parse(warning.slice(warning.indexOf(':\n') + 2));
+    const fromWarning = generateFromDocument(createDocumentTree(documentOf(form)), {
+      nodeId: form.id,
+    });
+    expect(outputs(fromWarning)).toEqual(outputs(legacyTree));
+
+    const documentContext = createContext() as unknown as {
+      logger: { warn: ReturnType<typeof vi.fn> };
+    };
+    reactiveForm({ name: 'contact', document: DOCUMENT_PATH } as ReactiveFormSchema)(
+      createDocumentTree(),
+      documentContext as never,
+    );
+    expect(documentContext.logger.warn).not.toHaveBeenCalled();
+  });
+
   it('TC-REACTIVE-FORM-OPENUI-03: round-trips every legacy definition feature through the Form AST', () => {
     const source = {
       title: 'Profile',

@@ -17,8 +17,8 @@ holds status, standing decisions, and environment notes.
 | 3     | `component`, `complex-component`, `embed-component`     | Done   | #127        |
 | 4     | `page`, `material-app`, `application`, `app-shell`, ... | Done   | #127        |
 | 5     | Master `compile` schematic                              | Done   | #127        |
-| 6     | Deprecation and legacy adapter                          | Next   | #127        |
-| 7     | Verification and documentation alignment                | —      |             |
+| 6     | Deprecation and legacy adapter                          | Done   | #127        |
+| 7     | Verification and documentation alignment                | Next   | #127        |
 
 Branch: `shlomoa/migrate_schematics_to_openui_phase3` (PR #127, against `main`).
 
@@ -38,6 +38,10 @@ Branch: `shlomoa/migrate_schematics_to_openui_phase3` (PR #127, against `main`).
   child of `Application` (`[theme]`, `[typography]`, `[animations]`);
   `[data]="<apiPath>#<ApiService>"` drives `data-service`; `IndexHtml`
   `[lang]`/`[dir]`/`[title]` and `Favicon` `[href]` drive `workspace-setup`.
+
+- Phase 6 (2026-09-24): no migration utility; `reactiveFormDefinition` files
+  exist only in angular-django2 and django-angular3. The `--definition`
+  warning prints the equivalent OpenUI `Form` node instead.
 
 Low-ambiguity decisions taken during each phase are recorded in the plan doc's
 "Phase N implementation notes".
@@ -101,3 +105,13 @@ commit, a confirmed push, and a browser demo with a screenshot.
 - Tests: `unit/integration/openui-compile.integration.spec.ts` (INT-OPENUI-01…04).
 - Demo: real Angular CLI `ng generate angular-django2:compile app.openui.json`
   in an empty workspace, then `ng build` and Chromium.
+
+## Phase 6 log
+
+- `--definition` deprecated (non-breaking): `x-deprecated` on the option, a
+  deprecation note on `definitions/reactiveFormDefinition`, and a warning that
+  prints the equivalent Form node (`definitionDeprecationWarning`).
+- Test: TC-REACTIVE-FORM-OPENUI-DEPRECATION (warning node round-trips to
+  identical output; no warning with `--document`).
+- Follow-up outside this repo: django-angular3 should switch its
+  reactive-form calls to `--document`.
