@@ -280,7 +280,13 @@ Maintainer decision (first run): the `Navigation` / `ToolBars` gap is fixed
 outside #106 by **compiling** the content, tracked in
 [#129](https://github.com/shlomoa/angular-django2/issues/129) with its own PR.
 Phase 4 is blocked until #129 is resolved (see Phase 4). After #131, #129's
-scope is finding 1. Findings 2–6 are new and not yet assigned to an issue.
+scope is finding 1.
+
+Maintainer decision (re-run): findings 2–6 are **documented as known
+limitations** in the #106 documents, not fixed and not tracked in an issue.
+They do not block any phase. Phases 3 and 4 must state each one where the
+affected behavior is described (§3.1 §1, §3.2 §1.x), with the §2.6 item it
+comes from, so no document presents these attributes as compiled.
 
 ---
 
@@ -293,7 +299,7 @@ Every schematic and every 0.3.0 catalog scope appears in exactly one class:
 | Section | Class                          | Content                                                                                                                                                                                                                                                                                                                                   |
 | :------ | :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | §0      | Classification legend          | Definitions of the classes below; links to the implementation plan and the migration plan; #27 ownership boundary.                                                                                                                                                                                                                        |
-| §1      | **Direct (OpenUI in)**         | Ingestion utilities (`readOpenUiDocument()`, `ast-compiler.ts`) and each schematic that compiles OpenUI nodes: OpenUI node types, input contract, **supported subset**, and test IDs.                                                                                                                                                     |
+| §1      | **Direct (OpenUI in)**         | Ingestion utilities (`readOpenUiDocument()`, `ast-compiler.ts`) and each schematic that compiles OpenUI nodes: OpenUI node types, input contract, **supported subset**, test IDs, and **known limitations** (§2.6 findings 2–6).                                                                                                          |
 | §2      | **Conceptual / CLI by design** | Schematics that correspond to OpenUI concepts but deliberately take CLI options (`material-setup`, `app-shell`), plus indirect primitives (for example the `complex-component` overlay vs. `widgets/dialog`).                                                                                                                             |
 | §3      | **Planned**                    | Spec-first schematics not yet built (`table`, `dialog`, `stepper`, `tabs`, `accordion`, `bottom-sheet`, `menu`, `feedback`, `date-picker`, `data-grid`, `chart`), with their OpenUI scopes.                                                                                                                                               |
 | §4      | **Tooling only**               | `ng-add`, `project-structure`, `openapi-setup`, `service`, `class` (and `workspace-setup` only if Phase 2 shows no OpenUI input).                                                                                                                                                                                                         |
@@ -347,7 +353,8 @@ Every schematic and every 0.3.0 catalog scope appears in exactly one class:
 
 ### Phase 3: Refresh `docs/openui-spec-implementation-plan.md`
 
-Apply §2.1, §2.2, §2.3, and §3.2.
+Apply §2.1, §2.2, §2.3, and §3.2. Where the plan describes current application
+compilation, list §2.6 findings 2–6 as known limitations.
 
 ### Phase 4: Refresh `docs/ngdj-openui-spec-mapping.md`
 
@@ -358,7 +365,8 @@ and `material-app` rows of §2.5 and finding 1 of §2.6 against the new code and
 tests, and document the resolved behavior.
 
 Apply §2.1, §2.4, §3.1, and the Phase 2 evidence table. Remove the old §1 table
-rather than keeping it next to the new one.
+rather than keeping it next to the new one. List §2.6 findings 2–6 as known
+limitations of the affected schematics (`application`, `material-app`, `page`).
 
 ### Phase 5: Cross-Document Validation
 
@@ -396,6 +404,7 @@ the exclusion. For the demo:
 ## 5. Acceptance Criteria (from #106)
 
 - [ ] Neither document describes planned behavior as implemented.
+- [ ] §2.6 findings 2–6 are listed as known limitations (maintainer decision).
 - [ ] Parser ingestion status distinguishes utility support from production
       schematic integration.
 - [ ] Every active mapping has a supporting schematic contract and test
