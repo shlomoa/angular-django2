@@ -430,6 +430,14 @@ the exclusion. For the demo:
 3. Publish a before/after page (for each document: `main` version vs. refreshed
    version, key changes) together with the screenshots.
 
+Result: preview sites were built from `main` (`93ee42a`, "before") and from
+this branch ("after") with a temporary, uncommitted `mkdocs.yml` that removes
+both documents from `exclude_docs` and adds an "OpenUI (preview)" nav section
+(non-strict). Screenshots cover mapping §0, §1, §2, and §5, plan §1 and §5, and
+the matching "before" sections. They are published with the key changes and
+the Phase 5 results on a private before/after page (link in PR #133 and the
+issue #106 thread, once shared by the maintainer).
+
 ### Phase 7: Review, Commit, and PR
 
 1. Show the diff and the demo to the maintainer; wait for approval.
