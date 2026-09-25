@@ -176,7 +176,9 @@ The refreshed docs must not describe a public `compile` schematic.
 Re-verified on `55efb54` (#131, `@shlomoa/openui-spec` 0.3.0) from code
 (`schematics/<name>/{index,ast}.ts`, `utility/ast-compiler.ts`,
 `utility/openui.ts`), from the named tests, and from runtime probes against the
-built schematics. The tests pass `document` to the schematic or to its compiler.
+built schematics. The `application` and `material-app` rows and §2.6 finding 1
+were re-verified on `93ee42a` after #132 (`ToolBar` compilation). The tests pass
+`document` to the schematic or to its compiler.
 Every node type below exists in the 0.3.0 catalog. Attributes outside the listed
 subset are rejected (`assertAstAttributes`) unless §2.6 says otherwise. Test IDs
 are under `projects/angular-django-validation/unit/schematics/`.
@@ -210,11 +212,11 @@ root. They reject a missing node or a node of the wrong type.
 | `app-shell`         | No OpenUI input; pass-through to Angular's SSR app-shell (#127, `f833a81`). OpenUI `ShellPage` maps to the `material-app` layout (`a11e9f3`).                                                                              | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | —                                                                                                                                                                                                                                                                                                                                                                                                        | —                                                                                               |
 | Master compiler     | Validation-only, not shipped: `unit/integration/openui-application-compiler.ts`                                                                                                                                            | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | —                                                                                                                                                                                                                                                                                                                                                                                                        | `unit/integration/openui-application.integration.spec.ts`                                       |
 
-Phase 1 baseline on the merged branch (`b1d277b`: `main` `55efb54` plus this
-plan), Linux, Node 24.15.0, npm 11.12.1, platform-native `npm ci`:
-`format:check`, `lint`, `build` ✅; `test:ci` ✅ (node: 24 files / 244 tests;
-reference app: 9 files / 50 tests); `pack:dry-run` ✅; `docs:build` ✅ (mkdocs
-1.6.1, `--strict`). The first run on `7e7047a` had 243 node tests.
+Phase 1 baseline on `main` at `93ee42a` (after #128 and #132), Linux, Node
+24.15.0, npm 11.12.1, platform-native `npm ci`: `format:check`, `lint`, `build`
+✅; `test:ci` ✅ (node: 24 files / 247 tests; reference app: 9 files / 50
+tests); `pack:dry-run` ✅; `docs:build` ✅ (mkdocs 1.6.1, `--strict`). Earlier
+runs: 243 node tests on `7e7047a`, 244 on `55efb54`.
 
 ### 2.6 Phase 2 findings: claims the code does not fully support
 
@@ -282,8 +284,9 @@ now compiled and validated by `material-app`, and `application` ignoring
 Maintainer decision (first run): the `Navigation` / `ToolBars` gap is fixed
 outside #106 by **compiling** the content, tracked in
 [#129](https://github.com/shlomoa/angular-django2/issues/129) with its own PR.
-Phase 4 is blocked until #129 is resolved (see Phase 4). After #131, #129's
-scope is finding 1.
+After #131, #129's scope was finding 1. #129 was closed as completed by #132
+(merged into `main` at `93ee42a`); finding 1 was re-verified there, so Phase 4
+is no longer blocked.
 
 Maintainer decision (re-run): findings 2–6 are **documented as known
 limitations** in the #106 documents, not fixed and not tracked in an issue.
@@ -361,11 +364,12 @@ compilation, list §2.6 findings 2–6 as known limitations.
 
 ### Phase 4: Refresh `docs/ngdj-openui-spec-mapping.md`
 
-**Blocked by [#129](https://github.com/shlomoa/angular-django2/issues/129).**
-Do not start this phase until #129 is closed as completed and its PR is merged
-into `main`. Then merge `main` into this branch, re-verify the `application`
-and `material-app` rows of §2.5 and finding 1 of §2.6 against the new code and
-tests, and document the resolved behavior.
+**Unblocked.** [#129](https://github.com/shlomoa/angular-django2/issues/129)
+was closed as completed by
+[#132](https://github.com/shlomoa/angular-django2/pull/132), merged into `main`
+at `93ee42a`. The `application` and `material-app` rows of §2.5 and finding 1 of
+§2.6 were re-verified there. #132 also edited `docs/ngdj-openui-spec-mapping.md`
+(`ToolBar` moved from Planned to Subset); start from that version.
 
 Apply §2.1, §2.4, §3.1, and the Phase 2 evidence table. Remove the old §1 table
 rather than keeping it next to the new one. List §2.6 findings 2–6 as known
