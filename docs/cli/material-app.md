@@ -42,8 +42,8 @@ node (the first, or the one named by `--node-id`); `--theme`, `--typography`,
 ng generate angular-django2:material-app --document=app.openui.json
 ```
 
-- `--name` defaults to the dasherized `Application` id; `[title]` sets the
-  toolbar title.
+- `--name` defaults to the dasherized `Application` id; `html[title]` sets the
+  existing toolbar title.
 - Routing is enabled when the `Application` has a `Routing` child.
 - A `Presentation` child sets `[theme]` (a `--theme` value) and `[typography]`
   / `[animations]` (`"true"` or `"false"`).
@@ -51,3 +51,7 @@ ng generate angular-django2:material-app --document=app.openui.json
   the page's `[route]`, `[title]`, and `[icon]` (see [`page`](page.md#openui-page-nodes)).
   `EmptyPage` nodes have no navigation. Navigation links require a `Routing`
   child.
+- An optional `ToolBar[ariaLabel]` adds its ordered `ToolBarRow` command rows
+  after the title row. Each `ToolAction` renders its required `[label]`, optional
+  `[icon]`, and `[disabled]` state; `(activate): null` generates a matching
+  `on<ActionId>Activate($event)` handler stub for the application to implement.

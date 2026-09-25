@@ -4,7 +4,10 @@ import type { OpenUiElement } from '@shlomoa/openui-spec';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { materialLayoutTemplate } from '../../../../projects/angular-django2/schematics/material-app/index';
-import { navigationLinksFromAst } from '../../../../projects/angular-django2/schematics/application/ast';
+import {
+  applicationFromAst,
+  navigationLinksFromAst,
+} from '../../../../projects/angular-django2/schematics/application/ast';
 import { updateIndexHtml } from '../../../../projects/angular-django2/schematics/workspace-setup/index';
 import { angularCollectionPath, collectionPath } from './schematics.helpers';
 
@@ -89,6 +92,36 @@ const ordersTable: OpenUiElement = {
   id: 'orderRows',
   type: 'Table',
   attrs: { '[data]': 'src/app/api/services#OrdersApiService', '(paginate)': null },
+};
+
+const toolBar: OpenUiElement = {
+  id: 'mainToolBar',
+  type: 'ToolBar',
+  attrs: { '[ariaLabel]': 'Shop actions' },
+  children: [
+    {
+      id: 'primaryToolBarRow',
+      type: 'ToolBarRow',
+      children: [
+        {
+          id: 'refresh',
+          type: 'ToolAction',
+          attrs: {
+            '[label]': 'Refresh',
+            '[icon]': 'refresh',
+            '[disabled]': 'true',
+            '(activate)': null,
+          },
+        },
+        { id: 'help', type: 'ToolAction', attrs: { '[label]': 'Help' } },
+      ],
+    },
+    {
+      id: 'secondaryToolBarRow',
+      type: 'ToolBarRow',
+      children: [{ id: 'about', type: 'ToolAction', attrs: { '[label]': 'About' } }],
+    },
+  ],
 };
 
 function openUiDocument(...children: OpenUiElement[]): string {
@@ -509,5 +542,203 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         DOCUMENT_PATH,
       ),
     ).toThrow('must be a quoted element-id string');
+  });
+
+  it('TC-APP-15: decodes ordered ToolBar rows and ToolAction attributes', () => {
+    const applicationWithToolBar = {
+      ...application,
+      children: [...(application.children ?? []), toolBar],
+    };
+
+    expect(
+      applicationFromAst(
+        JSON.parse(openUiDocument(applicationWithToolBar, ...pages)),
+        DOCUMENT_PATH,
+        undefined,
+      ).toolBar,
+    ).toEqual({
+      ariaLabel: 'Shop actions',
+      rows: [
+        {
+          actions: [
+            {
+              id: 'refresh',
+              label: 'Refresh',
+              icon: 'refresh',
+              disabled: true,
+              activate: true,
+            },
+            { id: 'help', label: 'Help', icon: undefined, disabled: false, activate: false },
+          ],
+        },
+        {
+          actions: [
+            { id: 'about', label: 'About', icon: undefined, disabled: false, activate: false },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('TC-APP-16: compiles ToolBar actions into the existing Material title toolbar', async () => {
+    const applicationWithToolBar = {
+      ...application,
+      children: [...(application.children ?? []), toolBar],
+    };
+    const generated = await runner.runSchematic(
+      'material-app',
+      { document: DOCUMENT_PATH },
+      await createWorkspace(openUiDocument(applicationWithToolBar, ...pages)),
+    );
+    const template = generated.readContent(`${APP}/app.html`);
+    const component = generated.readContent(`${APP}/app.ts`);
+    const styles = generated.readContent(`${APP}/app.scss`);
+
+    expect(template).toContain(
+      '<mat-toolbar color="primary" role="toolbar" aria-label="Shop actions">',
+    );
+    expect(template).toContain(
+      '<mat-toolbar-row>\n  <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">',
+    );
+    expect(template).toContain(
+      '<mat-toolbar-row>\n    <button mat-button disabled (click)="onRefreshActivate($event)"><mat-icon>refresh</mat-icon> Refresh</button>\n    <button mat-button>Help</button>\n  </mat-toolbar-row>',
+    );
+    expect(template).toContain(
+      '<mat-toolbar-row>\n    <button mat-button>About</button>\n  </mat-toolbar-row>',
+    );
+    expect(component).toContain('onRefreshActivate($event: unknown): void {');
+    expect(component).toContain("throw new Error('onRefreshActivate is not implemented');");
+    expect(styles).toContain('top: 192px;');
+  });
+
+  it('TC-APP-17: rejects invalid ToolBar content for both Application consumers', async () => {
+    const invalidToolBar = {
+      id: 'invalidToolBar',
+      type: 'ToolBar',
+      attrs: { '[bogus]': 'ignored' },
+    } satisfies OpenUiElement;
+    const invalidApplication = { ...application, children: [invalidToolBar] };
+
+    for (const schematic of ['application', 'material-app']) {
+      await expect(
+        runner.runSchematic(
+          schematic,
+          { document: DOCUMENT_PATH },
+          await createWorkspace(openUiDocument(invalidApplication)),
+        ),
+      ).rejects.toThrow('unsupported attribute(s): [bogus]');
+    }
+
+    const invalidCases: [OpenUiElement, string][] = [
+      [
+        { id: 'wrongRow', type: 'ToolBar', children: [{ id: 'text', type: 'TextInputs' }] },
+        'ToolBar may contain only ToolBarRow children',
+      ],
+      [
+        {
+          id: 'rowAttribute',
+          type: 'ToolBar',
+          children: [
+            {
+              id: 'row',
+              type: 'ToolBarRow',
+              attrs: { '[bogus]': 'ignored' },
+            },
+          ],
+        },
+        'unsupported attribute(s): [bogus]',
+      ],
+      [
+        {
+          id: 'wrongAction',
+          type: 'ToolBar',
+          children: [
+            {
+              id: 'row',
+              type: 'ToolBarRow',
+              children: [{ id: 'text', type: 'TextInputs' }],
+            },
+          ],
+        },
+        'ToolBarRow may contain only ToolAction children',
+      ],
+      [
+        {
+          id: 'missingLabel',
+          type: 'ToolBar',
+          children: [
+            { id: 'row', type: 'ToolBarRow', children: [{ id: 'action', type: 'ToolAction' }] },
+          ],
+        },
+        'requires a non-empty [label]',
+      ],
+      [
+        {
+          id: 'invalidDisabled',
+          type: 'ToolBar',
+          children: [
+            {
+              id: 'row',
+              type: 'ToolBarRow',
+              children: [
+                {
+                  id: 'action',
+                  type: 'ToolAction',
+                  attrs: { '[label]': 'Action', '[disabled]': 'yes' },
+                },
+              ],
+            },
+          ],
+        },
+        'attribute "[disabled]" must be "true" or "false"',
+      ],
+      [
+        {
+          id: 'childAction',
+          type: 'ToolBar',
+          children: [
+            {
+              id: 'row',
+              type: 'ToolBarRow',
+              children: [
+                {
+                  id: 'action',
+                  type: 'ToolAction',
+                  attrs: { '[label]': 'Action' },
+                  children: [{ id: 'nested', type: 'TextInputs' }],
+                },
+              ],
+            },
+          ],
+        },
+        'ToolAction and may not contain children',
+      ],
+      [
+        {
+          id: 'invalidActivate',
+          type: 'ToolBar',
+          children: [
+            {
+              id: 'row',
+              type: 'ToolBarRow',
+              children: [
+                {
+                  id: 'action',
+                  type: 'ToolAction',
+                  attrs: { '[label]': 'Action', '(activate)': 'callAction()' },
+                },
+              ],
+            },
+          ],
+        },
+        '(activate) must be null when present',
+      ],
+    ];
+    for (const [invalidToolBarNode, message] of invalidCases) {
+      const invalid = { ...application, children: [invalidToolBarNode] };
+      expect(() =>
+        applicationFromAst(JSON.parse(openUiDocument(invalid)), DOCUMENT_PATH, undefined),
+      ).toThrow(message);
+    }
   });
 });
