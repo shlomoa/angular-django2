@@ -293,7 +293,8 @@ Each finding was confirmed with a runtime probe against the built
     Phase 3). In `table.example.json` at `v0.3.0`, column nodes are typed
     `Table`, pagination `NavigationWidgets`, and the empty state
     `FeedbackWidgets`. `Column`, `Pagination`, and `EmptyState` are not catalog
-    types, and the scope's own child model is `tr`.
+    types, and the scope's own child model is `tr`. Reported upstream as
+    [openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154).
 
 Resolved since the first run on `7e7047a`: `Navigation` and `Routing` content is
 now compiled and validated by `material-app`, and `application` ignoring

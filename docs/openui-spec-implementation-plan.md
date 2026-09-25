@@ -289,7 +289,9 @@ table scope.
     `(pageChange)`;
   - an empty-state node (typed `FeedbackWidgets`) with `[message]`.
 
-  `Column`, `Pagination`, and `EmptyState` are not OpenUI types. Before
+  `Column`, `Pagination`, and `EmptyState` are not OpenUI types. The example
+  does not conform to the scope's own contract; see
+  [openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154). Before
   `ngdj:table` depends on these attributes, they must become part of the
   `openui-spec` contract (§1.3).
 
