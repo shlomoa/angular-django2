@@ -14,12 +14,12 @@ export const THEME_MAPPING: Record<string, string> = {
  * Material layout template for app.component.html
  * Responsive sidenav layout with toolbar and content area
  */
-export const MATERIAL_LAYOUT_TEMPLATE = `<mat-toolbar color="primary">
-  <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">
+export const MATERIAL_LAYOUT_TEMPLATE = `<mat-toolbar color="primary"TOOLBAR_ATTRIBUTES>
+TOOLBAR_TITLE_ROW_START  <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">
     <mat-icon>menu</mat-icon>
   </button>
   <span>{{ title }}</span>
-</mat-toolbar>
+TOOLBAR_TITLE_ROW_ENDTOOLBAR_ROWS</mat-toolbar>
 
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #drawer mode="side" opened class="sidenav">
@@ -42,7 +42,7 @@ export const MATERIAL_LAYOUT_TEMPLATE = `<mat-toolbar color="primary">
  */
 export const MATERIAL_LAYOUT_STYLES = `.sidenav-container {
   position: absolute;
-  top: 64px;
+  top: TOOLBAR_HEIGHT;
   bottom: 0;
   left: 0;
   right: 0;
@@ -89,6 +89,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class CLASS_NAME {
   title = 'REPLACE_APP_NAME';
+  TOOLBAR_ACTION_HANDLERS
 }
 `;
 

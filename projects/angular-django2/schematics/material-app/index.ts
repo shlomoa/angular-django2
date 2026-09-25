@@ -1,3 +1,4 @@
+import { strings } from '@angular-devkit/core';
 import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
 import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
@@ -8,6 +9,7 @@ import {
   navigationLinksFromAst,
   presentationFromAst,
   type NavigationAstLink,
+  type ToolBarAstOptions,
 } from '../application/ast';
 import { escapeTemplateText } from '../component/ast';
 import { readOpenUiDocument } from '../utility/openui';
@@ -33,6 +35,8 @@ export interface MaterialLayoutOptions {
   title?: string;
   /** Links added after the Home link, in order. */
   navigation?: readonly NavigationAstLink[];
+  /** Command rows added after the title row. */
+  toolBar?: ToolBarAstOptions;
 }
 
 /** Options the OpenUI document describes; they cannot be combined with `--document`. */
@@ -93,7 +97,7 @@ function resolveMaterialAppOptions(
       DEFAULT_MATERIAL_APP_OPTIONS.theme) as ResolvedMaterialAppSchema['theme'],
     typography: presentation.typography ?? DEFAULT_MATERIAL_APP_OPTIONS.typography,
     animations: presentation.animations ?? DEFAULT_MATERIAL_APP_OPTIONS.animations,
-    layout: { title: host?.title, navigation },
+    layout: { title: host?.title, navigation, toolBar: app.toolBar },
   };
 }
 
@@ -298,7 +302,7 @@ export function generateMaterialLayout(
   const htmlPaths = [`${appRoot}/app.html`, `${appRoot}/app.component.html`];
   const htmlPath = htmlPaths.find((p) => tree.exists(p));
   if (htmlPath) {
-    tree.overwrite(htmlPath, materialLayoutTemplate(layout.navigation ?? []));
+    tree.overwrite(htmlPath, materialLayoutTemplate(layout.navigation ?? [], layout.toolBar));
     context.logger.info(`Updated Material layout template ${htmlPath}.`);
   } else {
     context.logger.warn(`Could not find app template file for project "${projectName}".`);
@@ -312,7 +316,7 @@ export function generateMaterialLayout(
   ];
   const stylePath = stylePaths.find((p) => tree.exists(p));
   if (stylePath) {
-    tree.overwrite(stylePath, MATERIAL_LAYOUT_STYLES);
+    tree.overwrite(stylePath, materialLayoutStyles(layout.toolBar));
     context.logger.info(`Updated Material layout styles ${stylePath}.`);
   } else {
     context.logger.warn(`Could not find app style file for project "${projectName}".`);
@@ -335,7 +339,8 @@ export function generateMaterialLayout(
     )
       .replace('TEMPLATE_FILE', templateFile)
       .replace('STYLE_FILE', styleFile)
-      .replace('CLASS_NAME', className);
+      .replace('CLASS_NAME', className)
+      .replace('TOOLBAR_ACTION_HANDLERS', materialLayoutActionHandlers(layout.toolBar));
     tree.overwrite(tsPath, componentContent);
     context.logger.info(`Updated Material layout component ${tsPath}.`);
   } else {
@@ -351,7 +356,10 @@ export function generateMaterialLayout(
  *
  * @internal exported for direct unit testing.
  */
-export function materialLayoutTemplate(navigation: readonly NavigationAstLink[]): string {
+export function materialLayoutTemplate(
+  navigation: readonly NavigationAstLink[],
+  toolBar: ToolBarAstOptions | undefined = undefined,
+): string {
   const links = navigation.map((link) => {
     const icon = link.icon ? `        <mat-icon matListItemIcon>${link.icon}</mat-icon>\n` : '';
     const linkAttributes = link.disabled
@@ -368,7 +376,74 @@ export function materialLayoutTemplate(navigation: readonly NavigationAstLink[])
   return MATERIAL_LAYOUT_TEMPLATE.replace(
     '    </mat-nav-list>',
     `${links.join('')}    </mat-nav-list>`,
+  )
+    .replace('TOOLBAR_ATTRIBUTES', materialToolbarAttributes(toolBar))
+    .replace('TOOLBAR_TITLE_ROW_START', toolBar ? '  <mat-toolbar-row>\n' : '')
+    .replace('TOOLBAR_TITLE_ROW_END', toolBar ? '  </mat-toolbar-row>\n' : '')
+    .replace('TOOLBAR_ROWS', materialToolbarRows(toolBar));
+}
+
+function materialToolbarAttributes(toolBar: ToolBarAstOptions | undefined): string {
+  if (!toolBar?.ariaLabel) {
+    return '';
+  }
+  return ` role="toolbar" aria-label="${escapeTemplateAttribute(toolBar.ariaLabel)}"`;
+}
+
+function materialToolbarRows(toolBar: ToolBarAstOptions | undefined): string {
+  return (toolBar?.rows ?? [])
+    .map(
+      (row) =>
+        `  <mat-toolbar-row>\n${row.actions
+          .map((action) => {
+            const icon = action.icon
+              ? `<mat-icon>${escapeTemplateText(action.icon)}</mat-icon> `
+              : '';
+            const activate = action.activate
+              ? ` (click)="${materialToolbarActionHandler(action.id)}($event)"`
+              : '';
+            const disabled = action.disabled ? ' disabled' : '';
+            return `    <button mat-button${disabled}${activate}>${icon}${escapeTemplateText(action.label)}</button>\n`;
+          })
+          .join('')}  </mat-toolbar-row>\n`,
+    )
+    .join('');
+}
+
+function materialLayoutActionHandlers(toolBar: ToolBarAstOptions | undefined): string {
+  const handlers = [
+    ...new Set(
+      (toolBar?.rows ?? []).flatMap((row) =>
+        row.actions
+          .filter((action) => action.activate)
+          .map((action) => materialToolbarActionHandler(action.id)),
+      ),
+    ),
+  ];
+  if (handlers.length === 0) {
+    return '';
+  }
+  return `\n${handlers
+    .map(
+      (handler) =>
+        `  ${handler}($event: unknown): void {\n    throw new Error('${handler} is not implemented');\n  }`,
+    )
+    .join('\n\n')}\n`;
+}
+
+function materialToolbarActionHandler(actionId: string): string {
+  return `on${strings.classify(actionId)}Activate`;
+}
+
+function materialLayoutStyles(toolBar: ToolBarAstOptions | undefined): string {
+  return MATERIAL_LAYOUT_STYLES.replace(
+    'TOOLBAR_HEIGHT',
+    `${64 * (1 + (toolBar?.rows.length ?? 0))}px`,
   );
+}
+
+function escapeTemplateAttribute(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
 function escapeSingleQuotedString(value: string): string {

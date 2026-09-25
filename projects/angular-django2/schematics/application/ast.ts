@@ -64,6 +64,27 @@ export interface ApplicationAstOptions {
   node: OpenUiElement;
   name: string;
   routing: boolean;
+  toolBar: ToolBarAstOptions | undefined;
+}
+
+/** An application toolbar action compiled from a `ToolAction` node. */
+export interface ToolActionAstOptions {
+  id: string;
+  label: string;
+  icon: string | undefined;
+  disabled: boolean;
+  activate: boolean;
+}
+
+/** An ordered application toolbar row compiled from a `ToolBarRow` node. */
+export interface ToolBarRowAstOptions {
+  actions: readonly ToolActionAstOptions[];
+}
+
+/** An application toolbar compiled from a `ToolBar` node. */
+export interface ToolBarAstOptions {
+  ariaLabel: string | undefined;
+  rows: readonly ToolBarRowAstOptions[];
 }
 
 /** Presentation tokens an OpenUI `Presentation` node describes. */
@@ -110,6 +131,7 @@ export function applicationFromAst(
     node,
     name: strings.dasherize(node.id),
     routing: directChild(node, 'Routing', documentPath) !== undefined,
+    toolBar: toolBarFromAst(node, documentPath),
   };
 }
 
@@ -137,8 +159,87 @@ const NAV_ITEM_ATTRIBUTES = {
   disabled: '[disabled]',
 } as const;
 const NAV_GROUP_ATTRIBUTES = { label: '[label]', expanded: '[expanded]' } as const;
+const TOOL_BAR_ATTRIBUTES = { ariaLabel: '[ariaLabel]' } as const;
+const TOOL_ACTION_ATTRIBUTES = {
+  label: '[label]',
+  icon: '[icon]',
+  disabled: '[disabled]',
+  activate: '(activate)',
+} as const;
 const ROUTE_PATH_PATTERN = /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/;
 const NAVIGATION_ICON_PATTERN = /^[a-z0-9_]+$/;
+
+/**
+ * Compile the application `ToolBar` command surface. Its optional `(activate)`
+ * event is represented by a null-valued marker, so document data never becomes
+ * an unchecked Angular expression.
+ */
+export function toolBarFromAst(
+  application: OpenUiElement,
+  documentPath: string,
+): ToolBarAstOptions | undefined {
+  const toolBar = directChild(application, 'ToolBar', documentPath);
+  if (!toolBar) {
+    return undefined;
+  }
+
+  const subject = astNodeSubject(documentPath, toolBar);
+  assertAstAttributes(toolBar, Object.values(TOOL_BAR_ATTRIBUTES), subject);
+  return {
+    ariaLabel: readAstString(toolBar, TOOL_BAR_ATTRIBUTES.ariaLabel),
+    rows: (toolBar.children ?? []).map((row) => toolBarRowFromAst(row, documentPath)),
+  };
+}
+
+function toolBarRowFromAst(row: OpenUiElement, documentPath: string): ToolBarRowAstOptions {
+  const subject = astNodeSubject(documentPath, row);
+  if (row.type !== 'ToolBarRow') {
+    throw new SchematicsException(
+      `OpenUI node "${subject}" has type "${row.type}", but ToolBar may contain only ToolBarRow children.`,
+    );
+  }
+  assertAstAttributes(row, [], subject);
+
+  return {
+    actions: (row.children ?? []).map((action) => toolActionFromAst(action, documentPath)),
+  };
+}
+
+function toolActionFromAst(action: OpenUiElement, documentPath: string): ToolActionAstOptions {
+  const subject = astNodeSubject(documentPath, action);
+  if (action.type !== 'ToolAction') {
+    throw new SchematicsException(
+      `OpenUI node "${subject}" has type "${action.type}", but ToolBarRow may contain only ToolAction children.`,
+    );
+  }
+  assertAstAttributes(action, Object.values(TOOL_ACTION_ATTRIBUTES), subject);
+  if ((action.children ?? []).length > 0) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}" is a ToolAction and may not contain children.`,
+    );
+  }
+
+  const label = readAstString(action, TOOL_ACTION_ATTRIBUTES.label);
+  if (!label) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}" requires a non-empty ${TOOL_ACTION_ATTRIBUTES.label}.`,
+    );
+  }
+  const activate = TOOL_ACTION_ATTRIBUTES.activate in (action.attrs ?? {});
+  if (activate && action.attrs?.[TOOL_ACTION_ATTRIBUTES.activate] !== null) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": ${TOOL_ACTION_ATTRIBUTES.activate} must be null when present.`,
+    );
+  }
+
+  return {
+    id: action.id,
+    label,
+    icon: readAstString(action, TOOL_ACTION_ATTRIBUTES.icon),
+    disabled: readAstBoolean(action, TOOL_ACTION_ATTRIBUTES.disabled, subject) ?? false,
+    activate,
+  };
+}
 
 /**
  * Compile `Navigation` entries through their `Route` references. The OpenUI

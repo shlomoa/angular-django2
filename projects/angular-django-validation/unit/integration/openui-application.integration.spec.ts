@@ -51,6 +51,24 @@ const application: OpenUiElement = {
         },
       ],
     },
+    {
+      id: 'mainToolBar',
+      type: 'ToolBar',
+      attrs: { '[ariaLabel]': 'Shop actions' },
+      children: [
+        {
+          id: 'primaryToolBarRow',
+          type: 'ToolBarRow',
+          children: [
+            {
+              id: 'refresh',
+              type: 'ToolAction',
+              attrs: { '[label]': 'Refresh', '[icon]': 'refresh', '(activate)': null },
+            },
+          ],
+        },
+      ],
+    },
     { id: 'look', type: 'Presentation', attrs: { '[theme]': 'purple-green' } },
     { id: 'host', type: 'html', attrs: { '[lang]': 'en', '[title]': 'Shop admin' } },
   ],
@@ -135,6 +153,12 @@ describe('OpenUI application compilation (plan phase 5)', () => {
     );
     expect(generated.readContent(`${APP}/app.ts`)).toContain("title = 'Shop admin';");
     expect(generated.readContent(`${APP}/app.html`)).toContain('routerLink="/profile"');
+    expect(generated.readContent(`${APP}/app.html`)).toContain(
+      '(click)="onRefreshActivate($event)"',
+    );
+    expect(generated.readContent(`${APP}/app.ts`)).toContain(
+      "throw new Error('onRefreshActivate is not implemented');",
+    );
     expect(generated.readContent('/projects/shop/src/index.html')).toContain(
       '<title>Shop admin</title>',
     );
