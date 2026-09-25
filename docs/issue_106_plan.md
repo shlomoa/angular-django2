@@ -407,6 +407,16 @@ limitations of the affected schematics (`application`, `material-app`, `page`).
 5. `npm run format:check`, `npm run lint`, `npm run test:node`,
    `npm run docs:build` pass.
 
+Result (branch `shlomoa/issue_106_restart` at `6247295`, on `main` `93ee42a`):
+all five checks pass. Scripts 1–2 report no missing links, bad anchors,
+invalid scope names, or unclassified scopes (51 of 51 classified). Check 3
+finds obsolete names only in the mapping document's "obsolete names" sentence.
+Check 4: the Planned scopes, proposed schematic names, and roadmap items (11
+each), the known limitations, and the list of repository-local attributes agree
+between the two documents; both cite `@shlomoa/openui-spec` 0.3.0 and #27.
+Check 5: `format:check`, `lint`, `test:node` (247 tests), and `docs:build`
+pass.
+
 ### Phase 6: Visual Demonstration
 
 Both documents are in `mkdocs.yml` `exclude_docs` because their repo-relative
@@ -430,17 +440,17 @@ the exclusion. For the demo:
 
 ## 5. Acceptance Criteria (from #106)
 
-- [ ] Neither document describes planned behavior as implemented.
-- [ ] §2.6 findings 2–6 are listed as known limitations (maintainer decision).
-- [ ] Parser ingestion status distinguishes utility support from production
+- [x] Neither document describes planned behavior as implemented.
+- [x] §2.6 findings 2–6 are listed as known limitations (maintainer decision).
+- [x] Parser ingestion status distinguishes utility support from production
       schematic integration.
-- [ ] Every active mapping has a supporting schematic contract and test
+- [x] Every active mapping has a supporting schematic contract and test
       evidence (Phase 2 table).
-- [ ] OpenUI vocabulary matches exact canonical 0.3.0 names and casing.
-- [ ] Ownership boundaries align with #27, and the validation-only compiler
+- [x] OpenUI vocabulary matches exact canonical 0.3.0 names and casing.
+- [x] Ownership boundaries align with #27, and the validation-only compiler
       decision is respected.
-- [ ] Documentation links are valid.
-- [ ] `npm run format:check` passes.
+- [x] Documentation links are valid.
+- [x] `npm run format:check` passes.
 
 ---
 
