@@ -276,6 +276,25 @@ Each finding was confirmed with a runtime probe against the built
    `docs/ngdj-openui-spec-mapping.md`. Phases 3–4 fix the last two; the others
    are outside #106. (Checked by search.)
 
+10. **Most attributes the schematics read are not OpenUI 0.3.0 attributes**
+    (found in Phase 3). The implementation plan's "spec-defined identifiers
+    only" directive is therefore only partly met. Types and application-scope
+    attributes (`Routing`, `Route`, `Navigation`, `NavItem`, `NavGroup`,
+    `ToolBar`, `ToolAction`, `html`, `link`) are catalog-defined. The
+    attributes read on `Form` (except `(submit)`), `ActionControls`,
+    `TextInputs`, `RangeControl`, `SurfaceContainers`, `OverlayContainers`,
+    `DashboardPage`, `EmptyPage`, and `Presentation`, plus `[slot]` and
+    `[data]`, are repository-local extensions: the 0.3.0 catalog defines no
+    attributes for those instance types. Checked by comparing each compiler's
+    attribute list with the catalog instance attributes. Phase 3 records this
+    as the current status of the directive; Phase 4 must not present these
+    attributes as OpenUI-defined.
+11. **The table example's child types differ from §2.2's wording** (found in
+    Phase 3). In `table.example.json` at `v0.3.0`, column nodes are typed
+    `Table`, pagination `NavigationWidgets`, and the empty state
+    `FeedbackWidgets`. `Column`, `Pagination`, and `EmptyState` are not catalog
+    types, and the scope's own child model is `tr`.
+
 Resolved since the first run on `7e7047a`: `Navigation` and `Routing` content is
 now compiled and validated by `material-app`, and `application` ignoring
 `Application[title]` is moot because the attribute was removed. The
