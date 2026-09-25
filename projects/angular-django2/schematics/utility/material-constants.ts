@@ -89,7 +89,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class CLASS_NAME {
   title = 'REPLACE_APP_NAME';
-TOOLBAR_ACTION_HANDLERS
+  TOOLBAR_ACTION_HANDLERS
 }
 `;
 
