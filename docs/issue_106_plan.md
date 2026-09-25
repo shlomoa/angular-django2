@@ -444,6 +444,13 @@ issue #106 thread, once shared by the maintainer).
 2. Commit, push, and link the PR to #106. Close #125 as superseded, with the
    maintainer's confirmation.
 
+Result: the maintainer approved the diff and the before/after page. The work is
+committed and pushed in [#133](https://github.com/shlomoa/angular-django2/pull/133)
+(Refs #106), and [#125](https://github.com/shlomoa/angular-django2/pull/125) is
+closed as superseded, with the maintainer's confirmation. Still open for the
+maintainer: whether to keep the "spec-defined identifiers only" directive
+(§2.6 finding 10).
+
 ---
 
 ## 5. Acceptance Criteria (from #106)
