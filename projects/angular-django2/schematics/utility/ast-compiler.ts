@@ -2,7 +2,8 @@
  * Shared OpenUI AST compiler core for document-driven schematics.
  *
  * Every schematic that compiles UI from OpenUI follows the same two-step
- * pattern (see `docs/migrate_schematics_to_openui_plan.md`, section 3.2):
+ * pattern (see section 3.2 of the migration plan, removed from `main` in #131;
+ * last version: https://github.com/shlomoa/angular-django2/blob/7e7047a/docs/migrate_schematics_to_openui_plan.md):
  *
  * 1. A schema resolver / CLI adapter produces one validated `OpenUiElement`,
  *    either by resolving a node inside a `--document` (`resolveAstNode`) or by
