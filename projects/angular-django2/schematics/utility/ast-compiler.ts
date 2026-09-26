@@ -17,14 +17,28 @@ import { SchematicsException } from '@angular-devkit/schematics';
 import type { SchematicContext, Tree } from '@angular-devkit/schematics';
 import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
 
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+
 import { readOpenUiDocument, validateOpenUiDocument } from './openui';
 import type { WorkspaceConfig, WorkspaceProject } from './workspace';
 
+function resolveOpenUiVersion(): string {
+  try {
+    const entryPath = require.resolve('@shlomoa/openui-spec');
+    const pkgPath = resolve(dirname(entryPath), '..', '..', 'package.json');
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+    return pkg.version;
+  } catch {
+    return '0.3.1';
+  }
+}
+
 /**
  * OpenUI specification version stamped on synthetic documents.
- * Keep aligned with the `@shlomoa/openui-spec` dependency in package.json.
+ * Dynamically resolved from the installed `@shlomoa/openui-spec` package.
  */
-export const SYNTHETIC_OPENUI_VERSION = '0.3.0';
+export const SYNTHETIC_OPENUI_VERSION = resolveOpenUiVersion();
 
 /** Root type used for synthetic documents; matches the canonical catalog root. */
 export const SYNTHETIC_OPENUI_ROOT_TYPE = 'html';

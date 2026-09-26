@@ -1,8 +1,8 @@
 import { Tree, SchematicsException } from '@angular-devkit/schematics';
 import { describe, expect, it } from 'vitest';
 
-import { materialSetup } from '../../../../projects/angular-django2/schematics/material-setup/index';
-import { projectStructure } from '../../../../projects/angular-django2/schematics/project-structure/index';
+import { materialSetup } from 'angular-django2/schematics/material-setup/index';
+import { projectStructure } from 'angular-django2/schematics/project-structure/index';
 import { createSchematicContext } from './schematics.helpers';
 
 describe('angular-django2 schematics', () => {

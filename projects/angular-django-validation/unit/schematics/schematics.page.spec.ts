@@ -1,7 +1,7 @@
 import { Tree } from '@angular-devkit/schematics';
 import { describe, expect, it } from 'vitest';
-import { page } from '../../../../projects/angular-django2/schematics/page/index';
-import type { PageSchema } from '../../../../projects/angular-django2/schematics/page/schema';
+import { page } from 'angular-django2/schematics/page/index';
+import type { PageSchema } from 'angular-django2/schematics/page/schema';
 
 function createApplicationTree(
   options: { multipleProjects?: boolean; protectedRoute?: boolean } = {},

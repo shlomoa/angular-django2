@@ -1,7 +1,7 @@
 import { Tree } from '@angular-devkit/schematics';
 import { describe, expect, it, vi } from 'vitest';
 
-import { openapiSetup } from '../../../../projects/angular-django2/schematics/openapi-setup/index';
+import { openapiSetup } from 'angular-django2/schematics/openapi-setup/index';
 
 describe('angular-django2 schematics', () => {
   describe('openapi-setup schematic', () => {

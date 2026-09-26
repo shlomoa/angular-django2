@@ -219,7 +219,7 @@ sources over lower-priority ones.
 ### OpenUI document input contracts
 
 - Schematics that compile UI accept `--document=<path>` (a workspace-relative
-  OpenUI 0.3.0 JSON document) and, where a document can hold several
+  OpenUI JSON document) and, where a document can hold several
   candidates, `--node-id=<id>`; without `--node-id` they compile the first
   element of a supported type. The document is loaded and validated with
   `@shlomoa/openui-spec` before any mutation.

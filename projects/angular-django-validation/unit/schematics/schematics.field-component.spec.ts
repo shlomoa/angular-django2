@@ -1,20 +1,15 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, type UnitTestTree } from '@angular-devkit/schematics/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import * as path from 'node:path';
-import { fieldComponent } from '../../../../projects/angular-django2/schematics/field-component/index';
-import type { FieldComponentSchema } from '../../../../projects/angular-django2/schematics/field-component/schema';
-import { formField } from '../../../../projects/angular-django2/schematics/form-field/index';
-import { createSchematicContext } from './schematics.helpers';
-
-const collectionPath = path.join(
-  __dirname,
-  '../../../../projects/angular-django2/dist/schematics/collection.json',
-);
-const angularCollectionPath = path.join(
-  __dirname,
-  '../../../../node_modules/@schematics/angular/collection.json',
-);
+import { fieldComponent } from 'angular-django2/schematics/field-component/index';
+import type { FieldComponentSchema } from 'angular-django2/schematics/field-component/schema';
+import { formField } from 'angular-django2/schematics/form-field/index';
+import {
+  angularCollectionPath,
+  collectionPath,
+  createSchematicContext,
+  openUiDocumentString,
+} from './schematics.helpers';
 
 describe('field-component schematic', () => {
   let runner: SchematicTestRunner;
@@ -192,15 +187,10 @@ describe('field-component schematic', () => {
   });
 
   it('TC-FIELD-OPENUI-01: compiles a TextInputs node exactly like the matching --kind', async () => {
-    const document = JSON.stringify({
-      version: '0.3.0',
-      id: 'root',
-      type: 'html',
-      children: [
-        { id: 'seats', type: 'RangeControl' },
-        { id: 'secret', type: 'TextInputs', attrs: { '[type]': 'password' } },
-      ],
-    });
+    const document = openUiDocumentString(
+      { id: 'seats', type: 'RangeControl' },
+      { id: 'secret', type: 'TextInputs', attrs: { '[type]': 'password' } },
+    );
     const documentTree = await createApplicationTree();
     documentTree.create('/documents/fields.openui.json', document);
     const flagTree = await createApplicationTree();

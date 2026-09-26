@@ -1,19 +1,15 @@
 import { Tree } from '@angular-devkit/schematics';
 import { describe, expect, it } from 'vitest';
 
-import { readOpenUiDocument } from '../../../../projects/angular-django2/schematics/utility/openui';
+import { readOpenUiDocument } from 'angular-django2/schematics/utility/openui';
+import { createOpenUiDocument } from './schematics.helpers';
 
-const VALID_DOCUMENT = {
-  version: '0.3.0',
-  id: 'root',
-  type: 'html',
-  children: [
-    { id: 'report', type: 'Report' },
-    { id: 'form', type: 'Form' },
-    { id: 'chart', type: 'Chart' },
-    { id: 'list', type: 'List' },
-  ],
-};
+const VALID_DOCUMENT = createOpenUiDocument(
+  { id: 'report', type: 'Report' },
+  { id: 'form', type: 'Form' },
+  { id: 'chart', type: 'Chart' },
+  { id: 'list', type: 'List' },
+);
 
 describe('OpenUI document utility', () => {
   it('TC-OPENUI-01: parses and validates a catalog-backed OpenUI document from the schematic tree', () => {

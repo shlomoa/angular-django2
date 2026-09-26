@@ -243,7 +243,7 @@ function toolActionFromAst(action: OpenUiElement, documentPath: string): ToolAct
 
 /**
  * Compile `Navigation` entries through their `Route` references. The OpenUI
- * validator checks catalog membership; this enforces the 0.3.0 application
+ * validator checks catalog membership; this enforces the OpenUI application
  * contract's same-document references before generated output is written.
  */
 export function navigationLinksFromAst(

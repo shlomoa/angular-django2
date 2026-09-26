@@ -1,16 +1,7 @@
 import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, type UnitTestTree } from '@angular-devkit/schematics/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import * as path from 'node:path';
-
-const collectionPath = path.join(
-  __dirname,
-  '../../../../projects/angular-django2/dist/schematics/collection.json',
-);
-const angularCollectionPath = path.join(
-  __dirname,
-  '../../../../node_modules/@schematics/angular/collection.json',
-);
+import { angularCollectionPath, collectionPath } from './schematics.helpers';
 
 describe('complex-component schematic', () => {
   let runner: SchematicTestRunner;

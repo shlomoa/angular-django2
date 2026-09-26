@@ -36,7 +36,7 @@ Supported options are limited to:
 
 ## OpenUI Form documents
 
-With `--document`, the schematic reads the OpenUI 0.3.0 document with the
+With `--document`, the schematic reads the OpenUI document with the
 canonical `@shlomoa/openui-spec` validator and compiles one `Form` node.
 A `--definition` file is translated into the same synthetic `Form` node first,
 so both inputs produce identical output and share every contract rule below.
@@ -49,7 +49,7 @@ ng generate angular-django2:reactive-form contact \
 
 ```json
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "id": "root",
   "type": "html",
   "children": [
@@ -98,7 +98,7 @@ control child.
 > **Deprecated:** `--definition` and `definitions/reactiveFormDefinition` are
 > deprecated in favor of `--document`. They keep working, and each run logs a
 > warning that contains the equivalent OpenUI `Form` node. Add that node to an
-> OpenUI 0.3.0 document and pass `--document=<document> --node-id=<id>`; the
+> OpenUI document and pass `--document=<document> --node-id=<id>`; the
 > generated form is identical.
 
 The definition file describes exactly one form. Its contract is published with

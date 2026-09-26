@@ -7,19 +7,14 @@ import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing';
 import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
 import { beforeEach, describe, expect, it } from 'vitest';
-import * as path from 'node:path';
 import { lastValueFrom } from 'rxjs';
 
 import { compileOpenUiApplication, planCompilation } from './openui-application-compiler';
-
-const collectionPath = path.join(
-  __dirname,
-  '../../../../projects/angular-django2/dist/schematics/collection.json',
-);
-const angularCollectionPath = path.join(
-  __dirname,
-  '../../../../node_modules/@schematics/angular/collection.json',
-);
+import {
+  angularCollectionPath,
+  collectionPath,
+  createOpenUiDocument,
+} from '../schematics/schematics.helpers';
 
 const DOCUMENT_PATH = 'app.openui.json';
 const APP = '/projects/shop/src/app';
@@ -74,49 +69,44 @@ const application: OpenUiElement = {
   ],
 };
 
-const appDocument: OpenUiDocument = {
-  version: '0.3.0',
-  id: 'root',
-  type: 'html',
-  children: [
-    application,
-    {
-      id: 'profile',
-      type: 'DashboardPage',
-      attrs: { '[title]': 'My profile', '[icon]': 'person' },
-      children: [
-        { id: 'summary', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
-        {
-          id: 'contact',
-          type: 'Form',
-          attrs: { '[title]': 'Contact', '[action]': '/api/contact/' },
-          children: [
-            { id: 'email', type: 'TextInputs', attrs: { '[type]': 'email', '[label]': 'Email' } },
-          ],
-        },
-      ],
-    },
-    { id: 'blank', type: 'EmptyPage' },
-    { id: 'helpPanel', type: 'SurfaceContainers', attrs: { '[title]': 'Help' } },
-    {
-      id: 'feedback',
-      type: 'Form',
-      attrs: { '[title]': 'Feedback', '[action]': '/api/feedback/' },
-      children: [
-        {
-          id: 'message',
-          type: 'TextInputs',
-          attrs: { '[type]': 'textarea', '[label]': 'Message' },
-        },
-      ],
-    },
-    {
-      id: 'orderRows',
-      type: 'Table',
-      attrs: { '[data]': 'src/app/api/services#OrdersApiService' },
-    },
-  ],
-};
+const appDocument: OpenUiDocument = createOpenUiDocument(
+  application,
+  {
+    id: 'profile',
+    type: 'DashboardPage',
+    attrs: { '[title]': 'My profile', '[icon]': 'person' },
+    children: [
+      { id: 'summary', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
+      {
+        id: 'contact',
+        type: 'Form',
+        attrs: { '[title]': 'Contact', '[action]': '/api/contact/' },
+        children: [
+          { id: 'email', type: 'TextInputs', attrs: { '[type]': 'email', '[label]': 'Email' } },
+        ],
+      },
+    ],
+  },
+  { id: 'blank', type: 'EmptyPage' },
+  { id: 'helpPanel', type: 'SurfaceContainers', attrs: { '[title]': 'Help' } },
+  {
+    id: 'feedback',
+    type: 'Form',
+    attrs: { '[title]': 'Feedback', '[action]': '/api/feedback/' },
+    children: [
+      {
+        id: 'message',
+        type: 'TextInputs',
+        attrs: { '[type]': 'textarea', '[label]': 'Message' },
+      },
+    ],
+  },
+  {
+    id: 'orderRows',
+    type: 'Table',
+    attrs: { '[data]': 'src/app/api/services#OrdersApiService' },
+  },
+);
 
 describe('OpenUI application compilation (plan phase 5)', () => {
   let runner: SchematicTestRunner;
@@ -220,7 +210,7 @@ describe('OpenUI application compilation (plan phase 5)', () => {
       await expect(
         compileApplication(
           DOCUMENT_PATH,
-          await createWorkspace({ version: '0.3.0', id: 'root', type: 'html', children }),
+          await createWorkspace(createOpenUiDocument(...(children as OpenUiElement[]))),
         ),
       ).rejects.toThrow(message);
     }
