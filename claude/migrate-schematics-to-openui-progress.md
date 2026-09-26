@@ -1,6 +1,7 @@
 # Schematics → OpenUI migration: progress
 
-Working log for [`docs/migrate_schematics_to_openui_plan.md`](../docs/migrate_schematics_to_openui_plan.md).
+Working log for [`docs/migrate_schematics_to_openui_plan.md`](https://github.com/shlomoa/angular-django2/blob/7e7047a/docs/migrate_schematics_to_openui_plan.md)
+(removed from `main` in #131; the link points to its last version).
 The plan doc holds the checkboxes and per-phase implementation notes; this file
 holds status, standing decisions, and environment notes.
 
