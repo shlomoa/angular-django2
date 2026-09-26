@@ -1,6 +1,6 @@
 # Mapping between `openui-spec` and `angular-django2`
 
-This document maps every `angular-django2` schematic and every OpenUI 0.3.0
+This document maps every `angular-django2` schematic and every OpenUI 0.3.1
 scope (`@shlomoa/openui-spec`, pinned in [`package.json`](../package.json)) to
 exactly one class. For the architecture and roadmap, see the
 [OpenUI Specification Implementation Plan](openui-spec-implementation-plan.md).
@@ -15,7 +15,7 @@ exactly one class. For the architecture and roadmap, see the
 | **Tooling only**               | Angular CLI or project tooling with no OpenUI counterpart.                                                           |
 | **Missing**                    | An OpenUI scope with no schematic, no coverage through another schematic, and no plan.                               |
 
-Scope paths are canonical OpenUI 0.3.0 `<category>/<id>` paths. Test IDs refer to
+Scope paths are canonical OpenUI 0.3.1 `<category>/<id>` paths. Test IDs refer to
 specs in `projects/angular-django-validation/unit/schematics/`. Some IDs are
 reused across spec files (for example `TC-APP-01…03` also exist in
 `schematics.material-app.spec.ts`), so every test reference names its spec file.
@@ -68,12 +68,12 @@ document describes (for example `--routing`, `--theme`, `--controlType`,
 `--apiService`); see each schematic's CLI documentation. Where `--nodeId`
 exists, it requires `--document`.
 
-### 1.3 Attributes outside the OpenUI 0.3.0 contract
+### 1.3 Attributes outside the OpenUI 0.3.1 contract
 
-The object types above are all OpenUI 0.3.0 catalog types, and the
+The object types above are all OpenUI 0.3.1 catalog types, and the
 application-scope attributes (`Routing`, `Route`, `Navigation`, `NavItem`,
 `NavGroup`, `ToolBar`, `ToolAction`, `html`, `link`) are catalog attributes.
-The 0.3.0 catalog defines **no attributes** for `Form` (except `(submit)`),
+The 0.3.1 catalog defines **no attributes** for `Form` (except `(submit)`),
 `ActionControls`, `TextInputs`, `RangeControl`, `SurfaceContainers`,
 `OverlayContainers`, `DashboardPage`, `EmptyPage`, or `Presentation`. The
 attributes these schematics read on them, plus `[slot]` and `[data]` and its
@@ -92,7 +92,7 @@ These are current behavior, documented by maintainer decision:
   flattened, and its `[label]` is not rendered. `page`'s `[icon]` is validated
   but not used.
 - Nested `Route` paths are not composed: a link to a child route uses the
-  child's `[path]` alone, although OpenUI 0.3.0 defines it as relative to the
+  child's `[path]` alone, although OpenUI 0.3.1 defines it as relative to the
   parent route.
 - `Route[target]` is checked to exist, not to be a page or content element.
 - Route paths have two unsynchronized sources: `page` registers
@@ -156,7 +156,7 @@ classified as Direct because it compiles `html` and `link` nodes (§1.2).
 
 ## 5. Missing
 
-OpenUI 0.3.0 scopes with no schematic, no coverage through another schematic,
+OpenUI 0.3.1 scopes with no schematic, no coverage through another schematic,
 and no plan:
 
 | OpenUI scope                                                            | Notes                                                                                                   |
@@ -183,7 +183,7 @@ and no plan:
 
 ---
 
-## 6. Naming conventions in OpenUI 0.3.0
+## 6. Naming conventions in OpenUI 0.3.1
 
 Scope ids are camelCase. Their number tells whether a scope is a discrete
 concept or a family:
@@ -199,7 +199,7 @@ concept or a family:
   `choiceControls`, `drawingAndCapture`, `displayPrimitives`,
   `linkAndScrollControls`, `toolBars`.
 
-Obsolete names from earlier versions of this document and their 0.3.0 names:
+Obsolete names from earlier versions of this document and their 0.3.1 names:
 `charts` → `chart`, `lists` → `list`, `tables` → `table`, `data_grid` →
 `dataGrid`, `forms` → `form`, `reports` → `report`, `pickerControls` →
 `pickerControl`, `rangeControls` → `rangeControl`, `statusIndicators` →
@@ -223,6 +223,6 @@ Other rules:
   `containers/expandablePanels`.
 - `table` is a single concept under `widgets/`; the former `Controls/Table/`
   scope was retired. Its normative attributes are `(sort)`, `(filter)`, and
-  `(paginate)`. The upstream example also uses attributes and child types
-  outside that contract
+  `(paginate)`, with `tr` row children. The 0.3.1 worked example follows this
+  contract; the 0.3.0 example did not
   ([openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154)).
