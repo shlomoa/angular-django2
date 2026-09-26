@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.5.1]
+
+- Added OpenUI 0.3.1 document input to existing application, Material application, page, component, complex-component, reactive-form, form-field, field-component, data-service, and workspace-setup schematics.
+- Added OpenUI-driven composition for supported container, page, form, routing, navigation, and toolbar content, with schema validation and targeted unit and integration coverage.
+- Deprecated `reactive-form --definition` in favor of OpenUI documents while preserving the existing definition contract.
+
 ## [0.5.0]
 
 - Restructured repository into a multi-project standalone architecture with 3 decoupled workspaces: `projects/angular-django2` (authoritative library & schematics), `projects/angular-django2-reference` (reference & tutorial app), and `projects/angular-django-validation` (unit, integration, and E2E validation).
