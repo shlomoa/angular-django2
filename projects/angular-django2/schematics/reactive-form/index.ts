@@ -230,7 +230,7 @@ export function definitionDeprecationWarning(definitionPath: string, form: OpenU
   return (
     `--definition (reactiveFormDefinition) is deprecated; compile an OpenUI Form document with ` +
     `--document instead. To convert "${definitionPath}", add this Form node to the children of an ` +
-    'OpenUI 0.3.0 document (see docs/cli/reactive-form.md#openui-form-documents) and pass ' +
+    'OpenUI document (see docs/cli/reactive-form.md#openui-form-documents) and pass ' +
     `--document=<document> --nodeId=${form.id}:\n${JSON.stringify(form, null, 2)}`
   );
 }

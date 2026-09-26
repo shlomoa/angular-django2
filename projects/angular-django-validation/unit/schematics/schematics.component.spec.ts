@@ -4,11 +4,11 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   addComponentSectionMarkers,
   addTemplateSectionMarkers,
-} from '../../../../projects/angular-django2/schematics/component/index';
+} from 'angular-django2/schematics/component/index';
 import {
   embedComponent,
   parseChildComponent,
-} from '../../../../projects/angular-django2/schematics/embed-component/index';
+} from 'angular-django2/schematics/embed-component/index';
 
 describe('component implementation hooks', () => {
   const generatedComponentTs = `import { Component } from '@angular/core';

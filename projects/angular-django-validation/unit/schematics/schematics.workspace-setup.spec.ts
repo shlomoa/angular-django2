@@ -2,7 +2,7 @@ import { Tree, SchematicsException } from '@angular-devkit/schematics';
 import type { vi } from 'vitest';
 import { describe, expect, it } from 'vitest';
 
-import { workspaceSetup } from '../../../../projects/angular-django2/schematics/workspace-setup/index';
+import { workspaceSetup } from 'angular-django2/schematics/workspace-setup/index';
 import { createMockContext, workspaceReadme, workspaceReadmePath } from './schematics.helpers';
 
 describe('angular-django2 schematics', () => {

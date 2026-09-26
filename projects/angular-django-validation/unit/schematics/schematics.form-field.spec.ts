@@ -1,10 +1,10 @@
 import { Tree } from '@angular-devkit/schematics';
 import type { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it } from 'vitest';
-import type { FormFieldSchema } from '../../../../projects/angular-django2/schematics/form-field/schema';
+import type { FormFieldSchema } from 'angular-django2/schematics/form-field/schema';
 
-import { formField } from '../../../../projects/angular-django2/schematics/form-field/index';
-import { createSchematicContext } from './schematics.helpers';
+import { formField } from 'angular-django2/schematics/form-field/index';
+import { createSchematicContext, openUiDocumentString } from './schematics.helpers';
 
 function createApplicationTree(projects = { demo: { root: '', sourceRoot: 'src' } }): UnitTestTree {
   const tree = Tree.empty() as UnitTestTree;
@@ -176,10 +176,7 @@ describe('form-field schematic: OpenUI control nodes', () => {
 
   function createDocumentTree(children: unknown[] = CONTROLS): UnitTestTree {
     const tree = createApplicationTree();
-    tree.create(
-      `/${DOCUMENT_PATH}`,
-      JSON.stringify({ version: '0.3.0', id: 'root', type: 'html', children }),
-    );
+    tree.create(`/${DOCUMENT_PATH}`, openUiDocumentString(...(children as never[])));
     return tree;
   }
 

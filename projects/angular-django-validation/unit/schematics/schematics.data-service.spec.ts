@@ -1,7 +1,7 @@
 import { Tree } from '@angular-devkit/schematics';
 import { describe, expect, it, vi } from 'vitest';
 
-import { dataService } from '../../../../projects/angular-django2/schematics/data-service/index';
+import { dataService } from 'angular-django2/schematics/data-service/index';
 
 describe('angular-django2 schematics', () => {
   describe('data-service schematic', () => {

@@ -1,38 +1,36 @@
-import type * as SchematicsModule from '@angular-devkit/schematics';
-import { Tree, externalSchematic } from '@angular-devkit/schematics';
+import { createRequire } from 'node:module';
+import { Tree } from '@angular-devkit/schematics';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@angular-devkit/schematics', async () => {
-  const actual = await vi.importActual<SchematicsModule>('@angular-devkit/schematics');
-
-  return {
-    ...actual,
-    externalSchematic: vi.fn((collectionName, schematicName, options) => {
-      void collectionName;
-      void schematicName;
-      void options;
-
-      return (tree: Tree) => tree;
-    }),
-  };
-});
+const req = createRequire(import.meta.url);
+const devkitRules = req('@angular-devkit/schematics/src/rules/schematic') as {
+  externalSchematic: unknown;
+};
 
 import {
   addMaterialDependencies,
   generateMaterialLayout,
   materialApp,
   updateIndexHtmlWithMaterialIcons,
-} from '../../../../projects/angular-django2/schematics/material-app/index';
+} from 'angular-django2/schematics/material-app/index';
 
 describe('angular-django2 schematics', () => {
-  const mockedExternalSchematic = vi.mocked(externalSchematic);
+  const originalExternalSchematic = devkitRules.externalSchematic;
+  let mockedExternalSchematic: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    mockedExternalSchematic.mockClear();
+    mockedExternalSchematic = vi.fn((collectionName, schematicName, options) => {
+      void collectionName;
+      void schematicName;
+      void options;
+
+      return (tree: Tree) => tree;
+    });
+    devkitRules.externalSchematic = mockedExternalSchematic;
   });
 
   afterEach(() => {
-    mockedExternalSchematic.mockReset();
+    devkitRules.externalSchematic = originalExternalSchematic;
   });
 
   describe('material-app schematic', () => {

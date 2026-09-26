@@ -12,13 +12,14 @@ import {
   createSyntheticAstNode,
   resolveAstNode,
   toAstNodeId,
-} from '../../../../projects/angular-django2/schematics/utility/ast-compiler';
-import { readOpenUiDocument } from '../../../../projects/angular-django2/schematics/utility/openui';
+  SYNTHETIC_OPENUI_VERSION,
+} from 'angular-django2/schematics/utility/ast-compiler';
+import { readOpenUiDocument } from 'angular-django2/schematics/utility/openui';
 
 const DOCUMENT_PATH = 'documents/app.openui.json';
 
 const APP_DOCUMENT = {
-  version: '0.3.0',
+  version: SYNTHETIC_OPENUI_VERSION,
   id: 'root',
   type: 'html',
   children: [
@@ -143,7 +144,7 @@ describe('OpenUI AST compiler core', () => {
       const document = createSyntheticAstDocument([form]);
 
       expect(document).toEqual({
-        version: '0.3.0',
+        version: SYNTHETIC_OPENUI_VERSION,
         id: 'root',
         type: 'html',
         children: [

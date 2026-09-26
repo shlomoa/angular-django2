@@ -37,6 +37,8 @@ projects/angular-django-validation/
 
 Run these scripts directly from within `projects/angular-django-validation/`:
 
+> **Note**: Test commands (`test:unit`, `test:e2e`, etc.) automatically trigger `build:package` (`npm --workspace=angular-django2 run build`) via npm `pretest` lifecycle hooks, ensuring validation always runs against a freshly built package.
+
 ### Unit Testing
 
 ```bash

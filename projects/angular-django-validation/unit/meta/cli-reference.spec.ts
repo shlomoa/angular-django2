@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 
 import { getRepoRoot } from '../../e2e/utils/temp_areas';
 
+import { collectionPath } from '../schematics/schematics.helpers';
+
 interface Collection {
   schematics: Record<string, unknown>;
 }
@@ -12,9 +14,7 @@ interface Collection {
 describe('CLI reference', () => {
   it('provides exactly one navigable page for every collection schematic', () => {
     const repoRoot = getRepoRoot();
-    const collection = JSON.parse(
-      readFileSync(join(repoRoot, 'projects/angular-django2/schematics/collection.json'), 'utf8'),
-    ) as Collection;
+    const collection = JSON.parse(readFileSync(collectionPath, 'utf8')) as Collection;
     const schematicNames = Object.keys(collection.schematics).sort();
     const cliDirectory = join(repoRoot, 'docs/cli');
     const documentedNames = readdirSync(cliDirectory)

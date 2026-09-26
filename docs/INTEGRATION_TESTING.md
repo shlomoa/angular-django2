@@ -39,9 +39,9 @@ The node-side integration suite is in
 
 These tests:
 
-- run under `npm run test:node`
+- run under `npm run test:node` (which automatically refreshes the package via `pretest:unit`)
 - use `SchematicTestRunner` from `@angular-devkit/schematics/testing`
-- execute compiled schematics from `projects/angular-django2/dist/schematics/collection.json`
+- execute compiled schematics resolved from the installed `angular-django2` package (`collection.json`)
 - validate real file generation, workspace mutations, idempotency, and
   schematic chaining without creating a full on-disk Angular workspace
 
@@ -146,9 +146,11 @@ validation:
 
 ## Prerequisites and caveats
 
-### Build first for integration and E2E flows
+### Package build and refresh behavior
 
-Run a build before integration-oriented validation:
+Test commands (`npm run test:unit`, `npm run test:node`, and `npm run test:e2e`) automatically trigger a package build via npm `pretest` lifecycle hooks (`build:package`), ensuring that `projects/angular-django2/dist` is always freshly compiled before test execution.
+
+You can also run a manual build at any time:
 
 ```bash
 npm run build
@@ -156,12 +158,9 @@ npm run build
 
 Why this matters:
 
-- `projects/angular-django-validation/unit/integration/schematics.integration.spec.ts` loads the compiled collection from
-  `projects/angular-django2/dist/schematics/collection.json`
-- `projects/angular-django-validation/e2e/test_application.spec.ts` installs the built package from
-  `projects/angular-django2/dist`
-- `projects/angular-django-validation/e2e/schematics.e2e.spec.ts` installs the built package from
-  `projects/angular-django2/dist`
+- the validation test suites load schematics, schemas, and AST helpers directly from the installed `angular-django2` package dependency (`file:../angular-django2/dist`)
+- `projects/angular-django-validation/e2e/test_application.spec.ts` installs the built package from `projects/angular-django2/dist`
+- `projects/angular-django-validation/e2e/schematics.e2e.spec.ts` installs the built package from `projects/angular-django2/dist`
 
 ### E2E prerequisites
 

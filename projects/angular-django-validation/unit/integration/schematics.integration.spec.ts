@@ -6,16 +6,11 @@ import { Tree } from '@angular-devkit/schematics';
 import { SchematicTestRunner, type UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
-import * as path from 'path';
-
-const collectionPath = path.join(
-  __dirname,
-  '../../../../projects/angular-django2/dist/schematics/collection.json',
-);
-const workspaceReadme = readFileSync(
-  path.join(__dirname, '../../../../projects/angular-django2/dist/README.md'),
-  'utf8',
-);
+import {
+  angularCollectionPath,
+  collectionPath,
+  workspaceReadme,
+} from '../schematics/schematics.helpers';
 
 describe('angular-django2 schematics integration tests', () => {
   let runner: SchematicTestRunner;
@@ -751,10 +746,7 @@ export const appConfig: ApplicationConfig = {
     };
 
     beforeEach(() => {
-      angularRunner = new SchematicTestRunner(
-        '@schematics/angular',
-        path.join(__dirname, '../../../../node_modules/@schematics/angular/collection.json'),
-      );
+      angularRunner = new SchematicTestRunner('@schematics/angular', angularCollectionPath);
     });
 
     it('INT-CMP-01: adds section markers to the generated component TypeScript and template', async () => {
@@ -915,10 +907,7 @@ export const appConfig: ApplicationConfig = {
     };
 
     beforeEach(() => {
-      angularRunner = new SchematicTestRunner(
-        '@schematics/angular',
-        path.join(__dirname, '../../../../node_modules/@schematics/angular/collection.json'),
-      );
+      angularRunner = new SchematicTestRunner('@schematics/angular', angularCollectionPath);
     });
 
     it('INT-RF-01: composes canonical form-field and field-component façade output', async () => {

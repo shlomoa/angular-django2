@@ -3,13 +3,17 @@ import { SchematicTestRunner, type UnitTestTree } from '@angular-devkit/schemati
 import type { OpenUiElement } from '@shlomoa/openui-spec';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { materialLayoutTemplate } from '../../../../projects/angular-django2/schematics/material-app/index';
+import { materialLayoutTemplate } from 'angular-django2/schematics/material-app/index';
 import {
   applicationFromAst,
   navigationLinksFromAst,
-} from '../../../../projects/angular-django2/schematics/application/ast';
-import { updateIndexHtml } from '../../../../projects/angular-django2/schematics/workspace-setup/index';
-import { angularCollectionPath, collectionPath } from './schematics.helpers';
+} from 'angular-django2/schematics/application/ast';
+import { updateIndexHtml } from 'angular-django2/schematics/workspace-setup/index';
+import {
+  angularCollectionPath,
+  collectionPath,
+  openUiDocumentString as openUiDocument,
+} from './schematics.helpers';
 
 const DOCUMENT_PATH = 'app.openui.json';
 const APP = '/projects/shop/src/app';
@@ -123,10 +127,6 @@ const toolBar: OpenUiElement = {
     },
   ],
 };
-
-function openUiDocument(...children: OpenUiElement[]): string {
-  return JSON.stringify({ version: '0.3.0', id: 'root', type: 'html', children });
-}
 
 describe('OpenUI page and application compilers (plan phase 4)', () => {
   let runner: SchematicTestRunner;

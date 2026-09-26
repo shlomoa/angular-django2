@@ -18,6 +18,15 @@
     "url": "git+https://github.com/shlomoa/angular-django2.git"
   },
   "schematics": "./schematics/collection.json",
+  "exports": {
+    "./schematics/*.json": "./schematics/*.json",
+    "./schematics/*": {
+      "types": "./schematics/*.d.ts",
+      "default": "./schematics/*.js"
+    },
+    "./README.md": "./README.md",
+    "./package.json": "./package.json"
+  },
   "ng-add": {
     "save": "devDependencies"
   },
@@ -52,7 +61,7 @@
     "@angular/material": "22.0.6",
     "@angular/platform-browser": "^22.0.8",
     "@angular/router": "^22.0.8",
-    "@shlomoa/openui-spec": "^0.3.0",
+    "@shlomoa/openui-spec": "^0.3.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

@@ -29,7 +29,7 @@ See [OpenUI Specification Implementation Plan](openui-spec-implementation-plan.m
 
 ### 1.1 OpenUI Document Input (AST Compilation)
 
-These schematics compile directly from a validated OpenUI 0.3.0 document
+These schematics compile directly from a validated OpenUI document
 (`--document`, `--node-id`); legacy CLI flags run through the same compiler as
 synthetic nodes. See [`migrate_schematics_to_openui_plan.md`](https://github.com/shlomoa/angular-django2/blob/main/docs/migrate_schematics_to_openui_plan.md)
 for the decisions behind each mapping.

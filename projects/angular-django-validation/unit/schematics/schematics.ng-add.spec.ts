@@ -1,7 +1,7 @@
 import { Tree, SchematicsException } from '@angular-devkit/schematics';
 import { describe, expect, it } from 'vitest';
 
-import { ngAdd } from '../../../../projects/angular-django2/schematics/ng-add/index';
+import { ngAdd } from 'angular-django2/schematics/ng-add/index';
 import { createSchematicContext } from './schematics.helpers';
 
 describe('angular-django2 schematics', () => {

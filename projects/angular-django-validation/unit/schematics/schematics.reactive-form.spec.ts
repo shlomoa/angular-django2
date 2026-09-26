@@ -4,19 +4,19 @@ import { Tree } from '@angular-devkit/schematics';
 import type { UnitTestTree } from '@angular-devkit/schematics/testing';
 import { describe, expect, it, vi } from 'vitest';
 
-import { fieldComponent } from '../../../../projects/angular-django2/schematics/field-component/index';
-import { reactiveForm } from '../../../../projects/angular-django2/schematics/reactive-form/index';
+import { fieldComponent } from 'angular-django2/schematics/field-component/index';
+import { reactiveForm } from 'angular-django2/schematics/reactive-form/index';
 import {
   REACTIVE_FORM_CONTROL_KINDS,
   REACTIVE_FORM_VALIDATOR_KINDS,
-} from '../../../../projects/angular-django2/schematics/reactive-form/schema';
-import type { ReactiveFormSchema } from '../../../../projects/angular-django2/schematics/reactive-form/schema';
+} from 'angular-django2/schematics/reactive-form/schema';
+import type { ReactiveFormSchema } from 'angular-django2/schematics/reactive-form/schema';
 import {
   reactiveFormDefinitionFromAst,
   reactiveFormDefinitionToAst,
-} from '../../../../projects/angular-django2/schematics/reactive-form/ast';
-import { parseReactiveFormDefinition } from '../../../../projects/angular-django2/schematics/reactive-form/definition';
-import { schematicSchemaPath } from './schematics.helpers';
+} from 'angular-django2/schematics/reactive-form/ast';
+import { parseReactiveFormDefinition } from 'angular-django2/schematics/reactive-form/definition';
+import { openUiDocumentString, schematicSchemaPath } from './schematics.helpers';
 
 const COMPONENT_PATH = '/src/app/features/contact-form/contact-form.ts';
 const TEMPLATE_PATH = '/src/app/features/contact-form/contact-form.html';
@@ -658,7 +658,7 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
   };
 
   function documentOf(...forms: unknown[]): string {
-    return JSON.stringify({ version: '0.3.0', id: 'root', type: 'html', children: forms });
+    return openUiDocumentString(...(forms as OpenUiElement[]));
   }
 
   function createDocumentTree(document: string = documentOf(CONTACT_FORM)): UnitTestTree {

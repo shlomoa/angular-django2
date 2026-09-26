@@ -28,17 +28,17 @@ import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
 import {
   APPLICATION_AST_TYPE,
   applicationFromAst,
-} from '../../../angular-django2/schematics/application/ast';
-import { SURFACE_CONTAINER_AST_TYPE } from '../../../angular-django2/schematics/component/ast';
-import { DATA_ATTRIBUTE } from '../../../angular-django2/schematics/data-service/ast';
-import { PAGE_AST_TYPES } from '../../../angular-django2/schematics/page/ast';
-import { FORM_AST_TYPE } from '../../../angular-django2/schematics/reactive-form/ast';
+} from 'angular-django2/schematics/application/ast';
+import { SURFACE_CONTAINER_AST_TYPE } from 'angular-django2/schematics/component/ast';
+import { DATA_ATTRIBUTE } from 'angular-django2/schematics/data-service/ast';
+import { PAGE_AST_TYPES } from 'angular-django2/schematics/page/ast';
+import { FORM_AST_TYPE } from 'angular-django2/schematics/reactive-form/ast';
 import {
   astNodeSubject,
   createAstNodeResolver,
   readAstString,
-} from '../../../angular-django2/schematics/utility/ast-compiler';
-import { readOpenUiDocument } from '../../../angular-django2/schematics/utility/openui';
+} from 'angular-django2/schematics/utility/ast-compiler';
+import { readOpenUiDocument } from 'angular-django2/schematics/utility/openui';
 
 const COLLECTION = 'angular-django2';
 

@@ -6,14 +6,18 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   escapeTemplateText,
   surfaceContainerTemplate,
-} from '../../../../projects/angular-django2/schematics/component/ast';
+} from 'angular-django2/schematics/component/ast';
 import {
   astInputBindings,
   readAstSlot,
   withoutCompositionAttributes,
-} from '../../../../projects/angular-django2/schematics/embed-component/compose';
-import { embedInTemplate } from '../../../../projects/angular-django2/schematics/embed-component/index';
-import { angularCollectionPath, collectionPath } from './schematics.helpers';
+} from 'angular-django2/schematics/embed-component/compose';
+import { embedInTemplate } from 'angular-django2/schematics/embed-component/index';
+import {
+  angularCollectionPath,
+  collectionPath,
+  openUiDocumentString as openUiDocument,
+} from './schematics.helpers';
 
 const DOCUMENT_PATH = 'ui.openui.json';
 const FEATURES = '/projects/demo-app/src/app/features';
@@ -65,10 +69,6 @@ const settingsPanel: OpenUiElement = {
     { id: 'save', type: 'SurfaceContainers', attrs: { '[slot]': 'actions' } },
   ],
 };
-
-function openUiDocument(...children: OpenUiElement[]): string {
-  return JSON.stringify({ version: '0.3.0', id: 'root', type: 'html', children });
-}
 
 describe('OpenUI composition (plan phase 3)', () => {
   let runner: SchematicTestRunner;
