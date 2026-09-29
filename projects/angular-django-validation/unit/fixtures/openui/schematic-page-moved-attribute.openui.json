@@ -1,0 +1,29 @@
+{
+  "version": "0.8.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "routing",
+      "type": "Routing",
+      "children": [
+        {
+          "id": "profileRoute",
+          "type": "Route",
+          "attrs": {
+            "uses.path": "\"me\"",
+            "uses.target": "\"profile\""
+          }
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "type": "DashboardPage",
+      "attrs": {
+        "uses.title": "\"Profile\"",
+        "uses.route": "\"me\""
+      }
+    }
+  ]
+}

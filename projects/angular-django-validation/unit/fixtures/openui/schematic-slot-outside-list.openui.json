@@ -1,0 +1,23 @@
+{
+  "version": "0.8.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "panel",
+      "type": "SurfaceContainers",
+      "attrs": {
+        "uses.title": "\"Panel\""
+      },
+      "children": [
+        {
+          "id": "aside",
+          "type": "SurfaceContainers",
+          "attrs": {
+            "uses.slot": "\"sidebar\""
+          }
+        }
+      ]
+    }
+  ]
+}

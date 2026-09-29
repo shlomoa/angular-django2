@@ -1,0 +1,14 @@
+{
+  "version": "0.8.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "home",
+      "type": "NavItem",
+      "attrs": {
+        "uses.route": "\"missingRoute\""
+      }
+    }
+  ]
+}

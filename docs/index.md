@@ -22,6 +22,13 @@ at `projects/angular-django2-reference` for interactive command visualizations
 and Material 3 theming demonstrations. See the
 [Reference Application Guide](REFERENCE_APP.md).
 
+## Describe a UI as an OpenUI document
+
+The UI schematics compile [OpenUI](https://github.com/shlomoa/openui-spec)
+documents. Read the [OpenUI documents reference](OPENUI_DOCUMENTS.md) for the
+attribute language and the elements each schematic reads, and the
+[examples](OPENUI_EXAMPLES.md) for complete documents you can compile.
+
 ## Generate focused features
 
 - **Components:** [component](cli/component.md),

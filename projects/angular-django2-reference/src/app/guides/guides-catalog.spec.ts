@@ -7,12 +7,21 @@ const guideIds: readonly GuideId[] = [
   'forms',
   'quality',
   'security',
+  'openui-documents',
 ];
 
 describe('guides catalog', () => {
   it('lists the planned guides in issue order', () => {
     expect(GUIDES.map((guide) => guide.id)).toEqual(guideIds);
-    expect(GUIDES.map((guide) => guide.order)).toEqual(['3.1', '3.2', '3.3', '3.4', '3.5', '3.6']);
+    expect(GUIDES.map((guide) => guide.order)).toEqual([
+      '3.1',
+      '3.2',
+      '3.3',
+      '3.4',
+      '3.5',
+      '3.6',
+      '3.7',
+    ]);
     expect(new Set(GUIDES.map((guide) => guide.id)).size).toBe(GUIDES.length);
   });
 
@@ -39,6 +48,18 @@ describe('guides catalog', () => {
     const forms = getGuide('forms');
 
     expect(forms.sections.map((section) => section.title)).toContain('(Inter)Actions');
+  });
+
+  it('teaches the OpenUI 0.8.0 attribute language', () => {
+    const openUi = getGuide('openui-documents');
+    const text = JSON.stringify(openUi.sections);
+
+    expect(openUi.name).toBe('OpenUI documents');
+    expect(text).toContain('version 0.8.0');
+    expect(text).toContain('uses.<name>');
+    expect(text).toContain('behaves.<name>');
+    expect(text).toContain('produces.<name>');
+    expect(text).not.toMatch(/\[title\]|\(submit\)/);
   });
 
   it('looks up guides by id and fails fast for unknown ids', () => {

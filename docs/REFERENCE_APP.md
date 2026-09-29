@@ -76,6 +76,7 @@ The reference application provides a dedicated guides section at `/guides` that 
 - **Forms & Validation**: Typed reactive forms, custom CVA fields, and Django REST Framework server error mappings.
 - **Data Flow & OpenAPI**: Bootstrapping `ng-openapi-gen` and wiring typed Django transport services.
 - **Quality & Security**: Zoneless testing, CSRF cookie handling, and production style budget enforcement.
+- **OpenUI Documents**: Describing a UI as an OpenUI 0.8.0 document (typed `uses.*`, `behaves.*`, and `produces.*` attributes), compiling it with `--document`, and reading the diagnostics.
 
 ## Standalone Subproject Configuration
 

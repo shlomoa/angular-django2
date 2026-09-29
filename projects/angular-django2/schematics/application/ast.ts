@@ -158,10 +158,10 @@ export interface NavigationAstLink {
   disabled: boolean;
 }
 
-const NAVIGATION_ATTRIBUTES = { ariaLabel: 'uses.ariaLabel' } as const;
-const NAV_GROUP_ATTRIBUTES = { label: 'uses.label', expanded: 'uses.expanded' } as const;
-const TOOL_BAR_ATTRIBUTES = { ariaLabel: 'uses.ariaLabel' } as const;
-const TOOL_ACTION_ATTRIBUTES = {
+export const NAVIGATION_ATTRIBUTES = { ariaLabel: 'uses.ariaLabel' } as const;
+export const NAV_GROUP_ATTRIBUTES = { label: 'uses.label', expanded: 'uses.expanded' } as const;
+export const TOOL_BAR_ATTRIBUTES = { ariaLabel: 'uses.ariaLabel' } as const;
+export const TOOL_ACTION_ATTRIBUTES = {
   label: 'uses.label',
   icon: 'uses.icon',
   disabled: 'uses.disabled',

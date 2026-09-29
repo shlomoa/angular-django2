@@ -37,6 +37,9 @@ nav:
           - Reactive form: cli/reactive-form.md
       - Pages:
           - Page: cli/page.md
+  - OpenUI documents:
+      - Reference: OPENUI_DOCUMENTS.md
+      - Examples: OPENUI_EXAMPLES.md
   - Integrate and extend:
       - OpenAPI setup: cli/openapi-setup.md
       - Data service: cli/data-service.md

@@ -1,0 +1,228 @@
+{
+  "description": "Documents that pin what the OpenUI 0.8.0 validator and the angular-django2 schematics accept and reject. Each case names its stage: grammar, document, catalog and contract are reported by @shlomoa/openui-spec with the listed diagnostics; schematic cases are valid documents that a schematic rejects; valid cases report nothing.",
+  "specVersion": "0.8.0",
+  "cases": [
+    {
+      "file": "grammar-bracket-attribute-key.openui.json",
+      "stage": "grammar",
+      "summary": "The pre-0.6.0 bracket key form is no longer a valid attribute key.",
+      "diagnostics": [
+        "/children/0/attrs/[title]: grammar/invalid-key: invalid attribute key [title]"
+      ]
+    },
+    {
+      "file": "grammar-parenthesis-attribute-key.openui.json",
+      "stage": "grammar",
+      "summary": "The pre-0.6.0 parenthesis key form is no longer a valid attribute key.",
+      "diagnostics": [
+        "/children/0/attrs/(submit): grammar/invalid-key: invalid attribute key (submit)"
+      ]
+    },
+    {
+      "file": "grammar-object-attribute-value.openui.json",
+      "stage": "grammar",
+      "summary": "An attribute value is a scalar or a list of scalars, never an object.",
+      "diagnostics": [
+        "/children/0/attrs/uses.title: grammar/invalid-attribute-value: a value must be a string, number, boolean, null, or a list of these"
+      ]
+    },
+    {
+      "file": "grammar-nested-list-value.openui.json",
+      "stage": "grammar",
+      "summary": "A list holds scalars only, so lists do not nest.",
+      "diagnostics": [
+        "/children/0/attrs/uses.tags: grammar/invalid-attribute-value: a value must be a string, number, boolean, null, or a list of these"
+      ]
+    },
+    {
+      "file": "grammar-invalid-id.openui.json",
+      "stage": "grammar",
+      "summary": "An element id is camelCase alphanumeric.",
+      "diagnostics": [
+        "/children/0/id: grammar/invalid-id: \"Contact-Form\" does not match ^[a-z][A-Za-z0-9]*$"
+      ]
+    },
+    {
+      "file": "grammar-missing-type.openui.json",
+      "stage": "grammar",
+      "summary": "Every element has a type.",
+      "diagnostics": ["/children/0/type: grammar/missing-property: missing required property type"]
+    },
+    {
+      "file": "grammar-unknown-property.openui.json",
+      "stage": "grammar",
+      "summary": "Configuration belongs in attrs, not in a loose member.",
+      "diagnostics": ["/children/0/label: grammar/unknown-property: unknown member label"]
+    },
+    {
+      "file": "document-unsupported-version.openui.json",
+      "stage": "document",
+      "summary": "A document declares the spec version the tool implements, exactly.",
+      "diagnostics": [
+        "/version: document/unsupported-version: spec version 0.4.0 is not 0.8.0, the version this tool implements"
+      ]
+    },
+    {
+      "file": "document-duplicate-id.openui.json",
+      "stage": "document",
+      "summary": "Element ids are unique in the whole document.",
+      "diagnostics": ["/children/1/id: document/duplicate-id: duplicate object id: email"]
+    },
+    {
+      "file": "catalog-unknown-type.openui.json",
+      "stage": "catalog",
+      "summary": "A type is an exact, case-sensitive catalog literal.",
+      "diagnostics": ["/children/0/type: catalog/unknown-type: unknown OpenUI object type: Buton"]
+    },
+    {
+      "file": "contract-boolean-written-as-string.openui.json",
+      "stage": "contract",
+      "summary": "A quoted string is a string literal, not a boolean.",
+      "diagnostics": [
+        "/children/0/attrs/uses.disabled: contract/wrong-value-type: uses.disabled must be boolean, not \"\\\"yes\\\"\""
+      ]
+    },
+    {
+      "file": "contract-number-where-string-declared.openui.json",
+      "stage": "contract",
+      "summary": "A declared string attribute does not take a number.",
+      "diagnostics": [
+        "/children/0/attrs/uses.label: contract/wrong-value-type: uses.label must be string, not 42"
+      ]
+    },
+    {
+      "file": "contract-unresolved-reference.openui.json",
+      "stage": "contract",
+      "summary": "A reference names an element of the same document.",
+      "diagnostics": [
+        "/children/0/attrs/uses.route: contract/unresolved-reference: uses.route names no element: missingRoute"
+      ]
+    },
+    {
+      "file": "contract-wrong-reference-type.openui.json",
+      "stage": "contract",
+      "summary": "A typed reference names an element of the declared type.",
+      "diagnostics": [
+        "/children/0/attrs/uses.route: contract/wrong-reference-type: uses.route names a Form, not a Route"
+      ]
+    },
+    {
+      "file": "contract-enum-value-outside-list.openui.json",
+      "stage": "contract",
+      "summary": "An enum attribute takes one of its listed values.",
+      "diagnostics": [
+        "/children/0/attrs/uses.dir: contract/wrong-value-type: uses.dir must be enum(ltr|rtl|auto), not \"\\\"sideways\\\"\""
+      ]
+    },
+    {
+      "file": "valid-expressions-markers-and-lists.openui.json",
+      "stage": "valid",
+      "summary": "The validator accepts an unquoted expression for a typed attribute, a null marker, a list, and an unprefixed key."
+    },
+    {
+      "file": "schematic-unquoted-string-literal.openui.json",
+      "stage": "schematic",
+      "schematic": "reactive-form",
+      "options": {
+        "nodeId": "contact",
+        "name": "contact"
+      },
+      "summary": "An unquoted uses.* string is a binding expression; the schematics generate static code.",
+      "error": "must be a quoted string literal"
+    },
+    {
+      "file": "schematic-boolean-written-as-string.openui.json",
+      "stage": "schematic",
+      "schematic": "reactive-form",
+      "options": {
+        "nodeId": "contact",
+        "name": "contact"
+      },
+      "summary": "A boolean is the JSON value true or false.",
+      "error": "must be true or false"
+    },
+    {
+      "file": "schematic-number-written-as-string.openui.json",
+      "stage": "schematic",
+      "schematic": "reactive-form",
+      "options": {
+        "nodeId": "contact",
+        "name": "contact"
+      },
+      "summary": "A number is a JSON number.",
+      "error": "must be a finite number"
+    },
+    {
+      "file": "schematic-unknown-attribute.openui.json",
+      "stage": "schematic",
+      "schematic": "reactive-form",
+      "options": {
+        "nodeId": "contact",
+        "name": "contact"
+      },
+      "summary": "The schematics reject attributes they do not read instead of ignoring them.",
+      "error": "unsupported attribute(s): uses.color"
+    },
+    {
+      "file": "schematic-slot-outside-list.openui.json",
+      "stage": "schematic",
+      "schematic": "component",
+      "options": {
+        "nodeId": "panel"
+      },
+      "summary": "uses.slot is header, content, or actions.",
+      "error": "is not a supported slot. Supported slots: header, content, actions."
+    },
+    {
+      "file": "schematic-page-without-route.openui.json",
+      "stage": "schematic",
+      "schematic": "page",
+      "options": {
+        "nodeId": "lonely",
+        "path": "src/app/features/demo"
+      },
+      "summary": "A page is registered under the Route that targets it.",
+      "error": "is not the uses.target of any Route"
+    },
+    {
+      "file": "schematic-page-moved-attribute.openui.json",
+      "stage": "schematic",
+      "schematic": "page",
+      "options": {
+        "nodeId": "profile",
+        "path": "src/app/features/demo"
+      },
+      "summary": "A page is content-only; its path belongs to the Route.",
+      "error": "a page is content-only"
+    },
+    {
+      "file": "schematic-reference-not-quoted.openui.json",
+      "stage": "schematic",
+      "schematic": "page",
+      "options": {
+        "nodeId": "profile",
+        "path": "src/app/features/demo"
+      },
+      "summary": "A reference is a quoted element id.",
+      "error": "must be a quoted element-id string"
+    },
+    {
+      "file": "schematic-control-type-contradiction.openui.json",
+      "stage": "schematic",
+      "schematic": "form-field",
+      "options": {
+        "nodeId": "age"
+      },
+      "summary": "uses.type must agree with the node type.",
+      "error": "requires a \"RangeControl\" node"
+    },
+    {
+      "file": "schematic-data-binding-format.openui.json",
+      "stage": "schematic",
+      "schematic": "data-service",
+      "options": {},
+      "summary": "uses.data is <apiPath>#<ApiService>.",
+      "error": "must be \"<apiPath>#<ApiService>\""
+    }
+  ]
+}

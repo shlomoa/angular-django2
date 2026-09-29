@@ -1,0 +1,14 @@
+{
+  "version": "0.8.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "lonely",
+      "type": "DashboardPage",
+      "attrs": {
+        "uses.title": "\"Lonely\""
+      }
+    }
+  ]
+}

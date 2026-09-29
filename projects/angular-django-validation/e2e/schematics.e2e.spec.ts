@@ -31,6 +31,23 @@ function getLibraryPackagePath(): string {
   return tarball ? path.join(distDir, tarball) : distDir;
 }
 
+/**
+ * The OpenUI document of a documented example: the `json` fence after the
+ * `<!-- openui: example path=<path> -->` marker of `docs/OPENUI_EXAMPLES.md`. Using the
+ * page keeps the published example and the end-to-end flow one document.
+ */
+function readDocumentedExample(documentPath: string): string {
+  const page = fs.readFileSync(path.join(getRepoRoot(), 'docs', 'OPENUI_EXAMPLES.md'), 'utf8');
+  const marker = `<!-- openui: example path=${documentPath} -->`;
+  const start = page.indexOf(marker);
+  if (start < 0) {
+    throw new Error(`docs/OPENUI_EXAMPLES.md has no example for ${documentPath}`);
+  }
+  const fence = page.indexOf('```json\n', start) + '```json\n'.length;
+
+  return page.slice(fence, page.indexOf('\n```', fence)) + '\n';
+}
+
 async function waitForCondition(
   condition: () => boolean,
   timeoutMs: number = 5000,
@@ -1428,6 +1445,87 @@ export class App {
         console.log('[E2E-12] ✅ Step-by-step flow verified');
       } finally {
         cleanupWorkspace(tempArea, 'E2E-12');
+      }
+    },
+  );
+  it(
+    'E2E-13: an OpenUI 0.8.0 document compiles into a buildable Material application',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      console.log(`\n[E2E-13] Test workspace: ${tempArea.path}`);
+
+      try {
+        const workspaceRoot = bootstrapEmptyWorkspace(tempArea, 'openui-app', 'E2E-13');
+        const document = readDocumentedExample('app.openui.json');
+        fs.writeFileSync(path.join(workspaceRoot, 'app.openui.json'), document);
+
+        // A document for another OpenUI version is rejected before anything is written.
+        fs.writeFileSync(
+          path.join(workspaceRoot, 'stale.openui.json'),
+          document.replace('"version": "0.8.0"', '"version": "0.4.0"'),
+        );
+        let rejection = '';
+        try {
+          execAngularCli(
+            ['generate', 'angular-django2:application', '--document=stale.openui.json'],
+            workspaceRoot,
+            { stdio: 'pipe' },
+          );
+        } catch (error) {
+          const failure = error as { message: string; stdout?: string; stderr?: string };
+          rejection = `${failure.message}\n${failure.stdout ?? ''}\n${failure.stderr ?? ''}`;
+        }
+        expect(rejection).toContain('document/unsupported-version');
+        expect(rejection).toContain('is not 0.8.0');
+        expect(fs.existsSync(path.join(workspaceRoot, 'projects', 'shop'))).toBe(false);
+        console.log('[E2E-13] ✓ A document for another version is rejected without changes');
+
+        // The document describes the whole application: routing, navigation, toolbar, theme.
+        console.log('[E2E-13] Generating the application with material-app --document...');
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:material-app',
+            '--document=app.openui.json',
+            '--ssr=false',
+            '--zoneless=true',
+            '--style=scss',
+          ],
+          workspaceRoot,
+        );
+        execCommand('npm install', workspaceRoot);
+        for (const page of ['home', 'orders']) {
+          execAngularCli(
+            [
+              'generate',
+              'angular-django2:page',
+              '--document=app.openui.json',
+              `--node-id=${page}`,
+              `--path=src/app/features/${page}`,
+            ],
+            workspaceRoot,
+          );
+        }
+        console.log('[E2E-13] ✓ material-app and page --document completed');
+
+        const appRoot = path.join(workspaceRoot, 'projects', 'shop', 'src', 'app');
+        const layout = fs.readFileSync(resolveAppTemplatePath(appRoot), 'utf8');
+        expect(layout).toContain('routerLink="/home"');
+        expect(layout).toContain('routerLink="/orders"');
+        expect(layout).toContain('Refresh');
+        const routes = fs.readFileSync(path.join(appRoot, 'app.routes.ts'), 'utf8');
+        expect(routes).toContain('home');
+        expect(routes).toContain('orders');
+        console.log('[E2E-13] ✓ Sidenav links, toolbar action, and page routes generated');
+
+        execAngularCli(['build', 'shop', '--configuration=production'], workspaceRoot);
+        expect(
+          fs.existsSync(path.join(workspaceRoot, 'dist', 'shop', 'browser', 'index.html')),
+        ).toBe(true);
+        console.log('[E2E-13] ✅ OpenUI document flow verified');
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-13');
       }
     },
   );

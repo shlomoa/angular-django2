@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import * as path from 'node:path';
-import type { SchematicContext } from '@angular-devkit/schematics';
+import { Tree, type SchematicContext } from '@angular-devkit/schematics';
+import { SchematicTestRunner, type UnitTestTree } from '@angular-devkit/schematics/testing';
 import { vi } from 'vitest';
 
 const req = createRequire(import.meta.url);
@@ -57,4 +58,53 @@ export function createOpenUiDocument(...children: OpenUiElement[]): OpenUiDocume
 
 export function openUiDocumentString(...children: OpenUiElement[]): string {
   return JSON.stringify(createOpenUiDocument(...children));
+}
+
+/** Dependencies the generated Material components import; added to the workspace `package.json`. */
+const MATERIAL_DEPENDENCIES = {
+  '@angular/cdk': '^22.0.0',
+  '@angular/forms': '^22.0.0',
+  '@angular/material': '^22.0.0',
+} as const;
+
+/** An empty Angular workspace named `demo`, with `documents` (path -> content) created in it. */
+export async function createEmptyWorkspace(
+  documents: Readonly<Record<string, string>> = {},
+): Promise<UnitTestTree> {
+  const angularRunner = new SchematicTestRunner('@schematics/angular', angularCollectionPath);
+  const tree = (await angularRunner.runSchematic(
+    'workspace',
+    { name: 'demo', version: '22.0.0', newProjectRoot: 'projects' },
+    Tree.empty(),
+  )) as UnitTestTree;
+  for (const [documentPath, content] of Object.entries(documents)) {
+    tree.create(`/${documentPath}`, content);
+  }
+
+  return tree;
+}
+
+/** Add the Angular Material dependencies to the workspace `package.json` (idempotent). */
+export function addMaterialDependencies(tree: UnitTestTree): void {
+  const packageJson = JSON.parse(tree.readContent('/package.json'));
+  packageJson.dependencies = { ...packageJson.dependencies, ...MATERIAL_DEPENDENCIES };
+  tree.overwrite('/package.json', JSON.stringify(packageJson, null, 2));
+}
+
+/**
+ * A workspace with one routed standalone Angular application (`demo-app`) and the Material
+ * dependencies, with `documents` (path -> content) created in it.
+ */
+export async function createApplicationWorkspace(
+  documents: Readonly<Record<string, string>> = {},
+): Promise<UnitTestTree> {
+  const angularRunner = new SchematicTestRunner('@schematics/angular', angularCollectionPath);
+  const tree = (await angularRunner.runSchematic(
+    'application',
+    { name: 'demo-app', standalone: true, routing: true, style: 'scss', zoneless: true },
+    await createEmptyWorkspace(documents),
+  )) as UnitTestTree;
+  addMaterialDependencies(tree);
+
+  return tree;
 }

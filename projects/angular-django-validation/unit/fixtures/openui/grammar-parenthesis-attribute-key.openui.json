@@ -1,0 +1,15 @@
+{
+  "version": "0.8.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "contact",
+      "type": "Form",
+      "attrs": {
+        "(submit)": "save()"
+      },
+      "children": []
+    }
+  ]
+}

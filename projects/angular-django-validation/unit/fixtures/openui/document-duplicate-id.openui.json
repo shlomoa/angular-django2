@@ -1,0 +1,16 @@
+{
+  "version": "0.8.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "email",
+      "type": "TextInputs",
+      "attrs": {}
+    },
+    {
+      "id": "email",
+      "type": "TextInputs"
+    }
+  ]
+}

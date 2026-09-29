@@ -40,9 +40,10 @@ The UI schematics also compile from an
 `--node-id=<id>`. Attributes use the OpenUI 0.8.0 typed-attribute language
 (`uses.<input>`, `behaves.<name>`, `produces.<name>`): strings are quoted
 literals, booleans and numbers are JSON values. Each command page has an _OpenUI_ section listing the node types
-and attributes it accepts; the
-[repository requirements](https://github.com/shlomoa/angular-django2/blob/main/docs/REQUIREMENTS.md#openui-document-input-contracts)
-summarize them.
+and attributes it accepts. [OpenUI documents](../OPENUI_DOCUMENTS.md) is the
+reference for the attribute language, every element and attribute, and the
+diagnostics, and [OpenUI document examples](../OPENUI_EXAMPLES.md) holds complete
+documents with the commands that compile them.
 
 ## Discover command help
 

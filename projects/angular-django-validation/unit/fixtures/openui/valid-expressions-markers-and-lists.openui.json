@@ -1,0 +1,39 @@
+{
+  "version": "0.8.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "toolbar",
+      "type": "ToolBar",
+      "attrs": {
+        "uses.ariaLabel": "\"Actions\""
+      },
+      "children": [
+        {
+          "id": "row",
+          "type": "ToolBarRow",
+          "children": [
+            {
+              "id": "refresh",
+              "type": "ToolAction",
+              "attrs": {
+                "uses.label": "\"Refresh\"",
+                "uses.disabled": "isBusy()",
+                "produces.activate": null
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tagged",
+      "type": "Tabs",
+      "attrs": {
+        "title": "\"Unprefixed keys carry no category\"",
+        "uses.tags": ["a", "b", 1, true, null]
+      }
+    }
+  ]
+}

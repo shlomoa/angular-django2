@@ -1,5 +1,11 @@
 export type GuideId =
-  'basic-tutorial' | 'complex-components' | 'data-flow' | 'forms' | 'quality' | 'security';
+  | 'basic-tutorial'
+  | 'complex-components'
+  | 'data-flow'
+  | 'forms'
+  | 'quality'
+  | 'security'
+  | 'openui-documents';
 
 export interface GuideSection {
   readonly title: string;
@@ -193,6 +199,48 @@ export const GUIDES: readonly Guide[] = [
           'API base URL points at the intended Django origin.',
           'CSRF cookie and header names match the Django configuration.',
           'Credentialed requests are limited to trusted endpoints.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'openui-documents',
+    order: '3.7',
+    name: 'OpenUI documents',
+    summary:
+      'Describe a UI as an OpenUI 0.8.0 document and compile it into components, forms, and pages.',
+    icon: 'data_object',
+    sections: [
+      {
+        title: 'Write a document',
+        body: [
+          'An OpenUI document is a JSON tree of elements. Each element has an id, a type from the ' +
+            'OpenUI catalog, typed attrs, and children, and the root declares version 0.8.0.',
+        ],
+        steps: [
+          'Name attributes by category: uses.<name> for inputs, behaves.<name> for behaviors, and produces.<name> for events.',
+          'Write strings as quoted literals, for example "uses.title": "\\"Contact us\\"".',
+          'Write booleans and numbers as JSON values, and references as quoted element ids.',
+        ],
+      },
+      {
+        title: 'Compile it',
+        body: [
+          'Pass the document to a schematic with --document, and choose the element with --node-id. ' +
+            'The document is validated before any file changes.',
+        ],
+        steps: [
+          'ng generate angular-django2:reactive-form contact --document=forms/contact.openui.json --node-id=contact.',
+          'ng generate angular-django2:page --document=app.openui.json --node-id=home --path=src/app/features/home.',
+          'ng generate angular-django2:material-app --document=app.openui.json for a whole Material application.',
+        ],
+      },
+      {
+        title: 'Read the diagnostics',
+        body: [
+          'The validator reports each problem as path: code: message, and the code names the stage ' +
+            '(grammar, document, catalog, or contract). The schematics add their own rules, such as ' +
+            'accepting only quoted string literals, because they generate static code.',
         ],
       },
     ],

@@ -26,6 +26,11 @@ The validation suite is organized under `projects/angular-django-validation`:
   validation that installs the built package and verifies `ng generate
 angular-django2:application` can build
 - `projects/angular-django-validation/playwright/` — Playwright end-to-end browser suites testing reference app shell navigation, guide reader, and UI interactive sandboxes
+- `projects/angular-django-validation/unit/fixtures/openui/` — OpenUI 0.8.0 documents with a
+  `manifest.json` of the stage that reports each and the diagnostics it must produce, run by
+  `unit/schematics/schematics.openui-fixtures.spec.ts`
+- `projects/angular-django-validation/unit/meta/openui-examples.spec.ts` and
+  `unit/meta/openui-reference.spec.ts` — keep the OpenUI documentation honest (see below)
 - `projects/angular-django-validation/unit/browser/` — Vitest Browser component tests for UI visualizers
 - `projects/angular-django-validation/unit/utils/temp_areas.spec.ts` — temp-area persistence and cleanup coverage
 - `projects/angular-django-validation/e2e/utils/temp_areas.ts` — the single shared temp-area implementation
@@ -60,6 +65,26 @@ When a schematic delegates to `externalSchematic` — for example `material-app`
 relying on the Angular application schematic — the current pattern is to
 pre-create the expected project structure inside the virtual tree and then
 validate the package-owned behavior layered on top.
+
+## OpenUI document validation
+
+The OpenUI 0.8.0 language is covered at four levels, all under `npm run test:node`:
+
+- **Fixture suite** (`TC-FIXTURES-*`): each document in `unit/fixtures/openui/` is listed in
+  `manifest.json` with its stage. `grammar`, `document`, `catalog`, and `contract` cases must
+  produce exactly the listed `path: code: message` diagnostics from `@shlomoa/openui-spec`;
+  `schematic` cases are valid documents that a named schematic rejects, without changing the
+  tree; `valid` cases report nothing. The manifest must list every fixture file and name the
+  installed spec version. Add a fixture and its manifest entry when a rule is added.
+- **Schematic tests** (`TC-OPENUI-*`, `TC-AST-*`, `TC-APP-*`, and the per-schematic specs): the
+  value readers, the routing and navigation resolver, and each schematic's `--document` path.
+- **Documentation examples** (`TC-DOCS-OPENUI-*`): every complete OpenUI document in `docs/`
+  passes the validator. `docs/OPENUI_EXAMPLES.md` is executed: each `example` block is written
+  to a fresh workspace and its `ng generate` commands run; each `invalid` block must show the
+  validator's real diagnostics; each `rejected` block must show the real schematic error.
+- **Reference completeness** (`TC-REFERENCE-*`): `docs/OPENUI_DOCUMENTS.md` names every attribute
+  key the schematics read and no key they do not, and lists every diagnostic code of the
+  installed validator, so a spec upgrade that adds a code fails until the page is updated.
 
 ## End-to-end schematic tests
 
@@ -105,6 +130,10 @@ Current E2E coverage includes:
 - `E2E-12` — step-by-step app flow (`application` + `material-setup` +
   `project-structure`), verifying a production build, the theme and standard
   structure, and that the sidenav layout is absent (only `material-app` writes it)
+- `E2E-13` — an OpenUI 0.8.0 document: the "complete application" example of
+  `docs/OPENUI_EXAMPLES.md` compiled with `material-app --document` and `page --document`,
+  verifying the sidenav links, toolbar action, and page routes, a production build, and that
+  a document for another OpenUI version is rejected without writing files
 
 The E2E suite uses `projects/angular-django-validation/e2e/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.

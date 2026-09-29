@@ -1,0 +1,20 @@
+{
+  "version": "0.8.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "home",
+      "type": "NavItem",
+      "attrs": {
+        "uses.route": "\"contact\""
+      }
+    },
+    {
+      "id": "contact",
+      "type": "Form",
+      "attrs": {},
+      "children": []
+    }
+  ]
+}
