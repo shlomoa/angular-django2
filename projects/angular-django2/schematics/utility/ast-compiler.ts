@@ -31,7 +31,7 @@ function resolveOpenUiVersion(): string {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
     return pkg.version;
   } catch {
-    return '0.3.1';
+    return '0.4.0';
   }
 }
 

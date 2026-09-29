@@ -1,9 +1,16 @@
 # OpenUI Specification Implementation Plan for `angular-django2` (`ngdj`)
 
 This plan describes how `angular-django2` (`ngdj`) implements the
-[OpenUI Specification](https://github.com/shlomoa/openui-spec), version 0.3.1
+[OpenUI Specification](https://github.com/shlomoa/openui-spec), version 0.4.0
 (`@shlomoa/openui-spec`, pinned in [`package.json`](../package.json)). It
 separates what is implemented today from what is planned.
+
+Terminology follows the OpenUI
+[glossary](https://github.com/shlomoa/openui-spec/blob/v0.4.0/spec/scopes/scope.md#glossary),
+which `openui-spec` owns. In this repository, **object**, **element**, **known
+object type**, and **scope** carry their OpenUI meaning. **Component** means an
+Angular component, the generated artifact; the glossary uses the same word as an
+alias of **object**, so this document never uses it for an OpenUI concept.
 
 **Status legend**
 
@@ -43,8 +50,8 @@ it instead of repeating it.
   orchestrating schematics across a whole application belongs to
   `django-angular3` (`djng`), per the ownership boundary in
   [#27](https://github.com/shlomoa/angular-django2/issues/27).
-- **The component widgets in §3 are not implemented.** Documents that contain
-  them cannot be compiled yet.
+- **The scopes in §3 are not implemented.** Documents that contain them cannot
+  be compiled yet.
 
 ### 1.3 Target constraint: spec-defined identifiers only
 
@@ -55,14 +62,15 @@ it instead of repeating it.
 Current status: **partially met**.
 
 - **Object types**: met. Every document is validated by the canonical
-  `openui-spec` validator, which rejects types outside the 0.3.1 catalog.
+  `openui-spec` validator, which rejects types outside the 0.4.0 catalog.
 - **Application-scope attributes**: met. The attributes read on `Routing`,
   `Route`, `Navigation`, `NavItem`, `NavGroup`, `ToolBar`, `ToolAction`, `html`,
-  and `link` are 0.3.1 catalog attributes.
-- **Other attributes**: not met. The 0.3.1 catalog defines no attributes for
+  and `link` are 0.4.0 catalog attributes.
+- **Other attributes**: not met. The 0.4.0 catalog defines no attributes for
   these instance types, so the attributes the schematics read on them are
   repository-local extensions:
-  - `Form[title]` and `Form[action]` (`(submit)` is a catalog attribute);
+  - `Form[title]` and `Form[action]` (`(submit)`, `(validate)`, and
+    `(dirtyChange)` are catalog attributes);
   - `ActionControls[label]`;
   - the control attributes on `TextInputs` and `RangeControl` (`[type]`,
     `[name]`, `[label]`, validation, and appearance attributes);
@@ -116,7 +124,7 @@ These are current behavior, documented by maintainer decision rather than fixed:
   `Navigation[ariaLabel]`, and `NavGroup[expanded]`. `NavGroup` entries are
   flattened, and its `[label]` is not rendered. `page`'s `[icon]` is validated
   but not used.
-- Nested `Route` paths are not composed. OpenUI 0.3.1 defines `Route[path]` as
+- Nested `Route` paths are not composed. OpenUI 0.4.0 defines `Route[path]` as
   relative to the parent route, but a link to a child route uses the child's
   path alone.
 - `Route[target]` is checked to exist but not to be a page or content element.
@@ -129,13 +137,13 @@ These are current behavior, documented by maintainer decision rather than fixed:
 ## 2. Target Pipeline: Three-Layer Compiler Architecture
 
 This section describes the **target** pipeline. Parts of it exist today (see
-the notes after the diagram); the widget scopes in §3 do not.
+the notes after the diagram); the scopes in §3 do not.
 
 ```mermaid
 graph TD
     subgraph Input["Input Boundary"]
         DOC["OpenUI JSON Document (app.openui.json)"]
-        PARSER["Canonical TypeScript Parser & Validator (@shlomoa/openui-spec 0.3.1)"]
+        PARSER["Canonical TypeScript Parser & Validator (@shlomoa/openui-spec 0.4.0)"]
         DOC --> PARSER
     end
 
@@ -244,10 +252,11 @@ What exists today:
 
 ## 3. Scope Implementation Matrix (Planned)
 
-Every row is **Planned**. Scope paths are canonical OpenUI 0.3.1
+Every row is **Planned**. Scope paths are canonical OpenUI 0.4.0
 `<category>/<id>` paths. The schematic names are proposed Angular / Material
 names, not OpenUI identifiers; for example, `accordion` does not appear in the
-OpenUI catalog, whose scope is `containers/expandablePanels`.
+OpenUI catalog, whose scope is `containers/expandablePanels` (an accordion or a
+disclosure).
 
 | OpenUI scope                  | Status  | Proposed schematic | Layer 1 building blocks                                                   | Layer 2 building blocks                           | Layer 3 `ngdj` specifics                                                 |
 | :---------------------------- | :------ | :----------------- | :------------------------------------------------------------------------ | :------------------------------------------------ | :----------------------------------------------------------------------- |
@@ -263,23 +272,35 @@ OpenUI catalog, whose scope is `containers/expandablePanels`.
 | `widgets/dateTimePickers`     | Planned | `date-picker`      | Native `<input type="date">`                                              | `MatDatepickerModule`, `provideNativeDateAdapter` | Date range support, Django ISO-8601 formatting                           |
 | `widgets/chart`               | Planned | `chart`            | SVG primitives, Canvas API                                                | Angular chart adapter (SVG/CDK)                   | DRF aggregation API data binding, responsive resizing                    |
 
+**Modality is a behavior in 0.4.0.** `containers/overlayContainers` now covers
+popovers only. Modal focus and dismissal come from `behaviors/modalOverlay`,
+background scroll locking from `behaviors/viewportAndFocusControl`, and the
+backdrop from `presentation`. `widgets/dialog` follows `behaviors/modalOverlay`
+for modal focus and dismissal, and `containers/sheetContainers` treats edge
+placement, navigation content, and modality as independent. The `dialog` and
+`bottom-sheet` rows therefore depend on those behaviors, which have no schematic
+and no plan (see the [mapping document](ngdj-openui-spec-mapping.md), Missing).
+
 ---
 
 ## 4. First Focus: `widgets/table` (Planned)
 
 `table` is a single specification concept under `widgets/`. The former
-`Controls/Table/` scope was retired; `spec/scopes/Controls/` in 0.3.1 has no
+`Controls/Table/` scope was retired; `spec/scopes/Controls/` in 0.4.0 has no
 table scope.
 
-### Specification facts (OpenUI v0.3.1)
+### Specification facts (OpenUI v0.4.0)
 
 - **Identity**: scope `id: table`, scope `type: Table`. The instance element is
   `type: table`, with `tr` row children (`tableRow`).
 - **Normative attributes**, from
-  [`scopes/Widgets/table.scope.md`](https://github.com/shlomoa/openui-spec/blob/v0.3.1/spec/scopes/Widgets/table.scope.md):
-  only `(sort)`, `(filter)`, and `(paginate)`, all in the Behaves category.
+  [`scopes/Widgets/table.scope.md`](https://github.com/shlomoa/openui-spec/blob/v0.4.0/spec/scopes/Widgets/table.scope.md):
+  only `(sort)`, `(filter)`, and `(paginate)`, all in the Behaves category. The
+  0.4.0 Purpose also names columns, cells, a caption, and header associations,
+  but the Child model still defines only `tr` rows, so those are not part of the
+  contract yet.
 - **Worked example**:
-  [`examples/Widgets/table.example.json`](https://github.com/shlomoa/openui-spec/blob/v0.3.1/spec/examples/Widgets/table.example.json)
+  [`examples/Widgets/table.example.json`](https://github.com/shlomoa/openui-spec/blob/v0.4.0/spec/examples/Widgets/table.example.json)
   uses exactly this contract: a `table` with `(sort)`, `(filter)`, and
   `(paginate)` and `tr` rows. In 0.3.0 the example used attributes and child
   types outside the contract; 0.3.1 fixed it
@@ -312,8 +333,15 @@ table scope.
 - [x] Integrate openui-spec 0.3.0, including `Routing` / `Navigation`
       compilation in `material-app`
       ([#131](https://github.com/shlomoa/angular-django2/pull/131)).
-- [x] Move to openui-spec 0.3.1, the latest release (`2125108`). Its catalog is
-      identical to 0.3.0; it fixes the table example.
+- [x] Move to openui-spec 0.3.1 (`2125108`). Its catalog is identical to 0.3.0;
+      it fixes the table example.
+- [x] Integrate openui-spec 0.4.0, the latest release. No schematic contract
+      changed: the only catalog attribute change is `[target]` on the six
+      Behaviors, which no schematic reads. The catalog adds `InputAssistance`,
+      `ModalOverlay`, and `ViewportAndFocusControl` and no longer contains the
+      types `page`, `view`, `container`, and `widget`, which no repository
+      document uses. Terminology is aligned with the OpenUI glossary; see the
+      [mapping document](ngdj-openui-spec-mapping.md), section 7.
 - [x] Compile `ToolBar` content
       ([#129](https://github.com/shlomoa/angular-django2/issues/129),
       [#132](https://github.com/shlomoa/angular-django2/pull/132); tests

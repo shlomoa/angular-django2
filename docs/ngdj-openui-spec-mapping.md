@@ -1,6 +1,6 @@
 # Mapping between `openui-spec` and `angular-django2`
 
-This document maps every `angular-django2` schematic and every OpenUI 0.3.1
+This document maps every `angular-django2` schematic and every OpenUI 0.4.0
 scope (`@shlomoa/openui-spec`, pinned in [`package.json`](../package.json)) to
 exactly one class. For the architecture and roadmap, see the
 [OpenUI Specification Implementation Plan](openui-spec-implementation-plan.md).
@@ -15,7 +15,7 @@ exactly one class. For the architecture and roadmap, see the
 | **Tooling only**               | Angular CLI or project tooling with no OpenUI counterpart.                                                           |
 | **Missing**                    | An OpenUI scope with no schematic, no coverage through another schematic, and no plan.                               |
 
-Scope paths are canonical OpenUI 0.3.1 `<category>/<id>` paths. Test IDs refer to
+Scope paths are canonical OpenUI 0.4.0 `<category>/<id>` paths. Test IDs refer to
 specs in `projects/angular-django-validation/unit/schematics/`. Some IDs are
 reused across spec files (for example `TC-APP-01…03` also exist in
 `schematics.material-app.spec.ts`), so every test reference names its spec file.
@@ -68,13 +68,14 @@ document describes (for example `--routing`, `--theme`, `--controlType`,
 `--apiService`); see each schematic's CLI documentation. Where `--nodeId`
 exists, it requires `--document`.
 
-### 1.3 Attributes outside the OpenUI 0.3.1 contract
+### 1.3 Attributes outside the OpenUI 0.4.0 contract
 
-The object types above are all OpenUI 0.3.1 catalog types, and the
+The object types above are all OpenUI 0.4.0 catalog types, and the
 application-scope attributes (`Routing`, `Route`, `Navigation`, `NavItem`,
 `NavGroup`, `ToolBar`, `ToolAction`, `html`, `link`) are catalog attributes.
-The 0.3.1 catalog defines **no attributes** for `Form` (except `(submit)`),
-`ActionControls`, `TextInputs`, `RangeControl`, `SurfaceContainers`,
+The 0.4.0 catalog defines **no attributes** for `Form` (except `(submit)`,
+`(validate)`, and `(dirtyChange)`), `ActionControls`, `TextInputs`,
+`RangeControl`, `SurfaceContainers`,
 `OverlayContainers`, `DashboardPage`, `EmptyPage`, or `Presentation`. The
 attributes these schematics read on them, plus `[slot]` and `[data]` and its
 value format, are **`angular-django2` extensions**, not OpenUI-defined
@@ -92,7 +93,7 @@ These are current behavior, documented by maintainer decision:
   flattened, and its `[label]` is not rendered. `page`'s `[icon]` is validated
   but not used.
 - Nested `Route` paths are not composed: a link to a child route uses the
-  child's `[path]` alone, although OpenUI 0.3.1 defines it as relative to the
+  child's `[path]` alone, although OpenUI 0.4.0 defines it as relative to the
   parent route.
 - `Route[target]` is checked to exist, not to be a page or content element.
 - Route paths have two unsynchronized sources: `page` registers
@@ -103,13 +104,13 @@ These are current behavior, documented by maintainer decision:
 
 ## 2. Conceptual / CLI by design
 
-| OpenUI scope                | `angular-django2`   | Relationship                                                                                                                                                                                                                                                                     |
-| :-------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pages/shellPage`           | `material-app`      | `material-app`'s layout (toolbar, sidenav, router outlet) is the shell page. It is built from the `Application` node and its children; no `ShellPage` node is read.                                                                                                              |
-| — (`presentation` tokens)   | `material-setup`    | CLI-driven by design. Its options are exactly the `Presentation` tokens, which `material-app --document` reads and passes on (§1.2).                                                                                                                                             |
-| —                           | `app-shell`         | CLI-driven by design: a pass-through to Angular's SSR / prerender app-shell schematic, with no OpenUI counterpart.                                                                                                                                                               |
-| — (`[slot]` composition)    | `embed-component`   | No OpenUI input (CLI `--slot`). Its logic is the composition engine that `component`, `complex-component`, and `page` use to embed compiled children by `[slot]`. `[slot]` is an `angular-django2` extension (§1.3). Tests: `schematics.composition.spec.ts` `TC-COMPOSE-09…11`. |
-| `widgets/dialog` (indirect) | `complex-component` | An `OverlayContainers` child gives a CDK overlay with projected content (§1.2). This is not a `widgets/dialog` implementation: no `Dialog` node is read and there is no `MatDialog` lifecycle. `widgets/dialog` itself is Planned (§3).                                          |
+| OpenUI scope                | `angular-django2`   | Relationship                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :-------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pages/shellPage`           | `material-app`      | `material-app`'s layout (toolbar, sidenav, router outlet) is the shell page. It is built from the `Application` node and its children; no `ShellPage` node is read.                                                                                                                                                                                                                                                                                               |
+| — (`presentation` tokens)   | `material-setup`    | CLI-driven by design. Its options are exactly the `Presentation` tokens, which `material-app --document` reads and passes on (§1.2).                                                                                                                                                                                                                                                                                                                              |
+| —                           | `app-shell`         | CLI-driven by design: a pass-through to Angular's SSR / prerender app-shell schematic, with no OpenUI counterpart.                                                                                                                                                                                                                                                                                                                                                |
+| — (`[slot]` composition)    | `embed-component`   | No OpenUI input (CLI `--slot`). Its logic is the composition engine that `component`, `complex-component`, and `page` use to embed compiled children by `[slot]`. `[slot]` is an `angular-django2` extension (§1.3). Tests: `schematics.composition.spec.ts` `TC-COMPOSE-09…11`.                                                                                                                                                                                  |
+| `widgets/dialog` (indirect) | `complex-component` | An `OverlayContainers` child gives a non-modal CDK connected overlay (a popover: no backdrop, no focus trap) with projected content (§1.2). That matches OpenUI 0.4.0, where overlay containers cover popovers only and modality comes from the `behaviors/modalOverlay` behavior, which is Missing (§5). This is not a `widgets/dialog` implementation: no `Dialog` node is read and there is no `MatDialog` lifecycle. `widgets/dialog` itself is Planned (§3). |
 
 `pages/shellPage` is classified here. `presentation` is Direct through
 `material-app` (§1.2), and `widgets/dialog` is Planned (§3).
@@ -156,73 +157,106 @@ classified as Direct because it compiles `html` and `link` nodes (§1.2).
 
 ## 5. Missing
 
-OpenUI 0.3.1 scopes with no schematic, no coverage through another schematic,
+OpenUI 0.4.0 scopes with no schematic, no coverage through another schematic,
 and no plan:
 
-| OpenUI scope                                                            | Notes                                                                                                   |
-| :---------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
-| `views/report`                                                          | No report view. `data-service` generates data transport from a `[data]` binding only; it renders no UI. |
-| `widgets/list`                                                          |                                                                                                         |
-| `widgets/navigationWidgets`                                             | The `material-app` sidenav comes from `application/navigation` (§1.2), not from this scope.             |
-| `widgets/mediaWidgets`                                                  |                                                                                                         |
-| `containers/grid`                                                       |                                                                                                         |
-| `containers/structuralContainers`                                       | Composition uses `[slot]` sections inside `SurfaceContainers` (§2), not structural container nodes.     |
-| `containers/splitters`                                                  |                                                                                                         |
-| `controls/native`                                                       |                                                                                                         |
-| `controls/choiceControls`                                               | `form-field` rejects this node type.                                                                    |
-| `controls/pickerControl`                                                | `form-field` rejects this node type.                                                                    |
-| `controls/displayPrimitives`                                            |                                                                                                         |
-| `controls/statusIndicator`                                              |                                                                                                         |
-| `controls/drawingAndCapture`                                            |                                                                                                         |
-| `controls/linkAndScrollControls`                                        |                                                                                                         |
-| `behaviors/dragAndDrop`, `behaviors/resizable`, `behaviors/collapsible` |                                                                                                         |
-| `interaction`, `internationalization`, `layout`                         | Cross-cutting vocabularies with no one-to-one schematic.                                                |
+| OpenUI scope                                                            | Notes                                                                                                                                                                                                                                                                             |
+| :---------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `views/report`                                                          | No report view. `data-service` generates data transport from a `[data]` binding only; it renders no UI.                                                                                                                                                                           |
+| `widgets/list`                                                          |                                                                                                                                                                                                                                                                                   |
+| `widgets/navigationWidgets`                                             | The `material-app` sidenav comes from `application/navigation` (§1.2), not from this scope.                                                                                                                                                                                       |
+| `widgets/mediaWidgets`                                                  |                                                                                                                                                                                                                                                                                   |
+| `containers/grid`                                                       |                                                                                                                                                                                                                                                                                   |
+| `containers/structuralContainers`                                       | Composition uses `[slot]` sections inside `SurfaceContainers` (§2), not structural container nodes.                                                                                                                                                                               |
+| `containers/splitters`                                                  |                                                                                                                                                                                                                                                                                   |
+| `controls/native`                                                       |                                                                                                                                                                                                                                                                                   |
+| `controls/choiceControls`                                               | `form-field` rejects this node type.                                                                                                                                                                                                                                              |
+| `controls/pickerControl`                                                | `form-field` rejects this node type.                                                                                                                                                                                                                                              |
+| `controls/displayPrimitives`                                            |                                                                                                                                                                                                                                                                                   |
+| `controls/statusIndicator`                                              |                                                                                                                                                                                                                                                                                   |
+| `controls/drawingAndCapture`                                            |                                                                                                                                                                                                                                                                                   |
+| `controls/linkAndScrollControls`                                        |                                                                                                                                                                                                                                                                                   |
+| `behaviors/dragAndDrop`, `behaviors/resizable`, `behaviors/collapsible` | Each declares one `[target]` attribute that references its controlled element, and no children. Before 0.4.0 they owned target children of the types `page`, `view`, `container`, and `widget`.                                                                                   |
+| `behaviors/inputAssistance`                                             | New in 0.4.0: text completion and constraint validation for any input control; it declares only `[target]`. The validation attributes that `form-field` reads (`[required]`, `[pattern]`, and so on) remain `angular-django2` extensions (§1.3), not attributes of this behavior. |
+| `behaviors/modalOverlay`                                                | New in 0.4.0: makes a referenced surface modal. The `complex-component` overlay is a non-modal popover (§2). `widgets/dialog` follows this behavior for modal focus and dismissal (§3).                                                                                           |
+| `behaviors/viewportAndFocusControl`                                     | New in 0.4.0: viewport scrolling, scroll lock, and focus management.                                                                                                                                                                                                              |
+| `interaction`, `internationalization`, `layout`                         | Cross-cutting vocabularies with no one-to-one schematic.                                                                                                                                                                                                                          |
 
 `controls/actionControls` is Direct only as the `reactive-form` submit action
 (§1.2); no schematic generates standalone action controls.
 
 ---
 
-## 6. Naming conventions in OpenUI 0.3.1
+## 6. Naming conventions in OpenUI 0.4.0
 
-Scope ids are camelCase. Their number tells whether a scope is a discrete
-concept or a family:
+Scope ids are camelCase. OpenUI defines no rule that ties the number of a scope
+id to its kind (its naming rule covers element ids and `type` syntax only), so
+the number is a hint, not a contract:
 
-- **Singular ids are discrete concepts**: `chart`, `table`, `dataGrid`, `list`,
-  `stepper`, `dialog`, `form`, `report`, `pickerControl`, `rangeControl`,
-  `statusIndicator`, `native`, `grid`, `dashboard`, `shellPage`, `emptyPage`,
-  `route`, `navItem`, `navGroup`, `toolBarRow`, `toolAction`.
-- **Plural or grouped ids are families**: `feedbackWidgets`, `mediaWidgets`,
-  `navigationWidgets`, `menuWidgets`, `dateTimePickers`, `expandablePanels`,
-  `tabs`, `surfaceContainers`, `sheetContainers`, `overlayContainers`,
-  `structuralContainers`, `splitters`, `actionControls`, `textInputs`,
-  `choiceControls`, `drawingAndCapture`, `displayPrimitives`,
+- **Singular ids that name one concept**: `chart`, `table`, `dataGrid`, `list`,
+  `stepper`, `dialog`, `form`, `report`, `native`, `grid`, `dashboard`,
+  `shellPage`, `emptyPage`, `route`, `navItem`, `navGroup`, `toolBarRow`,
+  `toolAction`, `dragAndDrop`, `resizable`, `collapsible`, `modalOverlay`.
+- **Plural or grouped ids that name families**: `feedbackWidgets`,
+  `mediaWidgets`, `navigationWidgets`, `menuWidgets`, `dateTimePickers`,
+  `expandablePanels`, `tabs`, `surfaceContainers`, `sheetContainers`,
+  `overlayContainers`, `structuralContainers`, `splitters`, `actionControls`,
+  `textInputs`, `choiceControls`, `drawingAndCapture`, `displayPrimitives`,
   `linkAndScrollControls`, `toolBars`.
+- **Singular ids that name families**: `pickerControl`, `rangeControl`,
+  `statusIndicator`, `inputAssistance`, and `viewportAndFocusControl`. Their
+  catalog Purposes list several variants; for example, a range control covers
+  sliders, spin boxes, and ratings. Earlier versions of this document classed
+  the first three as discrete concepts.
 
-Obsolete names from earlier versions of this document and their 0.3.1 names:
-`charts` → `chart`, `lists` → `list`, `tables` → `table`, `data_grid` →
-`dataGrid`, `forms` → `form`, `reports` → `report`, `pickerControls` →
-`pickerControl`, `rangeControls` → `rangeControl`, `statusIndicators` →
-`statusIndicator`, `expandable_panels` → `expandablePanels`,
-`sheet_containers` → `sheetContainers`, `menu_widgets` → `menuWidgets`,
-`feedback_widgets` → `feedbackWidgets`, `date_time_pickers` →
+Obsolete names from earlier versions of this document and their 0.4.0 names
+(unchanged since 0.3.0): `charts` → `chart`, `lists` → `list`, `tables` →
+`table`, `data_grid` → `dataGrid`, `forms` → `form`, `reports` → `report`,
+`pickerControls` → `pickerControl`, `rangeControls` → `rangeControl`,
+`statusIndicators` → `statusIndicator`, `expandable_panels` →
+`expandablePanels`, `sheet_containers` → `sheetContainers`, `menu_widgets` →
+`menuWidgets`, `feedback_widgets` → `feedbackWidgets`, `date_time_pickers` →
 `dateTimePickers`.
 
 Other rules:
 
 - `dateTimePickers` is under `widgets/`, not `controls/`. `dashboard`,
   `shellPage`, and `emptyPage` are under `pages/`; `views/` holds only
-  `report` and `form`.
-- Documents use the **instance type**, which can differ from the scope type:
-  `application/toolBars` → `ToolBar`, `application/favicon` → `link`,
-  `application/indexHtml` → `html`, `pages/dashboard` → `DashboardPage`,
-  `widgets/table` → `table`.
+  `report` and `form`. The three Behaviors added in 0.4.0 (`inputAssistance`,
+  `modalOverlay`, `viewportAndFocusControl`) are under `behaviors/`.
+- The catalog accepts both a scope's `type` and its instance type as a known
+  object type (for example `Table` and `table`). The schematics read the
+  **instance type**, which can differ from the scope type: `application/toolBars`
+  → `ToolBar`, `application/favicon` → `link`, `application/indexHtml` → `html`,
+  `pages/dashboard` → `DashboardPage`, `widgets/table` → `table`.
+  `data-service` reads `[data]` on any node and does not depend on its type.
 - Material-style names such as `accordion`, `bottom-sheet`, `menu`, `feedback`,
   and `date-picker` are proposed schematic names, not OpenUI identifiers. The
   OpenUI catalog has no `accordion`; the scope is
   `containers/expandablePanels`.
 - `table` is a single concept under `widgets/`; the former `Controls/Table/`
   scope was retired. Its normative attributes are `(sort)`, `(filter)`, and
-  `(paginate)`, with `tr` row children. The 0.3.1 worked example follows this
-  contract; the 0.3.0 example did not
+  `(paginate)`, with `tr` row children. The worked example has followed this
+  contract since 0.3.1; the 0.3.0 example did not
   ([openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154)).
+
+---
+
+## 7. Terminology
+
+`openui-spec` owns the vocabulary: the
+[glossary](https://github.com/shlomoa/openui-spec/blob/v0.4.0/spec/scopes/scope.md#glossary)
+and the approved
+[terminology changes](https://github.com/shlomoa/openui-spec/blob/v0.4.0/spec/scopes/terminology.md).
+`angular-django2` uses the canonical terms in its documents and diagnostics and
+keeps the framework meanings apart:
+
+| Term            | Use in this repository                                                                                                                                                                                                                                                                                                                                                                                      |
+| :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Component**   | Always an Angular component, the generated artifact. The glossary also uses "component" and "UI component" as aliases of **Object** (0.4.0). The schematic names `component`, `complex-component`, `field-component`, and `embed-component` are Angular CLI names, not OpenUI identifiers.                                                                                                                  |
+| **Widget**      | A reusable specification object under `widgets/`. Being built from a Material component does not make a scope a widget: `containers/tabs`, `containers/expandablePanels`, and `containers/sheetContainers` are containers.                                                                                                                                                                                  |
+| **Element**     | One node in a document, addressed by `id`. The schematics resolve one element with `--nodeId` and call it a node in diagnostics, following the glossary's use of **Node** for tree traversal.                                                                                                                                                                                                               |
+| **Object type** | A known object type is an exact catalog literal. The validator rejects any other `type` with `unknown OpenUI object type`.                                                                                                                                                                                                                                                                                  |
+| **Category**    | `Form` is a view (`views/form`), not a control or a widget. `SurfaceContainers` and `OverlayContainers` are containers. `TextInputs`, `RangeControl`, and `ActionControls` are controls. `DashboardPage` and `EmptyPage` are pages; "screen" is a glossary alias of **Page**.                                                                                                                               |
+| **Popover**     | What an `OverlayContainers` child generates: a non-modal overlay. Modality is the `ModalOverlay` behavior, which no schematic reads (§5).                                                                                                                                                                                                                                                                   |
+| **Reference**   | An element reference is a quoted element-id string, as in `Route[target]` and `NavItem[route]`. The `[target]` of every behavior names its **controlled element**. The validator does not resolve references; `material-app` does for the routing and navigation attributes it reads. `[slot]` is different: it places children that a container **owns**, and it is an `angular-django2` extension (§1.3). |
