@@ -50,6 +50,9 @@ playwright-report/
 
 # Temporary local scaffolds
 /_tmp_*/
+# Repo-root workspaces the E2E suite creates while it runs (removed when it ends).
+/ngdj-e2e-*/
+/ngdj-application-*/
 
 # TypeScript cache
 *.tsbuildinfo

@@ -31,6 +31,12 @@ export const TEST_TEMP_AREA_MODE_ENV = 'ANGULAR_DJANGO2_TEST_MODE';
 export const TEST_TEMP_AREA_NAME_ENV = 'ANGULAR_DJANGO2_TEST_AREA_NAME';
 export const E2E_DEBUG_ENV = 'ANGULAR_DJANGO2_E2E_DEBUG';
 export const E2E_TEMP_AREA_PREFIX = 'ngdj-e2e-';
+export const E2E_APPLICATION_TEMP_AREA_PREFIX = 'ngdj-application-';
+/** Every prefix an E2E spec creates repo-root temp areas with; a sweep must know all of them. */
+export const E2E_TEMP_AREA_PREFIXES: readonly string[] = [
+  E2E_TEMP_AREA_PREFIX,
+  E2E_APPLICATION_TEMP_AREA_PREFIX,
+];
 export const DEFAULT_EXEC_COMMAND_MAX_BUFFER = 10 * 1024 * 1024;
 export const DEFAULT_E2E_TIMEOUT = 5 * 60 * 1000;
 export const VITEST_E2E_CONFIG = 'vitest.e2e.config.mts';
@@ -260,7 +266,7 @@ export function deleteTempDir(dirPath: string, tempRoot: string): void {
 
 export function cleanupTempAreas(
   tempRoot: string,
-  prefixes: readonly string[] = [E2E_TEMP_AREA_PREFIX],
+  prefixes: readonly string[] = E2E_TEMP_AREA_PREFIXES,
 ): string[] {
   if (!existsSync(tempRoot)) {
     return [];
@@ -288,6 +294,19 @@ export function isE2EDebugMode(env: Record<string, string | undefined> = process
   const value = env[E2E_DEBUG_ENV]?.trim().toLowerCase();
 
   return value === '1' || value === 'true' || value === 'yes' || value === 'on';
+}
+
+/**
+ * Remove every repo-root E2E temp area, whichever spec created it. Debug mode
+ * keeps them for failure investigation, so it removes nothing.
+ *
+ * @returns the directories that were removed
+ */
+export function sweepE2ETempAreas(
+  repoRoot = getRepoRoot(),
+  env: Record<string, string | undefined> = process.env,
+): string[] {
+  return isE2EDebugMode(env) ? [] : cleanupTempAreas(repoRoot);
 }
 
 export function createE2ETempArea(
@@ -415,7 +434,8 @@ export function main(args: string[] = process.argv.slice(2)): number {
 
     case 'run':
     case 'watch': {
-      cleanupTempAreas(repoRoot);
+      // Stale temp areas are swept by the Vitest global setup (global-setup.ts),
+      // before any worker starts and again when the run ends.
       return runVitest(command);
     }
 

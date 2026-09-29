@@ -73,7 +73,8 @@ These tests:
 - execute real `ng add` and `ng generate` flows
 - verify generated projects can build successfully
 - include a live `ng serve` validation path in the first E2E scenario
-- clean stale repo-root temp workspaces before regular runs unless debug mode is enabled
+- remove every repo-root temp workspace before the run starts and again when it
+  ends, pass or fail, unless debug mode is enabled
 - preserve temp workspaces in debug mode for failure investigation
 
 Current E2E coverage includes:
@@ -168,7 +169,9 @@ The E2E suite additionally expects:
 
 1. network access for npm package downloads
 2. enough disk space for temporary Angular workspaces
-3. Node.js and npm available in `PATH`
+3. Node.js and npm available in `PATH` that meet the `engines` in `package.json`
+   (npm 11 or newer: the npm 10 resolver crashes while installing the generated
+   workspaces)
 4. a free port for the `ng serve` step used by `E2E-01`
 
 ### Windows cleanup note
@@ -227,25 +230,38 @@ prerequisites are available.
 
 ### E2E temp workspace cleanup and debug mode
 
-The E2E suite creates repo-root temporary workspaces with the `ngdj-e2e-`
-prefix.
+The E2E suite creates repo-root temporary workspaces with two prefixes:
+`ngdj-e2e-` (`schematics.e2e.spec.ts`) and `ngdj-application-`
+(`test_application.spec.ts`). `E2E_TEMP_AREA_PREFIXES` in `temp_areas.ts` lists
+them, and a unit test fails if a spec creates areas with a prefix that list does
+not contain. Both prefixes are ignored by git, so a workspace that exists while
+the suite runs never shows up as an untracked change.
+
+The suite cleans up after itself in three layers:
+
+- each scenario removes its own workspace in a `finally` block, so a failed
+  assertion does not leak a directory
+- the Vitest global setup (`e2e/utils/global-setup.ts`) removes every
+  `ngdj-e2e-*` and `ngdj-application-*` workspace before any worker starts, which
+  clears the workspaces of a run that was killed and could not run its `finally`
+  blocks, and removes them again when the run ends, pass or fail
+- the sweep lives in the global setup, not in a spec file, because the spec files
+  run in parallel workers and one worker would delete another's live workspace
 
 Regular flows:
 
-- `npm run cleanup:e2e:tmp-areas` removes stale `ngdj-e2e-*` workspaces left
-  behind by earlier runs
-- `npm run test:e2e` runs that cleanup behavior before the suite starts
-- `npm run test:e2e:watch` also cleans stale `ngdj-e2e-*` workspaces before
-  entering watch mode
-- regular E2E scenarios clean up their current temp workspaces in `finally`
-  blocks so failed assertions do not automatically leak directories into later
-  runs
+- `npm run cleanup:e2e:tmp-areas` removes workspaces left behind by earlier runs
+  without running the suite
+- `npm run test:e2e` and `npm run test:e2e:watch` get the global-setup cleanup
+  through `vitest.e2e.config.mts`; the root file re-exports the configuration in
+  the validation workspace so the entrypoint launches the real suite
 
 Debug flow:
 
 - `npm run test:e2e:debug` sets `ANGULAR_DJANGO2_E2E_DEBUG=1`
-- when debug mode is enabled, stale tmp-area cleanup is skipped and current
-  E2E workspaces are preserved for manual inspection after a failure
+- when debug mode is enabled, no sweep runs and the current E2E workspaces are
+  preserved for manual inspection after a failure; remove them afterwards with
+  `npm run cleanup:e2e:tmp-areas`
 
 ## Temp-area harness configuration
 

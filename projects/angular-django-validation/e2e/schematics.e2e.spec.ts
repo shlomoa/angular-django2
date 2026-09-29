@@ -9,9 +9,7 @@ import { describe, expect, it, beforeAll } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
-  cleanupTempAreas,
   createE2ETempArea,
-  E2E_TEMP_AREA_PREFIX,
   DEFAULT_E2E_TIMEOUT,
   execAngularCli,
   execCommand,
@@ -226,17 +224,9 @@ describe('angular-django2 schematics E2E tests', () => {
   }
 
   beforeAll(() => {
-    if (debugMode) {
-      console.log('[E2E] Debug mode enabled; skipping stale temp area cleanup.');
-    } else {
-      const deletedDirectories = cleanupTempAreas(repoRoot, [E2E_TEMP_AREA_PREFIX]);
-
-      if (deletedDirectories.length > 0) {
-        console.log(
-          `[E2E] Removed ${deletedDirectories.length} stale temp area(s) before starting.`,
-        );
-      }
-    }
+    // Stale temp areas are swept once per run by the Vitest global setup
+    // (e2e/utils/global-setup.ts). Sweeping here would race the other spec file,
+    // which runs in a parallel worker and may own a live temp area.
 
     // Verify that the library has been built
     const libraryPath = getLibraryPackagePath();

@@ -3,7 +3,13 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { execAngularCli, execCommand, getRepoRoot, withTempArea } from './utils/temp_areas';
+import {
+  E2E_APPLICATION_TEMP_AREA_PREFIX,
+  execAngularCli,
+  execCommand,
+  getRepoRoot,
+  withTempArea,
+} from './utils/temp_areas';
 const repoRoot = getRepoRoot();
 const distDir = path.join(repoRoot, 'projects', 'angular-django2', 'dist');
 const angularDjango2PackagePath = distDir;
@@ -84,7 +90,7 @@ describe('angular-django2 application schematic', () => {
           expect(buildOutput).toContain('Application bundle generation complete');
         },
         {
-          prefix: 'ngdj-application-',
+          prefix: E2E_APPLICATION_TEMP_AREA_PREFIX,
           tempRoot: repoRoot,
         },
       );
