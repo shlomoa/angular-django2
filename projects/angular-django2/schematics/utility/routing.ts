@@ -19,6 +19,7 @@ import {
   astNodeSubject,
   createAstNodeResolver,
   readAstBoolean,
+  readAstReference,
   readAstString,
 } from './ast-compiler';
 
@@ -32,23 +33,23 @@ export const ROUTE_AST_TYPE = 'Route';
 export const NAV_ITEM_AST_TYPE = 'NavItem';
 
 /** Catalog-style attribute keys understood on `Routing` nodes. */
-export const ROUTING_ATTRIBUTES = { defaultRoute: '[defaultRoute]' } as const;
+export const ROUTING_ATTRIBUTES = { defaultRoute: 'uses.defaultRoute' } as const;
 
 /** Catalog-style attribute keys understood on `Route` nodes. */
 export const ROUTE_ATTRIBUTES = {
-  path: '[path]',
-  target: '[target]',
-  title: '[title]',
-  redirectTo: '[redirectTo]',
-  access: '[access]',
+  path: 'uses.path',
+  target: 'uses.target',
+  title: 'uses.title',
+  redirectTo: 'uses.redirectTo',
+  access: 'uses.access',
 } as const;
 
 /** Catalog-style attribute keys understood on `NavItem` nodes. */
 export const NAV_ITEM_ATTRIBUTES = {
-  label: '[label]',
-  route: '[route]',
-  icon: '[icon]',
-  disabled: '[disabled]',
+  label: 'uses.label',
+  route: 'uses.route',
+  icon: 'uses.icon',
+  disabled: 'uses.disabled',
 } as const;
 
 /** Lowercase URL segments separated by hyphens or slashes. */
@@ -75,50 +76,22 @@ export interface NavItemEntry {
 }
 
 /**
- * Read an element reference: a quoted element-id string, for example
- * `"\"profileRoute\""`. Absent and `null` values read as `undefined`.
+ * Collect every `Route` below one `Routing` node and check the contract rules
+ * the OpenUI validator does not: only `Route` children, only supported
+ * attributes, references written as quoted ids, and exactly one of `uses.target`
+ * and `uses.redirectTo`. The validator itself (spec 0.6.0 and later) already
+ * resolves the references and checks the type each one may name, so an unknown
+ * target or route never reaches this point.
  *
- * @throws SchematicsException when the value is not a quoted, non-empty id.
- */
-export function readElementReference(
-  node: OpenUiElement,
-  key: string,
-  subject: string,
-): string | undefined {
-  const value = readAstString(node, key);
-  if (value === undefined) {
-    return undefined;
-  }
-  try {
-    const reference: unknown = JSON.parse(value);
-    if (typeof reference === 'string' && reference.length > 0) {
-      return reference;
-    }
-  } catch {
-    // The diagnostic below explains the required quoted element-id form.
-  }
-  throw new SchematicsException(
-    `OpenUI node "${subject}": ${key} must be a quoted element-id string, not "${value}".`,
-  );
-}
-
-/**
- * Collect every `Route` below one `Routing` node, checking the OpenUI
- * application contract's same-document references. The OpenUI validator checks
- * catalog membership only; the references are enforced here before any
- * generated output is written.
- *
- * @throws SchematicsException for unsupported attributes or children, a route
- * with both or neither of `[target]` and `[redirectTo]`, or an unknown reference.
+ * @throws SchematicsException for unsupported attributes or children, or a route
+ * with both or neither of `uses.target` and `uses.redirectTo`.
  */
 export function collectRoutes(
   routing: OpenUiElement,
-  document: OpenUiDocument,
   documentPath: string,
 ): Map<string, RouteEntry> {
   const subject = astNodeSubject(documentPath, routing);
   assertAstAttributes(routing, Object.values(ROUTING_ATTRIBUTES), subject);
-  const resolver = createAstNodeResolver(document);
   const routes = new Map<string, RouteEntry>();
 
   const collect = (node: OpenUiElement, parent: RouteEntry | undefined): void => {
@@ -129,16 +102,11 @@ export function collectRoutes(
       );
     }
     assertAstAttributes(node, Object.values(ROUTE_ATTRIBUTES), routeSubject);
-    const target = readElementReference(node, ROUTE_ATTRIBUTES.target, routeSubject);
-    const redirect = readElementReference(node, ROUTE_ATTRIBUTES.redirectTo, routeSubject);
+    const target = readAstReference(node, ROUTE_ATTRIBUTES.target, routeSubject);
+    const redirect = readAstReference(node, ROUTE_ATTRIBUTES.redirectTo, routeSubject);
     if ((target === undefined) === (redirect === undefined)) {
       throw new SchematicsException(
         `OpenUI node "${routeSubject}" requires exactly one of ${ROUTE_ATTRIBUTES.target} or ${ROUTE_ATTRIBUTES.redirectTo}.`,
-      );
-    }
-    if (target !== undefined && !resolver.findById(target)) {
-      throw new SchematicsException(
-        `OpenUI node "${routeSubject}" references unknown target "${target}" with ${ROUTE_ATTRIBUTES.target}.`,
       );
     }
     const entry: RouteEntry = { node, parent, target };
@@ -151,28 +119,25 @@ export function collectRoutes(
   for (const child of routing.children ?? []) {
     collect(child, undefined);
   }
-  const defaultRoute = readElementReference(routing, ROUTING_ATTRIBUTES.defaultRoute, subject);
-  if (defaultRoute !== undefined && !routes.has(defaultRoute)) {
-    throw new SchematicsException(
-      `OpenUI node "${subject}" references unknown Route "${defaultRoute}" with ${ROUTING_ATTRIBUTES.defaultRoute}.`,
-    );
-  }
+  // Accepted but unused: only the quoted-id form is checked. The validator has
+  // already resolved it to a Route.
+  readAstReference(routing, ROUTING_ATTRIBUTES.defaultRoute, subject);
   return routes;
 }
 
 /**
- * The full URL path of a route: its own `[path]` matched relative to the
- * `[path]` of every `Route` that owns it, joined with slashes. A parent
- * without a `[path]` adds no segment; the route itself needs one.
+ * The full URL path of a route: its own `uses.path` matched relative to the
+ * `uses.path` of every `Route` that owns it, joined with slashes. A parent
+ * without a `uses.path` adds no segment; the route itself needs one.
  *
- * @throws SchematicsException when the route has no `[path]` or any `[path]` in
+ * @throws SchematicsException when the route has no `uses.path` or any `uses.path` in
  * the chain is not lowercase URL segments separated by hyphens or slashes.
  */
 export function routeFullPath(entry: RouteEntry, documentPath: string): string {
   const segments: string[] = [];
   for (let current: RouteEntry | undefined = entry; current; current = current.parent) {
     const subject = astNodeSubject(documentPath, current.node);
-    const path = readAstString(current.node, ROUTE_ATTRIBUTES.path);
+    const path = readAstString(current.node, ROUTE_ATTRIBUTES.path, subject);
     if (!path) {
       if (current === entry) {
         throw new SchematicsException(
@@ -195,20 +160,20 @@ export function routeFullPath(entry: RouteEntry, documentPath: string): string {
 /**
  * Decode and check one `NavItem`.
  *
- * @throws SchematicsException for unsupported attributes, a missing `[label]`
- * or `[route]`, or an icon that is not a lowercase Material icon identifier.
+ * @throws SchematicsException for unsupported attributes, a missing `uses.label`
+ * or `uses.route`, or an icon that is not a lowercase Material icon identifier.
  */
 export function navItemFromAst(node: OpenUiElement, documentPath: string): NavItemEntry {
   const subject = astNodeSubject(documentPath, node);
   assertAstAttributes(node, Object.values(NAV_ITEM_ATTRIBUTES), subject);
-  const label = readAstString(node, NAV_ITEM_ATTRIBUTES.label);
-  const routeId = readElementReference(node, NAV_ITEM_ATTRIBUTES.route, subject);
+  const label = readAstString(node, NAV_ITEM_ATTRIBUTES.label, subject);
+  const routeId = readAstReference(node, NAV_ITEM_ATTRIBUTES.route, subject);
   if (!label || !routeId) {
     throw new SchematicsException(
       `OpenUI node "${subject}" requires non-empty ${NAV_ITEM_ATTRIBUTES.label} and ${NAV_ITEM_ATTRIBUTES.route}.`,
     );
   }
-  const icon = readAstString(node, NAV_ITEM_ATTRIBUTES.icon);
+  const icon = readAstString(node, NAV_ITEM_ATTRIBUTES.icon, subject);
   if (icon !== undefined && !NAVIGATION_ICON_PATTERN.test(icon)) {
     throw new SchematicsException(
       `OpenUI node "${subject}": ${NAV_ITEM_ATTRIBUTES.icon}="${icon}" must be a lowercase Angular Material icon identifier.`,
@@ -239,7 +204,7 @@ export function findRouteForTarget(
     if (routing.type !== ROUTING_AST_TYPE) {
       continue;
     }
-    for (const entry of collectRoutes(routing, document, documentPath).values()) {
+    for (const entry of collectRoutes(routing, documentPath).values()) {
       if (entry.target === targetId) {
         matches.push(entry);
       }

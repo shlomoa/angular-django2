@@ -55,8 +55,8 @@ allowed alongside it.
 ng generate angular-django2:workspace-setup --name=shop --project=shop --document=app.openui.json
 ```
 
-- `html` `[lang]` and `[dir]` (`ltr`, `rtl`, or `auto`) are set on the
-  existing `<html>` element and `[title]` replaces the `<title>` text.
-- `link` `[href]` with `[rel]` set to `icon` names a workspace-relative icon file that replaces the
+- `html` `uses.lang` and `uses.dir` (`ltr`, `rtl`, or `auto`) are set on the
+  existing `<html>` element and `uses.title` replaces the `<title>` text.
+- `link` `uses.href` with `uses.rel` set to `icon` names a workspace-relative icon file that replaces the
   application favicon (`<project root>/public/favicon.ico` when present,
   otherwise `<sourceRoot>/favicon.ico`).

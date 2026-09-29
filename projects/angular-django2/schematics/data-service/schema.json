@@ -49,11 +49,11 @@
     "document": {
       "type": "string",
       "format": "path",
-      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). The bound node's [data]=\"<apiPath>#<ApiService>\" names the generated services module (application path, e.g. src/app/api/services) and service class."
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). The bound node's uses.data (the quoted string \"<apiPath>#<ApiService>\") names the generated services module (application path, e.g. src/app/api/services) and service class."
     },
     "nodeId": {
       "type": "string",
-      "description": "Optional id of the bound node. When omitted, targets the first element with a [data] binding. Requires --document.",
+      "description": "Optional id of the bound node. When omitted, targets the first element with a uses.data attribute. Requires --document.",
       "aliases": ["element-id", "elementId", "node-id", "nodeId"]
     }
   }

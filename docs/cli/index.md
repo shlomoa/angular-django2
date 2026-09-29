@@ -37,8 +37,9 @@ For an end-to-end setup path, see the [tutorial](../TUTORIAL.md).
 The UI schematics also compile from an
 [OpenUI](https://github.com/shlomoa/openui-spec) JSON document: pass
 `--document=<path>` and, when the document holds several candidates,
-`--node-id=<id>`. Attributes use the catalog style (`[input]`, `(event)`) with
-string values. Each command page has an _OpenUI_ section listing the node types
+`--node-id=<id>`. Attributes use the OpenUI 0.8.0 typed-attribute language
+(`uses.<input>`, `behaves.<name>`, `produces.<name>`): strings are quoted
+literals, booleans and numbers are JSON values. Each command page has an _OpenUI_ section listing the node types
 and attributes it accepts; the
 [repository requirements](https://github.com/shlomoa/angular-django2/blob/main/docs/REQUIREMENTS.md#openui-document-input-contracts)
 summarize them.

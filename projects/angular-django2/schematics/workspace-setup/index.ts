@@ -323,8 +323,8 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
 
 /**
  * Compile the `html` and icon `link` nodes of `--document` into host file
- * edits: `[lang]`, `[dir]`, and `[title]` update the existing index.html, and
- * the `[href]` icon file replaces the application favicon (`public/favicon.ico`
+ * edits: `uses.lang`, `uses.dir`, and `uses.title` update the existing index.html, and
+ * the `uses.href` icon file replaces the application favicon (`public/favicon.ico`
  * when present, else `<sourceRoot>/favicon.ico` as for the `favicon` file hook).
  *
  * @throws SchematicsException for conflicting file hooks, invalid nodes, or missing files.

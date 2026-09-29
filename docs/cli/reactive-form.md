@@ -49,7 +49,7 @@ ng generate angular-django2:reactive-form contact \
 
 ```json
 {
-  "version": "0.4.0",
+  "version": "0.8.0",
   "id": "root",
   "type": "html",
   "children": [
@@ -57,22 +57,35 @@ ng generate angular-django2:reactive-form contact \
       "id": "contactForm",
       "type": "Form",
       "attrs": {
-        "[title]": "Create contact",
-        "[action]": "/api/contacts/",
-        "(submit)": "src/app/api-integration/contact-submit.ts#ContactSubmitService.create"
+        "uses.title": "\"Create contact\"",
+        "uses.action": "\"/api/contacts/\"",
+        "behaves.submit": "src/app/api-integration/contact-submit.ts#ContactSubmitService.create"
       },
       "children": [
         {
           "id": "firstName",
           "type": "TextInputs",
-          "attrs": { "[name]": "first_name", "[label]": "First name", "[required]": "true" }
+          "attrs": {
+            "uses.name": "\"first_name\"",
+            "uses.label": "\"First name\"",
+            "uses.required": true
+          }
         },
         {
           "id": "seats",
           "type": "RangeControl",
-          "attrs": { "[label]": "Seats", "[min]": "1" }
+          "attrs": {
+            "uses.label": "\"Seats\"",
+            "uses.min": 1
+          }
         },
-        { "id": "contactSubmit", "type": "ActionControls", "attrs": { "[label]": "Create" } }
+        {
+          "id": "contactSubmit",
+          "type": "ActionControls",
+          "attrs": {
+            "uses.label": "\"Create\""
+          }
+        }
       ]
     }
   ]
@@ -81,14 +94,16 @@ ng generate angular-django2:reactive-form contact \
 
 | Definition key         | OpenUI `Form` subtree                                                    |
 | :--------------------- | :----------------------------------------------------------------------- |
-| `title`                | `Form` `[title]`                                                         |
-| `endpoint`             | `Form` `[action]`                                                        |
-| `integration`          | `Form` `(submit)` = `<artifact>#<Symbol>.<method>`                       |
-| `submitLabel`          | `[label]` of the single optional `ActionControls` child                  |
+| `title`                | `Form` `uses.title`                                                      |
+| `endpoint`             | `Form` `uses.action`                                                     |
+| `integration`          | `Form` `behaves.submit` = `<artifact>#<Symbol>.<method>`                 |
+| `submitLabel`          | `uses.label` of the single optional `ActionControls` child               |
 | `fields`               | `TextInputs` / `RangeControl` children, in order                         |
 | field keys, validators | control attributes, see [form-field](form-field.md#openui-control-nodes) |
 
-Attribute values are strings (`"true"`, `"120"`). Unknown attributes, other
+Attribute values are typed OpenUI values: strings are quoted literals
+(`"uses.label": "\"Email\""`), booleans and numbers are JSON values
+(`"uses.required": true`, `"uses.maxLength": 120`). Unknown attributes, other
 child types, and more than one `ActionControls` child are rejected.
 Diagnostics name the node as `<document>#<nodeId>`; `fields[<n>]` is the n-th
 control child.

@@ -223,26 +223,30 @@ sources over lower-priority ones.
   candidates, `--node-id=<id>`; without `--node-id` they compile the first
   element of a supported type. The document is loaded and validated with
   `@shlomoa/openui-spec` before any mutation.
-- Attributes use the OpenUI catalog style: `[input]` for inputs and `(event)`
-  for events; values are strings (booleans are `"true"` / `"false"`, numbers
-  are decimal strings). Unsupported attributes are rejected, never ignored.
+- Attributes use the OpenUI 0.8.0 typed-attribute language: `uses.<name>` for
+  inputs, `behaves.<name>` for behaviors, and `produces.<name>` for emitted
+  events. Strings are quoted literals (`"\"text\""`), booleans and numbers are
+  JSON values, references are quoted element ids, and `behaves.*` /
+  `produces.*` values are unquoted expressions. An unquoted string in a `uses.*`
+  attribute is a binding expression, which the compilers reject because they
+  generate static code. Unsupported attributes are rejected, never ignored.
 - Options that a node describes cannot be combined with `--document`; the
   schematic reports the conflicting flags. Legacy CLI flags are translated into
   synthetic OpenUI nodes and compiled by the same code path.
 - Accepted nodes, by schematic (the linked CLI pages are the canonical
   attribute reference):
 
-  | Schematic                                                                                                                            | OpenUI input                                                                                                                                                        |
-  | :----------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-  | [`reactive-form`](cli/reactive-form.md#openui-form-documents)                                                                        | `Form` with `TextInputs` / `RangeControl` / `ActionControls` children                                                                                               |
-  | [`form-field`](cli/form-field.md#openui-control-nodes), [`field-component`](cli/field-component.md)                                  | `TextInputs` or `RangeControl`                                                                                                                                      |
-  | [`component`](cli/component.md#openui-surface-containers)                                                                            | `SurfaceContainers`; children compiled and embedded by `[slot]`                                                                                                     |
-  | [`complex-component`](cli/complex-component.md#openui-composite-containers)                                                          | `SurfaceContainers` as a Material card; optional `OverlayContainers` child                                                                                          |
-  | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `[slot]` sections                                                                                            |
-  | [`page`](cli/page.md#openui-page-nodes)                                                                                              | `DashboardPage` or `EmptyPage` with `[title]`; its path and access from the `Route` that targets it, its label and icon from the `NavItem` that presents that route |
-  | [`application`](cli/application.md#openui-application-documents), [`material-app`](cli/material-app.md#openui-application-documents) | `Application` with `Routing`, `Navigation`, `ToolBar`, `Presentation`; `material-app` renders validated toolbar rows and sidenav links                              |
-  | [`workspace-setup`](cli/workspace-setup.md#openui-host-documents)                                                                    | `html` (`[lang]`, `[dir]`, `[title]`) and `link` (`[rel]`, `[href]`)                                                                                                |
-  | [`data-service`](cli/data-service.md#openui-data-bindings)                                                                           | any element with `[data]="<apiPath>#<ApiService>"`                                                                                                                  |
+  | Schematic                                                                                                                            | OpenUI input                                                                                                                                                           |
+  | :----------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | [`reactive-form`](cli/reactive-form.md#openui-form-documents)                                                                        | `Form` with `TextInputs` / `RangeControl` / `ActionControls` children                                                                                                  |
+  | [`form-field`](cli/form-field.md#openui-control-nodes), [`field-component`](cli/field-component.md)                                  | `TextInputs` or `RangeControl`                                                                                                                                         |
+  | [`component`](cli/component.md#openui-surface-containers)                                                                            | `SurfaceContainers`; children compiled and embedded by `uses.slot`                                                                                                     |
+  | [`complex-component`](cli/complex-component.md#openui-composite-containers)                                                          | `SurfaceContainers` as a Material card; optional `OverlayContainers` child                                                                                             |
+  | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `uses.slot` sections                                                                                            |
+  | [`page`](cli/page.md#openui-page-nodes)                                                                                              | `DashboardPage` or `EmptyPage` with `uses.title`; its path and access from the `Route` that targets it, its label and icon from the `NavItem` that presents that route |
+  | [`application`](cli/application.md#openui-application-documents), [`material-app`](cli/material-app.md#openui-application-documents) | `Application` with `Routing`, `Navigation`, `ToolBar`, `Presentation`; `material-app` renders validated toolbar rows and sidenav links                                 |
+  | [`workspace-setup`](cli/workspace-setup.md#openui-host-documents)                                                                    | `html` (`uses.lang`, `uses.dir`, `uses.title`) and `link` (`uses.rel`, `uses.href`)                                                                                    |
+  | [`data-service`](cli/data-service.md#openui-data-bindings)                                                                           | any element with `uses.data` = `"<apiPath>#<ApiService>"`                                                                                                              |
 
 - `app-shell`, `material-setup`, `openapi-setup`, `project-structure`,
   `service`, `class`, and `ng-add` are CLI-driven by design: they have no UI

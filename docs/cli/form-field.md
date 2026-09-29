@@ -15,7 +15,7 @@ ng generate angular-django2:form-field email \
 ```
 
 `--name` must be kebab-case; with `--document` it defaults to the node's
-dasherized `[name]` attribute or id. `--path` defaults to
+dasherized `uses.name` attribute or id. `--path` defaults to
 `src/app/shared/form-helpers` and must remain within the selected application's
 `sourceRoot`. Select `--project` when the workspace has more than one
 application. The schematic requires `@angular/forms`, `@angular/material`, and
@@ -62,18 +62,18 @@ drives both the reusable primitive and the form that composes it.
 ng generate angular-django2:form-field --document=src/app/app.openui.json --node-id=workEmail
 ```
 
-| Node type      | `[type]` values                         | Default `[type]` |
-| :------------- | :-------------------------------------- | :--------------- |
-| `TextInputs`   | `text`, `email`, `password`, `textarea` | `text`           |
-| `RangeControl` | `number`                                | `number`         |
+| Node type      | `uses.type` values                      | Default `uses.type` |
+| :------------- | :-------------------------------------- | :------------------ |
+| `TextInputs`   | `text`, `email`, `password`, `textarea` | `text`              |
+| `RangeControl` | `number`                                | `number`            |
 
-| Attribute                                                         | Used by                         |
-| :---------------------------------------------------------------- | :------------------------------ |
-| `[type]`, `[name]`                                                | all                             |
-| `[appearance]`, `[subscriptSizing]`                               | `form-field`, `field-component` |
-| `[label]`, `[value]`, `[hint]`, `[placeholder]`, `[autocomplete]` | `reactive-form`                 |
-| `[required]`, `[email]` (`"true"` / `"false"`)                    | `reactive-form`                 |
-| `[minLength]`, `[maxLength]`, `[min]`, `[max]`, `[pattern]`       | `reactive-form`                 |
+| Attribute                                                                        | Used by                         |
+| :------------------------------------------------------------------------------- | :------------------------------ |
+| `uses.type`, `uses.name`                                                         | all                             |
+| `uses.appearance`, `uses.subscriptSizing`                                        | `form-field`, `field-component` |
+| `uses.label`, `uses.value`, `uses.hint`, `uses.placeholder`, `uses.autocomplete` | `reactive-form`                 |
+| `uses.required`, `uses.email` (`true` / `false`)                                 | `reactive-form`                 |
+| `uses.minLength`, `uses.maxLength`, `uses.min`, `uses.max`, `uses.pattern`       | `reactive-form`                 |
 
 Any other attribute is rejected. `--control-type`, `--appearance`, and
 `--subscript-sizing` cannot be combined with `--document`.

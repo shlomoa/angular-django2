@@ -78,7 +78,7 @@ export function formFieldPrimitiveDescriptor(
 
 /** @internal Options that stay on the CLI when a control is compiled from an OpenUI node. */
 export interface FormFieldAstOptions {
-  /** Kebab-case base name; defaults to the dasherized node `[name]` or id. */
+  /** Kebab-case base name; defaults to the dasherized node `uses.name` or id. */
   name?: string;
   path?: string;
   project?: string;
@@ -124,10 +124,11 @@ export function compileFormFieldFromAst(
     path: options.path,
     project: options.project,
     controlType,
-    appearance: readAstString(node, CONTROL_ATTRIBUTES.appearance) as FormFieldAppearance,
+    appearance: readAstString(node, CONTROL_ATTRIBUTES.appearance, subject) as FormFieldAppearance,
     subscriptSizing: readAstString(
       node,
       CONTROL_ATTRIBUTES.subscriptSizing,
+      subject,
     ) as FormFieldSubscriptSizing,
   };
 

@@ -16,7 +16,7 @@
 import { strings } from '@angular-devkit/core';
 import { SchematicsException } from '@angular-devkit/schematics';
 import type { SchematicContext, Tree } from '@angular-devkit/schematics';
-import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
+import type { OpenUiAttributeValue, OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
 
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -31,7 +31,7 @@ function resolveOpenUiVersion(): string {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
     return pkg.version;
   } catch {
-    return '0.4.0';
+    return '0.8.0';
   }
 }
 
@@ -206,58 +206,169 @@ export function assertAstAttributes(
   }
 }
 
-/** Read a string attribute; absent and `null` values read as `undefined`. */
-export function readAstString(node: OpenUiElement, key: string): string | undefined {
-  return node.attrs?.[key] ?? undefined;
+/**
+ * Decode a quoted literal: `"\"Details\""` is the text `Details`. `undefined`
+ * for anything else, including an unquoted string, which OpenUI defines as a
+ * binding or target-language expression.
+ */
+export function decodeAstLiteral(value: unknown): string | undefined {
+  if (
+    typeof value !== 'string' ||
+    value.length < 2 ||
+    !value.startsWith('"') ||
+    !value.endsWith('"')
+  ) {
+    return undefined;
+  }
+  try {
+    const decoded: unknown = JSON.parse(value);
+    return typeof decoded === 'string' ? decoded : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Whether the attribute is present, including as a `null` marker. */
+export function hasAstAttribute(node: OpenUiElement, key: string): boolean {
+  return Object.hasOwn(node.attrs ?? {}, key);
 }
 
 /**
- * Read a boolean attribute encoded as `"true"` or `"false"`.
+ * Read a string attribute as a quoted literal and return its text. Absent and
+ * `null` values read as `undefined`.
  *
- * @throws SchematicsException for any other value.
+ * angular-django2 compiles literals: the generated code is static, so an
+ * unquoted string (a binding or target-language expression) is rejected rather
+ * than being read as text, which would silently change its meaning.
+ *
+ * @throws SchematicsException for an unquoted string or a value of another type.
+ */
+export function readAstString(
+  node: OpenUiElement,
+  key: string,
+  subject = node.id,
+): string | undefined {
+  const value = node.attrs?.[key];
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  const literal = decodeAstLiteral(value);
+  if (literal === undefined) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": attribute "${key}" must be a quoted string literal, ` +
+        `for example ${JSON.stringify('"text"')}, not ${JSON.stringify(value)}. ` +
+        'An unquoted string is a binding expression, which is not compiled.',
+    );
+  }
+  return literal;
+}
+
+/**
+ * Read a Behaves or Produces value: a target-language expression, an unquoted
+ * string. Absent and `null` values read as `undefined`.
+ *
+ * @throws SchematicsException for a quoted literal or a value of another type.
+ */
+export function readAstExpression(
+  node: OpenUiElement,
+  key: string,
+  subject = node.id,
+): string | undefined {
+  const value = node.attrs?.[key];
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (typeof value !== 'string' || decodeAstLiteral(value) !== undefined) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": attribute "${key}" must be an unquoted expression, not ${JSON.stringify(value)}.`,
+    );
+  }
+  return value;
+}
+
+/**
+ * Read a boolean attribute: the JSON value `true` or `false`.
+ *
+ * @throws SchematicsException for any other value, including the strings `"true"` and `"false"`.
  */
 export function readAstBoolean(
   node: OpenUiElement,
   key: string,
-  subject: string,
+  subject = node.id,
 ): boolean | undefined {
-  const value = readAstString(node, key);
-  if (value === undefined) {
+  const value = node.attrs?.[key];
+  if (value === undefined || value === null) {
     return undefined;
   }
-  if (value !== 'true' && value !== 'false') {
+  if (typeof value !== 'boolean') {
     throw new SchematicsException(
-      `OpenUI node "${subject}": attribute "${key}" must be "true" or "false", not "${value}".`,
+      `OpenUI node "${subject}": attribute "${key}" must be true or false, not ${JSON.stringify(value)}.`,
     );
   }
-  return value === 'true';
+  return value;
 }
 
 /**
- * Read a finite number attribute encoded as a decimal string.
+ * Read a finite number attribute: a JSON number.
  *
- * @throws SchematicsException for any other value.
+ * @throws SchematicsException for any other value, including a number written as a string.
  */
 export function readAstNumber(
   node: OpenUiElement,
   key: string,
-  subject: string,
+  subject = node.id,
 ): number | undefined {
-  const value = readAstString(node, key);
-  if (value === undefined) {
+  const value = node.attrs?.[key];
+  if (value === undefined || value === null) {
     return undefined;
   }
-  const parsed = value.trim() === '' ? Number.NaN : Number(value);
-  if (!Number.isFinite(parsed)) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new SchematicsException(
-      `OpenUI node "${subject}": attribute "${key}" must be a finite number, not "${value}".`,
+      `OpenUI node "${subject}": attribute "${key}" must be a finite number, not ${JSON.stringify(value)}.`,
     );
   }
-  return parsed;
+  return value;
 }
 
-/** Attribute values accepted from legacy CLI options before normalization. */
-export type SyntheticAttributeValue = string | number | boolean | null | undefined;
+/**
+ * Read an element reference: a quoted element id, for example `"\"profileRoute\""`.
+ * Absent and `null` values read as `undefined`.
+ *
+ * @throws SchematicsException when the value is not a quoted, non-empty id.
+ */
+export function readAstReference(
+  node: OpenUiElement,
+  key: string,
+  subject = node.id,
+): string | undefined {
+  const value = node.attrs?.[key];
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  const id = decodeAstLiteral(value);
+  if (id === undefined || id.length === 0) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": ${key} must be a quoted element-id string, not ${JSON.stringify(value)}.`,
+    );
+  }
+  return id;
+}
+
+/** A target-language expression (an unquoted string) for a synthetic attribute. */
+export interface AstExpression {
+  readonly expression: string;
+}
+
+/** Mark a string as an expression, so a synthetic attribute keeps it unquoted. */
+export function astExpression(expression: string): AstExpression {
+  return { expression };
+}
+
+/**
+ * Attribute values accepted from legacy CLI options before normalization. A
+ * string is a literal and is quoted; use `astExpression` for an expression.
+ */
+export type SyntheticAttributeValue = string | number | boolean | null | undefined | AstExpression;
 
 /** Input for a synthetic OpenUI element built from legacy CLI options. */
 export interface SyntheticAstNodeInput {
@@ -265,7 +376,7 @@ export interface SyntheticAstNodeInput {
   readonly id: string;
   /** Canonical, case-sensitive OpenUI catalog type (for example `Form`). */
   readonly type: string;
-  /** Attributes; `undefined` entries are dropped, numbers and booleans are stringified. */
+  /** Attributes; `undefined` entries are dropped and strings are encoded as quoted literals. */
   readonly attrs?: Readonly<Record<string, SyntheticAttributeValue>>;
   /** Child elements, already built with `createSyntheticAstNode`. */
   readonly children?: readonly OpenUiElement[];
@@ -324,14 +435,27 @@ export function toAstNodeId(name: string): string {
 
 function normalizeSyntheticAttributes(
   attrs: Readonly<Record<string, SyntheticAttributeValue>> | undefined,
-): Record<string, string | null> | undefined {
+): Record<string, OpenUiAttributeValue> | undefined {
   if (!attrs) {
     return undefined;
   }
 
   const entries = Object.entries(attrs)
     .filter(([, value]) => value !== undefined)
-    .map(([key, value]) => [key, value === null ? null : String(value)] as const);
+    .map(
+      ([key, value]) =>
+        [key, encodeSyntheticValue(value as Exclude<typeof value, undefined>)] as const,
+    );
 
   return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+}
+
+function encodeSyntheticValue(
+  value: Exclude<SyntheticAttributeValue, undefined>,
+): OpenUiAttributeValue {
+  if (value === null || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+
+  return typeof value === 'string' ? JSON.stringify(value) : value.expression;
 }

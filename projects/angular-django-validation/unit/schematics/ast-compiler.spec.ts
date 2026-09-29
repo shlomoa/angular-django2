@@ -4,10 +4,16 @@ import { describe, expect, it } from 'vitest';
 
 import {
   assertAstAttributes,
+  astExpression,
   createAstNodeResolver,
+  decodeAstLiteral,
+  hasAstAttribute,
   readAstBoolean,
+  readAstExpression,
   readAstNode,
   readAstNumber,
+  readAstReference,
+  readAstString,
   createSyntheticAstDocument,
   createSyntheticAstNode,
   resolveAstNode,
@@ -35,7 +41,7 @@ const APP_DOCUMENT = {
             {
               id: 'profileForm',
               type: 'Form',
-              attrs: { '(submit)': 'save()' },
+              attrs: { 'behaves.submit': 'save()' },
               children: [{ id: 'nameInput', type: 'TextInputs', attrs: { label: 'Name' } }],
             },
           ],
@@ -115,7 +121,7 @@ describe('OpenUI AST compiler core', () => {
   });
 
   describe('synthetic AST adapters', () => {
-    it('TC-AST-07: translates legacy CLI options into a normalized OpenUI element', () => {
+    it('TC-AST-07: translates legacy CLI options into a normalized, typed OpenUI element', () => {
       const input = createSyntheticAstNode({
         id: 'email-address',
         type: 'TextInputs',
@@ -128,11 +134,30 @@ describe('OpenUI AST compiler core', () => {
         },
       });
 
+      // A string is a literal (quoted inside the string); booleans and numbers stay JSON values.
       expect(input).toEqual({
         id: 'emailAddress',
         type: 'TextInputs',
-        attrs: { label: 'Email', required: 'true', maxLength: '120', hint: null },
+        attrs: { label: '"Email"', required: true, maxLength: 120, hint: null },
       });
+    });
+
+    it('TC-AST-07b: encodes quotes in literals and keeps an expression unquoted', () => {
+      const form = createSyntheticAstNode({
+        id: 'contact',
+        type: 'Form',
+        attrs: {
+          title: 'Say "hello" \\ now',
+          'behaves.submit': astExpression('orders#OrdersPage.save'),
+        },
+      });
+
+      expect(form.attrs).toEqual({
+        title: '"Say \\"hello\\" \\\\ now"',
+        'behaves.submit': 'orders#OrdersPage.save',
+      });
+      expect(readAstString(form, 'title')).toBe('Say "hello" \\ now');
+      expect(readAstExpression(form, 'behaves.submit')).toBe('orders#OrdersPage.save');
     });
 
     it('TC-AST-08: builds nested synthetic nodes that resolve like document nodes', () => {
@@ -166,7 +191,8 @@ describe('OpenUI AST compiler core', () => {
 
     it('TC-AST-10: rejects synthetic nodes outside the canonical catalog', () => {
       expect(() => createSyntheticAstNode({ id: 'report', type: 'report' })).toThrow(
-        'Synthetic OpenUI node "report" is invalid:\nunknown OpenUI object type: report',
+        'Synthetic OpenUI node "report" is invalid:\n' +
+          '/children/0/type: catalog/unknown-type: unknown OpenUI object type: report',
       );
     });
 
@@ -204,23 +230,80 @@ describe('OpenUI AST compiler core', () => {
       const node = {
         id: 'age',
         type: 'RangeControl',
-        attrs: { '[min]': '0', '[max]': 'many', '[required]': 'true', '[hint]': null },
+        attrs: { 'uses.min': 0, 'uses.max': 'many', 'uses.required': true, 'uses.hint': null },
       };
 
-      expect(readAstNumber(node, '[min]', 'doc#age')).toBe(0);
-      expect(readAstNumber(node, '[step]', 'doc#age')).toBeUndefined();
-      expect(() => readAstNumber(node, '[max]', 'doc#age')).toThrow(
-        'OpenUI node "doc#age": attribute "[max]" must be a finite number, not "many".',
+      expect(readAstNumber(node, 'uses.min', 'doc#age')).toBe(0);
+      expect(readAstNumber(node, 'uses.step', 'doc#age')).toBeUndefined();
+      expect(() => readAstNumber(node, 'uses.max', 'doc#age')).toThrow(
+        'OpenUI node "doc#age": attribute "uses.max" must be a finite number, not "many".',
       );
-      expect(readAstBoolean(node, '[required]', 'doc#age')).toBe(true);
-      expect(readAstBoolean(node, '[hint]', 'doc#age')).toBeUndefined();
+      expect(readAstBoolean(node, 'uses.required', 'doc#age')).toBe(true);
+      expect(readAstBoolean(node, 'uses.hint', 'doc#age')).toBeUndefined();
       expect(() =>
-        readAstBoolean({ ...node, attrs: { '[required]': 'yes' } }, '[required]', 'doc#age'),
-      ).toThrow('attribute "[required]" must be "true" or "false", not "yes".');
-      expect(() => assertAstAttributes(node, ['[min]', '[max]'], 'doc#age')).toThrow(
-        'OpenUI node "doc#age" has unsupported attribute(s): [required], [hint]. ' +
-          'Supported attributes for "RangeControl": [min], [max].',
+        readAstBoolean({ ...node, attrs: { 'uses.required': 'yes' } }, 'uses.required', 'doc#age'),
+      ).toThrow('attribute "uses.required" must be true or false, not "yes".');
+      expect(() => assertAstAttributes(node, ['uses.min', 'uses.max'], 'doc#age')).toThrow(
+        'OpenUI node "doc#age" has unsupported attribute(s): uses.required, uses.hint. ' +
+          'Supported attributes for "RangeControl": uses.min, uses.max.',
       );
+    });
+
+    it('TC-AST-15: reads a string only as a quoted literal and rejects a binding expression', () => {
+      const node = {
+        id: 'panel',
+        type: 'SurfaceContainers',
+        attrs: {
+          'uses.title': '"Orders"',
+          'uses.heading': 'orderTitle',
+          'uses.count': 3,
+          'uses.empty': null,
+        },
+      };
+
+      expect(readAstString(node, 'uses.title', 'doc#panel')).toBe('Orders');
+      expect(readAstString(node, 'uses.missing', 'doc#panel')).toBeUndefined();
+      expect(readAstString(node, 'uses.empty', 'doc#panel')).toBeUndefined();
+      // An unquoted string is a binding expression: it is never read as the text `orderTitle`.
+      expect(() => readAstString(node, 'uses.heading', 'doc#panel')).toThrow(
+        'OpenUI node "doc#panel": attribute "uses.heading" must be a quoted string literal, ' +
+          'for example "\\"text\\"", not "orderTitle". An unquoted string is a binding expression, ' +
+          'which is not compiled.',
+      );
+      expect(() => readAstString(node, 'uses.count', 'doc#panel')).toThrow(
+        'attribute "uses.count" must be a quoted string literal',
+      );
+    });
+
+    it('TC-AST-16: decodes literals, expressions, and element references', () => {
+      expect(decodeAstLiteral('"Details"')).toBe('Details');
+      expect(decodeAstLiteral('"a \\"quoted\\" word"')).toBe('a "quoted" word');
+      expect(decodeAstLiteral('Details')).toBeUndefined();
+      expect(decodeAstLiteral('"unterminated')).toBeUndefined();
+      expect(decodeAstLiteral('""')).toBe('');
+      expect(decodeAstLiteral(true)).toBeUndefined();
+
+      const node = {
+        id: 'item',
+        type: 'NavItem',
+        attrs: {
+          'uses.route': '"ordersRoute"',
+          'uses.bare': 'ordersRoute',
+          'behaves.save': 'save()',
+          'behaves.quoted': '"save()"',
+          'produces.activate': null,
+        },
+      };
+      expect(readAstReference(node, 'uses.route', 'doc#item')).toBe('ordersRoute');
+      expect(() => readAstReference(node, 'uses.bare', 'doc#item')).toThrow(
+        'uses.bare must be a quoted element-id string, not "ordersRoute".',
+      );
+      expect(readAstExpression(node, 'behaves.save', 'doc#item')).toBe('save()');
+      expect(() => readAstExpression(node, 'behaves.quoted', 'doc#item')).toThrow(
+        'attribute "behaves.quoted" must be an unquoted expression, not "\\"save()\\"".',
+      );
+      expect(hasAstAttribute(node, 'produces.activate')).toBe(true);
+      expect(hasAstAttribute(node, 'produces.other')).toBe(false);
     });
   });
 });

@@ -161,14 +161,14 @@ describe('form-field schematic: OpenUI control nodes', () => {
           id: 'contactEmail',
           type: 'TextInputs',
           attrs: {
-            '[name]': 'work_email',
-            '[type]': 'email',
-            '[label]': 'Work email',
-            '[appearance]': 'outline',
-            '[subscriptSizing]': 'dynamic',
+            'uses.name': '"work_email"',
+            'uses.type': '"email"',
+            'uses.label': '"Work email"',
+            'uses.appearance': '"outline"',
+            'uses.subscriptSizing': '"dynamic"',
           },
         },
-        { id: 'seats', type: 'RangeControl', attrs: { '[label]': 'Seats' } },
+        { id: 'seats', type: 'RangeControl', attrs: { 'uses.label': '"Seats"' } },
         { id: 'accepted', type: 'ChoiceControls' },
       ],
     },
@@ -235,7 +235,7 @@ describe('form-field schematic: OpenUI control nodes', () => {
     expect(() =>
       compile(
         createDocumentTree([
-          { id: 'title', type: 'TextInputs', attrs: { '[appearance]': 'outlined' } },
+          { id: 'title', type: 'TextInputs', attrs: { 'uses.appearance': '"outlined"' } },
         ]),
         {},
       ),

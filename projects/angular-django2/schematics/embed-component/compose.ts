@@ -7,7 +7,7 @@
  * child node types: callers supply one compiled child per node.
  *
  * Placement:
- * - A child picks a named projection slot with the catalog-style `[slot]`
+ * - A child picks a named projection slot with the catalog-style `uses.slot`
  *   attribute (`header`, `content`, or `actions`); without it the child goes
  *   into `content`, which is the parent's `children` section.
  * - Children keep document order inside each slot. `embed-component` inserts
@@ -22,12 +22,12 @@ import type { Rule } from '@angular-devkit/schematics';
 import { chain, SchematicsException } from '@angular-devkit/schematics';
 import type { OpenUiElement } from '@shlomoa/openui-spec';
 
-import { readAstString } from '../utility/ast-compiler';
-import { EMBED_SLOTS, embedComponentFile, slotSection } from './index';
+import { decodeAstLiteral, readAstString } from '../utility/ast-compiler';
+import { EMBED_SLOTS, embedComponentFile, slotSection, type EmbedBindingValue } from './index';
 import type { EmbedSlot } from './schema';
 
-/** Catalog-style attribute that places a child node into a named slot. */
-export const AST_SLOT_ATTRIBUTE = '[slot]';
+/** Uses attribute that places a child node into a named slot. */
+export const AST_SLOT_ATTRIBUTE = 'uses.slot';
 
 /** One child node compiled into its own component. */
 export interface AstChildCompilation {
@@ -42,15 +42,15 @@ export interface AstChildCompilation {
 }
 
 /**
- * Read the `[slot]` of a child node; `content` when absent.
+ * Read the `uses.slot` of a child node; `content` when absent.
  *
  * @throws SchematicsException for an unsupported slot name.
  */
 export function readAstSlot(node: OpenUiElement, subject: string): EmbedSlot {
-  const slot = readAstString(node, AST_SLOT_ATTRIBUTE) ?? 'content';
+  const slot = readAstString(node, AST_SLOT_ATTRIBUTE, subject) ?? 'content';
   if (!EMBED_SLOTS.includes(slot as EmbedSlot)) {
     throw new SchematicsException(
-      `OpenUI node "${subject}": ${AST_SLOT_ATTRIBUTE}="${slot}" is not a supported slot. ` +
+      `OpenUI node "${subject}": ${AST_SLOT_ATTRIBUTE}=${JSON.stringify(slot)} is not a supported slot. ` +
         `Supported slots: ${EMBED_SLOTS.join(', ')}.`,
     );
   }
@@ -58,13 +58,13 @@ export function readAstSlot(node: OpenUiElement, subject: string): EmbedSlot {
   return slot as EmbedSlot;
 }
 
-/** Parent template section for a child node's `[slot]`. */
+/** Parent template section for a child node's `uses.slot`. */
 export function astSlotSection(node: OpenUiElement, subject: string): string {
   return slotSection(readAstSlot(node, subject));
 }
 
 /**
- * A copy of `node` without the composition attributes (`[slot]`), so the child
+ * A copy of `node` without the composition attributes (`uses.slot`), so the child
  * compiler validates only its own vocabulary.
  */
 export function withoutCompositionAttributes(node: OpenUiElement): OpenUiElement {
@@ -86,16 +86,39 @@ export function withoutCompositionAttributes(node: OpenUiElement): OpenUiElement
 }
 
 /**
- * Input values carried by a child node: every bracketed attribute except
- * `[slot]`, keyed by the name inside the brackets. `null` values are skipped.
+ * Input values carried by a child node: every Uses attribute except
+ * `uses.slot`, keyed by its name. `null` values are skipped.
+ *
+ * An Angular generator emits `[name]` for a Uses attribute (OpenUI, "attributes"),
+ * and the value becomes the bound expression. The generated components take
+ * static values, so a value must be a literal: a quoted string, a number, or a
+ * boolean. An unquoted string is a binding expression and a list has no input
+ * to bind, and neither is compiled.
+ *
+ * @throws SchematicsException for an expression or a list value.
  */
-export function astInputBindings(node: OpenUiElement): Record<string, string> {
-  const bindings: Record<string, string> = {};
+export function astInputBindings(
+  node: OpenUiElement,
+  subject = node.id,
+): Record<string, EmbedBindingValue> {
+  const bindings: Record<string, EmbedBindingValue> = {};
   for (const [key, value] of Object.entries(node.attrs ?? {})) {
-    const match = /^\[(\w+)\]$/.exec(key);
-    if (match && key !== AST_SLOT_ATTRIBUTE && value !== null) {
-      bindings[match[1]] = value;
+    const match = /^uses\.(\w+)$/.exec(key);
+    if (!match || key === AST_SLOT_ATTRIBUTE || value === null) {
+      continue;
     }
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      bindings[match[1]] = value;
+      continue;
+    }
+    const literal = decodeAstLiteral(value);
+    if (literal === undefined) {
+      throw new SchematicsException(
+        `OpenUI node "${subject}": attribute "${key}" must be a quoted string, a number, or a boolean ` +
+          `to bind as an input, not ${JSON.stringify(value)}. Binding expressions and lists are not compiled.`,
+      );
+    }
+    bindings[match[1]] = literal;
   }
 
   return bindings;

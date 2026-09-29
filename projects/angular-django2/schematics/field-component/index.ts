@@ -44,7 +44,7 @@ export function fieldComponent(options: FieldComponentSchema): Rule {
 function compileFromDocument(options: FieldComponentSchema, documentPath: string): Rule {
   if (options.kind !== undefined) {
     throw new SchematicsException(
-      '--document cannot be combined with --kind; set [type] on the OpenUI TextInputs node instead.',
+      '--document cannot be combined with --kind; set uses.type on the OpenUI TextInputs node instead.',
     );
   }
 

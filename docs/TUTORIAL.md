@@ -123,43 +123,60 @@ To generate a complete form, describe it as an OpenUI `Form` node in
 
 ```json
 {
-  "version": "0.4.0",
+  "version": "0.8.0",
   "id": "root",
   "type": "html",
   "children": [
     {
       "id": "contact",
       "type": "Form",
-      "attrs": { "[title]": "Create contact", "[action]": "/api/contacts/" },
+      "attrs": {
+        "uses.title": "\"Create contact\"",
+        "uses.action": "\"/api/contacts/\""
+      },
       "children": [
         {
           "id": "email",
           "type": "TextInputs",
           "attrs": {
-            "[type]": "email",
-            "[label]": "Email",
-            "[required]": "true",
-            "[autocomplete]": "email"
+            "uses.type": "\"email\"",
+            "uses.label": "\"Email\"",
+            "uses.required": true,
+            "uses.autocomplete": "\"email\""
           }
         },
         {
           "id": "fullName",
           "type": "TextInputs",
-          "attrs": { "[label]": "Full name", "[required]": "true", "[maxLength]": "120" }
+          "attrs": {
+            "uses.label": "\"Full name\"",
+            "uses.required": true,
+            "uses.maxLength": 120
+          }
         },
         {
           "id": "notes",
           "type": "TextInputs",
-          "attrs": { "[type]": "textarea", "[label]": "Notes", "[hint]": "Optional context" }
+          "attrs": {
+            "uses.type": "\"textarea\"",
+            "uses.label": "\"Notes\"",
+            "uses.hint": "\"Optional context\""
+          }
         },
-        { "id": "submit", "type": "ActionControls", "attrs": { "[label]": "Create contact" } }
+        {
+          "id": "submit",
+          "type": "ActionControls",
+          "attrs": {
+            "uses.label": "\"Create contact\""
+          }
+        }
       ]
     }
   ]
 }
 ```
 
-Each control's id is its payload key, `[type]` picks the native control
+Each control's id is its payload key, `uses.type` picks the native control
 (`text` by default), and validators are bracketed attributes with string
 values. See [OpenUI Form documents](cli/reactive-form.md#openui-form-documents)
 for the full attribute vocabulary.

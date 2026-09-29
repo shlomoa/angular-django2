@@ -4,18 +4,18 @@
  * A page is content-only. Following the OpenUI application contract
  * ("Ownership and placement" in the Application scope), a page node carries no
  * routing, navigation, or access attributes: the path and access requirement
- * belong to the `Route` whose `[target]` is the page, and the navigation label
+ * belong to the `Route` whose `uses.target` is the page, and the navigation label
  * and icon to the `NavItem` that presents that route. The page reads them from
  * there, so `page` and `material-app` cannot disagree.
  *
- * | Source                                        | page option         | Default              |
- * | :-------------------------------------------- | :------------------ | :------------------- |
- * | id                                            | `name` (dasherized) | —                    |
- * | page `[title]`                                | card heading        | classified page name |
- * | full `[path]` of the `Route` targeting it     | `routePath`         | required             |
- * | that `Route`'s `[access]`                     | `access`            | `public`             |
- * | `[label]` of the `NavItem` presenting it      | `navigationLabel`   | classified page name |
- * | that `NavItem`'s `[icon]`                     | `navigationIcon`    | none                 |
+ * | Source                                         | page option         | Default              |
+ * | :--------------------------------------------- | :------------------ | :------------------- |
+ * | id                                             | `name` (dasherized) | —                    |
+ * | page `uses.title`                              | card heading        | classified page name |
+ * | full `uses.path` of the `Route` targeting it   | `routePath`         | required             |
+ * | that `Route`'s `uses.access`                   | `access`            | `public`             |
+ * | `uses.label` of the `NavItem` presenting it    | `navigationLabel`   | classified page name |
+ * | that `NavItem`'s `uses.icon`                   | `navigationIcon`    | none                 |
  *
  * The auth guard stays the `--authGuard` option: OpenUI expresses access as
  * policy and leaves guards to the implementation.
@@ -33,6 +33,7 @@ import { assertAstAttributes, astNodeSubject, readAstString } from '../utility/a
 import {
   findNavItemForRoute,
   findRouteForTarget,
+  NAV_ITEM_ATTRIBUTES,
   ROUTE_ATTRIBUTES,
   routeFullPath,
 } from '../utility/routing';
@@ -48,13 +49,13 @@ export const EMPTY_PAGE_AST_TYPE = 'EmptyPage';
 export const PAGE_AST_TYPES = [DASHBOARD_PAGE_AST_TYPE, EMPTY_PAGE_AST_TYPE] as const;
 
 /** Catalog-style attribute keys understood on page nodes. */
-export const PAGE_ATTRIBUTES = { title: '[title]' } as const;
+export const PAGE_ATTRIBUTES = { title: 'uses.title' } as const;
 
 /**
  * Attributes earlier versions read from the page node. They now belong to the
  * `Route` and `NavItem`, and `page` rejects them with a pointer to their owner.
  */
-const MOVED_PAGE_ATTRIBUTES = ['[route]', '[access]', '[icon]', '[authGuard]'] as const;
+const MOVED_PAGE_ATTRIBUTES = ['uses.route', 'uses.access', 'uses.icon', 'uses.authGuard'] as const;
 
 /** Page options an OpenUI page node, its `Route`, and its `NavItem` describe. */
 export interface PageAstOptions {
@@ -96,7 +97,7 @@ export function pageOptionsFromAst(
       `OpenUI node "${subject}" sets ${moved.join(', ')}, but a page is content-only. ` +
         `Set the path and access on the Route whose ${ROUTE_ATTRIBUTES.target} is this page ` +
         `(${ROUTE_ATTRIBUTES.path}, ${ROUTE_ATTRIBUTES.access}), the label and icon on the NavItem ` +
-        'that presents that route ([label], [icon]), and pass --authGuard for a guard.',
+        `that presents that route (${NAV_ITEM_ATTRIBUTES.label}, ${NAV_ITEM_ATTRIBUTES.icon}), and pass --authGuard for a guard.`,
     );
   }
   assertAstAttributes(node, Object.values(PAGE_ATTRIBUTES), subject);
@@ -120,10 +121,14 @@ export function pageOptionsFromAst(
   const navigation = findNavItemForRoute(document, documentPath, route.node.id);
   return {
     name,
-    title: readAstString(node, PAGE_ATTRIBUTES.title) ?? strings.classify(name),
+    title: readAstString(node, PAGE_ATTRIBUTES.title, subject) ?? strings.classify(name),
     routePath: routeFullPath(route, documentPath),
     navigationLabel: navigation?.label ?? strings.classify(name),
     navigationIcon: navigation?.icon,
-    access: (readAstString(route.node, ROUTE_ATTRIBUTES.access) ?? 'public') as PageAccessMode,
+    access: (readAstString(
+      route.node,
+      ROUTE_ATTRIBUTES.access,
+      astNodeSubject(documentPath, route.node),
+    ) ?? 'public') as PageAccessMode,
   };
 }

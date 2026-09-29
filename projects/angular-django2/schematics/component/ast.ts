@@ -8,10 +8,10 @@
  * | OpenUI                       | Generated template                                  |
  * | :--------------------------- | :-------------------------------------------------- |
  * | `SurfaceContainers`          | `<section>`                                         |
- * | `[title]`                    | `<h2>` inside the `<header>`                        |
- * | child with `[slot]="header"` | `<header>` (`header` section)                       |
- * | child without `[slot]`       | body (`children` section, the content slot)         |
- * | child with `[slot]="actions"`| `<footer>` (`actions` section)                      |
+ * | `uses.title`                 | `<h2>` inside the `<header>`                        |
+ * | child with `uses.slot` = `"header"`  | `<header>` (`header` section)               |
+ * | child without `uses.slot`    | body (`children` section, the content slot)         |
+ * | child with `uses.slot` = `"actions"` | `<footer>` (`actions` section)              |
  *
  * Supported child node types: `SurfaceContainers` (recursively), `Form`, and
  * the form controls `TextInputs` / `RangeControl`. Each child compiles into its
@@ -58,7 +58,7 @@ export const SURFACE_CONTAINER_AST_TYPE = 'SurfaceContainers';
 
 /** Catalog-style attribute keys understood on `SurfaceContainers` nodes. */
 export const SURFACE_CONTAINER_ATTRIBUTES = {
-  title: '[title]',
+  title: 'uses.title',
   slot: AST_SLOT_ATTRIBUTE,
 } as const;
 
@@ -158,7 +158,10 @@ export function compileSurfaceContainerFromAst(
       changeDetection: 'OnPush',
     }),
     (tree: Tree) => {
-      tree.overwrite(templatePath, surfaceContainerTemplate(readAstString(node, '[title]')));
+      tree.overwrite(
+        templatePath,
+        surfaceContainerTemplate(readAstString(node, SURFACE_CONTAINER_ATTRIBUTES.title, subject)),
+      );
       return tree;
     },
     composeAstChildren(componentPath, children),
@@ -167,7 +170,7 @@ export function compileSurfaceContainerFromAst(
 
 /**
  * Compile one child node into its own component under `target.directory`,
- * placed by its `[slot]` unless `section` overrides it.
+ * placed by its `uses.slot` unless `section` overrides it.
  *
  * @throws SchematicsException for unsupported child types or slots.
  */

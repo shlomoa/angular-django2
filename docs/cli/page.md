@@ -79,7 +79,7 @@ ng generate angular-django2:page --document=src/app/app.openui.json \
 
 ```json
 {
-  "version": "0.4.0",
+  "version": "0.8.0",
   "id": "root",
   "type": "html",
   "children": [
@@ -94,7 +94,11 @@ ng generate angular-django2:page --document=src/app/app.openui.json \
             {
               "id": "profileRoute",
               "type": "Route",
-              "attrs": { "[path]": "me/profile", "[target]": "\"profile\"", "[access]": "public" }
+              "attrs": {
+                "uses.path": "\"me/profile\"",
+                "uses.target": "\"profile\"",
+                "uses.access": "\"public\""
+              }
             }
           ]
         },
@@ -106,32 +110,38 @@ ng generate angular-django2:page --document=src/app/app.openui.json \
               "id": "profileNavigation",
               "type": "NavItem",
               "attrs": {
-                "[label]": "My profile",
-                "[route]": "\"profileRoute\"",
-                "[icon]": "person"
+                "uses.label": "\"My profile\"",
+                "uses.route": "\"profileRoute\"",
+                "uses.icon": "\"person\""
               }
             }
           ]
         }
       ]
     },
-    { "id": "profile", "type": "DashboardPage", "attrs": { "[title]": "Profile overview" } }
+    {
+      "id": "profile",
+      "type": "DashboardPage",
+      "attrs": {
+        "uses.title": "\"Profile overview\""
+      }
+    }
   ]
 }
 ```
 
-| Source in the document                                                                                 | Page option          | Default                            |
-| :----------------------------------------------------------------------------------------------------- | :------------------- | :--------------------------------- |
-| page id                                                                                                | `--name`             | dasherized id                      |
-| page `[title]`                                                                                         | page card heading    | classified page name               |
-| `[path]` of the `Route` whose `[target]` is the page, joined to the `[path]` of every `Route` above it | `--route-path`       | required: a `Route` must target it |
-| that `Route`'s `[access]`                                                                              | `--access`           | `public`                           |
-| `[label]` of the first `NavItem` whose `[route]` is that `Route`                                       | `--navigation-label` | classified page name               |
-| that `NavItem`'s `[icon]`                                                                              | `--navigation-icon`  | none                               |
+| Source in the document                                                                                          | Page option          | Default                            |
+| :-------------------------------------------------------------------------------------------------------------- | :------------------- | :--------------------------------- |
+| page id                                                                                                         | `--name`             | dasherized id                      |
+| page `uses.title`                                                                                               | page card heading    | classified page name               |
+| `uses.path` of the `Route` whose `uses.target` is the page, joined to the `uses.path` of every `Route` above it | `--route-path`       | required: a `Route` must target it |
+| that `Route`'s `uses.access`                                                                                    | `--access`           | `public`                           |
+| `uses.label` of the first `NavItem` whose `uses.route` is that `Route`                                          | `--navigation-label` | classified page name               |
+| that `NavItem`'s `uses.icon`                                                                                    | `--navigation-icon`  | none                               |
 
-A page must be the `[target]` of exactly one `Route`, and the routing model is
+A page must be the `uses.target` of exactly one `Route`, and the routing model is
 checked as a whole, so a `Route` that targets an unknown element fails the
-schematic. Setting `[route]`, `[access]`, `[icon]`, or `[authGuard]` on the page
+schematic. Setting `uses.route`, `uses.access`, `uses.icon`, or `uses.authGuard` on the page
 is rejected with a pointer to the element that owns it. `material-app` builds its
 sidenav links from the same `Route` and `NavItem` elements, so the registered
 route and the link cannot disagree.

@@ -55,7 +55,7 @@
     "document": {
       "type": "string",
       "format": "path",
-      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a DashboardPage or EmptyPage node: [title] is the page heading, the route path and access come from the Route whose [target] is the node, the navigation label and icon come from the NavItem that presents that route, and DashboardPage children are compiled and embedded into the page."
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a DashboardPage or EmptyPage node: uses.title is the page heading, the route path and access come from the Route whose uses.target is the node, the navigation label and icon come from the NavItem that presents that route, and DashboardPage children are compiled and embedded into the page."
     },
     "nodeId": {
       "type": "string",

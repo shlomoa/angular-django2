@@ -63,7 +63,7 @@
     "document": {
       "type": "string",
       "format": "path",
-      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles an Application node: name, toolbar [title], routing (Routing child), Presentation [theme]/[typography]/[animations], and sidenav links for every DashboardPage."
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles an Application node: name, toolbar title (html uses.title), routing (Routing child), Presentation uses.theme/uses.typography/uses.animations, sidenav links for the NavItem elements of the Navigation child, and ToolBar command rows."
     },
     "nodeId": {
       "type": "string",

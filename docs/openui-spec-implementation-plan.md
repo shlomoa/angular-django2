@@ -1,12 +1,12 @@
 # OpenUI Specification Implementation Plan for `angular-django2` (`ngdj`)
 
 This plan describes how `angular-django2` (`ngdj`) implements the
-[OpenUI Specification](https://github.com/shlomoa/openui-spec), version 0.4.0
+[OpenUI Specification](https://github.com/shlomoa/openui-spec), version 0.8.0
 (`@shlomoa/openui-spec`, pinned in [`package.json`](../package.json)). It
 separates what is implemented today from what is planned.
 
 Terminology follows the OpenUI
-[glossary](https://github.com/shlomoa/openui-spec/blob/v0.4.0/spec/scopes/scope.md#glossary),
+[glossary](https://github.com/shlomoa/openui-spec/blob/v0.8.0/spec/scopes/scope.md#glossary),
 which `openui-spec` owns. In this repository, **object**, **element**, **known
 object type**, and **scope** carry their OpenUI meaning. **Component** means an
 Angular component, the generated artifact; the glossary uses the same word as an
@@ -62,24 +62,38 @@ it instead of repeating it.
 Current status: **partially met**.
 
 - **Object types**: met. Every document is validated by the canonical
-  `openui-spec` validator, which rejects types outside the 0.4.0 catalog.
+  `openui-spec` validator, which rejects types outside the 0.8.0 catalog, and
+  the schematics read only catalog types.
 - **Application-scope attributes**: met. The attributes read on `Routing`,
   `Route`, `Navigation`, `NavItem`, `NavGroup`, `ToolBar`, `ToolAction`, `html`,
-  and `link` are 0.4.0 catalog attributes.
-- **Other attributes**: not met. The 0.4.0 catalog defines no attributes for
-  these instance types, so the attributes the schematics read on them are
+  and `link` are 0.8.0 catalog attributes, read with their declared value
+  types. The validator checks those types and resolves their references.
+- **Other attributes**: not met. The 0.8.0 catalog defines no Uses attributes
+  for these instance types, so the attributes the schematics read on them are
   repository-local extensions:
-  - `Form[title]` and `Form[action]` (`(submit)`, `(validate)`, and
-    `(dirtyChange)` are catalog attributes);
-  - `ActionControls[label]`;
-  - the control attributes on `TextInputs` and `RangeControl` (`[type]`,
-    `[name]`, `[label]`, validation, and appearance attributes);
-  - `SurfaceContainers[title]` and `OverlayContainers[label]`;
-  - the composition attribute `[slot]`;
-  - the `DashboardPage` and `EmptyPage` heading `[title]` (their path, access,
-    label, and icon are read from `Route` and `NavItem`, which own them);
-  - the `Presentation` tokens (`[theme]`, `[typography]`, `[animations]`);
-  - `[data]` (`data-service`) and its `<apiPath>#<ApiService>` value format.
+  - `Form` `uses.title` and `uses.action` (`behaves.submit`, `behaves.validate`,
+    and `produces.dirtyChange` are catalog attributes);
+  - `ActionControls` `uses.label`;
+  - the control attributes on `TextInputs` and `RangeControl` (`uses.type`,
+    `uses.name`, `uses.label`, validation, and appearance attributes);
+  - `SurfaceContainers` `uses.title` and `OverlayContainers` `uses.label`;
+  - the composition attribute `uses.slot`;
+  - the `DashboardPage` and `EmptyPage` heading `uses.title` (their path,
+    access, label, and icon are read from `Route` and `NavItem`, which own
+    them);
+  - the `Presentation` tokens (`uses.theme`, `uses.typography`,
+    `uses.animations`);
+  - `uses.data` (`data-service`) and its `<apiPath>#<ApiService>` value format.
+- **Value interpretation**: an `angular-django2` decision, aligned with the
+  specification's typed attributes (0.6.0). A `uses.*` string is a quoted
+  literal; an unquoted string is a binding expression, which the schematics
+  reject because they generate static code. Booleans and numbers are JSON
+  values, references are quoted element ids, and `behaves.*` values are
+  unquoted expressions. See the
+  [mapping document](ngdj-openui-spec-mapping.md), section 1.3.
+
+Points the specification leaves open, and the interpretation used meanwhile,
+are listed in the [mapping document](ngdj-openui-spec-mapping.md), section 8.
 
 ### 1.4 Parser ownership and integration status
 
@@ -93,7 +107,7 @@ Current status: **partially met**.
   `validateOpenUiDocument()` in `schematics/utility/openui.ts` load documents
   and validate them with the canonical validator, and
   `schematics/utility/ast-compiler.ts` resolves and reads nodes. Tests:
-  `schematics.openui.spec.ts` (`TC-OPENUI-01…04`) and `ast-compiler.spec.ts`.
+  `schematics.openui.spec.ts` (`TC-OPENUI-01…12`) and `ast-compiler.spec.ts`.
 - **Production schematic integration (Implemented)**: the schematics listed in
   §1.2 consume the validated AST. Tests: see the mapping document.
 - **Integration history** (all closed or merged):
@@ -117,20 +131,21 @@ Current status: **partially met**.
 
 These are current behavior, documented by maintainer decision rather than fixed:
 
-- `application --document` does not validate `Navigation` or `Routing` content;
-  only `material-app` does.
-- Some accepted attributes are validated but not used: `Route[title]`,
-  `Routing[defaultRoute]`, `Route[redirectTo]`, `Navigation[ariaLabel]`, and
-  `NavGroup[expanded]`. `NavGroup` entries are flattened, and its `[label]` is
-  not rendered. `Route[access]` is read by `page` only.
-- `Route[target]` is checked to exist but not to be a page or content element.
+- `application --document` does not read `Navigation` or `Routing` content;
+  only `material-app` does. The validator still checks the declared value types
+  and references of the whole document for every schematic.
+- Some accepted attributes are validated but not used: `Route` `uses.title`,
+  `Routing` `uses.defaultRoute`, `Route` `uses.redirectTo`, `Navigation` `uses.ariaLabel`, and
+  `NavGroup` `uses.expanded`. `NavGroup` entries are flattened, and its `uses.label` is
+  not rendered. `Route` `uses.access` is read by `page` only.
+- `Route` `uses.target` is an untyped `reference` in the catalog: the validator checks that it names an element, not which kind.
 - A page is registered under one route path, so a page that several `Route`
   elements target is rejected.
 
 Routing has a single source. OpenUI makes `Route` the sole owner of a route path
 and access requirement and `NavItem` the sole owner of a navigation label and
 icon, and pages content-only. `page` and `material-app` both read the full path
-of a `Route` (its `[path]` joined to the `[path]` of every `Route` above it), so
+of a `Route` (its `uses.path` joined to the `uses.path` of every `Route` above it), so
 a registered route and its sidenav link cannot disagree.
 
 ---
@@ -144,7 +159,7 @@ the notes after the diagram); the scopes in §3 do not.
 graph TD
     subgraph Input["Input Boundary"]
         DOC["OpenUI JSON Document (app.openui.json)"]
-        PARSER["Canonical TypeScript Parser & Validator (@shlomoa/openui-spec 0.4.0)"]
+        PARSER["Canonical TypeScript Parser & Validator (@shlomoa/openui-spec 0.8.0)"]
         DOC --> PARSER
     end
 
@@ -154,7 +169,7 @@ graph TD
         PARSER --> AST
 
         subgraph Layer3["Layer 3: ngdj Specifics (Full-Stack Django & Signals)"]
-            L3_1["OpenUI Attribute Bindings: [data], [loading], [error], (sort), (filter), (paginate)"]
+            L3_1["OpenUI Attribute Bindings: uses.data, uses.loading, uses.error, behaves.sort, behaves.filter, behaves.paginate"]
             L3_2["Django REST Framework (DRF) Integration: { count, next, previous, results }"]
             L3_3["Integration with ngdj:data-service & OpenAPI Client"]
             L3_4["CSRF Cookie Injection & Django Template View Adapters"]
@@ -195,8 +210,8 @@ What exists today:
 - **Layer 3**, in part: `openapi-setup` generates Django CSRF, credential, and
   auth transport helpers; `data-service` generates data services with a DRF
   `results` / `count` response adapter; `page` registers auth guards.
-- **Not implemented**: the table attribute bindings (`[data]`, `[loading]`,
-  `[error]`, `(sort)`, `(filter)`, `(paginate)`), invoking
+- **Not implemented**: the table attribute bindings (`uses.data`, `uses.loading`,
+  `uses.error`, `behaves.sort`, `behaves.filter`, `behaves.paginate`), invoking
   `@angular/material` schematics, and Django template view adapters.
 
 ### Layer 1: HTML5 + JavaScript (Web Standards Baseline)
@@ -237,8 +252,8 @@ What exists today:
   components to Django backends, and enforcing standalone `OnPush`
   architectures.
 - **Capabilities (target)**:
-  - **OpenUI attribute mapping**: binding `[data]`, `[loading]`, `[error]`,
-    `(sort)`, `(filter)`, `(paginate)`, and `(selectionChange)` to typed Angular
+  - **OpenUI attribute mapping**: binding `uses.data`, `uses.loading`, `uses.error`,
+    `behaves.sort`, `behaves.filter`, `behaves.paginate`, and `produces.selectionChange` to typed Angular
     signals (`input()`, `output()`, `computed()`).
   - **Django REST Framework (DRF) bridge**: standard DRF pagination responses
     (`{ count: number, next: string | null, previous: string | null, results: T[] }`),
@@ -253,7 +268,7 @@ What exists today:
 
 ## 3. Scope Implementation Matrix (Planned)
 
-Every row is **Planned**. Scope paths are canonical OpenUI 0.4.0
+Every row is **Planned**. Scope paths are canonical OpenUI 0.8.0
 `<category>/<id>` paths. The schematic names are proposed Angular / Material
 names, not OpenUI identifiers; for example, `accordion` does not appear in the
 OpenUI catalog, whose scope is `containers/expandablePanels` (an accordion or a
@@ -273,7 +288,7 @@ disclosure).
 | `widgets/dateTimePickers`     | Planned | `date-picker`      | Native `<input type="date">`                                              | `MatDatepickerModule`, `provideNativeDateAdapter` | Date range support, Django ISO-8601 formatting                           |
 | `widgets/chart`               | Planned | `chart`            | SVG primitives, Canvas API                                                | Angular chart adapter (SVG/CDK)                   | DRF aggregation API data binding, responsive resizing                    |
 
-**Modality is a behavior in 0.4.0.** `containers/overlayContainers` now covers
+**Modality is a behavior in 0.8.0.** `containers/overlayContainers` now covers
 popovers only. Modal focus and dismissal come from `behaviors/modalOverlay`,
 background scroll locking from `behaviors/viewportAndFocusControl`, and the
 backdrop from `presentation`. `widgets/dialog` follows `behaviors/modalOverlay`
@@ -287,27 +302,27 @@ and no plan (see the [mapping document](ngdj-openui-spec-mapping.md), Missing).
 ## 4. First Focus: `widgets/table` (Planned)
 
 `table` is a single specification concept under `widgets/`. The former
-`Controls/Table/` scope was retired; `spec/scopes/Controls/` in 0.4.0 has no
+`Controls/Table/` scope was retired; `spec/scopes/Controls/` in 0.8.0 has no
 table scope.
 
-### Specification facts (OpenUI v0.4.0)
+### Specification facts (OpenUI v0.8.0)
 
 - **Identity**: scope `id: table`, scope `type: Table`. The instance element is
   `type: table`, with `tr` row children (`tableRow`).
 - **Normative attributes**, from
-  [`scopes/Widgets/table.scope.md`](https://github.com/shlomoa/openui-spec/blob/v0.4.0/spec/scopes/Widgets/table.scope.md):
-  only `(sort)`, `(filter)`, and `(paginate)`, all in the Behaves category. The
-  0.4.0 Purpose also names columns, cells, a caption, and header associations,
+  [`scopes/Widgets/table.scope.md`](https://github.com/shlomoa/openui-spec/blob/v0.8.0/spec/scopes/Widgets/table.scope.md):
+  only `behaves.sort`, `behaves.filter`, and `behaves.paginate`, all in the Behaves category. The
+  0.8.0 Purpose also names columns, cells, a caption, and header associations,
   but the Child model still defines only `tr` rows, so those are not part of the
   contract yet.
 - **Worked example**:
-  [`examples/Widgets/table.example.json`](https://github.com/shlomoa/openui-spec/blob/v0.4.0/spec/examples/Widgets/table.example.json)
-  uses exactly this contract: a `table` with `(sort)`, `(filter)`, and
-  `(paginate)` and `tr` rows. In 0.3.0 the example used attributes and child
+  [`examples/Widgets/table.example.json`](https://github.com/shlomoa/openui-spec/blob/v0.8.0/spec/examples/Widgets/table.example.json)
+  uses exactly this contract: a `table` with `behaves.sort`, `behaves.filter`, and
+  `behaves.paginate` and `tr` rows. In 0.3.0 the example used attributes and child
   types outside the contract; 0.3.1 fixed it
   ([openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154)).
-- **Not in the contract**: data binding (`[data]`, `[selection]`, `[loading]`,
-  `[error]`, `(selectionChange)`), column definitions, pagination, and empty
+- **Not in the contract**: data binding (`uses.data`, `uses.selection`, `uses.loading`,
+  `uses.error`, `produces.selectionChange`), column definitions, pagination, and empty
   state. The catalog has no `Column`, `Pagination`, or `EmptyState` type. Before
   `ngdj:table` depends on any of these, they must become part of the
   `openui-spec` contract (§1.3).
@@ -336,8 +351,8 @@ table scope.
       ([#131](https://github.com/shlomoa/angular-django2/pull/131)).
 - [x] Move to openui-spec 0.3.1 (`2125108`). Its catalog is identical to 0.3.0;
       it fixes the table example.
-- [x] Integrate openui-spec 0.4.0, the latest release. The only catalog
-      attribute change is `[target]` on the six Behaviors, which no schematic
+- [x] Integrate openui-spec 0.4.0. The only catalog attribute change is
+      `[target]` (the 0.4.0 notation) on the six Behaviors, which no schematic
       reads. The catalog adds `InputAssistance`, `ModalOverlay`, and
       `ViewportAndFocusControl` and no longer contains the types `page`, `view`,
       `container`, and `widget`, which no repository document uses. Terminology
@@ -345,16 +360,33 @@ table scope.
       [mapping document](ngdj-openui-spec-mapping.md), section 7.
 - [x] Take page routing from `Route` and `NavItem`, as the OpenUI application
       contract assigns it. A `DashboardPage` or `EmptyPage` no longer carries
-      `[route]`, `[access]`, `[icon]`, or `[authGuard]` (a breaking change to
+      `uses.route`, `uses.access`, `uses.icon`, or `uses.authGuard` (a breaking change to
       documents); `page --document` reads the path and access from the `Route`
       that targets the page and the label and icon from the `NavItem` that
-      presents it, and `[title]` remains the page heading. `page` and
+      presents it, and `uses.title` remains the page heading. `page` and
       `material-app` share one route resolver that also composes nested
       `Route` paths (tests `TC-APP-18…20`).
 - [x] Compile `ToolBar` content
       ([#129](https://github.com/shlomoa/angular-django2/issues/129),
       [#132](https://github.com/shlomoa/angular-django2/pull/132); tests
       `TC-APP-15…17` in `schematics.openui-app.spec.ts`).
+- [x] Integrate openui-spec 0.8.0 (the changes of 0.5.0 to 0.8.0), a breaking
+      change to every document:
+  - **Typed attributes (0.6.0)**: keys are `uses.<name>`, `behaves.<name>`, and
+    `produces.<name>` instead of `[name]` and `(name)`; values are typed, with
+    strings as quoted literals. Every schematic, fixture, example, and CLI page
+    moved to the new form.
+  - **Validator (0.6.0)**: documents pass the grammar, document, catalog, and
+    contract stages. `version` must equal `0.8.0`, and declared value types and
+    references are checked by the validator, so the schematics' own
+    unknown-target checks were removed.
+  - **Terminology and scope (0.5.0, 0.7.0, 0.8.0)**: no known object type or
+    attribute changed. Glossary, taxonomy, and scope text moved; the
+    [mapping document](ngdj-openui-spec-mapping.md) tracks the terms and
+    lists, in section 8, the points the specification leaves open.
+  - **Validation**: a data-driven fixture suite of valid and invalid documents
+    with their expected diagnostics, and example documents that the tests
+    validate and compile, so the CLI pages cannot drift from the code.
 
 ### Planned
 

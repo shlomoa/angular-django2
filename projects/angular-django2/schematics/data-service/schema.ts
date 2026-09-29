@@ -42,10 +42,10 @@ export interface DataServiceSchema {
 
   /**
    * Workspace-relative path to an OpenUI document whose bound node carries
-   * `[data]="<apiPath>#<ApiService>"`.
+   * `uses.data` = `"<apiPath>#<ApiService>"`.
    */
   document?: string;
 
-  /** Id of the bound node. Requires `document`; defaults to the first node with `[data]`. */
+  /** Id of the bound node. Requires `document`; defaults to the first node with `uses.data`. */
   nodeId?: string;
 }

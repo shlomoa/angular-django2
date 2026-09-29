@@ -85,7 +85,7 @@ function resolveMaterialAppOptions(
   const document = readOpenUiDocument(tree, documentPath);
   const app = applicationFromAst(document, documentPath, nodeId);
   const presentation = presentationFromAst(app.node, documentPath);
-  const navigation = navigationLinksFromAst(app.node, document, documentPath);
+  const navigation = navigationLinksFromAst(app.node, documentPath);
   const host = indexHtmlFromAst(document, documentPath);
 
   return {

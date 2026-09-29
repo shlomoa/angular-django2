@@ -30,27 +30,39 @@ const application: OpenUiElement = {
         {
           id: 'profileRoute',
           type: 'Route',
-          attrs: { '[path]': 'profile', '[target]': '"profile"', '[title]': 'My profile' },
+          attrs: {
+            'uses.path': '"profile"',
+            'uses.target': '"profile"',
+            'uses.title': '"My profile"',
+          },
         },
-        { id: 'blankRoute', type: 'Route', attrs: { '[path]': 'blank', '[target]': '"blank"' } },
+        {
+          id: 'blankRoute',
+          type: 'Route',
+          attrs: { 'uses.path': '"blank"', 'uses.target': '"blank"' },
+        },
       ],
     },
     {
       id: 'navigation',
       type: 'Navigation',
-      attrs: { '[ariaLabel]': 'Primary' },
+      attrs: { 'uses.ariaLabel': '"Primary"' },
       children: [
         {
           id: 'profileNavigation',
           type: 'NavItem',
-          attrs: { '[label]': 'My profile', '[route]': '"profileRoute"', '[icon]': 'person' },
+          attrs: {
+            'uses.label': '"My profile"',
+            'uses.route': '"profileRoute"',
+            'uses.icon': '"person"',
+          },
         },
       ],
     },
     {
       id: 'mainToolBar',
       type: 'ToolBar',
-      attrs: { '[ariaLabel]': 'Shop actions' },
+      attrs: { 'uses.ariaLabel': '"Shop actions"' },
       children: [
         {
           id: 'primaryToolBarRow',
@@ -59,14 +71,18 @@ const application: OpenUiElement = {
             {
               id: 'refresh',
               type: 'ToolAction',
-              attrs: { '[label]': 'Refresh', '[icon]': 'refresh', '(activate)': null },
+              attrs: {
+                'uses.label': '"Refresh"',
+                'uses.icon': '"refresh"',
+                'produces.activate': null,
+              },
             },
           ],
         },
       ],
     },
-    { id: 'look', type: 'Presentation', attrs: { '[theme]': 'purple-green' } },
-    { id: 'host', type: 'html', attrs: { '[lang]': 'en', '[title]': 'Shop admin' } },
+    { id: 'look', type: 'Presentation', attrs: { 'uses.theme': '"purple-green"' } },
+    { id: 'host', type: 'html', attrs: { 'uses.lang': '"en"', 'uses.title': '"Shop admin"' } },
   ],
 };
 
@@ -75,37 +91,41 @@ const appDocument: OpenUiDocument = createOpenUiDocument(
   {
     id: 'profile',
     type: 'DashboardPage',
-    attrs: { '[title]': 'My profile' },
+    attrs: { 'uses.title': '"My profile"' },
     children: [
-      { id: 'summary', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
+      { id: 'summary', type: 'SurfaceContainers', attrs: { 'uses.slot': '"header"' } },
       {
         id: 'contact',
         type: 'Form',
-        attrs: { '[title]': 'Contact', '[action]': '/api/contact/' },
+        attrs: { 'uses.title': '"Contact"', 'uses.action': '"/api/contact/"' },
         children: [
-          { id: 'email', type: 'TextInputs', attrs: { '[type]': 'email', '[label]': 'Email' } },
+          {
+            id: 'email',
+            type: 'TextInputs',
+            attrs: { 'uses.type': '"email"', 'uses.label': '"Email"' },
+          },
         ],
       },
     ],
   },
   { id: 'blank', type: 'EmptyPage' },
-  { id: 'helpPanel', type: 'SurfaceContainers', attrs: { '[title]': 'Help' } },
+  { id: 'helpPanel', type: 'SurfaceContainers', attrs: { 'uses.title': '"Help"' } },
   {
     id: 'feedback',
     type: 'Form',
-    attrs: { '[title]': 'Feedback', '[action]': '/api/feedback/' },
+    attrs: { 'uses.title': '"Feedback"', 'uses.action': '"/api/feedback/"' },
     children: [
       {
         id: 'message',
         type: 'TextInputs',
-        attrs: { '[type]': 'textarea', '[label]': 'Message' },
+        attrs: { 'uses.type': '"textarea"', 'uses.label': '"Message"' },
       },
     ],
   },
   {
     id: 'orderRows',
     type: 'Table',
-    attrs: { '[data]': 'src/app/api/services#OrdersApiService' },
+    attrs: { 'uses.data': '"src/app/api/services#OrdersApiService"' },
   },
 );
 
@@ -171,7 +191,7 @@ describe('OpenUI application compilation (plan phase 5)', () => {
       'formControlName="message"',
     );
 
-    // 5. Data services for every [data] binding.
+    // 5. Data services for every uses.data attribute.
     expect(
       generated.readContent(
         `${APP}/features/order-rows/services/order-rows/order-rows.data.service.ts`,
@@ -190,21 +210,26 @@ describe('OpenUI application compilation (plan phase 5)', () => {
   });
 
   it('INT-OPENUI-03: rejects invalid documents', async () => {
+    // The routes of `application` target `profile` and `blank`, and the validator rejects a
+    // document whose references do not resolve, so each case that reaches the compiler has both.
+    const pages: OpenUiElement[] = [
+      { id: 'profile', type: 'DashboardPage' },
+      { id: 'blank', type: 'EmptyPage' },
+    ];
     const cases: [OpenUiElement[], string][] = [
       [[], 'must have exactly one root Application element; found 0'],
-      [[application, { id: 'other', type: 'Application' }], 'found 2'],
+      [[application, { id: 'other', type: 'Application' }, ...pages], 'found 2'],
       [
-        [application, { id: 'profile', type: 'DashboardPage' }, { id: 'grid', type: 'Grid' }],
+        [application, ...pages, { id: 'grid', type: 'Grid' }],
         'which the OpenUI application compiler cannot compile at the document root',
       ],
       [
         [
           application,
-          { id: 'profile', type: 'DashboardPage' },
-          { id: 'blank', type: 'EmptyPage' },
-          { id: 'panel', type: 'SurfaceContainers', attrs: { '[color]': 'red' } },
+          ...pages,
+          { id: 'panel', type: 'SurfaceContainers', attrs: { 'uses.color': '"red"' } },
         ],
-        'unsupported attribute(s): [color]',
+        'unsupported attribute(s): uses.color',
       ],
     ];
 
