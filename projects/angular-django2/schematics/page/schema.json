@@ -37,7 +37,7 @@
     "authGuard": {
       "type": "string",
       "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$",
-      "description": "Existing locally imported auth-guard identifier used by protected routes. Defaults to authGuard. Not allowed with --document.",
+      "description": "Existing locally imported auth-guard identifier used by protected routes. Defaults to authGuard. May be combined with --document, which expresses access as policy and leaves the guard to the implementation.",
       "aliases": ["auth-guard", "authGuard"]
     },
     "navigationLabel": {
@@ -55,7 +55,7 @@
     "document": {
       "type": "string",
       "format": "path",
-      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a DashboardPage or EmptyPage node: [title], [route], [icon], [access], and [authGuard] come from the node, and DashboardPage children are compiled and embedded into the page."
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a DashboardPage or EmptyPage node: [title] is the page heading, the route path and access come from the Route whose [target] is the node, the navigation label and icon come from the NavItem that presents that route, and DashboardPage children are compiled and embedded into the page."
     },
     "nodeId": {
       "type": "string",

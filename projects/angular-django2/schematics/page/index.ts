@@ -4,17 +4,14 @@ import { SchematicsException } from '@angular-devkit/schematics';
 import * as path from 'node:path';
 import * as ts from 'typescript';
 import type { PageAccessMode, PageSchema } from './schema';
-import {
-  NAVIGATION_ICON_PATTERN,
-  PAGE_AST_TYPES,
-  pageOptionsFromAst,
-  ROUTE_PATH_PATTERN,
-} from './ast';
+import { PAGE_AST_TYPES, pageOptionsFromAst } from './ast';
 import { compileAstChild } from '../component/ast';
 import { composeAstChildren } from '../embed-component/compose';
 import { templateSectionMarkers } from '../embed-component/index';
-import { astNodeSubject, readAstNode } from '../utility/ast-compiler';
+import { resolveAstNode } from '../utility/ast-compiler';
+import { readOpenUiDocument } from '../utility/openui';
 import { resolveApplicationTargetDirectory } from '../utility/project-relative-path';
+import { NAVIGATION_ICON_PATTERN, ROUTE_PATH_PATTERN } from '../utility/routing';
 import {
   readWorkspace,
   requireWorkspaceProject,
@@ -23,11 +20,15 @@ import {
 
 const ACCESS_MODES: readonly PageAccessMode[] = ['public', 'protected'];
 
-/** Options the OpenUI page node describes; they cannot be combined with `--document`. */
+/**
+ * Options the OpenUI document describes through the `Route` that targets the
+ * page and the `NavItem` that presents it; they cannot be combined with
+ * `--document`. `authGuard` is not among them: OpenUI expresses access as policy
+ * and leaves the guard to the implementation.
+ */
 const NODE_DESCRIBED_OPTIONS = [
   'routePath',
   'access',
-  'authGuard',
   'navigationLabel',
   'navigationIcon',
 ] as const;
@@ -39,6 +40,8 @@ interface ResolvedPageOptions {
   routePath: string;
   access: PageAccessMode;
   authGuard: string;
+  /** Heading of the page card. */
+  title: string;
   navigationLabel: string;
   navigationIcon?: string;
   componentPath: string;
@@ -79,18 +82,25 @@ export function page(options: PageSchema): Rule {
   if (conflicting.length > 0) {
     throw new SchematicsException(
       `--document cannot be combined with ${conflicting.map((option) => `--${option}`).join(', ')}; ` +
-        'set the matching attributes on the OpenUI page node instead.',
+        'set the matching attributes on the Route that targets the page and the NavItem that presents it instead.',
     );
   }
 
   const documentPath = options.document;
   return (tree: Tree, context: SchematicContext) => {
-    const node = readAstNode(tree, documentPath, options.nodeId, PAGE_AST_TYPES);
-    const described = pageOptionsFromAst(node, astNodeSubject(documentPath, node), options.name);
+    const document = readOpenUiDocument(tree, documentPath);
+    const node = resolveAstNode(document, options.nodeId, PAGE_AST_TYPES);
+    const { title, ...described } = pageOptionsFromAst(document, documentPath, node, options.name);
     const resolved = resolveOptions(
       tree,
-      { ...described, path: options.path, project: options.project },
+      {
+        ...described,
+        authGuard: options.authGuard,
+        path: options.path,
+        project: options.project,
+      },
       true,
+      title,
     );
     const target = {
       directory: path.posix.dirname(resolved.componentPath).slice(1),
@@ -120,7 +130,12 @@ function writePage(tree: Tree, resolved: ResolvedPageOptions): void {
   createOwnedFiles(tree, resolved, guard);
 }
 
-function resolveOptions(tree: Tree, options: PageSchema, composable: boolean): ResolvedPageOptions {
+function resolveOptions(
+  tree: Tree,
+  options: PageSchema,
+  composable: boolean,
+  title?: string,
+): ResolvedPageOptions {
   if (!options.name || !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(options.name)) {
     throw new SchematicsException('The page name must be non-empty kebab-case.');
   }
@@ -152,6 +167,7 @@ function resolveOptions(tree: Tree, options: PageSchema, composable: boolean): R
     );
   }
 
+  const navigationLabel = options.navigationLabel ?? strings.classify(options.name);
   const workspace = readWorkspace(tree);
   const projectName = resolveProjectName(workspace.projects ?? {}, options.project);
   const project = requireWorkspaceProject(workspace, projectName);
@@ -180,7 +196,8 @@ function resolveOptions(tree: Tree, options: PageSchema, composable: boolean): R
     routePath,
     access,
     authGuard,
-    navigationLabel: options.navigationLabel ?? strings.classify(options.name),
+    title: title ?? navigationLabel,
+    navigationLabel,
     navigationIcon: options.navigationIcon,
     componentPath: `/${path.posix.join(targetDirectory, `${pageFileName}.ts`)}`,
     templatePath: `/${path.posix.join(targetDirectory, `${pageFileName}.html`)}`,
@@ -396,7 +413,7 @@ function templateSource(resolved: ResolvedPageOptions): string {
   if (resolved.composable) {
     return `<mat-card>
   <mat-card-header>
-    <mat-card-title>${htmlText(resolved.navigationLabel)}</mat-card-title>
+    <mat-card-title>${htmlText(resolved.title)}</mat-card-title>
 ${templateSectionMarkers('header', '    ')}
   </mat-card-header>
   <mat-card-content>
@@ -411,7 +428,7 @@ ${templateSectionMarkers('actions', '    ')}
 
   return `<mat-card>
   <mat-card-header>
-    <mat-card-title>${htmlText(resolved.navigationLabel)}</mat-card-title>
+    <mat-card-title>${htmlText(resolved.title)}</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <p>Build this feature with reusable components, reactive forms, and contract-derived services.</p>

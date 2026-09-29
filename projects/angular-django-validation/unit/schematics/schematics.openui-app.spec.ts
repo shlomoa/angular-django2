@@ -21,7 +21,7 @@ const APP = '/projects/shop/src/app';
 const profilePage: OpenUiElement = {
   id: 'profile',
   type: 'DashboardPage',
-  attrs: { '[title]': 'My profile', '[route]': 'me/profile', '[icon]': 'person' },
+  attrs: { '[title]': 'Profile overview' },
   children: [
     { id: 'summary', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
     {
@@ -52,6 +52,11 @@ const application: OpenUiElement = {
           id: 'ordersRoute',
           type: 'Route',
           attrs: { '[path]': 'orders', '[target]': '"orders"', '[title]': 'Orders' },
+        },
+        {
+          id: 'blankRoute',
+          type: 'Route',
+          attrs: { '[path]': 'blank', '[target]': '"blank"' },
         },
       ],
     },
@@ -86,10 +91,20 @@ const application: OpenUiElement = {
   ],
 };
 
+/** The application with extra `Route` elements added to its `Routing` model. */
+function withRoutes(...routes: OpenUiElement[]): OpenUiElement {
+  return {
+    ...application,
+    children: application.children!.map((child) =>
+      child.type === 'Routing' ? { ...child, children: [...child.children!, ...routes] } : child,
+    ),
+  };
+}
+
 const pages: OpenUiElement[] = [
   profilePage,
-  { id: 'orders', type: 'DashboardPage', attrs: { '[access]': 'public' } },
-  { id: 'blank', type: 'EmptyPage', attrs: { '[route]': 'blank' } },
+  { id: 'orders', type: 'DashboardPage' },
+  { id: 'blank', type: 'EmptyPage' },
 ];
 
 const ordersTable: OpenUiElement = {
@@ -201,7 +216,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
   });
 
   describe('page --document', () => {
-    it('TC-APP-03: compiles a DashboardPage into a routed page with navigation metadata and composed children', async () => {
+    it('TC-APP-03: compiles a DashboardPage into a page routed by its Route and NavItem, with composed children', async () => {
       const tree = await createApplication(openUiDocument(application, ...pages));
       const generated = await runner.runSchematic(
         'page',
@@ -218,7 +233,8 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
       expect(routes).toContain("navigation: { label: 'My profile', icon: 'person' }");
       expect(routes).toContain("access: 'public'");
       expect(generated.readContent(`${APP}/app.routes.ts`)).toContain('...profilePageRoutes');
-      expect(template).toContain('<mat-card-title>My profile</mat-card-title>');
+      // The heading is the page's own [title]; the label comes from the NavItem.
+      expect(template).toContain('<mat-card-title>Profile overview</mat-card-title>');
       expect(template).toMatch(/<!-- Begin header section -->\n {4}<app-summary><\/app-summary>/);
       expect(template).toMatch(
         /<!-- Begin children section -->\n {4}<app-contact-form \(submitted\)="onSubmitted\(\$event\)"><\/app-contact-form>/,
@@ -249,15 +265,25 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         "path: 'blank'",
       );
 
-      const guarded = openUiDocument(application, {
-        id: 'admin',
-        type: 'DashboardPage',
-        attrs: { '[access]': 'protected', '[authGuard]': 'adminGuard' },
-      });
+      // Access is the Route's; the guard is an implementation option.
+      const guarded = openUiDocument(
+        withRoutes({
+          id: 'adminRoute',
+          type: 'Route',
+          attrs: { '[path]': 'admin', '[target]': '"admin"', '[access]': 'protected' },
+        }),
+        ...pages,
+        { id: 'admin', type: 'DashboardPage' },
+      );
       await expect(
         runner.runSchematic(
           'page',
-          { document: DOCUMENT_PATH, path: 'src/app/features/admin' },
+          {
+            document: DOCUMENT_PATH,
+            nodeId: 'admin',
+            path: 'src/app/features/admin',
+            authGuard: 'adminGuard',
+          },
           await createApplication(guarded),
         ),
       ).rejects.toThrow('Protected pages require the configured reusable "adminGuard" guard');
@@ -283,19 +309,148 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
           { id: 'bad', type: 'EmptyPage', children: [{ id: 'c', type: 'SurfaceContainers' }] },
           'which has no content',
         ],
-        [
-          { id: 'bad', type: 'DashboardPage', attrs: { '[route]': 'Bad Route' } },
-          'lowercase URL segments',
-        ],
       ];
       for (const [node, message] of cases) {
         await expect(
           runner.runSchematic(
             'page',
-            base,
-            await createApplication(openUiDocument(application, node)),
+            { ...base, nodeId: 'bad' },
+            await createApplication(openUiDocument(application, ...pages, node)),
           ),
         ).rejects.toThrow(message);
+      }
+
+      await expect(
+        runner.runSchematic(
+          'page',
+          { ...base, nodeId: 'bad' },
+          await createApplication(
+            openUiDocument(
+              withRoutes({
+                id: 'badRoute',
+                type: 'Route',
+                attrs: { '[path]': 'Bad Route', '[target]': '"bad"' },
+              }),
+              ...pages,
+              { id: 'bad', type: 'DashboardPage' },
+            ),
+          ),
+        ),
+      ).rejects.toThrow('lowercase URL segments');
+    });
+
+    it('TC-APP-18: registers a page under the composed path of nested Routes, the same path the sidenav links to', async () => {
+      const nested = withRoutes({
+        id: 'accountRoute',
+        type: 'Route',
+        attrs: { '[path]': 'account', '[target]': '"accountHome"' },
+        children: [
+          {
+            id: 'accountSettingsRoute',
+            type: 'Route',
+            attrs: { '[path]': 'settings', '[target]': '"settings"' },
+          },
+        ],
+      });
+      const withNavigation: OpenUiElement = {
+        ...nested,
+        children: nested.children!.map((child) =>
+          child.type === 'Navigation'
+            ? {
+                ...child,
+                children: [
+                  ...child.children!,
+                  {
+                    id: 'settingsNavigation',
+                    type: 'NavItem',
+                    attrs: { '[label]': 'Settings', '[route]': '"accountSettingsRoute"' },
+                  },
+                ],
+              }
+            : child,
+        ),
+      };
+      const document = openUiDocument(
+        withNavigation,
+        ...pages,
+        { id: 'accountHome', type: 'EmptyPage' },
+        { id: 'settings', type: 'DashboardPage' },
+      );
+
+      const generated = await runner.runSchematic(
+        'page',
+        { document: DOCUMENT_PATH, nodeId: 'settings', path: 'src/app/features/settings' },
+        await createApplication(document),
+      );
+      expect(generated.readContent(`${APP}/features/settings/settings.page.routes.ts`)).toContain(
+        "path: 'account/settings'",
+      );
+
+      const shell = await runner.runSchematic(
+        'material-app',
+        { document: DOCUMENT_PATH },
+        await createWorkspace(document),
+      );
+      expect(shell.readContent(`${APP}/app.html`)).toContain('routerLink="/account/settings"');
+    });
+
+    it('TC-APP-19: requires exactly one Route to target the page', async () => {
+      const base = { document: DOCUMENT_PATH, nodeId: 'lonely', path: 'src/app/features/lonely' };
+      await expect(
+        runner.runSchematic(
+          'page',
+          base,
+          await createApplication(
+            openUiDocument(application, ...pages, { id: 'lonely', type: 'DashboardPage' }),
+          ),
+        ),
+      ).rejects.toThrow('is not the [target] of any Route');
+
+      await expect(
+        runner.runSchematic(
+          'page',
+          base,
+          await createApplication(
+            openUiDocument(
+              withRoutes(
+                {
+                  id: 'firstRoute',
+                  type: 'Route',
+                  attrs: { '[path]': 'a', '[target]': '"lonely"' },
+                },
+                {
+                  id: 'secondRoute',
+                  type: 'Route',
+                  attrs: { '[path]': 'b', '[target]': '"lonely"' },
+                },
+              ),
+              ...pages,
+              { id: 'lonely', type: 'DashboardPage' },
+            ),
+          ),
+        ),
+      ).rejects.toThrow('is the [target] of 2 Route elements (firstRoute, secondRoute)');
+    });
+
+    it('TC-APP-20: rejects routing, navigation, and access attributes on a page and points to their owners', async () => {
+      const base = { document: DOCUMENT_PATH, nodeId: 'moved', path: 'src/app/features/moved' };
+      for (const attrs of [
+        { '[route]': 'moved' },
+        { '[access]': 'protected' },
+        { '[icon]': 'person' },
+        { '[authGuard]': 'adminGuard' },
+      ]) {
+        await expect(
+          runner.runSchematic(
+            'page',
+            base,
+            await createApplication(
+              openUiDocument(application, { id: 'moved', type: 'DashboardPage', attrs }),
+            ),
+          ),
+        ).rejects.toThrow(
+          `sets ${Object.keys(attrs)[0]}, but a page is content-only. Set the path and access on the Route`,
+        );
       }
     });
   });

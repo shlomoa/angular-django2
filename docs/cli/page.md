@@ -64,23 +64,77 @@ routing enabled before running this schematic.
 ## OpenUI page nodes
 
 With `--document`, the schematic compiles one OpenUI page node: the first
-`DashboardPage` or `EmptyPage`, or the one named by `--node-id`. The node
-carries the routing and navigation metadata, so `--route-path`, `--access`,
-`--auth-guard`, `--navigation-label`, and `--navigation-icon` are not allowed.
+`DashboardPage` or `EmptyPage`, or the one named by `--node-id`. A page is
+content-only, as in the OpenUI application contract: the `Route` that targets it
+owns its path and access, and the `NavItem` that presents that route owns its
+label and icon. The schematic reads them from the same document, so
+`--route-path`, `--access`, `--navigation-label`, and `--navigation-icon` are not
+allowed. `--auth-guard` is allowed: OpenUI expresses access as policy and leaves
+the guard to the implementation.
 
 ```bash
 ng generate angular-django2:page --document=src/app/app.openui.json \
   --node-id=profile --path=src/app/features/profile
 ```
 
-| Page attribute | Page option          | Default              |
-| :------------- | :------------------- | :------------------- |
-| id             | `--name`             | dasherized id        |
-| `[title]`      | `--navigation-label` | classified page name |
-| `[route]`      | `--route-path`       | page name            |
-| `[icon]`       | `--navigation-icon`  | none                 |
-| `[access]`     | `--access`           | `public`             |
-| `[authGuard]`  | `--auth-guard`       | `authGuard`          |
+```json
+{
+  "version": "0.4.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "shop",
+      "type": "Application",
+      "children": [
+        {
+          "id": "routing",
+          "type": "Routing",
+          "children": [
+            {
+              "id": "profileRoute",
+              "type": "Route",
+              "attrs": { "[path]": "me/profile", "[target]": "\"profile\"", "[access]": "public" }
+            }
+          ]
+        },
+        {
+          "id": "navigation",
+          "type": "Navigation",
+          "children": [
+            {
+              "id": "profileNavigation",
+              "type": "NavItem",
+              "attrs": {
+                "[label]": "My profile",
+                "[route]": "\"profileRoute\"",
+                "[icon]": "person"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    { "id": "profile", "type": "DashboardPage", "attrs": { "[title]": "Profile overview" } }
+  ]
+}
+```
+
+| Source in the document                                                                                 | Page option          | Default                            |
+| :----------------------------------------------------------------------------------------------------- | :------------------- | :--------------------------------- |
+| page id                                                                                                | `--name`             | dasherized id                      |
+| page `[title]`                                                                                         | page card heading    | classified page name               |
+| `[path]` of the `Route` whose `[target]` is the page, joined to the `[path]` of every `Route` above it | `--route-path`       | required: a `Route` must target it |
+| that `Route`'s `[access]`                                                                              | `--access`           | `public`                           |
+| `[label]` of the first `NavItem` whose `[route]` is that `Route`                                       | `--navigation-label` | classified page name               |
+| that `NavItem`'s `[icon]`                                                                              | `--navigation-icon`  | none                               |
+
+A page must be the `[target]` of exactly one `Route`, and the routing model is
+checked as a whole, so a `Route` that targets an unknown element fails the
+schematic. Setting `[route]`, `[access]`, `[icon]`, or `[authGuard]` on the page
+is rejected with a pointer to the element that owns it. `material-app` builds its
+sidenav links from the same `Route` and `NavItem` elements, so the registered
+route and the link cannot disagree.
 
 `--name` still overrides the id-derived name. A `DashboardPage`'s children are
 compiled and embedded into the page card's header, content, and actions slots,

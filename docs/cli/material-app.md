@@ -47,10 +47,12 @@ ng generate angular-django2:material-app --document=app.openui.json
 - Routing is enabled when the `Application` has a `Routing` child.
 - A `Presentation` child sets `[theme]` (a `--theme` value) and `[typography]`
   / `[animations]` (`"true"` or `"false"`).
-- Every `DashboardPage` in the document adds a sidenav link after Home, using
-  the page's `[route]`, `[title]`, and `[icon]` (see [`page`](page.md#openui-page-nodes)).
-  `EmptyPage` nodes have no navigation. Navigation links require a `Routing`
-  child.
+- Each `NavItem` of a `Navigation` child adds a sidenav link after Home, using
+  its `[label]` and `[icon]` and the full path of the `Route` it references (that
+  `Route`'s `[path]` joined to the `[path]` of every `Route` above it). A
+  `NavGroup` is flattened. Navigation requires a `Routing` child. Pages carry no
+  navigation of their own: [`page`](page.md#openui-page-nodes) registers its
+  route from the same `Route` and `NavItem` elements.
 - An optional `ToolBar[ariaLabel]` adds its ordered `ToolBarRow` command rows
   after the title row. Each `ToolAction` renders its required `[label]`, optional
   `[icon]`, and `[disabled]` state; `(activate): null` generates a matching

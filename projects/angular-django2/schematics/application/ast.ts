@@ -26,6 +26,7 @@ import {
   readAstString,
   resolveAstNode,
 } from '../utility/ast-compiler';
+import { collectRoutes, navItemFromAst, routeFullPath, type RouteEntry } from '../utility/routing';
 
 /** OpenUI catalog type of the application root element. */
 export const APPLICATION_AST_TYPE = 'Application';
@@ -135,7 +136,11 @@ export function applicationFromAst(
   };
 }
 
-/** A sidenav entry compiled from a `NavItem` and its referenced `Route`. */
+/**
+ * A sidenav entry compiled from a `NavItem` and its referenced `Route`.
+ * `route` is the route's full path: its `[path]` joined to the `[path]` of
+ * every `Route` that owns it.
+ */
 export interface NavigationAstLink {
   route: string;
   label: string;
@@ -143,21 +148,7 @@ export interface NavigationAstLink {
   disabled: boolean;
 }
 
-const ROUTING_ATTRIBUTES = { defaultRoute: '[defaultRoute]' } as const;
-const ROUTE_ATTRIBUTES = {
-  path: '[path]',
-  target: '[target]',
-  title: '[title]',
-  redirectTo: '[redirectTo]',
-  access: '[access]',
-} as const;
 const NAVIGATION_ATTRIBUTES = { ariaLabel: '[ariaLabel]' } as const;
-const NAV_ITEM_ATTRIBUTES = {
-  label: '[label]',
-  route: '[route]',
-  icon: '[icon]',
-  disabled: '[disabled]',
-} as const;
 const NAV_GROUP_ATTRIBUTES = { label: '[label]', expanded: '[expanded]' } as const;
 const TOOL_BAR_ATTRIBUTES = { ariaLabel: '[ariaLabel]' } as const;
 const TOOL_ACTION_ATTRIBUTES = {
@@ -166,8 +157,6 @@ const TOOL_ACTION_ATTRIBUTES = {
   disabled: '[disabled]',
   activate: '(activate)',
 } as const;
-const ROUTE_PATH_PATTERN = /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/;
-const NAVIGATION_ICON_PATTERN = /^[a-z0-9_]+$/;
 
 /**
  * Compile the application `ToolBar` command surface. Its optional `(activate)`
@@ -265,62 +254,15 @@ export function navigationLinksFromAst(
     );
   }
 
-  const routes = routesFromAst(routing, document, documentPath);
+  const routes = collectRoutes(routing, document, documentPath);
   const links: NavigationAstLink[] = [];
   collectNavigationLinks(navigation, routes, documentPath, links);
   return links;
 }
 
-function routesFromAst(
-  routing: OpenUiElement,
-  document: OpenUiDocument,
-  documentPath: string,
-): Map<string, OpenUiElement> {
-  const subject = astNodeSubject(documentPath, routing);
-  assertAstAttributes(routing, Object.values(ROUTING_ATTRIBUTES), subject);
-  const routes = new Map<string, OpenUiElement>();
-
-  const collect = (node: OpenUiElement): void => {
-    const routeSubject = astNodeSubject(documentPath, node);
-    if (node.type !== 'Route') {
-      throw new SchematicsException(
-        `OpenUI node "${routeSubject}" has type "${node.type}", but Routing may contain only Route children.`,
-      );
-    }
-    assertAstAttributes(node, Object.values(ROUTE_ATTRIBUTES), routeSubject);
-    const target = readElementReference(node, ROUTE_ATTRIBUTES.target, routeSubject);
-    const redirect = readElementReference(node, ROUTE_ATTRIBUTES.redirectTo, routeSubject);
-    if ((target === undefined) === (redirect === undefined)) {
-      throw new SchematicsException(
-        `OpenUI node "${routeSubject}" requires exactly one of ${ROUTE_ATTRIBUTES.target} or ${ROUTE_ATTRIBUTES.redirectTo}.`,
-      );
-    }
-    if (target !== undefined && !createAstNodeResolver(document).findById(target)) {
-      throw new SchematicsException(
-        `OpenUI node "${routeSubject}" references unknown target "${target}" with ${ROUTE_ATTRIBUTES.target}.`,
-      );
-    }
-    routes.set(node.id, node);
-    for (const child of node.children ?? []) {
-      collect(child);
-    }
-  };
-
-  for (const child of routing.children ?? []) {
-    collect(child);
-  }
-  const defaultRoute = readElementReference(routing, ROUTING_ATTRIBUTES.defaultRoute, subject);
-  if (defaultRoute !== undefined && !routes.has(defaultRoute)) {
-    throw new SchematicsException(
-      `OpenUI node "${subject}" references unknown Route "${defaultRoute}" with ${ROUTING_ATTRIBUTES.defaultRoute}.`,
-    );
-  }
-  return routes;
-}
-
 function collectNavigationLinks(
   node: OpenUiElement,
-  routes: ReadonlyMap<string, OpenUiElement>,
+  routes: ReadonlyMap<string, RouteEntry>,
   documentPath: string,
   links: NavigationAstLink[],
 ): void {
@@ -342,67 +284,20 @@ function collectNavigationLinks(
         `OpenUI node "${subject}" has type "${child.type}", but Navigation may contain only NavItem or NavGroup children.`,
       );
     }
-    assertAstAttributes(child, Object.values(NAV_ITEM_ATTRIBUTES), subject);
-    const label = readAstString(child, NAV_ITEM_ATTRIBUTES.label);
-    const routeId = readElementReference(child, NAV_ITEM_ATTRIBUTES.route, subject);
-    if (!label || !routeId) {
-      throw new SchematicsException(
-        `OpenUI node "${subject}" requires non-empty ${NAV_ITEM_ATTRIBUTES.label} and ${NAV_ITEM_ATTRIBUTES.route}.`,
-      );
-    }
-    const route = routes.get(routeId);
+    const item = navItemFromAst(child, documentPath);
+    const route = routes.get(item.routeId);
     if (!route) {
       throw new SchematicsException(
-        `OpenUI node "${subject}" references unknown Route "${routeId}" with ${NAV_ITEM_ATTRIBUTES.route}.`,
-      );
-    }
-    const path = readAstString(route, ROUTE_ATTRIBUTES.path);
-    if (!path) {
-      throw new SchematicsException(
-        `OpenUI node "${astNodeSubject(documentPath, route)}" requires a non-empty ${ROUTE_ATTRIBUTES.path}.`,
-      );
-    }
-    if (!ROUTE_PATH_PATTERN.test(path)) {
-      throw new SchematicsException(
-        `OpenUI node "${astNodeSubject(documentPath, route)}": ${ROUTE_ATTRIBUTES.path}="${path}" must contain ` +
-          'lowercase URL segments separated by hyphens or slashes.',
-      );
-    }
-    const icon = readAstString(child, NAV_ITEM_ATTRIBUTES.icon);
-    if (icon !== undefined && !NAVIGATION_ICON_PATTERN.test(icon)) {
-      throw new SchematicsException(
-        `OpenUI node "${subject}": ${NAV_ITEM_ATTRIBUTES.icon}="${icon}" must be a lowercase Angular Material icon identifier.`,
+        `OpenUI node "${subject}" references unknown Route "${item.routeId}" with [route].`,
       );
     }
     links.push({
-      route: path,
-      label,
-      icon,
-      disabled: readAstBoolean(child, NAV_ITEM_ATTRIBUTES.disabled, subject) ?? false,
+      route: routeFullPath(route, documentPath),
+      label: item.label,
+      icon: item.icon,
+      disabled: item.disabled,
     });
   }
-}
-
-function readElementReference(
-  node: OpenUiElement,
-  key: string,
-  subject: string,
-): string | undefined {
-  const value = readAstString(node, key);
-  if (value === undefined) {
-    return undefined;
-  }
-  try {
-    const reference: unknown = JSON.parse(value);
-    if (typeof reference === 'string' && reference.length > 0) {
-      return reference;
-    }
-  } catch {
-    // The diagnostic below explains the required quoted element-id form.
-  }
-  throw new SchematicsException(
-    `OpenUI node "${subject}": ${key} must be a quoted element-id string, not "${value}".`,
-  );
 }
 
 /**

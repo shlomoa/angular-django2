@@ -76,8 +76,8 @@ Current status: **partially met**.
     `[name]`, `[label]`, validation, and appearance attributes);
   - `SurfaceContainers[title]` and `OverlayContainers[label]`;
   - the composition attribute `[slot]`;
-  - `DashboardPage` and `EmptyPage` attributes (`[title]`, `[route]`, `[icon]`,
-    `[access]`, `[authGuard]`);
+  - the `DashboardPage` and `EmptyPage` heading `[title]` (their path, access,
+    label, and icon are read from `Route` and `NavItem`, which own them);
   - the `Presentation` tokens (`[theme]`, `[typography]`, `[animations]`);
   - `[data]` (`data-service`) and its `<apiPath>#<ApiService>` value format.
 
@@ -120,17 +120,18 @@ These are current behavior, documented by maintainer decision rather than fixed:
 - `application --document` does not validate `Navigation` or `Routing` content;
   only `material-app` does.
 - Some accepted attributes are validated but not used: `Route[title]`,
-  `Route[access]`, `Routing[defaultRoute]`, `Route[redirectTo]`,
-  `Navigation[ariaLabel]`, and `NavGroup[expanded]`. `NavGroup` entries are
-  flattened, and its `[label]` is not rendered. `page`'s `[icon]` is validated
-  but not used.
-- Nested `Route` paths are not composed. OpenUI 0.4.0 defines `Route[path]` as
-  relative to the parent route, but a link to a child route uses the child's
-  path alone.
+  `Routing[defaultRoute]`, `Route[redirectTo]`, `Navigation[ariaLabel]`, and
+  `NavGroup[expanded]`. `NavGroup` entries are flattened, and its `[label]` is
+  not rendered. `Route[access]` is read by `page` only.
 - `Route[target]` is checked to exist but not to be a page or content element.
-- Route paths have two unsynchronized sources: `page` registers
-  `DashboardPage[route]`, and `material-app` links to `Route[path]`. Nothing
-  checks that they match.
+- A page is registered under one route path, so a page that several `Route`
+  elements target is rejected.
+
+Routing has a single source. OpenUI makes `Route` the sole owner of a route path
+and access requirement and `NavItem` the sole owner of a navigation label and
+icon, and pages content-only. `page` and `material-app` both read the full path
+of a `Route` (its `[path]` joined to the `[path]` of every `Route` above it), so
+a registered route and its sidenav link cannot disagree.
 
 ---
 
@@ -335,13 +336,21 @@ table scope.
       ([#131](https://github.com/shlomoa/angular-django2/pull/131)).
 - [x] Move to openui-spec 0.3.1 (`2125108`). Its catalog is identical to 0.3.0;
       it fixes the table example.
-- [x] Integrate openui-spec 0.4.0, the latest release. No schematic contract
-      changed: the only catalog attribute change is `[target]` on the six
-      Behaviors, which no schematic reads. The catalog adds `InputAssistance`,
-      `ModalOverlay`, and `ViewportAndFocusControl` and no longer contains the
-      types `page`, `view`, `container`, and `widget`, which no repository
-      document uses. Terminology is aligned with the OpenUI glossary; see the
+- [x] Integrate openui-spec 0.4.0, the latest release. The only catalog
+      attribute change is `[target]` on the six Behaviors, which no schematic
+      reads. The catalog adds `InputAssistance`, `ModalOverlay`, and
+      `ViewportAndFocusControl` and no longer contains the types `page`, `view`,
+      `container`, and `widget`, which no repository document uses. Terminology
+      is aligned with the OpenUI glossary; see the
       [mapping document](ngdj-openui-spec-mapping.md), section 7.
+- [x] Take page routing from `Route` and `NavItem`, as the OpenUI application
+      contract assigns it. A `DashboardPage` or `EmptyPage` no longer carries
+      `[route]`, `[access]`, `[icon]`, or `[authGuard]` (a breaking change to
+      documents); `page --document` reads the path and access from the `Route`
+      that targets the page and the label and icon from the `NavItem` that
+      presents it, and `[title]` remains the page heading. `page` and
+      `material-app` share one route resolver that also composes nested
+      `Route` paths (tests `TC-APP-18…20`).
 - [x] Compile `ToolBar` content
       ([#129](https://github.com/shlomoa/angular-django2/issues/129),
       [#132](https://github.com/shlomoa/angular-django2/pull/132); tests

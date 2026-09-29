@@ -32,6 +32,7 @@ const application: OpenUiElement = {
           type: 'Route',
           attrs: { '[path]': 'profile', '[target]': '"profile"', '[title]': 'My profile' },
         },
+        { id: 'blankRoute', type: 'Route', attrs: { '[path]': 'blank', '[target]': '"blank"' } },
       ],
     },
     {
@@ -74,7 +75,7 @@ const appDocument: OpenUiDocument = createOpenUiDocument(
   {
     id: 'profile',
     type: 'DashboardPage',
-    attrs: { '[title]': 'My profile', '[icon]': 'person' },
+    attrs: { '[title]': 'My profile' },
     children: [
       { id: 'summary', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
       {
@@ -200,6 +201,7 @@ describe('OpenUI application compilation (plan phase 5)', () => {
         [
           application,
           { id: 'profile', type: 'DashboardPage' },
+          { id: 'blank', type: 'EmptyPage' },
           { id: 'panel', type: 'SurfaceContainers', attrs: { '[color]': 'red' } },
         ],
         'unsupported attribute(s): [color]',
