@@ -17,7 +17,7 @@ one application.
 ## Options
 
 - `--name`: non-empty kebab-case component name; required unless `--document`
-  is given, where it defaults to the node's dasherized `[name]` or id.
+  is given, where it defaults to the node's dasherized `uses.name` or id.
 - `--path`: destination within the selected application source tree.
 - `--project`: selected Angular application project.
 - `--kind`: one of `text` (default), `email`, `password`, or `textarea`.

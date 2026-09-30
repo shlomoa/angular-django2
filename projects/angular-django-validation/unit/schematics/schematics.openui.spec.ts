@@ -33,7 +33,7 @@ describe('OpenUI document utility', () => {
     );
 
     expect(() => readOpenUiDocument(tree, 'documents/invalid.json')).toThrow(
-      'OpenUI document "documents/invalid.json" is invalid:\nduplicate object id: duplicate',
+      'OpenUI document "documents/invalid.json" is invalid:\n/children/1/id: document/duplicate-id',
     );
   });
 
@@ -60,7 +60,7 @@ describe('OpenUI document utility', () => {
     );
 
     expect(() => readOpenUiDocument(tree, 'documents/unknown-type.json')).toThrow(
-      'OpenUI document "documents/unknown-type.json" is invalid:\nunknown OpenUI object type: report',
+      'OpenUI document "documents/unknown-type.json" is invalid:\n/children/0/type: catalog/unknown-type',
     );
   });
 });

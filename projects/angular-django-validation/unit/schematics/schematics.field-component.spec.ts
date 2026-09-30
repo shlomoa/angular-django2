@@ -189,7 +189,7 @@ describe('field-component schematic', () => {
   it('TC-FIELD-OPENUI-01: compiles a TextInputs node exactly like the matching --kind', async () => {
     const document = openUiDocumentString(
       { id: 'seats', type: 'RangeControl' },
-      { id: 'secret', type: 'TextInputs', attrs: { '[type]': 'password' } },
+      { id: 'secret', type: 'TextInputs', attrs: { 'uses.type': '"password"' } },
     );
     const documentTree = await createApplicationTree();
     documentTree.create('/documents/fields.openui.json', document);

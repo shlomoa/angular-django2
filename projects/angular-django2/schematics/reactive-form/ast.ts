@@ -4,17 +4,17 @@
  *
  * | reactiveFormDefinition | OpenUI Form subtree                                         |
  * | :--------------------- | :---------------------------------------------------------- |
- * | `title`                | `Form[title]`                                               |
- * | `endpoint`             | `Form[action]`                                              |
- * | `integration`          | `Form(submit)` = `<artifact>#<Symbol>.<method>`              |
- * | `submitLabel`          | child `ActionControls[label]` (at most one)                 |
+ * | `title`                | `Form` `uses.title`                                         |
+ * | `endpoint`             | `Form` `uses.action`                                        |
+ * | `integration`          | `Form` `behaves.submit` = `<artifact>#<Symbol>.<method>` (expression) |
+ * | `submitLabel`          | child `ActionControls` `uses.label` (at most one)           |
  * | `fields[]`             | child `TextInputs` / `RangeControl` nodes, in order         |
- * | `field.name`           | control `[name]` (defaults to the node id)                  |
- * | `field.control`        | control `[type]` (see `form-field/ast.ts`)                  |
- * | `field.initialValue`   | control `[value]` (`null` allowed)                          |
- * | `field.required`       | control `[required]` = `"true"` / `"false"`                 |
- * | `validators[]`         | control `[email]`, `[minLength]`, `[maxLength]`, `[min]`, `[max]`, `[pattern]` |
- * | `hint` / `placeholder` / `autocomplete` | control `[hint]` / `[placeholder]` / `[autocomplete]` |
+ * | `field.name`           | control `uses.name` (defaults to the node id)               |
+ * | `field.control`        | control `uses.type`, or `uses.multiline` for a textarea (see `form-field/ast.ts`) |
+ * | `field.initialValue`   | control `uses.value` (`null` allowed)                       |
+ * | `field.required`       | control `uses.required` = JSON `true` / `false`             |
+ * | `validators[]`         | control `uses.email`, `uses.minLength`, `uses.maxLength`, `uses.min`, `uses.max`, `uses.pattern` |
+ * | `hint` / `placeholder` / `autocomplete` | control `uses.hint` / `uses.placeholder` / `uses.autocomplete` |
  *
  * Decoding builds a plain definition object and runs it through
  * `validateReactiveFormDefinition`, so both inputs share one set of contract
@@ -30,14 +30,17 @@ import {
   CONTROL_ATTRIBUTES,
   controlAstType,
   controlName,
+  controlTypeAttributes,
   controlTypeFromAst,
 } from '../form-field/ast';
 import {
   assertAstAttributes,
   createSyntheticAstNode,
   readAstBoolean,
+  readAstExpression,
   readAstNumber,
   readAstString,
+  syntheticExpression,
   type SyntheticAttributeValue,
 } from '../utility/ast-compiler';
 import { validateReactiveFormDefinition } from './definition';
@@ -54,27 +57,27 @@ export const FORM_AST_TYPE = 'Form';
 /** OpenUI catalog type carrying the submit button label. */
 export const SUBMIT_ACTION_AST_TYPE = 'ActionControls';
 
-/** Catalog-style attribute keys understood on `Form` nodes. */
+/** Attribute keys understood on `Form` nodes (`uses.title` and `uses.action` are extensions). */
 export const FORM_ATTRIBUTES = {
-  title: '[title]',
-  action: '[action]',
-  submit: '(submit)',
+  title: 'uses.title',
+  action: 'uses.action',
+  submit: 'behaves.submit',
 } as const;
 
-/** Catalog-style attribute keys understood on the submit `ActionControls` node. */
-export const SUBMIT_ACTION_ATTRIBUTES = { label: '[label]' } as const;
+/** Attribute keys understood on the submit `ActionControls` node. */
+export const SUBMIT_ACTION_ATTRIBUTES = { label: 'uses.label' } as const;
 
-/** Validator kinds carried by a same-named bracketed control attribute (`required` is separate). */
+/** Validator kinds carried by a same-named `uses.` control attribute (`required` is separate). */
 const VALIDATOR_ATTRIBUTE_KINDS = ['minLength', 'maxLength', 'min', 'max'] as const;
 
-/** `(submit)` binding: `<artifact>#<Symbol>.<method>`. */
+/** `behaves.submit` binding: `<artifact>#<Symbol>.<method>`. */
 const SUBMIT_BINDING_PATTERN = /^([^#]+)#([^#.]+)\.([^#.]+)$/;
 
 /**
  * Translate a validated legacy definition into a synthetic OpenUI `Form` node
  * (legacy CLI adapter). Control ids are positional (`<formId>Field<index>`)
  * because legacy field names may differ only by `_` versus camel case, which
- * would collapse to the same OpenUI id; the payload key travels in `[name]`.
+ * would collapse to the same OpenUI id; the payload key travels in `uses.name`.
  */
 export function reactiveFormDefinitionToAst(
   definition: ReactiveFormDefinition,
@@ -104,7 +107,7 @@ export function reactiveFormDefinitionToAst(
       [FORM_ATTRIBUTES.title]: definition.title,
       [FORM_ATTRIBUTES.action]: definition.endpoint,
       [FORM_ATTRIBUTES.submit]: definition.integration
-        ? submitBinding(definition.integration)
+        ? syntheticExpression(submitBinding(definition.integration))
         : undefined,
     },
     children,
@@ -138,11 +141,11 @@ export function reactiveFormDefinitionFromAst(
     );
   }
   const submitLabel = submitActions[0] ? readSubmitLabel(submitActions[0], subject) : undefined;
-  const submit = readAstString(form, FORM_ATTRIBUTES.submit);
+  const submit = readAstExpression(form, FORM_ATTRIBUTES.submit, subject);
 
   const raw = {
-    title: readAstString(form, FORM_ATTRIBUTES.title),
-    endpoint: readAstString(form, FORM_ATTRIBUTES.action),
+    title: readAstString(form, FORM_ATTRIBUTES.title, subject),
+    endpoint: readAstString(form, FORM_ATTRIBUTES.action, subject),
     ...(submitLabel === undefined ? {} : { submitLabel }),
     fields: children
       .filter((child) => child.type !== SUBMIT_ACTION_AST_TYPE)
@@ -160,7 +163,7 @@ function fieldAttributes(
   const required = field.required === true || validators.has('required') ? true : field.required;
 
   return {
-    [CONTROL_ATTRIBUTES.type]: field.control,
+    ...controlTypeAttributes(field.control),
     [CONTROL_ATTRIBUTES.name]: field.name,
     [CONTROL_ATTRIBUTES.label]: field.label,
     [CONTROL_ATTRIBUTES.value]: field.initialValue,
@@ -189,21 +192,21 @@ function fieldFromAst(control: OpenUiElement, subject: string): Record<string, u
       validators.push({ type: kind, value });
     }
   }
-  const pattern = readAstString(control, CONTROL_ATTRIBUTES.pattern);
+  const pattern = readAstString(control, CONTROL_ATTRIBUTES.pattern, subject);
   if (pattern !== undefined) {
     validators.push({ type: 'pattern', value: pattern });
   }
 
   const field: Record<string, unknown> = {
     name: controlName(control),
-    label: readAstString(control, CONTROL_ATTRIBUTES.label),
+    label: readAstString(control, CONTROL_ATTRIBUTES.label, subject),
     control: controlType,
   };
   if (control.attrs && CONTROL_ATTRIBUTES.value in control.attrs) {
     field['initialValue'] =
       controlType === 'number'
         ? (readAstNumber(control, CONTROL_ATTRIBUTES.value, subject) ?? null)
-        : (control.attrs[CONTROL_ATTRIBUTES.value] ?? null);
+        : (readAstString(control, CONTROL_ATTRIBUTES.value, subject) ?? null);
   }
   const required = readAstBoolean(control, CONTROL_ATTRIBUTES.required, subject);
   if (required !== undefined) {
@@ -213,7 +216,7 @@ function fieldFromAst(control: OpenUiElement, subject: string): Record<string, u
     field['validators'] = validators;
   }
   for (const key of ['hint', 'placeholder', 'autocomplete'] as const) {
-    const value = readAstString(control, CONTROL_ATTRIBUTES[key]);
+    const value = readAstString(control, CONTROL_ATTRIBUTES[key], subject);
     if (value !== undefined) {
       field[key] = value;
     }
@@ -231,7 +234,7 @@ function readSubmitLabel(action: OpenUiElement, formSubject: string): string | u
     );
   }
 
-  return readAstString(action, SUBMIT_ACTION_ATTRIBUTES.label);
+  return readAstString(action, SUBMIT_ACTION_ATTRIBUTES.label, subject);
 }
 
 function submitBinding(integration: ReactiveFormIntegrationDefinition): string {

@@ -6,11 +6,11 @@
  * | :--------------------------------------- | :-------------------------------------- |
  * | `Application` id                         | `name` (dasherized)                     |
  * | `Routing` child of `Application`         | `routing` (`true` when present)         |
- * | `Presentation[theme]`                    | `theme` (`material-app`)                |
- * | `Presentation[typography]`               | `typography` (`"true"` / `"false"`)     |
- * | `Presentation[animations]`               | `animations` (`"true"` / `"false"`)     |
- * | `html[lang]`, `[dir]`, `[title]`         | `<html lang dir>`, `<title>`            |
- * | `link[rel=icon][href]`                   | icon file copied to the app favicon     |
+ * | `Presentation` `uses.theme`              | `theme` (`material-app`)                |
+ * | `Presentation` `uses.typography`         | `typography` (JSON `true` / `false`)    |
+ * | `Presentation` `uses.animations`         | `animations` (JSON `true` / `false`)    |
+ * | `html` `uses.lang`, `uses.dir`, `uses.title` | `<html lang dir>`, `<title>`            |
+ * | `link` `uses.rel` `"icon"`, `uses.href`  | icon file copied to the app favicon     |
  *
  * @internal
  */
@@ -40,23 +40,27 @@ export const APPLICATION_CHILD_AST_TYPES = [
   'link',
 ] as const;
 
-/** Catalog-style attribute keys understood on `Presentation` nodes. */
+/** Attribute keys understood on `Presentation` nodes (extensions: the catalog declares none). */
 export const PRESENTATION_ATTRIBUTES = {
-  theme: '[theme]',
-  typography: '[typography]',
-  animations: '[animations]',
+  theme: 'uses.theme',
+  typography: 'uses.typography',
+  animations: 'uses.animations',
 } as const;
 
-/** Catalog-style attribute keys understood on `html` nodes. */
-export const INDEX_HTML_ATTRIBUTES = { lang: '[lang]', dir: '[dir]', title: '[title]' } as const;
+/** Attribute keys understood on `html` nodes. */
+export const INDEX_HTML_ATTRIBUTES = {
+  lang: 'uses.lang',
+  dir: 'uses.dir',
+  title: 'uses.title',
+} as const;
 
-/** Catalog-style attribute keys understood on icon `link` nodes. */
+/** Attribute keys understood on icon `link` nodes. */
 export const FAVICON_ATTRIBUTES = {
-  rel: '[rel]',
-  href: '[href]',
-  type: '[type]',
-  sizes: '[sizes]',
-  media: '[media]',
+  rel: 'uses.rel',
+  href: 'uses.href',
+  type: 'uses.type',
+  sizes: 'uses.sizes',
+  media: 'uses.media',
 } as const;
 
 /** Application options an OpenUI `Application` node describes. */
@@ -143,34 +147,34 @@ export interface NavigationAstLink {
   disabled: boolean;
 }
 
-const ROUTING_ATTRIBUTES = { defaultRoute: '[defaultRoute]' } as const;
+const ROUTING_ATTRIBUTES = { defaultRoute: 'uses.defaultRoute' } as const;
 const ROUTE_ATTRIBUTES = {
-  path: '[path]',
-  target: '[target]',
-  title: '[title]',
-  redirectTo: '[redirectTo]',
-  access: '[access]',
+  path: 'uses.path',
+  target: 'uses.target',
+  title: 'uses.title',
+  redirectTo: 'uses.redirectTo',
+  access: 'uses.access',
 } as const;
-const NAVIGATION_ATTRIBUTES = { ariaLabel: '[ariaLabel]' } as const;
+const NAVIGATION_ATTRIBUTES = { ariaLabel: 'uses.ariaLabel' } as const;
 const NAV_ITEM_ATTRIBUTES = {
-  label: '[label]',
-  route: '[route]',
-  icon: '[icon]',
-  disabled: '[disabled]',
+  label: 'uses.label',
+  route: 'uses.route',
+  icon: 'uses.icon',
+  disabled: 'uses.disabled',
 } as const;
-const NAV_GROUP_ATTRIBUTES = { label: '[label]', expanded: '[expanded]' } as const;
-const TOOL_BAR_ATTRIBUTES = { ariaLabel: '[ariaLabel]' } as const;
+const NAV_GROUP_ATTRIBUTES = { label: 'uses.label', expanded: 'uses.expanded' } as const;
+const TOOL_BAR_ATTRIBUTES = { ariaLabel: 'uses.ariaLabel' } as const;
 const TOOL_ACTION_ATTRIBUTES = {
-  label: '[label]',
-  icon: '[icon]',
-  disabled: '[disabled]',
-  activate: '(activate)',
+  label: 'uses.label',
+  icon: 'uses.icon',
+  disabled: 'uses.disabled',
+  activate: 'produces.activate',
 } as const;
 const ROUTE_PATH_PATTERN = /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/;
 const NAVIGATION_ICON_PATTERN = /^[a-z0-9_]+$/;
 
 /**
- * Compile the application `ToolBar` command surface. Its optional `(activate)`
+ * Compile the application `ToolBar` command surface. Its optional `produces.activate`
  * event is represented by a null-valued marker, so document data never becomes
  * an unchecked Angular expression.
  */
@@ -186,7 +190,7 @@ export function toolBarFromAst(
   const subject = astNodeSubject(documentPath, toolBar);
   assertAstAttributes(toolBar, Object.values(TOOL_BAR_ATTRIBUTES), subject);
   return {
-    ariaLabel: readAstString(toolBar, TOOL_BAR_ATTRIBUTES.ariaLabel),
+    ariaLabel: readAstString(toolBar, TOOL_BAR_ATTRIBUTES.ariaLabel, subject),
     rows: (toolBar.children ?? []).map((row) => toolBarRowFromAst(row, documentPath)),
   };
 }
@@ -219,7 +223,7 @@ function toolActionFromAst(action: OpenUiElement, documentPath: string): ToolAct
     );
   }
 
-  const label = readAstString(action, TOOL_ACTION_ATTRIBUTES.label);
+  const label = readAstString(action, TOOL_ACTION_ATTRIBUTES.label, subject);
   if (!label) {
     throw new SchematicsException(
       `OpenUI node "${subject}" requires a non-empty ${TOOL_ACTION_ATTRIBUTES.label}.`,
@@ -235,7 +239,7 @@ function toolActionFromAst(action: OpenUiElement, documentPath: string): ToolAct
   return {
     id: action.id,
     label,
-    icon: readAstString(action, TOOL_ACTION_ATTRIBUTES.icon),
+    icon: readAstString(action, TOOL_ACTION_ATTRIBUTES.icon, subject),
     disabled: readAstBoolean(action, TOOL_ACTION_ATTRIBUTES.disabled, subject) ?? false,
     activate,
   };
@@ -328,7 +332,7 @@ function collectNavigationLinks(
     const subject = astNodeSubject(documentPath, child);
     if (child.type === 'NavGroup') {
       assertAstAttributes(child, Object.values(NAV_GROUP_ATTRIBUTES), subject);
-      const label = readAstString(child, NAV_GROUP_ATTRIBUTES.label);
+      const label = readAstString(child, NAV_GROUP_ATTRIBUTES.label, subject);
       if (!label) {
         throw new SchematicsException(
           `OpenUI node "${subject}" requires a non-empty ${NAV_GROUP_ATTRIBUTES.label}.`,
@@ -343,7 +347,7 @@ function collectNavigationLinks(
       );
     }
     assertAstAttributes(child, Object.values(NAV_ITEM_ATTRIBUTES), subject);
-    const label = readAstString(child, NAV_ITEM_ATTRIBUTES.label);
+    const label = readAstString(child, NAV_ITEM_ATTRIBUTES.label, subject);
     const routeId = readElementReference(child, NAV_ITEM_ATTRIBUTES.route, subject);
     if (!label || !routeId) {
       throw new SchematicsException(
@@ -356,7 +360,7 @@ function collectNavigationLinks(
         `OpenUI node "${subject}" references unknown Route "${routeId}" with ${NAV_ITEM_ATTRIBUTES.route}.`,
       );
     }
-    const path = readAstString(route, ROUTE_ATTRIBUTES.path);
+    const path = readAstString(route, ROUTE_ATTRIBUTES.path, astNodeSubject(documentPath, route));
     if (!path) {
       throw new SchematicsException(
         `OpenUI node "${astNodeSubject(documentPath, route)}" requires a non-empty ${ROUTE_ATTRIBUTES.path}.`,
@@ -368,7 +372,7 @@ function collectNavigationLinks(
           'lowercase URL segments separated by hyphens or slashes.',
       );
     }
-    const icon = readAstString(child, NAV_ITEM_ATTRIBUTES.icon);
+    const icon = readAstString(child, NAV_ITEM_ATTRIBUTES.icon, subject);
     if (icon !== undefined && !NAVIGATION_ICON_PATTERN.test(icon)) {
       throw new SchematicsException(
         `OpenUI node "${subject}": ${NAV_ITEM_ATTRIBUTES.icon}="${icon}" must be a lowercase Angular Material icon identifier.`,
@@ -388,21 +392,16 @@ function readElementReference(
   key: string,
   subject: string,
 ): string | undefined {
-  const value = readAstString(node, key);
-  if (value === undefined) {
+  const reference = readAstString(node, key, subject);
+  if (reference === undefined) {
     return undefined;
   }
-  try {
-    const reference: unknown = JSON.parse(value);
-    if (typeof reference === 'string' && reference.length > 0) {
-      return reference;
-    }
-  } catch {
-    // The diagnostic below explains the required quoted element-id form.
+  if (reference.length === 0) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": ${key} must be a quoted element-id string, not an empty string.`,
+    );
   }
-  throw new SchematicsException(
-    `OpenUI node "${subject}": ${key} must be a quoted element-id string, not "${value}".`,
-  );
+  return reference;
 }
 
 /**
@@ -424,7 +423,7 @@ export function presentationFromAst(
   const subject = astNodeSubject(documentPath, node);
   assertAstAttributes(node, Object.values(PRESENTATION_ATTRIBUTES), subject);
   return {
-    theme: readAstString(node, PRESENTATION_ATTRIBUTES.theme),
+    theme: readAstString(node, PRESENTATION_ATTRIBUTES.theme, subject),
     typography: readAstBoolean(node, PRESENTATION_ATTRIBUTES.typography, subject),
     animations: readAstBoolean(node, PRESENTATION_ATTRIBUTES.animations, subject),
   };
@@ -433,7 +432,7 @@ export function presentationFromAst(
 /**
  * Decode the first non-root `html` node of the document, if any.
  *
- * @throws SchematicsException for unsupported attributes or a `[dir]` other than `ltr`, `rtl`, `auto`.
+ * @throws SchematicsException for unsupported attributes or a `uses.dir` other than `ltr`, `rtl`, `auto`.
  */
 export function indexHtmlFromAst(
   document: OpenUiDocument,
@@ -448,7 +447,7 @@ export function indexHtmlFromAst(
 
   const subject = astNodeSubject(documentPath, node);
   assertAstAttributes(node, Object.values(INDEX_HTML_ATTRIBUTES), subject);
-  const dir = readAstString(node, INDEX_HTML_ATTRIBUTES.dir);
+  const dir = readAstString(node, INDEX_HTML_ATTRIBUTES.dir, subject);
   if (dir !== undefined && !['ltr', 'rtl', 'auto'].includes(dir)) {
     throw new SchematicsException(
       `OpenUI node "${subject}": ${INDEX_HTML_ATTRIBUTES.dir} must be ltr, rtl, or auto, not "${dir}".`,
@@ -456,16 +455,16 @@ export function indexHtmlFromAst(
   }
 
   return {
-    lang: readAstString(node, INDEX_HTML_ATTRIBUTES.lang),
+    lang: readAstString(node, INDEX_HTML_ATTRIBUTES.lang, subject),
     dir,
-    title: readAstString(node, INDEX_HTML_ATTRIBUTES.title),
+    title: readAstString(node, INDEX_HTML_ATTRIBUTES.title, subject),
   };
 }
 
 /**
- * The `[href]` of the first `link[rel=icon]` node of the document, if any.
+ * The `uses.href` of the first `link` node with `uses.rel` `"icon"` of the document, if any.
  *
- * @throws SchematicsException for unsupported attributes or a missing `[href]`.
+ * @throws SchematicsException for unsupported attributes or a missing `uses.href`.
  */
 export function faviconHrefFromAst(
   document: OpenUiDocument,
@@ -473,7 +472,9 @@ export function faviconHrefFromAst(
 ): string | undefined {
   const node = [...createAstNodeResolver(document).walk()].find(
     (candidate) =>
-      candidate.type === 'link' && readAstString(candidate, FAVICON_ATTRIBUTES.rel) === 'icon',
+      candidate.type === 'link' &&
+      readAstString(candidate, FAVICON_ATTRIBUTES.rel, astNodeSubject(documentPath, candidate)) ===
+        'icon',
   );
   if (!node) {
     return undefined;
@@ -481,7 +482,7 @@ export function faviconHrefFromAst(
 
   const subject = astNodeSubject(documentPath, node);
   assertAstAttributes(node, Object.values(FAVICON_ATTRIBUTES), subject);
-  const href = readAstString(node, FAVICON_ATTRIBUTES.href);
+  const href = readAstString(node, FAVICON_ATTRIBUTES.href, subject);
   if (!href) {
     throw new SchematicsException(
       `OpenUI node "${subject}" needs ${FAVICON_ATTRIBUTES.href} with the workspace-relative icon file.`,

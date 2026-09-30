@@ -31,19 +31,19 @@ Options:
 ## OpenUI data bindings
 
 With `--document`, the service is generated for a node bound with
-`[data]="<apiPath>#<ApiService>"` (the first such node, or the one named by
-`--node-id`); `--api-service` and `--api-path` are not allowed.
+`uses.data` set to the unquoted expression `<apiPath>#<ApiService>` (the first
+such node, or the one named by `--node-id`); `--api-service` and `--api-path` are not allowed.
 
 ```json
 {
   "id": "orderRows",
   "type": "Table",
-  "attrs": { "[data]": "src/app/api/services#OrdersApiService" }
+  "attrs": { "uses.data": "src/app/api/services#OrdersApiService" }
 }
 ```
 
 `<apiPath>` is the application path of the generated `services` module, turned
 into an import relative to the generated service; `<ApiService>` is the service
 class. `--name` defaults to the dasherized node id, and paths resolve inside the
-selected project. `(paginate)`, `(sort)`, and `(filter)` are left to the widget
+selected project. `behaves.paginate`, `behaves.sort`, and `behaves.filter` are left to the widget
 compilers.

@@ -633,27 +633,31 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
   const CONTACT_FORM = {
     id: 'contactForm',
     type: 'Form',
-    attrs: { '[title]': 'Create contact', '[action]': '/api/contacts/' },
+    attrs: { 'uses.title': '"Create contact"', 'uses.action': '"/api/contacts/"' },
     children: [
       {
         id: 'firstName',
         type: 'TextInputs',
         attrs: {
-          '[name]': 'first_name',
-          '[label]': 'First name',
-          '[required]': 'true',
-          '[hint]': 'Given name on the record',
-          '[autocomplete]': 'given-name',
+          'uses.name': '"first_name"',
+          'uses.label': '"First name"',
+          'uses.required': true,
+          'uses.hint': '"Given name on the record"',
+          'uses.autocomplete': '"given-name"',
         },
       },
       {
         id: 'email',
         type: 'TextInputs',
-        attrs: { '[type]': 'email', '[label]': 'Email', '[required]': 'true' },
+        attrs: { 'uses.type': '"email"', 'uses.label': '"Email"', 'uses.required': true },
       },
-      { id: 'seats', type: 'RangeControl', attrs: { '[label]': 'Seats' } },
-      { id: 'notes', type: 'TextInputs', attrs: { '[type]': 'textarea', '[label]': 'Notes' } },
-      { id: 'contactSubmit', type: 'ActionControls', attrs: { '[label]': 'Create contact' } },
+      { id: 'seats', type: 'RangeControl', attrs: { 'uses.label': '"Seats"' } },
+      {
+        id: 'notes',
+        type: 'TextInputs',
+        attrs: { 'uses.multiline': true, 'uses.label': '"Notes"' },
+      },
+      { id: 'contactSubmit', type: 'ActionControls', attrs: { 'uses.label': '"Create contact"' } },
     ],
   };
 
@@ -685,7 +689,7 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
     expect(outputs(fromDocument)).toEqual(outputs(fromDefinition));
   });
 
-  it('TC-REACTIVE-FORM-OPENUI-02: maps (submit) to the typed integration identically to the legacy definition', () => {
+  it('TC-REACTIVE-FORM-OPENUI-02: maps behaves.submit to the typed integration identically to the legacy definition', () => {
     const integration = {
       artifact: 'src/app/api-integration/contact-submit.ts',
       symbol: 'ContactSubmitService',
@@ -698,7 +702,7 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
         ...CONTACT_FORM,
         attrs: {
           ...CONTACT_FORM.attrs,
-          '(submit)': 'src/app/api-integration/contact-submit.ts#ContactSubmitService.create',
+          'behaves.submit': 'src/app/api-integration/contact-submit.ts#ContactSubmitService.create',
         },
       }),
     );
@@ -811,9 +815,9 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
       'profileSubmitAction',
     ]);
     expect(form.children?.[0].attrs).toMatchObject({
-      '[required]': 'true',
-      '[email]': 'true',
-      '[minLength]': '3',
+      'uses.required': true,
+      'uses.email': true,
+      'uses.minLength': 3,
     });
 
     const decoded = reactiveFormDefinitionFromAst(form, 'profile.json');
@@ -835,8 +839,8 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
     const second = {
       ...CONTACT_FORM,
       id: 'otherForm',
-      attrs: { ...CONTACT_FORM.attrs, '[title]': 'Other form' },
-      children: [{ id: 'otherNotes', type: 'TextInputs', attrs: { '[label]': 'Notes' } }],
+      attrs: { ...CONTACT_FORM.attrs, 'uses.title': '"Other form"' },
+      children: [{ id: 'otherNotes', type: 'TextInputs', attrs: { 'uses.label': '"Notes"' } }],
     };
     const document = documentOf(CONTACT_FORM, second);
 
@@ -857,33 +861,41 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
   it.each([
     [
       'an unsupported Form attribute',
-      { ...CONTACT_FORM, attrs: { ...CONTACT_FORM.attrs, '(validate)': 'check()' } },
-      'OpenUI node "documents/app.openui.json#contactForm" has unsupported attribute(s): (validate).',
+      { ...CONTACT_FORM, attrs: { ...CONTACT_FORM.attrs, 'behaves.validate': 'check()' } },
+      'OpenUI node "documents/app.openui.json#contactForm" has unsupported attribute(s): behaves.validate.',
     ],
     [
-      'a malformed (submit) binding',
-      { ...CONTACT_FORM, attrs: { ...CONTACT_FORM.attrs, '(submit)': 'save()' } },
-      'attribute "(submit)" must be "<artifact>#<Symbol>.<method>", not "save()".',
+      'a malformed behaves.submit binding',
+      { ...CONTACT_FORM, attrs: { ...CONTACT_FORM.attrs, 'behaves.submit': 'save()' } },
+      'attribute "behaves.submit" must be "<artifact>#<Symbol>.<method>", not "save()".',
     ],
     [
       'a non-numeric validator',
       {
         ...CONTACT_FORM,
         children: [
-          { id: 'seats', type: 'RangeControl', attrs: { '[label]': 'Seats', '[min]': 'x' } },
+          {
+            id: 'seats',
+            type: 'RangeControl',
+            attrs: { 'uses.label': '"Seats"', 'uses.min': 'x' },
+          },
         ],
       },
-      'OpenUI node "documents/app.openui.json#contactForm/seats": attribute "[min]" must be a finite number, not "x".',
+      'OpenUI node "documents/app.openui.json#contactForm/seats": attribute "uses.min" must be a finite JSON number, not "x".',
     ],
     [
       'a control kind that contradicts its node type',
       {
         ...CONTACT_FORM,
         children: [
-          { id: 'seats', type: 'TextInputs', attrs: { '[type]': 'number', '[label]': 'S' } },
+          {
+            id: 'seats',
+            type: 'RangeControl',
+            attrs: { 'uses.type': '"email"', 'uses.label': '"S"' },
+          },
         ],
       },
-      '[type]="number" requires a "RangeControl" node, not "TextInputs".',
+      'uses.type="email" requires a "TextInputs" node, not "RangeControl".',
     ],
     [
       'an unsupported control type',
@@ -896,7 +908,7 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
         ...CONTACT_FORM,
         children: [
           ...CONTACT_FORM.children,
-          { id: 'secondSubmit', type: 'ActionControls', attrs: { '[label]': 'Again' } },
+          { id: 'secondSubmit', type: 'ActionControls', attrs: { 'uses.label': '"Again"' } },
         ],
       },
       'declares 2 "ActionControls" children; a reactive form has exactly one submit action.',

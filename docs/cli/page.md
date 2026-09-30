@@ -73,14 +73,14 @@ ng generate angular-django2:page --document=src/app/app.openui.json \
   --node-id=profile --path=src/app/features/profile
 ```
 
-| Page attribute | Page option          | Default              |
-| :------------- | :------------------- | :------------------- |
-| id             | `--name`             | dasherized id        |
-| `[title]`      | `--navigation-label` | classified page name |
-| `[route]`      | `--route-path`       | page name            |
-| `[icon]`       | `--navigation-icon`  | none                 |
-| `[access]`     | `--access`           | `public`             |
-| `[authGuard]`  | `--auth-guard`       | `authGuard`          |
+| Page attribute   | Page option          | Default              |
+| :--------------- | :------------------- | :------------------- |
+| id               | `--name`             | dasherized id        |
+| `uses.title`     | `--navigation-label` | classified page name |
+| `uses.route`     | `--route-path`       | page name            |
+| `uses.icon`      | `--navigation-icon`  | none                 |
+| `uses.access`    | `--access`           | `public`             |
+| `uses.authGuard` | `--auth-guard`       | `authGuard`          |
 
 `--name` still overrides the id-derived name. A `DashboardPage`'s children are
 compiled and embedded into the page card's header, content, and actions slots,

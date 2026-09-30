@@ -41,7 +41,7 @@ const NESTED_CHILD_SUFFIXES = ['header', 'content'] as const;
 export const OVERLAY_CONTAINER_AST_TYPE = 'OverlayContainers';
 
 /** Catalog-style attribute keys understood on the overlay configuration child. */
-export const OVERLAY_CONTAINER_ATTRIBUTES = { label: '[label]' } as const;
+export const OVERLAY_CONTAINER_ATTRIBUTES = { label: 'uses.label' } as const;
 
 const DEFAULT_OVERLAY_LABEL = 'Toggle details';
 
@@ -182,7 +182,8 @@ function resolveDocument(
     const overlaySubject = astNodeSubject(documentPath, overlay);
     assertAstAttributes(overlay, Object.values(OVERLAY_CONTAINER_ATTRIBUTES), overlaySubject);
     const slotted = (overlay.children ?? []).find(
-      (child) => readAstString(child, AST_SLOT_ATTRIBUTE) !== undefined,
+      (child) =>
+        readAstString(child, AST_SLOT_ATTRIBUTE, astNodeSubject(documentPath, child)) !== undefined,
     );
     if (slotted) {
       throw new SchematicsException(
@@ -195,7 +196,7 @@ function resolveDocument(
   return {
     documentPath,
     node,
-    title: readAstString(node, SURFACE_CONTAINER_ATTRIBUTES.title),
+    title: readAstString(node, SURFACE_CONTAINER_ATTRIBUTES.title, subject),
     children: (node.children ?? []).filter((child) => child !== overlay),
     overlay,
   };
@@ -241,7 +242,7 @@ function resolveOptions(
 
 /**
  * Compile every document child into its own component under the complex
- * component's directory and embed it: slot children by their `[slot]`, overlay
+ * component's directory and embed it: slot children by their `uses.slot`, overlay
  * children into the `overlay` section.
  */
 function composeDocumentChildren(
@@ -443,8 +444,11 @@ function documentTemplate(name: string, document: ComplexComponentDocument): str
   const overlay = document.overlay
     ? `\n  ${overlayTemplate(
         name,
-        readAstString(document.overlay, OVERLAY_CONTAINER_ATTRIBUTES.label) ??
-          DEFAULT_OVERLAY_LABEL,
+        readAstString(
+          document.overlay,
+          OVERLAY_CONTAINER_ATTRIBUTES.label,
+          astNodeSubject(document.documentPath, document.overlay),
+        ) ?? DEFAULT_OVERLAY_LABEL,
         templateSectionMarkers('overlay', '    '),
       )
         .split('\n')

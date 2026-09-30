@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [0.6.0]
+
+- **Breaking:** OpenUI documents use `@shlomoa/openui-spec` 0.11.0 typed attributes (pinned, no range). Keys are categorized (`[title]` becomes `uses.title`, `(activate)` becomes `produces.activate`, `(submit)` becomes `behaves.submit`); a string literal is quoted inside the string (`"\"Users\""`); booleans and numbers are JSON values. An unquoted string is an expression, so a text attribute written without quotes is rejected with a message that shows the quoted form. Only `behaves.*`, `produces.*` and `uses.data` take an expression. Documents written for 0.3.1 must be migrated.
+- A textarea control is `uses.multiline: true`; the catalog's `uses.type` has no `textarea`. `uses.type` `search`, `tel` and `url` are still not generated.
+- The validator's contract stage now checks element references (`uses.route`, `uses.target`, `uses.redirectTo`, `uses.defaultRoute`) in every schematic that reads a document, and reports diagnostics as `path: code: message`.
+- Generated Angular output is unchanged.
+
 ## [0.5.1]
 
 - Added OpenUI 0.3.1 document input to existing application, Material application, page, component, complex-component, reactive-form, form-field, field-component, data-service, and workspace-setup schematics.

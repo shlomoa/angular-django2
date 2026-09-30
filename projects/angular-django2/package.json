@@ -1,6 +1,6 @@
 {
   "name": "angular-django2",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Angular workspace for a Django-friendly Angular CLI schematics collection.",
   "keywords": [
     "angular",
@@ -61,7 +61,7 @@
     "@angular/material": "22.0.6",
     "@angular/platform-browser": "^22.0.8",
     "@angular/router": "^22.0.8",
-    "@shlomoa/openui-spec": "^0.3.1",
+    "@shlomoa/openui-spec": "0.11.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

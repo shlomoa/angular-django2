@@ -2,17 +2,17 @@
  * OpenUI page vocabulary (migration plan, step 4.1), shared by `page` and by
  * `material-app`, which builds its navigation links from the same page nodes.
  *
- * A page node carries its own routing and navigation metadata as catalog-style
- * input attributes:
+ * A page node carries its own routing and navigation metadata as `uses.`
+ * attributes (string values are quoted literals, for example `"\"Users\""`):
  *
  * | OpenUI page attribute | page option         | Default                   |
  * | :-------------------- | :------------------ | :------------------------ |
  * | id                    | `name` (dasherized) | —                         |
- * | `[title]`             | `navigationLabel`   | classified page name      |
- * | `[route]`             | `routePath`         | page name                 |
- * | `[icon]`              | `navigationIcon`    | none                      |
- * | `[access]`            | `access`            | `public`                  |
- * | `[authGuard]`         | `authGuard`         | `authGuard`               |
+ * | `uses.title`          | `navigationLabel`   | classified page name      |
+ * | `uses.route`          | `routePath`         | page name                 |
+ * | `uses.icon`           | `navigationIcon`    | none                      |
+ * | `uses.access`         | `access`            | `public`                  |
+ * | `uses.authGuard`      | `authGuard`         | `authGuard`               |
  *
  * `DashboardPage` children are composed into the page body (plan step 3.3);
  * `EmptyPage` has no content, so it takes no children and, having no
@@ -47,13 +47,13 @@ export const ROUTE_PATH_PATTERN = /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/;
 /** Lowercase Angular Material icon ligature name. */
 export const NAVIGATION_ICON_PATTERN = /^[a-z0-9_]+$/;
 
-/** Catalog-style attribute keys understood on page nodes. */
+/** Attribute keys understood on page nodes; the catalog declares none of them (extensions). */
 export const PAGE_ATTRIBUTES = {
-  title: '[title]',
-  route: '[route]',
-  icon: '[icon]',
-  access: '[access]',
-  authGuard: '[authGuard]',
+  title: 'uses.title',
+  route: 'uses.route',
+  icon: 'uses.icon',
+  access: 'uses.access',
+  authGuard: 'uses.authGuard',
 } as const;
 
 /** Page options an OpenUI page node describes. */
@@ -103,11 +103,11 @@ export function pageOptionsFromAst(
   const name = nameOverride ?? strings.dasherize(node.id);
   return {
     name,
-    routePath: readAstString(node, PAGE_ATTRIBUTES.route) ?? name,
-    navigationLabel: readAstString(node, PAGE_ATTRIBUTES.title) ?? strings.classify(name),
-    navigationIcon: readAstString(node, PAGE_ATTRIBUTES.icon),
-    access: (readAstString(node, PAGE_ATTRIBUTES.access) ?? 'public') as PageAccessMode,
-    authGuard: readAstString(node, PAGE_ATTRIBUTES.authGuard),
+    routePath: readAstString(node, PAGE_ATTRIBUTES.route, subject) ?? name,
+    navigationLabel: readAstString(node, PAGE_ATTRIBUTES.title, subject) ?? strings.classify(name),
+    navigationIcon: readAstString(node, PAGE_ATTRIBUTES.icon, subject),
+    access: (readAstString(node, PAGE_ATTRIBUTES.access, subject) ?? 'public') as PageAccessMode,
+    authGuard: readAstString(node, PAGE_ATTRIBUTES.authGuard, subject),
   };
 }
 
