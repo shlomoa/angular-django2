@@ -7,13 +7,13 @@
  * child node types: callers supply one compiled child per node.
  *
  * Placement:
- * - A child picks a named projection slot with the catalog-style `[slot]`
+ * - A child picks a named projection slot with the `uses.slot`
  *   attribute (`header`, `content`, or `actions`); without it the child goes
  *   into `content`, which is the parent's `children` section.
  * - Children keep document order inside each slot. `embed-component` inserts
  *   right after a section's begin marker, so the engine embeds the children
  *   last-to-first.
- * - The child element binds the node's bracketed attributes that name one of
+ * - The child element binds the node's `uses.` attributes that name one of
  *   the child's inputs, as string literals; other inputs keep their defaults.
  *
  * @internal
@@ -26,8 +26,8 @@ import { readAstString } from '../utility/ast-compiler';
 import { EMBED_SLOTS, embedComponentFile, slotSection } from './index';
 import type { EmbedSlot } from './schema';
 
-/** Catalog-style attribute that places a child node into a named slot. */
-export const AST_SLOT_ATTRIBUTE = '[slot]';
+/** Attribute that places a child node into a named slot (an extension: the catalog declares no slot). */
+export const AST_SLOT_ATTRIBUTE = 'uses.slot';
 
 /** One child node compiled into its own component. */
 export interface AstChildCompilation {
@@ -42,12 +42,12 @@ export interface AstChildCompilation {
 }
 
 /**
- * Read the `[slot]` of a child node; `content` when absent.
+ * Read the `uses.slot` of a child node; `content` when absent.
  *
  * @throws SchematicsException for an unsupported slot name.
  */
 export function readAstSlot(node: OpenUiElement, subject: string): EmbedSlot {
-  const slot = readAstString(node, AST_SLOT_ATTRIBUTE) ?? 'content';
+  const slot = readAstString(node, AST_SLOT_ATTRIBUTE, subject) ?? 'content';
   if (!EMBED_SLOTS.includes(slot as EmbedSlot)) {
     throw new SchematicsException(
       `OpenUI node "${subject}": ${AST_SLOT_ATTRIBUTE}="${slot}" is not a supported slot. ` +
@@ -58,13 +58,13 @@ export function readAstSlot(node: OpenUiElement, subject: string): EmbedSlot {
   return slot as EmbedSlot;
 }
 
-/** Parent template section for a child node's `[slot]`. */
+/** Parent template section for a child node's `uses.slot`. */
 export function astSlotSection(node: OpenUiElement, subject: string): string {
   return slotSection(readAstSlot(node, subject));
 }
 
 /**
- * A copy of `node` without the composition attributes (`[slot]`), so the child
+ * A copy of `node` without the composition attributes (`uses.slot`), so the child
  * compiler validates only its own vocabulary.
  */
 export function withoutCompositionAttributes(node: OpenUiElement): OpenUiElement {
@@ -86,16 +86,27 @@ export function withoutCompositionAttributes(node: OpenUiElement): OpenUiElement
 }
 
 /**
- * Input values carried by a child node: every bracketed attribute except
- * `[slot]`, keyed by the name inside the brackets. `null` values are skipped.
+ * Input values carried by a child node: every `uses.` attribute except
+ * `uses.slot`, keyed by the name after the prefix. `null` values are skipped.
+ * String literals contribute their decoded text; booleans and numbers their
+ * JSON text.
+ *
+ * @throws SchematicsException for an unquoted string: an expression is not a string literal input.
  */
 export function astInputBindings(node: OpenUiElement): Record<string, string> {
   const bindings: Record<string, string> = {};
   for (const [key, value] of Object.entries(node.attrs ?? {})) {
-    const match = /^\[(\w+)\]$/.exec(key);
-    if (match && key !== AST_SLOT_ATTRIBUTE && value !== null) {
-      bindings[match[1]] = value;
+    const match = /^uses\.(\w+)$/.exec(key);
+    if (!match || key === AST_SLOT_ATTRIBUTE || value === null) {
+      continue;
     }
+    if (Array.isArray(value)) {
+      throw new SchematicsException(
+        `OpenUI node "${node.id}": attribute "${key}" is a list, which cannot be bound to a component input.`,
+      );
+    }
+    bindings[match[1]] =
+      typeof value === 'string' ? (readAstString(node, key) ?? '') : String(value);
   }
 
   return bindings;

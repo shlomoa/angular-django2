@@ -21,15 +21,19 @@ const APP = '/projects/shop/src/app';
 const profilePage: OpenUiElement = {
   id: 'profile',
   type: 'DashboardPage',
-  attrs: { '[title]': 'My profile', '[route]': 'me/profile', '[icon]': 'person' },
+  attrs: { 'uses.title': '"My profile"', 'uses.route': '"me/profile"', 'uses.icon': '"person"' },
   children: [
-    { id: 'summary', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
+    { id: 'summary', type: 'SurfaceContainers', attrs: { 'uses.slot': '"header"' } },
     {
       id: 'contact',
       type: 'Form',
-      attrs: { '[title]': 'Contact', '[action]': '/api/contact/' },
+      attrs: { 'uses.title': '"Contact"', 'uses.action': '"/api/contact/"' },
       children: [
-        { id: 'email', type: 'TextInputs', attrs: { '[type]': 'email', '[label]': 'Email' } },
+        {
+          id: 'email',
+          type: 'TextInputs',
+          attrs: { 'uses.type': '"email"', 'uses.label': '"Email"' },
+        },
       ],
     },
   ],
@@ -46,62 +50,74 @@ const application: OpenUiElement = {
         {
           id: 'profileRoute',
           type: 'Route',
-          attrs: { '[path]': 'me/profile', '[target]': '"profile"', '[title]': 'My profile' },
+          attrs: {
+            'uses.path': '"me/profile"',
+            'uses.target': '"profile"',
+            'uses.title': '"My profile"',
+          },
         },
         {
           id: 'ordersRoute',
           type: 'Route',
-          attrs: { '[path]': 'orders', '[target]': '"orders"', '[title]': 'Orders' },
+          attrs: { 'uses.path': '"orders"', 'uses.target': '"orders"', 'uses.title': '"Orders"' },
         },
       ],
     },
     {
       id: 'navigation',
       type: 'Navigation',
-      attrs: { '[ariaLabel]': 'Primary' },
+      attrs: { 'uses.ariaLabel': '"Primary"' },
       children: [
         {
           id: 'profileNavigation',
           type: 'NavItem',
-          attrs: { '[label]': 'My profile', '[route]': '"profileRoute"', '[icon]': 'person' },
+          attrs: {
+            'uses.label': '"My profile"',
+            'uses.route': '"profileRoute"',
+            'uses.icon': '"person"',
+          },
         },
         {
           id: 'ordersNavigation',
           type: 'NavItem',
-          attrs: { '[label]': 'Orders', '[route]': '"ordersRoute"' },
+          attrs: { 'uses.label': '"Orders"', 'uses.route': '"ordersRoute"' },
         },
       ],
     },
     {
       id: 'look',
       type: 'Presentation',
-      attrs: { '[theme]': 'purple-green', '[typography]': 'false', '[animations]': 'true' },
+      attrs: { 'uses.theme': '"purple-green"', 'uses.typography': false, 'uses.animations': true },
     },
     {
       id: 'host',
       type: 'html',
-      attrs: { '[lang]': 'he', '[dir]': 'rtl', '[title]': 'Shop & Co' },
+      attrs: { 'uses.lang': '"he"', 'uses.dir': '"rtl"', 'uses.title': '"Shop & Co"' },
     },
-    { id: 'icon', type: 'link', attrs: { '[rel]': 'icon', '[href]': 'branding/shop.ico' } },
+    {
+      id: 'icon',
+      type: 'link',
+      attrs: { 'uses.rel': '"icon"', 'uses.href': '"branding/shop.ico"' },
+    },
   ],
 };
 
 const pages: OpenUiElement[] = [
   profilePage,
-  { id: 'orders', type: 'DashboardPage', attrs: { '[access]': 'public' } },
-  { id: 'blank', type: 'EmptyPage', attrs: { '[route]': 'blank' } },
+  { id: 'orders', type: 'DashboardPage', attrs: { 'uses.access': '"public"' } },
+  { id: 'blank', type: 'EmptyPage', attrs: { 'uses.route': '"blank"' } },
 ];
 
 const ordersTable: OpenUiElement = {
   id: 'orderRows',
   type: 'Table',
-  attrs: { '[data]': 'src/app/api/services#OrdersApiService', '(paginate)': null },
+  attrs: { 'uses.data': 'src/app/api/services#OrdersApiService', 'behaves.paginate': null },
 };
 
 const toolBar: OpenUiElement = {
   id: 'mainToolBar',
   type: 'ToolBar',
-  attrs: { '[ariaLabel]': 'Shop actions' },
+  attrs: { 'uses.ariaLabel': '"Shop actions"' },
   children: [
     {
       id: 'primaryToolBarRow',
@@ -111,19 +127,19 @@ const toolBar: OpenUiElement = {
           id: 'refresh',
           type: 'ToolAction',
           attrs: {
-            '[label]': 'Refresh',
-            '[icon]': 'refresh',
-            '[disabled]': 'true',
-            '(activate)': null,
+            'uses.label': '"Refresh"',
+            'uses.icon': '"refresh"',
+            'uses.disabled': true,
+            'produces.activate': null,
           },
         },
-        { id: 'help', type: 'ToolAction', attrs: { '[label]': 'Help' } },
+        { id: 'help', type: 'ToolAction', attrs: { 'uses.label': '"Help"' } },
       ],
     },
     {
       id: 'secondaryToolBarRow',
       type: 'ToolBarRow',
-      children: [{ id: 'about', type: 'ToolAction', attrs: { '[label]': 'About' } }],
+      children: [{ id: 'about', type: 'ToolAction', attrs: { 'uses.label': '"About"' } }],
     },
   ],
 };
@@ -249,15 +265,15 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         "path: 'blank'",
       );
 
-      const guarded = openUiDocument(application, {
+      const guarded = openUiDocument(application, ...pages, {
         id: 'admin',
         type: 'DashboardPage',
-        attrs: { '[access]': 'protected', '[authGuard]': 'adminGuard' },
+        attrs: { 'uses.access': '"protected"', 'uses.authGuard': '"adminGuard"' },
       });
       await expect(
         runner.runSchematic(
           'page',
-          { document: DOCUMENT_PATH, path: 'src/app/features/admin' },
+          { document: DOCUMENT_PATH, nodeId: 'admin', path: 'src/app/features/admin' },
           await createApplication(guarded),
         ),
       ).rejects.toThrow('Protected pages require the configured reusable "adminGuard" guard');
@@ -276,15 +292,15 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
 
       const cases: [OpenUiElement, string][] = [
         [
-          { id: 'bad', type: 'DashboardPage', attrs: { '[color]': 'red' } },
-          'unsupported attribute(s): [color]',
+          { id: 'bad', type: 'DashboardPage', attrs: { 'uses.color': '"red"' } },
+          'unsupported attribute(s): uses.color',
         ],
         [
           { id: 'bad', type: 'EmptyPage', children: [{ id: 'c', type: 'SurfaceContainers' }] },
           'which has no content',
         ],
         [
-          { id: 'bad', type: 'DashboardPage', attrs: { '[route]': 'Bad Route' } },
+          { id: 'bad', type: 'DashboardPage', attrs: { 'uses.route': '"Bad Route"' } },
           'lowercase URL segments',
         ],
       ];
@@ -292,8 +308,8 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         await expect(
           runner.runSchematic(
             'page',
-            base,
-            await createApplication(openUiDocument(application, node)),
+            { ...base, nodeId: node.id },
+            await createApplication(openUiDocument(application, ...pages, node)),
           ),
         ).rejects.toThrow(message);
       }
@@ -336,7 +352,8 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         'Option "name" is required unless --document is given.',
       );
 
-      const withoutRouting = {
+      // A NavItem's uses.route must name a Route: the validator's contract stage reports it first.
+      const navItemsWithoutRouting = {
         ...application,
         children: application.children?.filter((child) => child.type !== 'Routing'),
       };
@@ -344,7 +361,22 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         runner.runSchematic(
           'material-app',
           { document: DOCUMENT_PATH },
-          await createWorkspace(openUiDocument(withoutRouting, ...pages)),
+          await createWorkspace(openUiDocument(navItemsWithoutRouting, ...pages)),
+        ),
+      ).rejects.toThrow(
+        '/children/0/children/0/children/0/attrs/uses.route: contract/unresolved-reference',
+      );
+      const emptyNavigationWithoutRouting = {
+        ...application,
+        children: navItemsWithoutRouting.children?.map((child) =>
+          child.type === 'Navigation' ? { ...child, children: [] } : child,
+        ),
+      };
+      await expect(
+        runner.runSchematic(
+          'material-app',
+          { document: DOCUMENT_PATH },
+          await createWorkspace(openUiDocument(emptyNavigationWithoutRouting, ...pages)),
         ),
       ).rejects.toThrow('requires an Application Routing child');
       await expect(
@@ -354,17 +386,19 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
           await createWorkspace(
             openUiDocument({
               ...application,
-              children: [{ id: 'look', type: 'Presentation', attrs: { '[typography]': 'yes' } }],
+              children: [{ id: 'look', type: 'Presentation', attrs: { 'uses.typography': 'yes' } }],
             }),
           ),
         ),
-      ).rejects.toThrow('attribute "[typography]" must be "true" or "false"');
+      ).rejects.toThrow(
+        'attribute "uses.typography" must be the JSON value true or false, not "yes"',
+      );
     });
   });
 
   describe('workspace-setup --document', () => {
     it('TC-APP-08: updates index.html and replaces the favicon from html and link nodes', async () => {
-      const tree = await createApplication(openUiDocument(application));
+      const tree = await createApplication(openUiDocument(application, ...pages));
       tree.create('/branding/shop.ico', Buffer.from([0, 0, 1, 0, 42]));
       const generated = await runner.runSchematic(
         'workspace-setup',
@@ -379,7 +413,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
     });
 
     it('TC-APP-09: rejects conflicting file hooks and missing favicon files', async () => {
-      const tree = await createApplication(openUiDocument(application));
+      const tree = await createApplication(openUiDocument(application, ...pages));
       await expect(
         runner.runSchematic(
           'workspace-setup',
@@ -420,8 +454,8 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
   });
 
   describe('data-service --document', () => {
-    it('TC-APP-11: generates a data service from a [data] binding with a relative API import', async () => {
-      const tree = await createApplication(openUiDocument(application, ordersTable));
+    it('TC-APP-11: generates a data service from a uses.data binding with a relative API import', async () => {
+      const tree = await createApplication(openUiDocument(application, ...pages, ordersTable));
       const generated = await runner.runSchematic(
         'data-service',
         { document: DOCUMENT_PATH, project: 'shop' },
@@ -436,7 +470,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
     });
 
     it('TC-APP-12: honours --name and --path, and rejects invalid bindings and conflicts', async () => {
-      const tree = await createApplication(openUiDocument(application, ordersTable));
+      const tree = await createApplication(openUiDocument(application, ...pages, ordersTable));
       const generated = await runner.runSchematic(
         'data-service',
         {
@@ -457,16 +491,16 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
       ).rejects.toThrow('--document cannot be combined with --apiService');
       await expect(
         runner.runSchematic('data-service', { document: DOCUMENT_PATH, nodeId: 'shop' }, tree),
-      ).rejects.toThrow('has no [data] binding');
+      ).rejects.toThrow('has no uses.data binding');
       await expect(
         runner.runSchematic(
           'data-service',
           { document: DOCUMENT_PATH },
           await createApplication(
-            openUiDocument(application, {
+            openUiDocument(application, ...pages, {
               id: 'rows',
               type: 'Table',
-              attrs: { '[data]': 'OrdersApiService' },
+              attrs: { 'uses.data': 'OrdersApiService' },
             }),
           ),
         ),
@@ -503,7 +537,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
                 {
                   id: 'brokenNavigation',
                   type: 'NavItem',
-                  attrs: { '[label]': 'Broken', '[route]': '"missing"' },
+                  attrs: { 'uses.label': '"Broken"', 'uses.route': '"missing"' },
                 },
               ],
             }
@@ -520,7 +554,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
                 {
                   id: 'profileRoute',
                   type: 'Route',
-                  attrs: { '[path]': 'profile', '[target]': 'profile' },
+                  attrs: { 'uses.path': '"profile"', 'uses.target': 'profile' },
                 },
               ],
             }
@@ -541,7 +575,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         JSON.parse(openUiDocument(unquotedTarget, ...pages)),
         DOCUMENT_PATH,
       ),
-    ).toThrow('must be a quoted element-id string');
+    ).toThrow('attribute "uses.target" has the unquoted value profile');
   });
 
   it('TC-APP-15: decodes ordered ToolBar rows and ToolAction attributes', () => {
@@ -615,7 +649,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
     const invalidToolBar = {
       id: 'invalidToolBar',
       type: 'ToolBar',
-      attrs: { '[bogus]': 'ignored' },
+      attrs: { 'uses.bogus': '"ignored"' },
     } satisfies OpenUiElement;
     const invalidApplication = { ...application, children: [invalidToolBar] };
 
@@ -626,7 +660,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
           { document: DOCUMENT_PATH },
           await createWorkspace(openUiDocument(invalidApplication)),
         ),
-      ).rejects.toThrow('unsupported attribute(s): [bogus]');
+      ).rejects.toThrow('unsupported attribute(s): uses.bogus');
     }
 
     const invalidCases: [OpenUiElement, string][] = [
@@ -642,11 +676,11 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
             {
               id: 'row',
               type: 'ToolBarRow',
-              attrs: { '[bogus]': 'ignored' },
+              attrs: { 'uses.bogus': '"ignored"' },
             },
           ],
         },
-        'unsupported attribute(s): [bogus]',
+        'unsupported attribute(s): uses.bogus',
       ],
       [
         {
@@ -670,7 +704,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
             { id: 'row', type: 'ToolBarRow', children: [{ id: 'action', type: 'ToolAction' }] },
           ],
         },
-        'requires a non-empty [label]',
+        'requires a non-empty uses.label',
       ],
       [
         {
@@ -684,13 +718,13 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
                 {
                   id: 'action',
                   type: 'ToolAction',
-                  attrs: { '[label]': 'Action', '[disabled]': 'yes' },
+                  attrs: { 'uses.label': '"Action"', 'uses.disabled': 'yes' },
                 },
               ],
             },
           ],
         },
-        'attribute "[disabled]" must be "true" or "false"',
+        'attribute "uses.disabled" must be the JSON value true or false, not "yes"',
       ],
       [
         {
@@ -704,7 +738,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
                 {
                   id: 'action',
                   type: 'ToolAction',
-                  attrs: { '[label]': 'Action' },
+                  attrs: { 'uses.label': '"Action"' },
                   children: [{ id: 'nested', type: 'TextInputs' }],
                 },
               ],
@@ -725,13 +759,13 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
                 {
                   id: 'action',
                   type: 'ToolAction',
-                  attrs: { '[label]': 'Action', '(activate)': 'callAction()' },
+                  attrs: { 'uses.label': '"Action"', 'produces.activate': 'callAction()' },
                 },
               ],
             },
           ],
         },
-        '(activate) must be null when present',
+        'produces.activate must be null when present',
       ],
     ];
     for (const [invalidToolBarNode, message] of invalidCases) {

@@ -121,13 +121,15 @@ describe('form-field schematic', () => {
   it('TC-FORM-FIELD-05: rejects invalid options and prerequisites before creating output', () => {
     const tree = createApplicationTree();
     const invalidPath = formField({ name: 'email', path: '../outside' });
-    const invalidControl = formField({ name: 'email', controlType: 'date' as never });
     const missingDependencies = createApplicationTree();
     missingDependencies.overwrite('/package.json', JSON.stringify({ dependencies: {} }));
 
     expect(() => formField({ name: 'Email' })(tree)).toThrow('kebab-case');
     expect(() => invalidPath(tree)).toThrow('within the application source tree');
-    expect(() => invalidControl(tree)).toThrow('Unsupported form-field control type');
+    // The catalog declares the uses.type enum, so the validator reports an unsupported kind first.
+    expect(() => formField({ name: 'email', controlType: 'date' as never })).toThrow(
+      '/children/0/attrs/uses.type: contract/wrong-value-type',
+    );
     expect(() => formField({ name: 'email', unsupported: true } as never)).toThrow(
       'Unsupported form-field option',
     );
@@ -161,14 +163,14 @@ describe('form-field schematic: OpenUI control nodes', () => {
           id: 'contactEmail',
           type: 'TextInputs',
           attrs: {
-            '[name]': 'work_email',
-            '[type]': 'email',
-            '[label]': 'Work email',
-            '[appearance]': 'outline',
-            '[subscriptSizing]': 'dynamic',
+            'uses.name': '"work_email"',
+            'uses.type': '"email"',
+            'uses.label': '"Work email"',
+            'uses.appearance': '"outline"',
+            'uses.subscriptSizing': '"dynamic"',
           },
         },
-        { id: 'seats', type: 'RangeControl', attrs: { '[label]': 'Seats' } },
+        { id: 'seats', type: 'RangeControl', attrs: { 'uses.label': '"Seats"' } },
         { id: 'accepted', type: 'ChoiceControls' },
       ],
     },
@@ -200,7 +202,7 @@ describe('form-field schematic: OpenUI control nodes', () => {
       appearance: 'outline',
       subscriptSizing: 'dynamic',
     })(createApplicationTree()) as UnitTestTree;
-    // The name defaults to the dasherized [name] attribute, matching reactive-form composition.
+    // The name defaults to the dasherized uses.name attribute, matching reactive-form composition.
     const fromDocument = compile(createDocumentTree(), { nodeId: 'contactEmail' });
 
     expect(outputs(fromDocument, 'work-email')).toEqual(outputs(fromFlags, 'work-email'));
@@ -222,6 +224,52 @@ describe('form-field schematic: OpenUI control nodes', () => {
     ).toBe(true);
   });
 
+  it('TC-FORM-FIELD-OPENUI-04: compiles uses.multiline as a textarea identically to the legacy flag', () => {
+    const fromFlags = formField({ name: 'notes', controlType: 'textarea' })(
+      createApplicationTree(),
+    ) as UnitTestTree;
+    const fromDocument = compile(
+      createDocumentTree([{ id: 'notes', type: 'TextInputs', attrs: { 'uses.multiline': true } }]),
+      {},
+    );
+
+    expect(outputs(fromDocument, 'notes')).toEqual(outputs(fromFlags, 'notes'));
+  });
+
+  it('TC-FORM-FIELD-OPENUI-05: keeps the existing diagnostics for TextInputs types the schematics do not generate', () => {
+    // The catalog declares search, tel, and url, so the validator accepts them.
+    expect(() =>
+      compile(
+        createDocumentTree([
+          { id: 'query', type: 'TextInputs', attrs: { 'uses.type': '"search"' } },
+        ]),
+        {},
+      ),
+    ).toThrow('Unsupported form-field control type "search".');
+  });
+
+  it('TC-FORM-FIELD-OPENUI-06: rejects a textarea that also names another type, and unquoted or mistyped values', () => {
+    const cases: [Record<string, string | number | boolean>, string][] = [
+      [
+        { 'uses.multiline': true, 'uses.type': '"email"' },
+        'uses.multiline is true, which makes a textarea, but uses.type is "email".',
+      ],
+      [
+        { 'uses.type': 'email' },
+        'attribute "uses.type" has the unquoted value email, which is an expression, not text.',
+      ],
+      [
+        { 'uses.multiline': 'true' },
+        'attribute "uses.multiline" must be the JSON value true or false, not "true".',
+      ],
+    ];
+    for (const [attrs, message] of cases) {
+      expect(() =>
+        compile(createDocumentTree([{ id: 'notes', type: 'TextInputs', attrs }]), {}),
+      ).toThrow(message);
+    }
+  });
+
   it('TC-FORM-FIELD-OPENUI-03: rejects conflicting flags, unsupported nodes, and invalid attributes', () => {
     expect(() => compile(createDocumentTree(), { controlType: 'text' })).toThrow(
       '--document cannot be combined with --controlType;',
@@ -235,7 +283,7 @@ describe('form-field schematic: OpenUI control nodes', () => {
     expect(() =>
       compile(
         createDocumentTree([
-          { id: 'title', type: 'TextInputs', attrs: { '[appearance]': 'outlined' } },
+          { id: 'title', type: 'TextInputs', attrs: { 'uses.appearance': '"outlined"' } },
         ]),
         {},
       ),

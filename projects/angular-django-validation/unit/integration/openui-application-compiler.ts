@@ -15,7 +15,7 @@
  *    `reactive-form`, under `src/app/features`;
  * 4. embedding of nested children into their parent slots happens inside the
  *    page and component compilers (plan step 3.3);
- * 5. every element with a `[data]` binding -> `data-service`.
+ * 5. every element with a `uses.data` binding -> `data-service`.
  *
  * Run it with `SchematicTestRunner.callRule` on a runner registered for the
  * built `angular-django2` collection.
@@ -36,7 +36,7 @@ import { FORM_AST_TYPE } from 'angular-django2/schematics/reactive-form/ast';
 import {
   astNodeSubject,
   createAstNodeResolver,
-  readAstString,
+  readAstExpression,
 } from 'angular-django2/schematics/utility/ast-compiler';
 import { readOpenUiDocument } from 'angular-django2/schematics/utility/openui';
 
@@ -60,7 +60,7 @@ export interface CompilationPlan {
   pages: readonly OpenUiElement[];
   containers: readonly OpenUiElement[];
   forms: readonly OpenUiElement[];
-  /** Elements anywhere in the document with a `[data]` binding. */
+  /** Elements anywhere in the document with a `uses.data` binding. */
   dataBindings: readonly OpenUiElement[];
   /** Bound root elements whose own markup has no compiler yet. */
   dataOnly: readonly OpenUiElement[];
@@ -73,7 +73,7 @@ export function compileOpenUiApplication(documentPath: string): Rule {
     for (const node of plan.dataOnly) {
       context.logger.warn(
         `${astNodeSubject(documentPath, node)} (${node.type}) has no compiler yet; ` +
-          'only its [data] binding is compiled (data-service).',
+          'only its uses.data binding is compiled (data-service).',
       );
     }
 
@@ -131,7 +131,8 @@ export function planCompilation(document: OpenUiDocument, documentPath: string):
   }
 
   const dataBindings = [...createAstNodeResolver(document).walk()].filter(
-    (node) => readAstString(node, DATA_ATTRIBUTE) !== undefined,
+    (node) =>
+      readAstExpression(node, DATA_ATTRIBUTE, astNodeSubject(documentPath, node)) !== undefined,
   );
   const ofType = (...types: readonly string[]) => roots.filter((node) => types.includes(node.type));
   const dataOnly = roots.filter(

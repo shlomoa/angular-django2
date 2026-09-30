@@ -26,29 +26,35 @@ const FEATURES = '/projects/demo-app/src/app/features';
 const profileCard: OpenUiElement = {
   id: 'profileCard',
   type: 'SurfaceContainers',
-  attrs: { '[title]': 'Profile' },
+  attrs: { 'uses.title': '"Profile"' },
   children: [
     {
       id: 'signup',
       type: 'Form',
-      attrs: { '[title]': 'Sign up', '[action]': '/api/signup/' },
+      attrs: { 'uses.title': '"Sign up"', 'uses.action': '"/api/signup/"' },
       children: [
         {
           id: 'email',
           type: 'TextInputs',
-          attrs: { '[type]': 'email', '[label]': 'Email', '[required]': 'true' },
+          attrs: { 'uses.type': '"email"', 'uses.label': '"Email"', 'uses.required': true },
         },
-        { id: 'age', type: 'RangeControl', attrs: { '[label]': 'Age', '[min]': '18' } },
+        { id: 'age', type: 'RangeControl', attrs: { 'uses.label': '"Age"', 'uses.min': 18 } },
       ],
     },
-    { id: 'summary', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
-    { id: 'nickname', type: 'TextInputs', attrs: { '[label]': 'Nickname', '[slot]': 'actions' } },
-    { id: 'notes', type: 'SurfaceContainers', attrs: { '[slot]': 'content' } },
+    { id: 'summary', type: 'SurfaceContainers', attrs: { 'uses.slot': '"header"' } },
+    {
+      id: 'nickname',
+      type: 'TextInputs',
+      attrs: { 'uses.label': '"Nickname"', 'uses.slot': '"actions"' },
+    },
+    { id: 'notes', type: 'SurfaceContainers', attrs: { 'uses.slot': '"content"' } },
     {
       id: 'more',
       type: 'OverlayContainers',
-      attrs: { '[label]': 'More' },
-      children: [{ id: 'details', type: 'SurfaceContainers', attrs: { '[title]': 'Details' } }],
+      attrs: { 'uses.label': '"More"' },
+      children: [
+        { id: 'details', type: 'SurfaceContainers', attrs: { 'uses.title': '"Details"' } },
+      ],
     },
   ],
 };
@@ -57,16 +63,18 @@ const profileCard: OpenUiElement = {
 const settingsPanel: OpenUiElement = {
   id: 'settingsPanel',
   type: 'SurfaceContainers',
-  attrs: { '[title]': 'Settings' },
+  attrs: { 'uses.title': '"Settings"' },
   children: [
     { id: 'first', type: 'SurfaceContainers' },
-    { id: 'toolbar', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
+    { id: 'toolbar', type: 'SurfaceContainers', attrs: { 'uses.slot': '"header"' } },
     {
       id: 'second',
       type: 'SurfaceContainers',
-      children: [{ id: 'displayName', type: 'TextInputs', attrs: { '[label]': 'Display name' } }],
+      children: [
+        { id: 'displayName', type: 'TextInputs', attrs: { 'uses.label': '"Display name"' } },
+      ],
     },
-    { id: 'save', type: 'SurfaceContainers', attrs: { '[slot]': 'actions' } },
+    { id: 'save', type: 'SurfaceContainers', attrs: { 'uses.slot': '"actions"' } },
   ],
 };
 
@@ -180,16 +188,18 @@ describe('OpenUI composition (plan phase 3)', () => {
       const cases: [OpenUiElement, string][] = [
         [{ id: 'form', type: 'Form' }, 'contains no "SurfaceContainers" element'],
         [
-          { id: 'panel', type: 'SurfaceContainers', attrs: { '[color]': 'red' } },
-          'unsupported attribute(s): [color]',
+          { id: 'panel', type: 'SurfaceContainers', attrs: { 'uses.color': '"red"' } },
+          'unsupported attribute(s): uses.color',
         ],
         [
           {
             id: 'panel',
             type: 'SurfaceContainers',
-            children: [{ id: 'child', type: 'SurfaceContainers', attrs: { '[slot]': 'footer' } }],
+            children: [
+              { id: 'child', type: 'SurfaceContainers', attrs: { 'uses.slot': '"footer"' } },
+            ],
           },
-          '[slot]="footer" is not a supported slot',
+          'uses.slot="footer" is not a supported slot',
         ],
         [
           { id: 'panel', type: 'SurfaceContainers', children: [{ id: 'grid', type: 'Grid' }] },
@@ -334,20 +344,20 @@ describe('OpenUI composition (plan phase 3)', () => {
                 id: 'pop',
                 type: 'OverlayContainers',
                 children: [
-                  { id: 'inner', type: 'SurfaceContainers', attrs: { '[slot]': 'header' } },
+                  { id: 'inner', type: 'SurfaceContainers', attrs: { 'uses.slot': '"header"' } },
                 ],
               },
             ],
           },
-          'cannot choose a [slot]',
+          'cannot choose a uses.slot',
         ],
         [
           {
             id: 'card',
             type: 'SurfaceContainers',
-            children: [{ id: 'pop', type: 'OverlayContainers', attrs: { '[modal]': 'true' } }],
+            children: [{ id: 'pop', type: 'OverlayContainers', attrs: { 'uses.modal': true } }],
           },
-          'unsupported attribute(s): [modal]',
+          'unsupported attribute(s): uses.modal',
         ],
       ];
       for (const [node, message] of cases) {
@@ -409,10 +419,10 @@ describe('OpenUI composition (plan phase 3)', () => {
         id: 'field',
         type: 'TextInputs',
         attrs: {
-          '[slot]': 'actions',
-          '[label]': 'Name',
-          '[hint]': null,
-          '(change)': 'x',
+          'uses.slot': '"actions"',
+          'uses.label': '"Name"',
+          'uses.hint': null,
+          'produces.change': 'x',
           title: 'meta',
         },
       };
@@ -420,18 +430,38 @@ describe('OpenUI composition (plan phase 3)', () => {
       expect(readAstSlot(node, 'doc#field')).toBe('actions');
       expect(readAstSlot({ id: 'plain', type: 'SurfaceContainers' }, 'doc#plain')).toBe('content');
       expect(withoutCompositionAttributes(node).attrs).toEqual({
-        '[label]': 'Name',
-        '[hint]': null,
-        '(change)': 'x',
+        'uses.label': '"Name"',
+        'uses.hint': null,
+        'produces.change': 'x',
         title: 'meta',
       });
       expect(
-        withoutCompositionAttributes({ id: 'a', type: 'X', attrs: { '[slot]': 'header' } }),
+        withoutCompositionAttributes({ id: 'a', type: 'X', attrs: { 'uses.slot': '"header"' } }),
       ).toEqual({
         id: 'a',
         type: 'X',
       });
       expect(astInputBindings(node)).toEqual({ label: 'Name' });
+    });
+
+    it('TC-COMPOSE-12: binds booleans and numbers as their JSON text and rejects expressions and lists', () => {
+      const node: OpenUiElement = {
+        id: 'field',
+        type: 'TextInputs',
+        attrs: { 'uses.label': '"Name"', 'uses.required': true, 'uses.maxLength': 40 },
+      };
+
+      expect(astInputBindings(node)).toEqual({ label: 'Name', required: 'true', maxLength: '40' });
+      expect(() =>
+        astInputBindings({ id: 'field', type: 'TextInputs', attrs: { 'uses.label': 'Name' } }),
+      ).toThrow('attribute "uses.label" has the unquoted value Name, which is an expression');
+      expect(() =>
+        astInputBindings({
+          id: 'field',
+          type: 'TextInputs',
+          attrs: { 'uses.label': ['"a"', '"b"'] },
+        }),
+      ).toThrow('attribute "uses.label" is a list');
     });
 
     it('TC-COMPOSE-11: escapes text and bound string literals in generated templates', () => {

@@ -1,6 +1,6 @@
 # Mapping between `openui-spec` and `angular-django2`
 
-This document maps every `angular-django2` schematic and every OpenUI 0.3.1
+This document maps every `angular-django2` schematic and every OpenUI 0.11.0
 scope (`@shlomoa/openui-spec`, pinned in [`package.json`](../package.json)) to
 exactly one class. For the architecture and roadmap, see the
 [OpenUI Specification Implementation Plan](openui-spec-implementation-plan.md).
@@ -15,10 +15,18 @@ exactly one class. For the architecture and roadmap, see the
 | **Tooling only**               | Angular CLI or project tooling with no OpenUI counterpart.                                                           |
 | **Missing**                    | An OpenUI scope with no schematic, no coverage through another schematic, and no plan.                               |
 
-Scope paths are canonical OpenUI 0.3.1 `<category>/<id>` paths. Test IDs refer to
+Scope paths are canonical OpenUI 0.11.0 `<category>/<id>` paths. Test IDs refer to
 specs in `projects/angular-django-validation/unit/schematics/`. Some IDs are
 reused across spec files (for example `TC-APP-01…03` also exist in
 `schematics.material-app.spec.ts`), so every test reference names its spec file.
+
+Attribute notation (OpenUI 0.11.0, spec 4.5 and 4.6): keys are categorized,
+`uses.x` for inputs, `produces.x` for events and `behaves.x` for behaviors.
+A string literal is quoted inside the string (`"\"Users\""`); booleans and
+numbers are JSON values; an unquoted string is a binding or expression.
+Element references are quoted element ids. In the tables below, an attribute
+marked **†** is an `angular-django2` extension: the catalog does not declare it
+for that type (§1.3); every other attribute is declared by the catalog.
 
 Ownership boundary
 ([#27](https://github.com/shlomoa/angular-django2/issues/27)):
@@ -40,76 +48,114 @@ migration plan, which was removed from `main` in
 
 ### 1.1 Ingestion utilities
 
-| Utility                                                | Role                                                                                                                                                                           | Tests                                         |
-| :----------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------- |
-| `readOpenUiDocument()`, `validateOpenUiDocument()`     | `schematics/utility/openui.ts`: load a document and validate it with the canonical `openui-spec` validator (schema, known types, unique ids).                                  | `schematics.openui.spec.ts` `TC-OPENUI-01…04` |
-| `readAstNode()`, `resolveAstNode()`, attribute readers | `schematics/utility/ast-compiler.ts`: resolve `--nodeId` (or the first node of the expected type), reject unknown attributes, and read string, boolean, and number attributes. | `ast-compiler.spec.ts`                        |
+| Utility                                                | Role                                                                                                                                                                                                                 | Tests                                         |
+| :----------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------- |
+| `readOpenUiDocument()`, `validateOpenUiDocument()`     | `schematics/utility/openui.ts`: load a document and validate it with the canonical `openui-spec` validator (grammar, unique ids, known types, declared value types, references).                                     | `schematics.openui.spec.ts` `TC-OPENUI-01…04` |
+| `readAstNode()`, `resolveAstNode()`, attribute readers | `schematics/utility/ast-compiler.ts`: resolve `--nodeId` (or the first node of the expected type), reject unknown attributes, and read quoted string literals, expressions, JSON boolean and JSON number attributes. | `ast-compiler.spec.ts`                        |
 
-The canonical validator checks only that each `type` is a known catalog type.
-Attribute and child checks are done by each schematic, as listed below.
+The canonical validator checks the grammar (categorized keys, typed values),
+unique ids, that each `type` is a known catalog type, the value type of every
+declared attribute, and that references name an element of the right type. It
+accepts any categorized key a type does not declare without checking its value
+(an extension), and an unquoted string for any value type (it is an expression).
+Extension attributes, unsupported attributes, and child checks are done by each
+schematic, as listed below.
 
 ### 1.2 Schematics
 
-| Schematic           | OpenUI scope → node types                                                                                                                                                                                                                          | Supported subset                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Tests                                                                                           |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
-| `reactive-form`     | `views/form` → `Form`; children from `controls/textInputs` → `TextInputs`, `controls/rangeControl` → `RangeControl`, and at most one `controls/actionControls` → `ActionControls` submit                                                           | `Form`: `[title]`, `[action]`, `(submit)` (`<artifact>#<Symbol>.<method>`). `ActionControls`: `[label]`, no children. Controls: as `form-field`. Other child types are rejected. `--definition` is deprecated.                                                                                                                                                                                                                                                                                                                                                                                                  | `schematics.reactive-form.spec.ts` `TC-REACTIVE-FORM-OPENUI-01…06`, `-DEPRECATION`, `-TUTORIAL` |
-| `form-field`        | `controls/textInputs` → `TextInputs`; `controls/rangeControl` → `RangeControl`                                                                                                                                                                     | `[type]` (`text`, `email`, `password`, `textarea` on `TextInputs`; `number` on `RangeControl`), `[name]`, `[label]`, `[value]`, `[hint]`, `[placeholder]`, `[autocomplete]`, `[required]`, `[email]`, `[minLength]`, `[maxLength]`, `[min]`, `[max]`, `[pattern]`, `[appearance]`, `[subscriptSizing]`. Other control types are rejected.                                                                                                                                                                                                                                                                       | `schematics.form-field.spec.ts` `TC-FORM-FIELD-OPENUI-01…03`                                    |
-| `field-component`   | `controls/textInputs` → `TextInputs` only                                                                                                                                                                                                          | As `form-field`, with `[type]` limited to `text`, `email`, `password`, `textarea`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `schematics.field-component.spec.ts` `TC-FIELD-OPENUI-01`                                       |
-| `component`         | `containers/surfaceContainers` → `SurfaceContainers`; children `SurfaceContainers`, `Form`, `TextInputs`, `RangeControl`, each compiled to its own component and embedded                                                                          | `[title]`; children choose a section with `[slot]` (`header`, `content`, `actions`; default `content`). Other child types and slots are rejected.                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `schematics.composition.spec.ts` `TC-COMPOSE-01…04`, `TC-COMPOSE-09`                            |
-| `complex-component` | As `component`, plus at most one `containers/overlayContainers` → `OverlayContainers` child, compiled to a CDK overlay                                                                                                                             | Container as `component`. `OverlayContainers`: `[label]`; its children may not set `[slot]`. Only `--mode=create`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `schematics.composition.spec.ts` `TC-COMPOSE-05…08`                                             |
-| `page`              | `pages/dashboard` → `DashboardPage`; `pages/emptyPage` → `EmptyPage`. `DashboardPage` children are composed as in `component`.                                                                                                                     | `[title]` (card title), `[route]` (registered lazy route), `[access]` (`public`, `protected`), `[authGuard]`, `[icon]` (validated only). `EmptyPage` rejects children.                                                                                                                                                                                                                                                                                                                                                                                                                                          | `schematics.openui-app.spec.ts` `TC-APP-03…05`                                                  |
-| `application`       | `Application` with children from `application/routing` → `Routing`, `application/navigation` → `Navigation`, `application/toolBars` → `ToolBar`, `presentation` → `Presentation`, `application/indexHtml` → `html`, `application/favicon` → `link` | Name from the node id; routing when a `Routing` child exists. `ToolBar` content is validated as in `material-app`. No `Application` attributes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | `schematics.openui-app.spec.ts` `TC-APP-01`, `TC-APP-02`, `TC-APP-17`                           |
-| `material-app`      | As `application`, plus `application/route` → `Route`, `application/navItem` → `NavItem`, `application/navGroup` → `NavGroup`, `application/toolBarRow` → `ToolBarRow`, `application/toolAction` → `ToolAction`                                     | `Presentation`: `[theme]`, `[typography]`, `[animations]`. `html[title]`: toolbar title. Sidenav: `Navigation[ariaLabel]` → `NavItem` (`[label]`, `[route]`, `[icon]`, `[disabled]`) / `NavGroup` (`[label]`, `[expanded]`) → referenced `Route` (`[path]`, `[target]`, `[title]`, `[redirectTo]`, `[access]`), under `Routing[defaultRoute]`. References are quoted element ids. Toolbar: `ToolBar[ariaLabel]` → `ToolBarRow` → `ToolAction` (`[label]`, `[icon]`, `[disabled]`, `(activate)` as a `null` marker that generates an `on<ActionId>Activate($event)` stub), rendered as rows after the title row. | `schematics.openui-app.spec.ts` `TC-APP-06`, `TC-APP-07`, `TC-APP-13…17`                        |
-| `workspace-setup`   | `application/indexHtml` → first non-root `html`; `application/favicon` → first `link` with `[rel]`=`icon`. No `--nodeId`.                                                                                                                          | `html`: `[lang]`, `[dir]` (`ltr`, `rtl`, `auto`), `[title]`. `link`: `[rel]`, `[href]` (workspace icon file), `[type]`, `[sizes]`, `[media]`; only `[href]` is used.                                                                                                                                                                                                                                                                                                                                                                                                                                            | `schematics.openui-app.spec.ts` `TC-APP-08…10`                                                  |
-| `data-service`      | Any node carrying `[data]`                                                                                                                                                                                                                         | `[data]` = `<apiPath>#<ApiService>`. No other attribute is read or checked.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `schematics.openui-app.spec.ts` `TC-APP-11`, `TC-APP-12`                                        |
+| Schematic           | OpenUI scope → node types                                                                                                                                                                                                                          | Supported subset                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Tests                                                                                           |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| `reactive-form`     | `views/form` → `Form`; children from `controls/textInputs` → `TextInputs`, `controls/rangeControl` → `RangeControl`, and at most one `controls/actionControls` → `ActionControls` submit                                                           | `Form`: `uses.title`†, `uses.action`†, `behaves.submit` (an expression, `<artifact>#<Symbol>.<method>`). `ActionControls`: `uses.label`, no children. Controls: as `form-field`. Other child types are rejected. `--definition` is deprecated.                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | `schematics.reactive-form.spec.ts` `TC-REACTIVE-FORM-OPENUI-01…06`, `-DEPRECATION`, `-TUTORIAL` |
+| `form-field`        | `controls/textInputs` → `TextInputs`; `controls/rangeControl` → `RangeControl`                                                                                                                                                                     | `TextInputs`: `uses.type` (`text`, `email`, `password`), `uses.multiline` (`true` is a textarea), `uses.label`, `uses.value`, `uses.placeholder`, `uses.required`, `uses.maxLength` (integer), and the extensions `uses.name`†, `uses.hint`†, `uses.autocomplete`†, `uses.email`†, `uses.minLength`†, `uses.min`†, `uses.max`†, `uses.pattern`†, `uses.appearance`†, `uses.subscriptSizing`†. `RangeControl`: `uses.label`, `uses.value`, `uses.min`, `uses.max` (numbers), `uses.type`† (`number`), and the same extensions. Other control types, and the `TextInputs` types `search`, `tel` and `url`, are rejected.                                                                                                  | `schematics.form-field.spec.ts` `TC-FORM-FIELD-OPENUI-01…06`                                    |
+| `field-component`   | `controls/textInputs` → `TextInputs` only                                                                                                                                                                                                          | As `form-field` for `TextInputs`: `uses.type` limited to `text`, `email`, `password`, or `uses.multiline` `true` for a textarea.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `schematics.field-component.spec.ts` `TC-FIELD-OPENUI-01`                                       |
+| `component`         | `containers/surfaceContainers` → `SurfaceContainers`; children `SurfaceContainers`, `Form`, `TextInputs`, `RangeControl`, each compiled to its own component and embedded                                                                          | `uses.title`; children choose a section with `uses.slot`† (`header`, `content`, `actions`; default `content`). Other child types and slots are rejected.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | `schematics.composition.spec.ts` `TC-COMPOSE-01…04`, `TC-COMPOSE-09`                            |
+| `complex-component` | As `component`, plus at most one `containers/overlayContainers` → `OverlayContainers` child, compiled to a CDK overlay                                                                                                                             | Container as `component`. `OverlayContainers`: `uses.label`†; its children may not set `uses.slot`. Only `--mode=create`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `schematics.composition.spec.ts` `TC-COMPOSE-05…08`                                             |
+| `page`              | `pages/dashboard` → `DashboardPage`; `pages/emptyPage` → `EmptyPage`. `DashboardPage` children are composed as in `component`.                                                                                                                     | `uses.title`† (card title), `uses.route`† (registered lazy route), `uses.access`† (`public`, `protected`), `uses.authGuard`†, `uses.icon`† (validated only). `EmptyPage` rejects children.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `schematics.openui-app.spec.ts` `TC-APP-03…05`                                                  |
+| `application`       | `Application` with children from `application/routing` → `Routing`, `application/navigation` → `Navigation`, `application/toolBars` → `ToolBar`, `presentation` → `Presentation`, `application/indexHtml` → `html`, `application/favicon` → `link` | Name from the node id; routing when a `Routing` child exists. `ToolBar` content is validated as in `material-app`. No `Application` attributes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `schematics.openui-app.spec.ts` `TC-APP-01`, `TC-APP-02`, `TC-APP-17`                           |
+| `material-app`      | As `application`, plus `application/route` → `Route`, `application/navItem` → `NavItem`, `application/navGroup` → `NavGroup`, `application/toolBarRow` → `ToolBarRow`, `application/toolAction` → `ToolAction`                                     | `Presentation`: `uses.theme`†, `uses.typography`† and `uses.animations`† (JSON booleans). `html` `uses.title`: toolbar title. Sidenav: `Navigation` `uses.ariaLabel` → `NavItem` (`uses.label`, `uses.route`, `uses.icon`, `uses.disabled`) / `NavGroup` (`uses.label`, `uses.expanded`) → referenced `Route` (`uses.path`, `uses.target`, `uses.title`, `uses.redirectTo`, `uses.access`), under `Routing` `uses.defaultRoute`. References are quoted element ids. Toolbar: `ToolBar` `uses.ariaLabel` → `ToolBarRow` → `ToolAction` (`uses.label`, `uses.icon`, `uses.disabled`, `produces.activate` as a `null` marker that generates an `on<ActionId>Activate($event)` stub), rendered as rows after the title row. | `schematics.openui-app.spec.ts` `TC-APP-06`, `TC-APP-07`, `TC-APP-13…17`                        |
+| `workspace-setup`   | `application/indexHtml` → first non-root `html`; `application/favicon` → first `link` with `uses.rel` `"\"icon\""`. No `--nodeId`.                                                                                                                 | `html`: `uses.lang`, `uses.dir` (`ltr`, `rtl`, `auto`), `uses.title`. `link`: `uses.rel`, `uses.href` (workspace icon file), `uses.type`, `uses.sizes`, `uses.media`; only `uses.href` is used.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `schematics.openui-app.spec.ts` `TC-APP-08…10`                                                  |
+| `data-service`      | Any node carrying `uses.data`†                                                                                                                                                                                                                     | `uses.data`† = `<apiPath>#<ApiService>`, an expression (unquoted). No other attribute is read or checked.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `schematics.openui-app.spec.ts` `TC-APP-11`, `TC-APP-12`                                        |
 
 With `--document`, the schematics above reject command-line options that the
 document describes (for example `--routing`, `--theme`, `--controlType`,
 `--apiService`); see each schematic's CLI documentation. Where `--nodeId`
 exists, it requires `--document`.
 
-### 1.3 Attributes outside the OpenUI 0.3.1 contract
+### 1.3 Attributes outside the OpenUI 0.11.0 contract
 
-The object types above are all OpenUI 0.3.1 catalog types, and the
-application-scope attributes (`Routing`, `Route`, `Navigation`, `NavItem`,
-`NavGroup`, `ToolBar`, `ToolAction`, `html`, `link`) are catalog attributes.
-The 0.3.1 catalog defines **no attributes** for `Form` (except `(submit)`),
-`ActionControls`, `TextInputs`, `RangeControl`, `SurfaceContainers`,
-`OverlayContainers`, `DashboardPage`, `EmptyPage`, or `Presentation`. The
-attributes these schematics read on them, plus `[slot]` and `[data]` and its
-value format, are **`angular-django2` extensions**, not OpenUI-defined
-attributes.
+The object types above are all OpenUI 0.11.0 catalog types. The catalog
+declares these attributes for the types the schematics compile:
+
+- `html`: `uses.lang`, `uses.dir`, `uses.title`. `link`: `uses.rel`, `uses.type`,
+  `uses.sizes`, `uses.media`, `uses.href`.
+- `Routing`: `uses.defaultRoute`. `Route`: `uses.path`, `uses.title`,
+  `uses.access`, `uses.target`, `uses.redirectTo`. `Navigation`, `ToolBar`:
+  `uses.ariaLabel`. `NavItem`: `uses.label`, `uses.icon`, `uses.route`,
+  `uses.disabled`. `NavGroup`: `uses.label`, `uses.expanded`. `ToolAction`:
+  `uses.label`, `uses.icon`, `uses.disabled`, `produces.activate`.
+- `SurfaceContainers`: `uses.title`, `uses.checkable`, `uses.checked`.
+  `OverlayContainers`: `uses.open`, `uses.anchor`, `uses.placement`,
+  `produces.close`.
+- `Form`: `behaves.validate`, `behaves.submit`, `produces.dirtyChange`.
+  `ActionControls`: `uses.label`, `uses.icon`, `uses.disabled`, `uses.pressed`,
+  `uses.autoRepeat`, `produces.activate`.
+- `TextInputs`: `uses.label`, `uses.value`, `uses.placeholder`, `uses.type`
+  (`text`, `password`, `search`, `email`, `tel`, `url`), `uses.multiline`,
+  `uses.readOnly`, `uses.required`, `uses.disabled`, `uses.maxLength`,
+  `produces.valueChange`. `RangeControl`: `uses.label`, `uses.value`, `uses.min`,
+  `uses.max`, `uses.step`, `uses.start`, `uses.end`, `uses.wrapping`,
+  `uses.disabled`, `uses.orientation`, `produces.valueChange`.
+
+The catalog declares **no attributes** for `DashboardPage`, `EmptyPage`, or
+`Presentation`. The attributes marked **†** above, which these schematics read
+on the types listed, are **`angular-django2` extensions**, not OpenUI-defined
+attributes: `Presentation` `uses.theme`, `uses.typography`, `uses.animations`;
+page `uses.title`, `uses.route`, `uses.icon`, `uses.access`, `uses.authGuard`;
+`SurfaceContainers` `uses.slot`, `uses.data`; `OverlayContainers` `uses.label`;
+`Form` `uses.title`, `uses.action`; `TextInputs` `uses.name`, `uses.hint`,
+`uses.autocomplete`, `uses.email`, `uses.minLength`, `uses.min`, `uses.max`,
+`uses.pattern`, `uses.appearance`, `uses.subscriptSizing`; `RangeControl`
+`uses.type` and the same control extensions. The validator takes such a key
+only if it is categorized (`uses.x`) and does not check its value, so the
+extensions are allowed by implication, not by an explicit spec rule.
+
+Declared but not compiled: the schematics reject `Form` `behaves.validate`,
+`produces.dirtyChange`, and the other declared attributes they do not list
+above as unsupported.
 
 ### 1.4 Known limitations
 
 These are current behavior, documented by maintainer decision:
 
-- `application --document` does not validate `Navigation` or `Routing` content;
-  only `material-app` does.
-- Accepted but unused: `Route[title]`, `Route[access]`, `Routing[defaultRoute]`
-  and `Route[redirectTo]` (checked only as references), `Navigation[ariaLabel]`
-  (not emitted on the sidenav), and `NavGroup[expanded]`. `NavGroup` entries are
-  flattened, and its `[label]` is not rendered. `page`'s `[icon]` is validated
-  but not used.
+- `application --document` does not validate `Navigation` or `Routing` content
+  beyond what the validator checks (its reference types); only `material-app`
+  does.
+- Accepted but unused: `Route` `uses.title` and `uses.access`, `Routing`
+  `uses.defaultRoute` and `Route` `uses.redirectTo` (checked only as references),
+  `Navigation` `uses.ariaLabel` (not emitted on the sidenav), and `NavGroup`
+  `uses.expanded`. `NavGroup` entries are flattened, and its `uses.label` is not
+  rendered. `page`'s `uses.icon` is validated but not used.
 - Nested `Route` paths are not composed: a link to a child route uses the
-  child's `[path]` alone, although OpenUI 0.3.1 defines it as relative to the
+  child's `uses.path` alone, although OpenUI defines it as relative to the
   parent route.
-- `Route[target]` is checked to exist, not to be a page or content element.
+- `Route` `uses.target` is typed only as a `reference`: the validator and the
+  schematic check that it names an element, not that it is a page or content
+  element.
 - Route paths have two unsynchronized sources: `page` registers
-  `DashboardPage[route]`, and `material-app` links to `Route[path]`. Nothing
+  `DashboardPage` `uses.route`, and `material-app` links to `Route` `uses.path`. Nothing
   checks that they match.
 
 ---
 
 ## 2. Conceptual / CLI by design
 
-| OpenUI scope                | `angular-django2`   | Relationship                                                                                                                                                                                                                                                                     |
-| :-------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pages/shellPage`           | `material-app`      | `material-app`'s layout (toolbar, sidenav, router outlet) is the shell page. It is built from the `Application` node and its children; no `ShellPage` node is read.                                                                                                              |
-| — (`presentation` tokens)   | `material-setup`    | CLI-driven by design. Its options are exactly the `Presentation` tokens, which `material-app --document` reads and passes on (§1.2).                                                                                                                                             |
-| —                           | `app-shell`         | CLI-driven by design: a pass-through to Angular's SSR / prerender app-shell schematic, with no OpenUI counterpart.                                                                                                                                                               |
-| — (`[slot]` composition)    | `embed-component`   | No OpenUI input (CLI `--slot`). Its logic is the composition engine that `component`, `complex-component`, and `page` use to embed compiled children by `[slot]`. `[slot]` is an `angular-django2` extension (§1.3). Tests: `schematics.composition.spec.ts` `TC-COMPOSE-09…11`. |
-| `widgets/dialog` (indirect) | `complex-component` | An `OverlayContainers` child gives a CDK overlay with projected content (§1.2). This is not a `widgets/dialog` implementation: no `Dialog` node is read and there is no `MatDialog` lifecycle. `widgets/dialog` itself is Planned (§3).                                          |
+| OpenUI scope                | `angular-django2`   | Relationship                                                                                                                                                                                                                                                                           |
+| :-------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pages/shellPage`           | `material-app`      | `material-app`'s layout (toolbar, sidenav, router outlet) is the shell page. It is built from the `Application` node and its children; no `ShellPage` node is read.                                                                                                                    |
+| — (`presentation` tokens)   | `material-setup`    | CLI-driven by design. Its options are exactly the `Presentation` tokens, which `material-app --document` reads and passes on (§1.2).                                                                                                                                                   |
+| —                           | `app-shell`         | CLI-driven by design: a pass-through to Angular's SSR / prerender app-shell schematic, with no OpenUI counterpart.                                                                                                                                                                     |
+| — (`uses.slot` composition) | `embed-component`   | No OpenUI input (CLI `--slot`). Its logic is the composition engine that `component`, `complex-component`, and `page` use to embed compiled children by `uses.slot`. `uses.slot` is an `angular-django2` extension (§1.3). Tests: `schematics.composition.spec.ts` `TC-COMPOSE-09…12`. |
+| `widgets/dialog` (indirect) | `complex-component` | An `OverlayContainers` child gives a CDK overlay with projected content (§1.2). This is not a `widgets/dialog` implementation: no `Dialog` node is read and there is no `MatDialog` lifecycle. `widgets/dialog` itself is Planned (§3).                                                |
 
 `pages/shellPage` is classified here. `presentation` is Direct through
 `material-app` (§1.2), and `widgets/dialog` is Planned (§3).
@@ -156,34 +202,34 @@ classified as Direct because it compiles `html` and `link` nodes (§1.2).
 
 ## 5. Missing
 
-OpenUI 0.3.1 scopes with no schematic, no coverage through another schematic,
+OpenUI 0.11.0 scopes with no schematic, no coverage through another schematic,
 and no plan:
 
-| OpenUI scope                                                            | Notes                                                                                                   |
-| :---------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
-| `views/report`                                                          | No report view. `data-service` generates data transport from a `[data]` binding only; it renders no UI. |
-| `widgets/list`                                                          |                                                                                                         |
-| `widgets/navigationWidgets`                                             | The `material-app` sidenav comes from `application/navigation` (§1.2), not from this scope.             |
-| `widgets/mediaWidgets`                                                  |                                                                                                         |
-| `containers/grid`                                                       |                                                                                                         |
-| `containers/structuralContainers`                                       | Composition uses `[slot]` sections inside `SurfaceContainers` (§2), not structural container nodes.     |
-| `containers/splitters`                                                  |                                                                                                         |
-| `controls/native`                                                       |                                                                                                         |
-| `controls/choiceControls`                                               | `form-field` rejects this node type.                                                                    |
-| `controls/pickerControl`                                                | `form-field` rejects this node type.                                                                    |
-| `controls/displayPrimitives`                                            |                                                                                                         |
-| `controls/statusIndicator`                                              |                                                                                                         |
-| `controls/drawingAndCapture`                                            |                                                                                                         |
-| `controls/linkAndScrollControls`                                        |                                                                                                         |
-| `behaviors/dragAndDrop`, `behaviors/resizable`, `behaviors/collapsible` |                                                                                                         |
-| `interaction`, `internationalization`, `layout`                         | Cross-cutting vocabularies with no one-to-one schematic.                                                |
+| OpenUI scope                                                                                                                                                        | Notes                                                                                                      |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------- |
+| `views/report`                                                                                                                                                      | No report view. `data-service` generates data transport from a `uses.data` binding only; it renders no UI. |
+| `widgets/list`                                                                                                                                                      |                                                                                                            |
+| `widgets/navigationWidgets`                                                                                                                                         | The `material-app` sidenav comes from `application/navigation` (§1.2), not from this scope.                |
+| `widgets/mediaWidgets`                                                                                                                                              |                                                                                                            |
+| `containers/grid`                                                                                                                                                   |                                                                                                            |
+| `containers/structuralContainers`                                                                                                                                   | Composition uses `uses.slot` sections inside `SurfaceContainers` (§2), not structural container nodes.     |
+| `containers/splitters`                                                                                                                                              |                                                                                                            |
+| `controls/native`                                                                                                                                                   |                                                                                                            |
+| `controls/choiceControls`                                                                                                                                           | `form-field` rejects this node type.                                                                       |
+| `controls/pickerControl`                                                                                                                                            | `form-field` rejects this node type.                                                                       |
+| `controls/displayPrimitives`                                                                                                                                        |                                                                                                            |
+| `controls/statusIndicator`                                                                                                                                          |                                                                                                            |
+| `controls/drawingAndCapture`                                                                                                                                        |                                                                                                            |
+| `controls/linkAndScrollControls`                                                                                                                                    |                                                                                                            |
+| `behaviors/dragAndDrop`, `behaviors/resizable`, `behaviors/collapsible`, `behaviors/inputAssistance`, `behaviors/modalOverlay`, `behaviors/viewportAndFocusControl` |                                                                                                            |
+| `interaction`, `internationalization`, `layout`                                                                                                                     | Cross-cutting vocabularies with no one-to-one schematic.                                                   |
 
 `controls/actionControls` is Direct only as the `reactive-form` submit action
 (§1.2); no schematic generates standalone action controls.
 
 ---
 
-## 6. Naming conventions in OpenUI 0.3.1
+## 6. Naming conventions in OpenUI 0.11.0
 
 Scope ids are camelCase. Their number tells whether a scope is a discrete
 concept or a family:
@@ -199,7 +245,8 @@ concept or a family:
   `choiceControls`, `drawingAndCapture`, `displayPrimitives`,
   `linkAndScrollControls`, `toolBars`.
 
-Obsolete names from earlier versions of this document and their 0.3.1 names:
+Obsolete names from earlier versions of this document and their 0.11.0 names
+(unchanged since 0.3.1):
 `charts` → `chart`, `lists` → `list`, `tables` → `table`, `data_grid` →
 `dataGrid`, `forms` → `form`, `reports` → `report`, `pickerControls` →
 `pickerControl`, `rangeControls` → `rangeControl`, `statusIndicators` →
@@ -222,7 +269,7 @@ Other rules:
   OpenUI catalog has no `accordion`; the scope is
   `containers/expandablePanels`.
 - `table` is a single concept under `widgets/`; the former `Controls/Table/`
-  scope was retired. Its normative attributes are `(sort)`, `(filter)`, and
-  `(paginate)`, with `tr` row children. The 0.3.1 worked example follows this
+  scope was retired. Its normative attributes are `behaves.sort`,
+  `behaves.filter`, and `behaves.paginate`, with `tr` row children. The 0.3.1 worked example follows this
   contract; the 0.3.0 example did not
   ([openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154)).

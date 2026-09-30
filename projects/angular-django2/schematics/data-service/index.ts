@@ -9,7 +9,7 @@ import {
   requireWorkspaceProject,
   resolveApplicationProjectName,
 } from '../utility/workspace';
-import { dataBindingFromAst } from './ast';
+import { DATA_ATTRIBUTE, dataBindingFromAst } from './ast';
 import type { DataServiceSchema } from './schema';
 import type { DataServiceNames } from './templates';
 import { generateServiceContent, generateSpecContent } from './templates';
@@ -90,7 +90,7 @@ export function dataService(options: DataServiceSchema): Rule {
   if (conflicting.length > 0) {
     throw new SchematicsException(
       `--document cannot be combined with ${conflicting.map((option) => `--${option}`).join(', ')}; ` +
-        'set the [data] binding on the OpenUI node instead.',
+        `set ${DATA_ATTRIBUTE} on the OpenUI node instead.`,
     );
   }
 

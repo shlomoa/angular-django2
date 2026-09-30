@@ -1,4 +1,5 @@
 import { Tree } from '@angular-devkit/schematics';
+import { defaultCatalog } from '@shlomoa/openui-spec';
 import type { OpenUiDocument } from '@shlomoa/openui-spec';
 import { describe, expect, it } from 'vitest';
 
@@ -6,8 +7,11 @@ import {
   assertAstAttributes,
   createAstNodeResolver,
   readAstBoolean,
+  readAstExpression,
   readAstNode,
   readAstNumber,
+  readAstString,
+  syntheticExpression,
   createSyntheticAstDocument,
   createSyntheticAstNode,
   resolveAstNode,
@@ -26,7 +30,7 @@ const APP_DOCUMENT = {
     {
       id: 'dashboard',
       type: 'DashboardPage',
-      attrs: { title: 'Overview' },
+      attrs: { 'uses.title': '"Overview"' },
       children: [
         {
           id: 'profileCard',
@@ -35,8 +39,10 @@ const APP_DOCUMENT = {
             {
               id: 'profileForm',
               type: 'Form',
-              attrs: { '(submit)': 'save()' },
-              children: [{ id: 'nameInput', type: 'TextInputs', attrs: { label: 'Name' } }],
+              attrs: { 'behaves.submit': 'save()' },
+              children: [
+                { id: 'nameInput', type: 'TextInputs', attrs: { 'uses.label': '"Name"' } },
+              ],
             },
           ],
         },
@@ -73,7 +79,7 @@ describe('OpenUI AST compiler core', () => {
       expect(resolver.findById('nameInput')).toEqual({
         id: 'nameInput',
         type: 'TextInputs',
-        attrs: { label: 'Name' },
+        attrs: { 'uses.label': '"Name"' },
       });
       expect(resolver.findById('root')?.type).toBe('html');
       expect(resolver.findById('missing')).toBeUndefined();
@@ -120,18 +126,25 @@ describe('OpenUI AST compiler core', () => {
         id: 'email-address',
         type: 'TextInputs',
         attrs: {
-          label: 'Email',
-          required: true,
-          maxLength: 120,
-          hint: null,
-          appearance: undefined,
+          'uses.label': 'Email',
+          'uses.required': true,
+          'uses.maxLength': 120,
+          'uses.hint': null,
+          'uses.appearance': undefined,
+          'behaves.submit': syntheticExpression('save()'),
         },
       });
 
       expect(input).toEqual({
         id: 'emailAddress',
         type: 'TextInputs',
-        attrs: { label: 'Email', required: 'true', maxLength: '120', hint: null },
+        attrs: {
+          'uses.label': '"Email"',
+          'uses.required': true,
+          'uses.maxLength': 120,
+          'uses.hint': null,
+          'behaves.submit': 'save()',
+        },
       });
     });
 
@@ -166,7 +179,7 @@ describe('OpenUI AST compiler core', () => {
 
     it('TC-AST-10: rejects synthetic nodes outside the canonical catalog', () => {
       expect(() => createSyntheticAstNode({ id: 'report', type: 'report' })).toThrow(
-        'Synthetic OpenUI node "report" is invalid:\nunknown OpenUI object type: report',
+        'Synthetic OpenUI node "report" is invalid:\n/children/0/type: catalog/unknown-type',
       );
     });
 
@@ -200,27 +213,90 @@ describe('OpenUI AST compiler core', () => {
       );
     });
 
-    it('TC-AST-14: reads typed attributes and rejects unsupported or malformed ones', () => {
+    it('TC-AST-14: reads JSON numbers and booleans and rejects other values', () => {
       const node = {
         id: 'age',
         type: 'RangeControl',
-        attrs: { '[min]': '0', '[max]': 'many', '[required]': 'true', '[hint]': null },
+        attrs: { 'uses.min': 0, 'uses.max': 'many', 'uses.required': true, 'uses.hint': null },
       };
 
-      expect(readAstNumber(node, '[min]', 'doc#age')).toBe(0);
-      expect(readAstNumber(node, '[step]', 'doc#age')).toBeUndefined();
-      expect(() => readAstNumber(node, '[max]', 'doc#age')).toThrow(
-        'OpenUI node "doc#age": attribute "[max]" must be a finite number, not "many".',
+      expect(readAstNumber(node, 'uses.min', 'doc#age')).toBe(0);
+      expect(readAstNumber(node, 'uses.step', 'doc#age')).toBeUndefined();
+      expect(() => readAstNumber(node, 'uses.max', 'doc#age')).toThrow(
+        'OpenUI node "doc#age": attribute "uses.max" must be a finite JSON number, not "many".',
       );
-      expect(readAstBoolean(node, '[required]', 'doc#age')).toBe(true);
-      expect(readAstBoolean(node, '[hint]', 'doc#age')).toBeUndefined();
+      expect(readAstBoolean(node, 'uses.required', 'doc#age')).toBe(true);
+      expect(readAstBoolean(node, 'uses.hint', 'doc#age')).toBeUndefined();
       expect(() =>
-        readAstBoolean({ ...node, attrs: { '[required]': 'yes' } }, '[required]', 'doc#age'),
-      ).toThrow('attribute "[required]" must be "true" or "false", not "yes".');
-      expect(() => assertAstAttributes(node, ['[min]', '[max]'], 'doc#age')).toThrow(
-        'OpenUI node "doc#age" has unsupported attribute(s): [required], [hint]. ' +
-          'Supported attributes for "RangeControl": [min], [max].',
+        readAstBoolean({ ...node, attrs: { 'uses.required': 'yes' } }, 'uses.required', 'doc#age'),
+      ).toThrow(
+        'OpenUI node "doc#age": attribute "uses.required" must be the JSON value true or false, not "yes".',
       );
+      expect(() => assertAstAttributes(node, ['uses.min', 'uses.max'], 'doc#age')).toThrow(
+        'OpenUI node "doc#age" has unsupported attribute(s): uses.required, uses.hint. ' +
+          'Supported attributes for "RangeControl": uses.min, uses.max.',
+      );
+    });
+
+    it('TC-AST-15: reads a quoted literal and rejects an unquoted string as an expression', () => {
+      const node = {
+        id: 'name',
+        type: 'TextInputs',
+        attrs: {
+          'uses.label': '"Users \\"all\\""',
+          'uses.value': '""',
+          'uses.hint': null,
+          'uses.placeholder': 'Name',
+          'uses.maxLength': 5,
+        },
+      };
+
+      expect(readAstString(node, 'uses.label', 'doc#name')).toBe('Users "all"');
+      expect(readAstString(node, 'uses.value', 'doc#name')).toBe('');
+      expect(readAstString(node, 'uses.hint', 'doc#name')).toBeUndefined();
+      expect(readAstString(node, 'uses.missing', 'doc#name')).toBeUndefined();
+      expect(() => readAstString(node, 'uses.placeholder', 'doc#name')).toThrow(
+        'OpenUI node "doc#name": attribute "uses.placeholder" has the unquoted value Name, ' +
+          'which is an expression, not text. Quote the literal inside the string: "\\"Name\\"".',
+      );
+      expect(() => readAstString(node, 'uses.maxLength', 'doc#name')).toThrow(
+        'attribute "uses.maxLength" must be a quoted string literal, not 5.',
+      );
+    });
+
+    it('TC-AST-16: reads an unquoted expression and rejects a quoted literal', () => {
+      const node = {
+        id: 'save',
+        type: 'Form',
+        attrs: { 'behaves.submit': 'features/contact#ContactService.create', 'uses.title': '"T"' },
+      };
+
+      expect(readAstExpression(node, 'behaves.submit', 'doc#save')).toBe(
+        'features/contact#ContactService.create',
+      );
+      expect(readAstExpression(node, 'behaves.validate', 'doc#save')).toBeUndefined();
+      expect(() => readAstExpression(node, 'uses.title', 'doc#save')).toThrow(
+        'OpenUI node "doc#save": attribute "uses.title" must be an unquoted expression string, not "\\"T\\"".',
+      );
+    });
+
+    it('TC-AST-17: rejects the strings "true" and "5" where a JSON boolean or number is required', () => {
+      const node = {
+        id: 'field',
+        type: 'TextInputs',
+        attrs: { 'uses.required': 'true', 'uses.maxLength': '5' },
+      };
+
+      expect(() => readAstBoolean(node, 'uses.required', 'doc#field')).toThrow(
+        'attribute "uses.required" must be the JSON value true or false, not "true".',
+      );
+      expect(() => readAstNumber(node, 'uses.maxLength', 'doc#field')).toThrow(
+        'attribute "uses.maxLength" must be a finite JSON number, not "5".',
+      );
+    });
+
+    it('TC-AST-18: stamps synthetic documents with the installed openui-spec version', () => {
+      expect(SYNTHETIC_OPENUI_VERSION).toBe(defaultCatalog().version);
     });
   });
 });

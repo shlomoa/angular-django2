@@ -4,16 +4,22 @@
  *
  * OpenUI control types are coarse (`TextInputs` covers text, email,
  * password, and textarea), so the concrete native kind is carried by the
- * catalog-style `[type]` input attribute, the same way the catalog's native
- * `input` element does. Every other control setting is a bracketed input
- * attribute as well; attribute values are strings.
+ * `uses.type` attribute, the same way the catalog's native `input` element does;
+ * a textarea is `uses.multiline` `true`, because the catalog's `uses.type` enum has
+ * no `textarea`. Every other control setting is a `uses.` attribute as well: text
+ * is a quoted literal, booleans and numbers are JSON values.
  *
  * @internal
  */
 import { SchematicsException } from '@angular-devkit/schematics';
 import type { OpenUiElement } from '@shlomoa/openui-spec';
 
-import { assertAstAttributes, readAstString } from '../utility/ast-compiler';
+import {
+  assertAstAttributes,
+  readAstBoolean,
+  readAstString,
+  type SyntheticAttributeValue,
+} from '../utility/ast-compiler';
 import type { FormFieldControlType } from './schema';
 
 /** OpenUI catalog type used for each native control kind. */
@@ -28,41 +34,42 @@ export const CONTROL_AST_TYPES = {
 /** OpenUI catalog types that compile to a native Material control. */
 export const CONTROL_AST_NODE_TYPES = ['TextInputs', 'RangeControl'] as const;
 
-/** Default `[type]` for each control node type when the attribute is omitted. */
+/** Default `uses.type` for each control node type when the attribute is omitted. */
 const DEFAULT_CONTROL_TYPES: Record<(typeof CONTROL_AST_NODE_TYPES)[number], string> = {
   TextInputs: 'text',
   RangeControl: 'number',
 };
 
-/** Catalog-style attribute keys understood on control nodes. */
+/** Attribute keys understood on control nodes (the catalog does not declare every one; see `docs/ngdj-openui-spec-mapping.md`). */
 export const CONTROL_ATTRIBUTES = {
-  type: '[type]',
-  name: '[name]',
-  label: '[label]',
-  value: '[value]',
-  hint: '[hint]',
-  placeholder: '[placeholder]',
-  autocomplete: '[autocomplete]',
-  required: '[required]',
-  email: '[email]',
-  minLength: '[minLength]',
-  maxLength: '[maxLength]',
-  min: '[min]',
-  max: '[max]',
-  pattern: '[pattern]',
-  appearance: '[appearance]',
-  subscriptSizing: '[subscriptSizing]',
+  type: 'uses.type',
+  multiline: 'uses.multiline',
+  name: 'uses.name',
+  label: 'uses.label',
+  value: 'uses.value',
+  hint: 'uses.hint',
+  placeholder: 'uses.placeholder',
+  autocomplete: 'uses.autocomplete',
+  required: 'uses.required',
+  email: 'uses.email',
+  minLength: 'uses.minLength',
+  maxLength: 'uses.maxLength',
+  min: 'uses.min',
+  max: 'uses.max',
+  pattern: 'uses.pattern',
+  appearance: 'uses.appearance',
+  subscriptSizing: 'uses.subscriptSizing',
 } as const;
 
 const CONTROL_ATTRIBUTE_KEYS = Object.values(CONTROL_ATTRIBUTES);
 
 /**
  * Validate a control node's type and attribute keys and return its native
- * control kind (`[type]`, defaulting per node type).
+ * control kind (`uses.type` or `uses.multiline`, defaulting per node type).
  *
  * The kind is returned unchecked against the supported enum so each caller
  * keeps reporting unsupported kinds with its own existing diagnostic; only a
- * kind that contradicts the node type (for example `[type]="number"` on
+ * kind that contradicts the node type (for example `uses.type` `"number"` on
  * `TextInputs`) is rejected here.
  *
  * @throws SchematicsException for unsupported node types, attributes, or a contradictory kind.
@@ -77,8 +84,15 @@ export function controlTypeFromAst(node: OpenUiElement, subject: string): string
   assertAstAttributes(node, CONTROL_ATTRIBUTE_KEYS, subject);
 
   const nodeType = node.type as (typeof CONTROL_AST_NODE_TYPES)[number];
-  const controlType =
-    readAstString(node, CONTROL_ATTRIBUTES.type) ?? DEFAULT_CONTROL_TYPES[nodeType];
+  const declaredType = readAstString(node, CONTROL_ATTRIBUTES.type, subject);
+  const multiline = readAstBoolean(node, CONTROL_ATTRIBUTES.multiline, subject) === true;
+  if (multiline && declaredType !== undefined && declaredType !== 'text') {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": ${CONTROL_ATTRIBUTES.multiline} is true, which makes a textarea, ` +
+        `but ${CONTROL_ATTRIBUTES.type} is "${declaredType}". Remove ${CONTROL_ATTRIBUTES.type} or use "text".`,
+    );
+  }
+  const controlType = multiline ? 'textarea' : (declaredType ?? DEFAULT_CONTROL_TYPES[nodeType]);
   const expectedNodeType = CONTROL_AST_TYPES[controlType as FormFieldControlType];
   if (expectedNodeType !== undefined && expectedNodeType !== nodeType) {
     throw new SchematicsException(
@@ -90,12 +104,25 @@ export function controlTypeFromAst(node: OpenUiElement, subject: string): string
   return controlType;
 }
 
+/**
+ * Attributes that carry a legacy control kind: `uses.type` for a native input
+ * kind, `uses.multiline` for a textarea (the catalog declares no `textarea`
+ * type). An undefined kind contributes nothing.
+ */
+export function controlTypeAttributes(
+  controlType: string | undefined,
+): Record<string, SyntheticAttributeValue> {
+  return controlType === 'textarea'
+    ? { [CONTROL_ATTRIBUTES.multiline]: true }
+    : { [CONTROL_ATTRIBUTES.type]: controlType };
+}
+
 /** OpenUI catalog type for a legacy control kind; unknown kinds fall back to `TextInputs`. */
 export function controlAstType(controlType: string): string {
   return CONTROL_AST_TYPES[controlType as FormFieldControlType] ?? CONTROL_AST_TYPES.text;
 }
 
-/** Payload / component base name of a control node: `[name]`, defaulting to its id. */
+/** Payload / component base name of a control node: `uses.name`, defaulting to its id. */
 export function controlName(node: OpenUiElement): string {
-  return readAstString(node, CONTROL_ATTRIBUTES.name) ?? node.id;
+  return readAstString(node, CONTROL_ATTRIBUTES.name, node.id) ?? node.id;
 }

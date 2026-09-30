@@ -27,7 +27,7 @@ export interface FormFieldSchema {
   /**
    * Kebab-case base name for the generated component. Required unless
    * `document` is given, in which case it defaults to the node's dasherized
-   * `[name]` attribute or id.
+   * `uses.name` attribute or id.
    */
   name?: string;
 

@@ -1,7 +1,7 @@
 import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { SchematicsException } from '@angular-devkit/schematics';
 import { compileFormFieldFromAst, generateFormField } from '../form-field/generate';
-import { CONTROL_AST_TYPES } from '../form-field/ast';
+import { CONTROL_ATTRIBUTES, CONTROL_AST_TYPES } from '../form-field/ast';
 import { astNodeSubject, readAstNode } from '../utility/ast-compiler';
 import type { FieldComponentSchema, FieldControlKind } from './schema';
 
@@ -44,7 +44,7 @@ export function fieldComponent(options: FieldComponentSchema): Rule {
 function compileFromDocument(options: FieldComponentSchema, documentPath: string): Rule {
   if (options.kind !== undefined) {
     throw new SchematicsException(
-      '--document cannot be combined with --kind; set [type] on the OpenUI TextInputs node instead.',
+      `--document cannot be combined with --kind; set ${CONTROL_ATTRIBUTES.type} (or ${CONTROL_ATTRIBUTES.multiline} for a textarea) on the OpenUI TextInputs node instead.`,
     );
   }
 

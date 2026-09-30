@@ -50,11 +50,11 @@ ng generate angular-django2:complex-component --document=src/app/app.openui.json
 The node becomes a Material card whose header, content, and actions each keep a
 consumer projection slot and host the embedded document children:
 
-- `[title]` becomes `<mat-card-title>`.
-- Children are placed by `[slot]` (`header`, `content`, or `actions`; default
+- `uses.title` becomes `<mat-card-title>`.
+- Children are placed by `uses.slot` (`header`, `content`, or `actions`; default
   `content`) and compiled as described for [`component`](component.md#openui-surface-containers).
   A `Form` child with `TextInputs` children produces Card → Form → Controls.
 - One optional `OverlayContainers` child adds the CDK connected overlay: its
-  `[label]` is the toggle button text (default `Toggle details`) and its
+  `uses.label` is the toggle button text (default `Toggle details`) and its
   children are embedded inside the overlay card. Overlay children cannot set
-  `[slot]`.
+  `uses.slot`.

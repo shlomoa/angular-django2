@@ -21,7 +21,13 @@ import {
   type FormFieldPrimitiveBinding,
   type FormFieldSubscriptSizing,
 } from './schema';
-import { CONTROL_ATTRIBUTES, controlAstType, controlName, controlTypeFromAst } from './ast';
+import {
+  CONTROL_ATTRIBUTES,
+  controlAstType,
+  controlName,
+  controlTypeAttributes,
+  controlTypeFromAst,
+} from './ast';
 import { formFieldComponentSource, formFieldTemplate } from './templates';
 
 const DEFAULT_PATH = 'src/app/shared/form-helpers';
@@ -78,7 +84,7 @@ export function formFieldPrimitiveDescriptor(
 
 /** @internal Options that stay on the CLI when a control is compiled from an OpenUI node. */
 export interface FormFieldAstOptions {
-  /** Kebab-case base name; defaults to the dasherized node `[name]` or id. */
+  /** Kebab-case base name; defaults to the dasherized node `uses.name` or id. */
   name?: string;
   path?: string;
   project?: string;
@@ -94,7 +100,7 @@ export function generateFormField(options: CanonicalFormFieldOptions): Rule {
     id: options.name,
     type: controlAstType(options.controlType ?? 'text'),
     attrs: {
-      [CONTROL_ATTRIBUTES.type]: options.controlType,
+      ...controlTypeAttributes(options.controlType),
       [CONTROL_ATTRIBUTES.appearance]: options.appearance,
       [CONTROL_ATTRIBUTES.subscriptSizing]: options.subscriptSizing,
     },
@@ -124,10 +130,11 @@ export function compileFormFieldFromAst(
     path: options.path,
     project: options.project,
     controlType,
-    appearance: readAstString(node, CONTROL_ATTRIBUTES.appearance) as FormFieldAppearance,
+    appearance: readAstString(node, CONTROL_ATTRIBUTES.appearance, subject) as FormFieldAppearance,
     subscriptSizing: readAstString(
       node,
       CONTROL_ATTRIBUTES.subscriptSizing,
+      subject,
     ) as FormFieldSubscriptSizing,
   };
 

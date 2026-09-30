@@ -42,16 +42,16 @@ node (the first, or the one named by `--node-id`); `--theme`, `--typography`,
 ng generate angular-django2:material-app --document=app.openui.json
 ```
 
-- `--name` defaults to the dasherized `Application` id; `html[title]` sets the
+- `--name` defaults to the dasherized `Application` id; `html` `uses.title` sets the
   existing toolbar title.
 - Routing is enabled when the `Application` has a `Routing` child.
-- A `Presentation` child sets `[theme]` (a `--theme` value) and `[typography]`
-  / `[animations]` (`"true"` or `"false"`).
+- A `Presentation` child sets `uses.theme` (a `--theme` value) and
+  `uses.typography` / `uses.animations` (JSON `true` or `false`).
 - Every `DashboardPage` in the document adds a sidenav link after Home, using
-  the page's `[route]`, `[title]`, and `[icon]` (see [`page`](page.md#openui-page-nodes)).
+  the page's `uses.route`, `uses.title`, and `uses.icon` (see [`page`](page.md#openui-page-nodes)).
   `EmptyPage` nodes have no navigation. Navigation links require a `Routing`
   child.
-- An optional `ToolBar[ariaLabel]` adds its ordered `ToolBarRow` command rows
-  after the title row. Each `ToolAction` renders its required `[label]`, optional
-  `[icon]`, and `[disabled]` state; `(activate): null` generates a matching
+- An optional `ToolBar` `uses.ariaLabel` adds its ordered `ToolBarRow` command rows
+  after the title row. Each `ToolAction` renders its required `uses.label`, optional
+  `uses.icon`, and `uses.disabled` state; `produces.activate: null` generates a matching
   `on<ActionId>Activate($event)` handler stub for the application to implement.

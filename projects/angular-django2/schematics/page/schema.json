@@ -55,7 +55,7 @@
     "document": {
       "type": "string",
       "format": "path",
-      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a DashboardPage or EmptyPage node: [title], [route], [icon], [access], and [authGuard] come from the node, and DashboardPage children are compiled and embedded into the page."
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a DashboardPage or EmptyPage node: uses.title, uses.route, uses.icon, uses.access, and uses.authGuard come from the node, and DashboardPage children are compiled and embedded into the page."
     },
     "nodeId": {
       "type": "string",
