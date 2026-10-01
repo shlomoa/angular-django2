@@ -62,8 +62,9 @@ Current status: **partially met**.
 - **Other attributes**: not met. The 0.11.0 catalog does not declare the
   following attributes for these instance types, so the attributes the
   schematics read on them are repository-local extensions. The validator
-  accepts them because the key is categorized (`uses.x`) and does not check
-  their values; the spec allows this only by implication:
+  accepts such a key, categorized (`uses.x`) or plain (`x`, spec 4.5), and does
+  not check its value; the spec allows this only by implication. The
+  schematics accept only the categorized keys they list:
   - `Form` `uses.title` and `uses.action` (`behaves.submit` is a catalog
     attribute);
   - the control attributes on `TextInputs` (`uses.name`, `uses.hint`,
