@@ -5,9 +5,9 @@
  * OpenUI control types are coarse (`TextInputs` covers text, email,
  * password, and textarea), so the concrete native kind is carried by the
  * `uses.type` attribute, the same way the catalog's native `input` element does;
- * a textarea is `uses.multiline` `true`, because the catalog's `uses.type` enum has
+ * a textarea is `uses.multiline` `"true"`, because the catalog's `uses.type` enum has
  * no `textarea`. Every other control setting is a `uses.` attribute as well: text
- * is a quoted literal, booleans and numbers are JSON values.
+ * is a quoted literal, booleans and numbers are unquoted strings (`"true"`, `"25"`).
  *
  * @internal
  */
@@ -18,6 +18,7 @@ import {
   assertAstAttributes,
   readAstBoolean,
   readAstString,
+  syntheticTypedValue,
   type SyntheticAttributeValue,
 } from '../utility/ast-compiler';
 import type { FormFieldControlType } from './schema';
@@ -113,7 +114,7 @@ export function controlTypeAttributes(
   controlType: string | undefined,
 ): Record<string, SyntheticAttributeValue> {
   return controlType === 'textarea'
-    ? { [CONTROL_ATTRIBUTES.multiline]: true }
+    ? { [CONTROL_ATTRIBUTES.multiline]: syntheticTypedValue(true) }
     : { [CONTROL_ATTRIBUTES.type]: controlType };
 }
 

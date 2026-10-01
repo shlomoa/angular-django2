@@ -641,7 +641,7 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
         attrs: {
           'uses.name': '"first_name"',
           'uses.label': '"First name"',
-          'uses.required': true,
+          'uses.required': 'true',
           'uses.hint': '"Given name on the record"',
           'uses.autocomplete': '"given-name"',
         },
@@ -649,13 +649,13 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
       {
         id: 'email',
         type: 'TextInputs',
-        attrs: { 'uses.type': '"email"', 'uses.label': '"Email"', 'uses.required': true },
+        attrs: { 'uses.type': '"email"', 'uses.label': '"Email"', 'uses.required': 'true' },
       },
       { id: 'seats', type: 'RangeControl', attrs: { 'uses.label': '"Seats"' } },
       {
         id: 'notes',
         type: 'TextInputs',
-        attrs: { 'uses.multiline': true, 'uses.label': '"Notes"' },
+        attrs: { 'uses.multiline': 'true', 'uses.label': '"Notes"' },
       },
       { id: 'contactSubmit', type: 'ActionControls', attrs: { 'uses.label': '"Create contact"' } },
     ],
@@ -815,9 +815,9 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
       'profileSubmitAction',
     ]);
     expect(form.children?.[0].attrs).toMatchObject({
-      'uses.required': true,
-      'uses.email': true,
-      'uses.minLength': 3,
+      'uses.required': 'true',
+      'uses.email': 'true',
+      'uses.minLength': '3',
     });
 
     const decoded = reactiveFormDefinitionFromAst(form, 'profile.json');
@@ -881,7 +881,7 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
           },
         ],
       },
-      'OpenUI node "documents/app.openui.json#contactForm/seats": attribute "uses.min" must be a finite JSON number, not "x".',
+      'OpenUI node "documents/app.openui.json#contactForm/seats": attribute "uses.min" must be an unquoted string that is a finite JSON number, not the expression "x", which cannot be evaluated at generation time.',
     ],
     [
       'a control kind that contradicts its node type',

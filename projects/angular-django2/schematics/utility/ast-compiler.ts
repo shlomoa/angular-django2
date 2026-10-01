@@ -272,50 +272,99 @@ export function readAstExpression(
   return attribute.value;
 }
 
+/** JSON number grammar (RFC 8259): the only text `readAstNumber` accepts. */
+const JSON_NUMBER_PATTERN = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$/;
+
 /**
- * Read a boolean attribute written as the JSON value `true` or `false`.
+ * The unquoted string of a typed attribute (`boolean`, `integer`, `number`), or
+ * `undefined` for an absent or `null` value.
  *
- * @throws SchematicsException for any other value, including the strings `"true"` and `"false"`.
+ * A typed value is written as an unquoted string (spec 4.6): a quoted literal
+ * is text, and a list is not a scalar. Both are rejected here, with the wanted
+ * form in `expected`.
+ *
+ * @throws SchematicsException for a list, a non-string value or a quoted literal.
  */
-export function readAstBoolean(
+function readTypedText(
   node: OpenUiElement,
   key: string,
   subject: string,
-): boolean | undefined {
+  expected: string,
+): string | undefined {
   const attribute = readAttribute(node, key);
   if (attribute === undefined) {
     return undefined;
   }
-  if (typeof attribute.value !== 'boolean') {
+  if (typeof attribute.value !== 'string') {
     throw new SchematicsException(
-      `OpenUI node "${subject}": attribute "${key}" must be the JSON value true or false, ` +
+      `OpenUI node "${subject}": attribute "${key}" must be ${expected}, ` +
         `not ${JSON.stringify(attribute.value)}.`,
+    );
+  }
+  if (!attribute.isExpression) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": attribute "${key}" has the quoted literal ${attribute.value}, ` +
+        `which is text, not ${expected}. Write it unquoted.`,
     );
   }
   return attribute.value;
 }
 
 /**
- * Read a finite number attribute written as a JSON number.
+ * Read a boolean attribute written as the unquoted string `"true"` or `"false"`
+ * (spec 4.6); absent and `null` values read as `undefined`.
  *
- * @throws SchematicsException for any other value, including a numeric string.
+ * The schematics need the value at generation time, so any other expression
+ * (for example `!x` or `(bool)x`) cannot be evaluated and is rejected, as is a
+ * quoted literal (`"\"true\""` is the text `true`, not a Boolean) and a list.
+ *
+ * @throws SchematicsException for any other value.
+ */
+export function readAstBoolean(
+  node: OpenUiElement,
+  key: string,
+  subject: string,
+): boolean | undefined {
+  const text = readTypedText(node, key, subject, 'the unquoted string "true" or "false"');
+  if (text === undefined) {
+    return undefined;
+  }
+  if (text !== 'true' && text !== 'false') {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": attribute "${key}" must be the unquoted string "true" or "false", ` +
+        `not the expression ${JSON.stringify(text)}, which cannot be evaluated at generation time.`,
+    );
+  }
+  return text === 'true';
+}
+
+/**
+ * Read a finite number attribute written as an unquoted string that is a JSON
+ * number (spec 4.6, for example `"25"` or `"0.5"`); absent and `null` values
+ * read as `undefined`.
+ *
+ * Any other expression (for example `(int)x`) cannot be evaluated at
+ * generation time and is rejected, as is a quoted literal and a list.
+ *
+ * @throws SchematicsException for any other value.
  */
 export function readAstNumber(
   node: OpenUiElement,
   key: string,
   subject: string,
 ): number | undefined {
-  const attribute = readAttribute(node, key);
-  if (attribute === undefined) {
+  const text = readTypedText(node, key, subject, 'an unquoted string that is a JSON number');
+  if (text === undefined) {
     return undefined;
   }
-  if (typeof attribute.value !== 'number' || !Number.isFinite(attribute.value)) {
+  const value = JSON_NUMBER_PATTERN.test(text) ? Number(text) : Number.NaN;
+  if (!Number.isFinite(value)) {
     throw new SchematicsException(
-      `OpenUI node "${subject}": attribute "${key}" must be a finite JSON number, ` +
-        `not ${JSON.stringify(attribute.value)}.`,
+      `OpenUI node "${subject}": attribute "${key}" must be an unquoted string that is a finite JSON number, ` +
+        `not the expression ${JSON.stringify(text)}, which cannot be evaluated at generation time.`,
     );
   }
-  return attribute.value;
+  return value;
 }
 
 /** A synthetic attribute value written unquoted: a binding or target-language expression. */
@@ -329,11 +378,23 @@ export function syntheticExpression(text: string): SyntheticExpression {
 }
 
 /**
- * Attribute values accepted from legacy CLI options before normalization. A
- * plain string is a literal; wrap an expression with `syntheticExpression`.
+ * A Boolean or number CLI option as the unquoted string of its text (`"true"`,
+ * `"25"`), which is how a typed value is written (spec 4.6); `undefined` stays
+ * `undefined`, so an unset option contributes no attribute.
  */
-export type SyntheticAttributeValue =
-  string | number | boolean | null | undefined | SyntheticExpression;
+export function syntheticTypedValue(
+  value: boolean | number | undefined,
+): SyntheticExpression | undefined {
+  return value === undefined ? undefined : syntheticExpression(String(value));
+}
+
+/**
+ * Attribute values accepted from legacy CLI options before normalization. A
+ * plain string is a literal; wrap an expression with `syntheticExpression`. A
+ * Boolean or number is not a value (spec 4.5): write it as the string of its
+ * text, with `syntheticExpression(String(value))` or `syntheticTypedValue`.
+ */
+export type SyntheticAttributeValue = string | null | undefined | SyntheticExpression;
 
 /** Input for a synthetic OpenUI element built from legacy CLI options. */
 export interface SyntheticAstNodeInput {
@@ -341,7 +402,7 @@ export interface SyntheticAstNodeInput {
   readonly id: string;
   /** Canonical, case-sensitive OpenUI catalog type (for example `Form`). */
   readonly type: string;
-  /** Attributes; `undefined` entries are dropped, strings are written as quoted literals, numbers and booleans as JSON values. */
+  /** Attributes; `undefined` entries are dropped, strings are written as quoted literals, expressions unquoted, `null` as `null`. */
   readonly attrs?: Readonly<Record<string, SyntheticAttributeValue>>;
   /** Child elements, already built with `createSyntheticAstNode`. */
   readonly children?: readonly OpenUiElement[];
@@ -400,7 +461,7 @@ export function toAstNodeId(name: string): string {
 
 function normalizeSyntheticAttributes(
   attrs: Readonly<Record<string, SyntheticAttributeValue>> | undefined,
-): Record<string, string | number | boolean | null> | undefined {
+): Record<string, string | null> | undefined {
   if (!attrs) {
     return undefined;
   }
@@ -414,12 +475,9 @@ function normalizeSyntheticAttributes(
 
 function normalizeSyntheticValue(
   value: Exclude<SyntheticAttributeValue, undefined>,
-): string | number | boolean | null {
+): string | null {
   if (typeof value === 'string') {
     return JSON.stringify(value);
   }
-  if (value !== null && typeof value === 'object') {
-    return value.expression;
-  }
-  return value;
+  return value === null ? null : value.expression;
 }

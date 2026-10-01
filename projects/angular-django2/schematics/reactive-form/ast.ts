@@ -11,8 +11,8 @@
  * | `fields[]`             | child `TextInputs` / `RangeControl` nodes, in order         |
  * | `field.name`           | control `uses.name` (defaults to the node id)               |
  * | `field.control`        | control `uses.type`, or `uses.multiline` for a textarea (see `form-field/ast.ts`) |
- * | `field.initialValue`   | control `uses.value` (`null` allowed)                       |
- * | `field.required`       | control `uses.required` = JSON `true` / `false`             |
+ * | `field.initialValue`   | control `uses.value`: a quoted literal, a number as the string `"25"`, or `null` |
+ * | `field.required`       | control `uses.required` = the string `"true"` / `"false"`   |
  * | `validators[]`         | control `uses.email`, `uses.minLength`, `uses.maxLength`, `uses.min`, `uses.max`, `uses.pattern` |
  * | `hint` / `placeholder` / `autocomplete` | control `uses.hint` / `uses.placeholder` / `uses.autocomplete` |
  *
@@ -41,6 +41,7 @@ import {
   readAstNumber,
   readAstString,
   syntheticExpression,
+  syntheticTypedValue,
   type SyntheticAttributeValue,
 } from '../utility/ast-compiler';
 import { validateReactiveFormDefinition } from './definition';
@@ -166,17 +167,28 @@ function fieldAttributes(
     ...controlTypeAttributes(field.control),
     [CONTROL_ATTRIBUTES.name]: field.name,
     [CONTROL_ATTRIBUTES.label]: field.label,
-    [CONTROL_ATTRIBUTES.value]: field.initialValue,
-    [CONTROL_ATTRIBUTES.required]: required,
-    [CONTROL_ATTRIBUTES.email]: validators.has('email') ? true : undefined,
+    [CONTROL_ATTRIBUTES.value]: typedAttribute(field.initialValue),
+    [CONTROL_ATTRIBUTES.required]: syntheticTypedValue(required),
+    [CONTROL_ATTRIBUTES.email]: validators.has('email') ? syntheticTypedValue(true) : undefined,
     ...Object.fromEntries(
-      VALIDATOR_ATTRIBUTE_KINDS.map((kind) => [CONTROL_ATTRIBUTES[kind], validators.get(kind)]),
+      VALIDATOR_ATTRIBUTE_KINDS.map((kind) => [
+        CONTROL_ATTRIBUTES[kind],
+        typedAttribute(validators.get(kind)),
+      ]),
     ),
-    [CONTROL_ATTRIBUTES.pattern]: validators.get('pattern'),
+    [CONTROL_ATTRIBUTES.pattern]: typedAttribute(validators.get('pattern')),
     [CONTROL_ATTRIBUTES.hint]: field.hint,
     [CONTROL_ATTRIBUTES.placeholder]: field.placeholder,
     [CONTROL_ATTRIBUTES.autocomplete]: field.autocomplete,
   };
+}
+
+/**
+ * A number as its typed string (`"25"`, spec 4.6); a string stays a quoted
+ * literal and `null` and `undefined` stay as they are.
+ */
+function typedAttribute(value: number | string | null | undefined): SyntheticAttributeValue {
+  return typeof value === 'number' ? syntheticTypedValue(value) : value;
 }
 
 /** Build the raw (not yet contract-validated) field object for one control node. */

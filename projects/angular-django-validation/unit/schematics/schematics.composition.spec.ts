@@ -36,9 +36,9 @@ const profileCard: OpenUiElement = {
         {
           id: 'email',
           type: 'TextInputs',
-          attrs: { 'uses.type': '"email"', 'uses.label': '"Email"', 'uses.required': true },
+          attrs: { 'uses.type': '"email"', 'uses.label': '"Email"', 'uses.required': 'true' },
         },
-        { id: 'age', type: 'RangeControl', attrs: { 'uses.label': '"Age"', 'uses.min': 18 } },
+        { id: 'age', type: 'RangeControl', attrs: { 'uses.label': '"Age"', 'uses.min': '18' } },
       ],
     },
     { id: 'summary', type: 'SurfaceContainers', attrs: { 'uses.slot': '"header"' } },
@@ -355,7 +355,7 @@ describe('OpenUI composition (plan phase 3)', () => {
           {
             id: 'card',
             type: 'SurfaceContainers',
-            children: [{ id: 'pop', type: 'OverlayContainers', attrs: { 'uses.modal': true } }],
+            children: [{ id: 'pop', type: 'OverlayContainers', attrs: { 'uses.modal': 'true' } }],
           },
           'unsupported attribute(s): uses.modal',
         ],
