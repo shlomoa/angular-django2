@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
-## [Unreleased]
+## [0.6.1]
 
 - **Breaking:** OpenUI documents use `@shlomoa/openui-spec` 0.12.0 (pinned, no range), which narrows the attribute value grammar: an attribute value is a string, `null`, or a list of those. A JSON number or Boolean is no longer a value, alone or in a list, and the validator rejects it with `grammar/invalid-attribute-value`. A typed value is written as an unquoted string: `"uses.multiline": "true"`, `"uses.maxLength": "25"`. Documents written for 0.11.0 must be migrated (`python -m spec.bin.migrate` of openui-spec converts a Boolean or number to the string of its JSON text) and declare version `0.12.0`.
 - `readAstBoolean` accepts exactly the unquoted strings `"true"` and `"false"`, and `readAstNumber` an unquoted string that is a JSON number. Both reject a quoted literal (`"\"true\""` is the text `true`), any other expression (`"!x"`, `"(int)x"`) and a list, because the schematics need the value at generation time and cannot evaluate an expression. Synthetic documents built from CLI options write Booleans and numbers as such strings.

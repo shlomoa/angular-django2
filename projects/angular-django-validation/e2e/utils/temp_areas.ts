@@ -381,9 +381,10 @@ export function getVitestInvocation(
 
 function runVitest(command: Exclude<TempAreaCliCommand, 'cleanup'>, env = process.env): number {
   const invocation = getVitestInvocation(command);
+  const validationWorkspaceRoot = join(getRepoRoot(), 'projects', 'angular-django-validation');
 
   const result = spawnSync(invocation.command, invocation.args, {
-    cwd: getRepoRoot(),
+    cwd: validationWorkspaceRoot,
     env: { ...process.env, ...env },
     stdio: 'inherit',
   });
