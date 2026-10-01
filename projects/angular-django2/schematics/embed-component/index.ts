@@ -77,11 +77,21 @@ export interface EmbedPlacement {
   /** Reject a parent template without the section markers instead of appending. */
   readonly strict?: boolean;
   /**
-   * Explicit input values, bound as string literals. When given, only child
-   * inputs listed here are bound; otherwise every input is bound to `undefined`.
+   * Explicit input values: a plain string is bound as a string literal, an
+   * `EmbedExpression` as the Angular template expression itself. When given,
+   * only child inputs listed here are bound; otherwise every input is bound to
+   * `undefined`.
    */
-  readonly bindings?: Readonly<Record<string, string>>;
+  readonly bindings?: Readonly<Record<string, EmbedBinding>>;
 }
+
+/** An input value written as an Angular template expression, not a string literal. */
+export interface EmbedExpression {
+  readonly expression: string;
+}
+
+/** One input binding: a string literal (plain string) or an Angular expression. */
+export type EmbedBinding = string | EmbedExpression;
 
 /**
  * File-mode embedding as a reusable rule: wire the local child component at
@@ -379,7 +389,7 @@ function addOutputHandlerStubs(content: string, outputs: readonly string[]): str
 
 function buildChildElement(
   child: ChildComponent,
-  bindings: Readonly<Record<string, string>> | undefined,
+  bindings: Readonly<Record<string, EmbedBinding>> | undefined,
 ): string {
   const attributes: string[] = [];
 
@@ -387,7 +397,7 @@ function buildChildElement(
     if (bindings === undefined) {
       attributes.push(`[${input}]="undefined"`);
     } else if (Object.hasOwn(bindings, input)) {
-      attributes.push(`[${input}]="${stringLiteralBinding(bindings[input])}"`);
+      attributes.push(`[${input}]="${bindingSource(bindings[input])}"`);
     }
   }
   for (const output of child.outputs) {
@@ -399,10 +409,19 @@ function buildChildElement(
   return `<${child.selector}${attributeText}></${child.selector}>`;
 }
 
-/** A template expression evaluating to `value`, escaped for a double-quoted HTML attribute. */
-function stringLiteralBinding(value: string): string {
-  const literal = `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
-  return literal.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+/** The template source of a binding, escaped for a double-quoted HTML attribute. */
+function bindingSource(binding: EmbedBinding): string {
+  return typeof binding === 'string'
+    ? escapeAttributeValue(stringLiteral(binding))
+    : escapeAttributeValue(binding.expression);
+}
+
+function stringLiteral(value: string): string {
+  return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+}
+
+function escapeAttributeValue(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
 function handlerName(output: string): string {

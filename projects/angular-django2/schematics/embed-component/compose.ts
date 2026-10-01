@@ -14,7 +14,9 @@
  *   right after a section's begin marker, so the engine embeds the children
  *   last-to-first.
  * - The child element binds the node's `uses.` attributes that name one of
- *   the child's inputs, as string literals; other inputs keep their defaults.
+ *   the child's inputs: a quoted literal as a string literal, an unquoted
+ *   string as the Angular expression itself (`"true"` binds `true`); other
+ *   inputs keep their defaults.
  *
  * @internal
  */
@@ -22,8 +24,9 @@ import type { Rule } from '@angular-devkit/schematics';
 import { chain, SchematicsException } from '@angular-devkit/schematics';
 import type { OpenUiElement } from '@shlomoa/openui-spec';
 
-import { readAstString } from '../utility/ast-compiler';
+import { readAstString, readAstValue } from '../utility/ast-compiler';
 import { EMBED_SLOTS, embedComponentFile, slotSection } from './index';
+import type { EmbedBinding } from './index';
 import type { EmbedSlot } from './schema';
 
 /** Attribute that places a child node into a named slot (an extension: the catalog declares no slot). */
@@ -88,13 +91,15 @@ export function withoutCompositionAttributes(node: OpenUiElement): OpenUiElement
 /**
  * Input values carried by a child node: every `uses.` attribute except
  * `uses.slot`, keyed by the name after the prefix. `null` values are skipped.
- * String literals contribute their decoded text; booleans and numbers their
- * JSON text.
+ * A quoted literal contributes its decoded text (bound as a string literal); an
+ * unquoted string is an Angular template expression and is bound as written, so
+ * a typed value (`"true"`, `"25"`) binds as `true` or `25`. Attributes the child
+ * has no input for are carried along and ignored by the renderer.
  *
- * @throws SchematicsException for an unquoted string: an expression is not a string literal input.
+ * @throws SchematicsException for a list or an empty expression.
  */
-export function astInputBindings(node: OpenUiElement): Record<string, string> {
-  const bindings: Record<string, string> = {};
+export function astInputBindings(node: OpenUiElement): Record<string, EmbedBinding> {
+  const bindings: Record<string, EmbedBinding> = {};
   for (const [key, value] of Object.entries(node.attrs ?? {})) {
     const match = /^uses\.(\w+)$/.exec(key);
     if (!match || key === AST_SLOT_ATTRIBUTE || value === null) {
@@ -105,8 +110,20 @@ export function astInputBindings(node: OpenUiElement): Record<string, string> {
         `OpenUI node "${node.id}": attribute "${key}" is a list, which cannot be bound to a component input.`,
       );
     }
-    bindings[match[1]] =
-      typeof value === 'string' ? (readAstString(node, key) ?? '') : String(value);
+    const written = readAstValue(node, key);
+    if (written === undefined) {
+      continue;
+    }
+    if ('literal' in written) {
+      bindings[match[1]] = written.literal;
+    } else if (written.expression.trim() === '') {
+      throw new SchematicsException(
+        `OpenUI node "${node.id}": attribute "${key}" is an empty expression; ` +
+          'write a quoted literal or an Angular expression.',
+      );
+    } else {
+      bindings[match[1]] = written;
+    }
   }
 
   return bindings;

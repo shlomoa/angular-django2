@@ -349,11 +349,12 @@ table scope.
       ([#135](https://github.com/shlomoa/angular-django2/issues/135),
       [#136](https://github.com/shlomoa/angular-django2/issues/136)). The
       generated output is unchanged.
-- [ ] Migrate to openui-spec 0.12.0 (attribute value grammar): an attribute
+- [x] Migrate to openui-spec 0.12.0 (attribute value grammar): an attribute
       value is a string, `null` or a list of those; booleans and numbers are
-      written as unquoted strings (`"true"`, `"25"`)
-      ([#140](https://github.com/shlomoa/angular-django2/issues/140)). Open:
-      the typed inputs of an embedded child component (`astInputBindings`).
+      written as unquoted strings (`"true"`, `"25"`), and an unquoted input value
+      of an embedded child component is bound as an Angular expression
+      ([#140](https://github.com/shlomoa/angular-django2/issues/140)). Generated
+      output is unchanged except for those input bindings.
 - [x] Compile `ToolBar` content
       ([#129](https://github.com/shlomoa/angular-django2/issues/129),
       [#132](https://github.com/shlomoa/angular-django2/pull/132); tests

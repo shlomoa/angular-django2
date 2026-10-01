@@ -243,6 +243,37 @@ export function readAstString(
   return attribute.literal as string;
 }
 
+/** A scalar attribute value as written: a quoted literal (decoded) or an unquoted expression. */
+export type AstValue = { readonly literal: string } | { readonly expression: string };
+
+/**
+ * Read an attribute as it is written, without requiring either form: a quoted
+ * literal returns its decoded text, an unquoted string returns the expression;
+ * absent and `null` values read as `undefined`.
+ *
+ * @param subject Diagnostic subject (see `astNodeSubject`); defaults to the node id.
+ * @throws SchematicsException for a list (the only non-string value left).
+ */
+export function readAstValue(
+  node: OpenUiElement,
+  key: string,
+  subject: string = node.id,
+): AstValue | undefined {
+  const attribute = readAttribute(node, key);
+  if (attribute === undefined) {
+    return undefined;
+  }
+  if (typeof attribute.value !== 'string') {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": attribute "${key}" must be a string, ` +
+        `not ${JSON.stringify(attribute.value)}.`,
+    );
+  }
+  return attribute.isExpression
+    ? { expression: attribute.value }
+    : { literal: attribute.literal as string };
+}
+
 /**
  * Read an attribute whose value is an expression (an unquoted string) and
  * return it as written; absent and `null` values read as `undefined`.

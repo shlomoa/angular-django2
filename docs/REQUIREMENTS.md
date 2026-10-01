@@ -229,7 +229,8 @@ sources over lower-priority ones.
   the string (`"\"Users\""`); booleans and numbers are unquoted strings (`"true"`,
   `"25"`), which the schematics read only as exactly `"true"` or `"false"` and as
   a JSON number; any other unquoted string is an expression (only `behaves.x`,
-  `produces.x` and `uses.data` take one). Unsupported attributes are rejected, never ignored.
+  `produces.x` and `uses.data` take one, and an unquoted input value of an embedded
+  child component is bound as an Angular expression). Unsupported attributes are rejected, never ignored.
 - Options that a node describes cannot be combined with `--document`; the
   schematic reports the conflicting flags. Legacy CLI flags are translated into
   synthetic OpenUI nodes and compiled by the same code path.
