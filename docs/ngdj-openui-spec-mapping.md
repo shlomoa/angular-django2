@@ -24,7 +24,9 @@ Attribute notation (OpenUI 0.11.0, spec 4.5 and 4.6): keys are categorized,
 `uses.x` for inputs, `produces.x` for events and `behaves.x` for behaviors.
 A string literal is quoted inside the string (`"\"Users\""`); booleans and
 numbers are JSON values; an unquoted string is a binding or expression.
-Element references are quoted element ids. In the tables below, an attribute
+The spec also allows a plain `<name>` key with no category; the schematics
+accept only the categorized keys they list, and reject a plain key as
+unsupported. Element references are quoted element ids. In the tables below, an attribute
 marked **†** is an `angular-django2` extension: the catalog does not declare it
 for that type (§1.3); every other attribute is declared by the catalog.
 
@@ -53,11 +55,12 @@ migration plan, which was removed from `main` in
 | `readOpenUiDocument()`, `validateOpenUiDocument()`     | `schematics/utility/openui.ts`: load a document and validate it with the canonical `openui-spec` validator (grammar, unique ids, known types, declared value types, references).                                     | `schematics.openui.spec.ts` `TC-OPENUI-01…04` |
 | `readAstNode()`, `resolveAstNode()`, attribute readers | `schematics/utility/ast-compiler.ts`: resolve `--nodeId` (or the first node of the expected type), reject unknown attributes, and read quoted string literals, expressions, JSON boolean and JSON number attributes. | `ast-compiler.spec.ts`                        |
 
-The canonical validator checks the grammar (categorized keys, typed values),
-unique ids, that each `type` is a known catalog type, the value type of every
+The canonical validator checks the grammar (the key is `uses.x`, `produces.x`,
+`behaves.x` or a plain `x`; the value is a string, number, boolean, `null` or a
+list of these), unique ids, that each `type` is a known catalog type, the value type of every
 declared attribute, and that references name an element of the right type. It
-accepts any categorized key a type does not declare without checking its value
-(an extension), and an unquoted string for any value type (it is an expression).
+accepts any key a type does not declare, categorized or plain, without checking
+its value (an extension), and an unquoted string for any value type (it is an expression).
 Extension attributes, unsupported attributes, and child checks are done by each
 schematic, as listed below.
 
@@ -115,9 +118,11 @@ page `uses.title`, `uses.route`, `uses.icon`, `uses.access`, `uses.authGuard`;
 `Form` `uses.title`, `uses.action`; `TextInputs` `uses.name`, `uses.hint`,
 `uses.autocomplete`, `uses.email`, `uses.minLength`, `uses.min`, `uses.max`,
 `uses.pattern`, `uses.appearance`, `uses.subscriptSizing`; `RangeControl`
-`uses.type` and the same control extensions. The validator takes such a key
-only if it is categorized (`uses.x`) and does not check its value, so the
-extensions are allowed by implication, not by an explicit spec rule.
+`uses.type` and the same control extensions. The validator accepts such a key
+whether it is categorized (`uses.x`) or plain (`x`, spec 4.5), and does not
+check its value, so the extensions are allowed by implication, not by an
+explicit spec rule. The schematics accept only the categorized keys they list;
+a plain key is rejected as unsupported.
 
 Declared but not compiled: the schematics reject `Form` `behaves.validate`,
 `produces.dirtyChange`, and the other declared attributes they do not list
