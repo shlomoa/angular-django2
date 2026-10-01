@@ -12,6 +12,7 @@ import {
   readAstNumber,
   readAstString,
   syntheticExpression,
+  syntheticTypedValue,
   createSyntheticAstDocument,
   createSyntheticAstNode,
   resolveAstNode,
@@ -127,8 +128,8 @@ describe('OpenUI AST compiler core', () => {
         type: 'TextInputs',
         attrs: {
           'uses.label': 'Email',
-          'uses.required': true,
-          'uses.maxLength': 120,
+          'uses.required': syntheticExpression('true'),
+          'uses.maxLength': syntheticExpression('120'),
           'uses.hint': null,
           'uses.appearance': undefined,
           'behaves.submit': syntheticExpression('save()'),
@@ -140,12 +141,46 @@ describe('OpenUI AST compiler core', () => {
         type: 'TextInputs',
         attrs: {
           'uses.label': '"Email"',
-          'uses.required': true,
-          'uses.maxLength': 120,
+          'uses.required': 'true',
+          'uses.maxLength': '120',
           'uses.hint': null,
           'behaves.submit': 'save()',
         },
       });
+    });
+
+    it('TC-AST-19: writes Boolean and number options as strings, never as JSON values', () => {
+      expect(syntheticTypedValue(true)).toEqual(syntheticExpression('true'));
+      expect(syntheticTypedValue(false)).toEqual(syntheticExpression('false'));
+      expect(syntheticTypedValue(25)).toEqual(syntheticExpression('25'));
+      expect(syntheticTypedValue(0.5)).toEqual(syntheticExpression('0.5'));
+      expect(syntheticTypedValue(undefined)).toBeUndefined();
+
+      const node = createSyntheticAstNode({
+        id: 'age',
+        type: 'TextInputs',
+        attrs: {
+          'uses.required': syntheticTypedValue(true),
+          'uses.readOnly': syntheticTypedValue(false),
+          'uses.maxLength': syntheticTypedValue(25),
+          'uses.min': syntheticTypedValue(0.5),
+          'uses.disabled': syntheticTypedValue(undefined),
+        },
+      });
+
+      expect(node.attrs).toEqual({
+        'uses.required': 'true',
+        'uses.readOnly': 'false',
+        'uses.maxLength': '25',
+        'uses.min': '0.5',
+      });
+      for (const value of Object.values(node.attrs ?? {})) {
+        expect(typeof value).toBe('string');
+      }
+      expect(readAstBoolean(node, 'uses.required', 'doc#age')).toBe(true);
+      expect(readAstBoolean(node, 'uses.readOnly', 'doc#age')).toBe(false);
+      expect(readAstNumber(node, 'uses.maxLength', 'doc#age')).toBe(25);
+      expect(readAstNumber(node, 'uses.min', 'doc#age')).toBe(0.5);
     });
 
     it('TC-AST-08: builds nested synthetic nodes that resolve like document nodes', () => {
@@ -213,27 +248,40 @@ describe('OpenUI AST compiler core', () => {
       );
     });
 
-    it('TC-AST-14: reads JSON numbers and booleans and rejects other values', () => {
+    it('TC-AST-14: reads the unquoted strings "true", "false" and a JSON number, and rejects other values', () => {
       const node = {
         id: 'age',
         type: 'RangeControl',
-        attrs: { 'uses.min': 0, 'uses.max': 'many', 'uses.required': true, 'uses.hint': null },
+        attrs: {
+          'uses.min': '0',
+          'uses.max': 'many',
+          'uses.step': '-1.5e2',
+          'uses.required': 'true',
+          'uses.disabled': 'false',
+          'uses.hint': null,
+        },
       };
 
       expect(readAstNumber(node, 'uses.min', 'doc#age')).toBe(0);
-      expect(readAstNumber(node, 'uses.step', 'doc#age')).toBeUndefined();
+      expect(readAstNumber(node, 'uses.step', 'doc#age')).toBe(-150);
+      expect(readAstNumber(node, 'uses.start', 'doc#age')).toBeUndefined();
+      expect(readAstNumber(node, 'uses.hint', 'doc#age')).toBeUndefined();
       expect(() => readAstNumber(node, 'uses.max', 'doc#age')).toThrow(
-        'OpenUI node "doc#age": attribute "uses.max" must be a finite JSON number, not "many".',
+        'OpenUI node "doc#age": attribute "uses.max" must be an unquoted string that is a finite JSON number, ' +
+          'not the expression "many", which cannot be evaluated at generation time.',
       );
       expect(readAstBoolean(node, 'uses.required', 'doc#age')).toBe(true);
+      expect(readAstBoolean(node, 'uses.disabled', 'doc#age')).toBe(false);
       expect(readAstBoolean(node, 'uses.hint', 'doc#age')).toBeUndefined();
+      expect(readAstBoolean(node, 'uses.missing', 'doc#age')).toBeUndefined();
       expect(() =>
         readAstBoolean({ ...node, attrs: { 'uses.required': 'yes' } }, 'uses.required', 'doc#age'),
       ).toThrow(
-        'OpenUI node "doc#age": attribute "uses.required" must be the JSON value true or false, not "yes".',
+        'OpenUI node "doc#age": attribute "uses.required" must be the unquoted string "true" or "false", ' +
+          'not the expression "yes", which cannot be evaluated at generation time.',
       );
       expect(() => assertAstAttributes(node, ['uses.min', 'uses.max'], 'doc#age')).toThrow(
-        'OpenUI node "doc#age" has unsupported attribute(s): uses.required, uses.hint. ' +
+        'OpenUI node "doc#age" has unsupported attribute(s): uses.step, uses.required, uses.disabled, uses.hint. ' +
           'Supported attributes for "RangeControl": uses.min, uses.max.',
       );
     });
@@ -247,7 +295,7 @@ describe('OpenUI AST compiler core', () => {
           'uses.value': '""',
           'uses.hint': null,
           'uses.placeholder': 'Name',
-          'uses.maxLength': 5,
+          'uses.items': ['"a"', '"b"'],
         },
       };
 
@@ -259,8 +307,8 @@ describe('OpenUI AST compiler core', () => {
         'OpenUI node "doc#name": attribute "uses.placeholder" has the unquoted value Name, ' +
           'which is an expression, not text. Quote the literal inside the string: "\\"Name\\"".',
       );
-      expect(() => readAstString(node, 'uses.maxLength', 'doc#name')).toThrow(
-        'attribute "uses.maxLength" must be a quoted string literal, not 5.',
+      expect(() => readAstString(node, 'uses.items', 'doc#name')).toThrow(
+        'attribute "uses.items" must be a quoted string literal, not ["\\"a\\"","\\"b\\""].',
       );
     });
 
@@ -280,19 +328,82 @@ describe('OpenUI AST compiler core', () => {
       );
     });
 
-    it('TC-AST-17: rejects the strings "true" and "5" where a JSON boolean or number is required', () => {
-      const node = {
-        id: 'field',
-        type: 'TextInputs',
-        attrs: { 'uses.required': 'true', 'uses.maxLength': '5' },
+    it('TC-AST-17: rejects a quoted literal, another expression and a list where a Boolean or number is required', () => {
+      const attrs = {
+        'uses.quotedBoolean': '"true"',
+        'uses.negation': '!x',
+        'uses.cast': '(bool)x',
+        'uses.quotedNumber': '"5"',
+        'uses.conversion': '(int)x',
+        'uses.list': ['true'],
       };
+      const node = { id: 'field', type: 'TextInputs', attrs };
 
-      expect(() => readAstBoolean(node, 'uses.required', 'doc#field')).toThrow(
-        'attribute "uses.required" must be the JSON value true or false, not "true".',
+      expect(() => readAstBoolean(node, 'uses.quotedBoolean', 'doc#field')).toThrow(
+        'attribute "uses.quotedBoolean" has the quoted literal "true", which is text, ' +
+          'not the unquoted string "true" or "false".',
       );
-      expect(() => readAstNumber(node, 'uses.maxLength', 'doc#field')).toThrow(
-        'attribute "uses.maxLength" must be a finite JSON number, not "5".',
+      for (const key of ['uses.negation', 'uses.cast', 'uses.conversion', 'uses.quotedNumber']) {
+        expect(() => readAstBoolean(node, key, 'doc#field')).toThrow(`attribute "${key}"`);
+      }
+      expect(() => readAstBoolean(node, 'uses.list', 'doc#field')).toThrow(
+        'attribute "uses.list" must be the unquoted string "true" or "false", not ["true"].',
       );
+
+      expect(() => readAstNumber(node, 'uses.conversion', 'doc#field')).toThrow(
+        'attribute "uses.conversion" must be an unquoted string that is a finite JSON number, ' +
+          'not the expression "(int)x"',
+      );
+      expect(() => readAstNumber(node, 'uses.quotedNumber', 'doc#field')).toThrow(
+        'attribute "uses.quotedNumber" has the quoted literal "5", which is text, ' +
+          'not an unquoted string that is a JSON number.',
+      );
+      expect(() => readAstNumber(node, 'uses.list', 'doc#field')).toThrow(
+        'attribute "uses.list" must be an unquoted string that is a JSON number, not ["true"].',
+      );
+      expect(() => readAstNumber(node, 'uses.negation', 'doc#field')).toThrow(
+        'attribute "uses.negation"',
+      );
+    });
+
+    it.each(['5.', '.5', '05', '+5', '1e', '0x10', ' 5', '5 ', 'NaN', 'Infinity', '1e999', ''])(
+      'TC-AST-20: rejects the text %j as a JSON number',
+      (text) => {
+        const node = { id: 'field', type: 'RangeControl', attrs: { 'uses.min': text } };
+
+        expect(() => readAstNumber(node, 'uses.min', 'doc#field')).toThrow(
+          'attribute "uses.min" must be an unquoted string that is a finite JSON number',
+        );
+      },
+    );
+
+    it.each([
+      ['0', 0],
+      ['-0.5', -0.5],
+      ['25', 25],
+      ['1E3', 1000],
+      ['2.5e-1', 0.25],
+    ])('TC-AST-21: reads the text %j as the JSON number %d', (text, expected) => {
+      const node = { id: 'field', type: 'RangeControl', attrs: { 'uses.min': text } };
+
+      expect(readAstNumber(node, 'uses.min', 'doc#field')).toBe(expected);
+    });
+
+    it('TC-AST-22: rejects a JSON number or Boolean at the grammar stage, alone or in a list', () => {
+      for (const value of [true, false, 25, 0.5, [25], [true, '"a"']]) {
+        const tree = Tree.empty();
+        tree.create(
+          `/${DOCUMENT_PATH}`,
+          JSON.stringify({
+            ...APP_DOCUMENT,
+            children: [{ id: 'field', type: 'TextInputs', attrs: { 'uses.required': value } }],
+          }),
+        );
+
+        expect(() => readOpenUiDocument(tree, DOCUMENT_PATH)).toThrow(
+          '/children/0/attrs/uses.required: grammar/invalid-attribute-value',
+        );
+      }
     });
 
     it('TC-AST-18: stamps synthetic documents with the installed openui-spec version', () => {

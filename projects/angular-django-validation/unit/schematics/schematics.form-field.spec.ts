@@ -229,7 +229,9 @@ describe('form-field schematic: OpenUI control nodes', () => {
       createApplicationTree(),
     ) as UnitTestTree;
     const fromDocument = compile(
-      createDocumentTree([{ id: 'notes', type: 'TextInputs', attrs: { 'uses.multiline': true } }]),
+      createDocumentTree([
+        { id: 'notes', type: 'TextInputs', attrs: { 'uses.multiline': 'true' } },
+      ]),
       {},
     );
 
@@ -248,10 +250,10 @@ describe('form-field schematic: OpenUI control nodes', () => {
     ).toThrow('Unsupported form-field control type "search".');
   });
 
-  it('TC-FORM-FIELD-OPENUI-06: rejects a textarea that also names another type, and unquoted or mistyped values', () => {
-    const cases: [Record<string, string | number | boolean>, string][] = [
+  it('TC-FORM-FIELD-OPENUI-06: rejects a textarea that also names another type, and unquoted, quoted or mistyped values', () => {
+    const cases: [Record<string, string>, string][] = [
       [
-        { 'uses.multiline': true, 'uses.type': '"email"' },
+        { 'uses.multiline': 'true', 'uses.type': '"email"' },
         'uses.multiline is true, which makes a textarea, but uses.type is "email".',
       ],
       [
@@ -259,8 +261,12 @@ describe('form-field schematic: OpenUI control nodes', () => {
         'attribute "uses.type" has the unquoted value email, which is an expression, not text.',
       ],
       [
-        { 'uses.multiline': 'true' },
-        'attribute "uses.multiline" must be the JSON value true or false, not "true".',
+        { 'uses.multiline': '"true"' },
+        '/children/0/attrs/uses.multiline: contract/wrong-value-type: uses.multiline must be boolean',
+      ],
+      [
+        { 'uses.multiline': '!x' },
+        'attribute "uses.multiline" must be the unquoted string "true" or "false", not the expression "!x"',
       ],
     ];
     for (const [attrs, message] of cases) {

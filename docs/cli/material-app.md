@@ -46,7 +46,7 @@ ng generate angular-django2:material-app --document=app.openui.json
   existing toolbar title.
 - Routing is enabled when the `Application` has a `Routing` child.
 - A `Presentation` child sets `uses.theme` (a `--theme` value) and
-  `uses.typography` / `uses.animations` (JSON `true` or `false`).
+  `uses.typography` / `uses.animations` (`"true"` or `"false"`).
 - Every `DashboardPage` in the document adds a sidenav link after Home, using
   the page's `uses.route`, `uses.title`, and `uses.icon` (see [`page`](page.md#openui-page-nodes)).
   `EmptyPage` nodes have no navigation. Navigation links require a `Routing`

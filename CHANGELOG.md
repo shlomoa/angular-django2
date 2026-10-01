@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [Unreleased]
+
+- **Breaking:** OpenUI documents use `@shlomoa/openui-spec` 0.12.0 (pinned, no range), which narrows the attribute value grammar: an attribute value is a string, `null`, or a list of those. A JSON number or Boolean is no longer a value, alone or in a list, and the validator rejects it with `grammar/invalid-attribute-value`. A typed value is written as an unquoted string: `"uses.multiline": "true"`, `"uses.maxLength": "25"`. Documents written for 0.11.0 must be migrated (`python -m spec.bin.migrate` of openui-spec converts a Boolean or number to the string of its JSON text) and declare version `0.12.0`.
+- `readAstBoolean` accepts exactly the unquoted strings `"true"` and `"false"`, and `readAstNumber` an unquoted string that is a JSON number. Both reject a quoted literal (`"\"true\""` is the text `true`), any other expression (`"!x"`, `"(int)x"`) and a list, because the schematics need the value at generation time and cannot evaluate an expression. Synthetic documents built from CLI options write Booleans and numbers as such strings.
+- Component input bindings of embedded children (`component`, `complex-component`, `page`): an unquoted input value is an Angular expression and is bound as written, so a typed attribute is now bound as a typed expression (`uses.required` `"true"` binds `[required]="true"`, `"25"` binds `[size]="25"`) instead of the string `'true'`. A quoted literal still binds as a string literal (`[label]="'Email'"`), `null` is not bound and a list is rejected. An unquoted value no longer fails, and neither does an attribute the child has no input for.
+- A quoted literal on a `produces.*` or `behaves.*` attribute is rejected by the validator with `contract/wrong-value-type`.
+- Generated Angular output is unchanged.
+
 ## [0.6.0]
 
 - **Breaking:** OpenUI documents use `@shlomoa/openui-spec` 0.11.0 typed attributes (pinned, no range). Keys are categorized (`[title]` becomes `uses.title`, `(activate)` becomes `produces.activate`, `(submit)` becomes `behaves.submit`); a string literal is quoted inside the string (`"\"Users\""`); booleans and numbers are JSON values. An unquoted string is an expression, so a text attribute written without quotes is rejected with a message that shows the quoted form. Only `behaves.*`, `produces.*` and `uses.data` take an expression. Documents written for 0.3.1 must be migrated.

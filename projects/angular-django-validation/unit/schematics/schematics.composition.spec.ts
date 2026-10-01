@@ -36,9 +36,9 @@ const profileCard: OpenUiElement = {
         {
           id: 'email',
           type: 'TextInputs',
-          attrs: { 'uses.type': '"email"', 'uses.label': '"Email"', 'uses.required': true },
+          attrs: { 'uses.type': '"email"', 'uses.label': '"Email"', 'uses.required': 'true' },
         },
-        { id: 'age', type: 'RangeControl', attrs: { 'uses.label': '"Age"', 'uses.min': 18 } },
+        { id: 'age', type: 'RangeControl', attrs: { 'uses.label': '"Age"', 'uses.min': '18' } },
       ],
     },
     { id: 'summary', type: 'SurfaceContainers', attrs: { 'uses.slot': '"header"' } },
@@ -221,6 +221,39 @@ describe('OpenUI composition (plan phase 3)', () => {
     });
   });
 
+  describe('input bindings of embedded children', () => {
+    it('TC-COMPOSE-15: binds typed and unquoted attributes as expressions and never fails on unquoted or unmatched ones', async () => {
+      const panel: OpenUiElement = {
+        id: 'panel',
+        type: 'SurfaceContainers',
+        children: [
+          {
+            id: 'nick',
+            type: 'TextInputs',
+            attrs: {
+              'uses.label': '"Nick"',
+              'uses.required': 'true',
+              'uses.maxLength': '25',
+              'uses.placeholder': 'placeholderText',
+              'uses.hint': null,
+            },
+          },
+        ],
+      };
+      const generated = await runner.runSchematic(
+        'component',
+        { document: DOCUMENT_PATH, project: 'demo-app', path: 'src/app/features' },
+        await createApplicationTree(openUiDocument(panel)),
+      );
+
+      const template = generated.readContent(`${FEATURES}/panel/panel.html`);
+      expect(template).toContain('[label]="\'Nick\'"');
+      expect(template).toContain('[required]="true"');
+      expect(template).not.toContain("'true'");
+      expect(template).not.toContain('maxLength');
+    });
+  });
+
   describe('complex-component --document (composite compiler)', () => {
     it('TC-COMPOSE-05: compiles Card → Form → Controls into a Material card with slots', async () => {
       const tree = await createApplicationTree(openUiDocument(profileCard));
@@ -355,7 +388,7 @@ describe('OpenUI composition (plan phase 3)', () => {
           {
             id: 'card',
             type: 'SurfaceContainers',
-            children: [{ id: 'pop', type: 'OverlayContainers', attrs: { 'uses.modal': true } }],
+            children: [{ id: 'pop', type: 'OverlayContainers', attrs: { 'uses.modal': 'true' } }],
           },
           'unsupported attribute(s): uses.modal',
         ],
@@ -444,17 +477,34 @@ describe('OpenUI composition (plan phase 3)', () => {
       expect(astInputBindings(node)).toEqual({ label: 'Name' });
     });
 
-    it('TC-COMPOSE-12: binds booleans and numbers as their JSON text and rejects expressions and lists', () => {
+    it('TC-COMPOSE-12: binds a quoted literal as a string literal and an unquoted string as the expression itself', () => {
       const node: OpenUiElement = {
         id: 'field',
         type: 'TextInputs',
-        attrs: { 'uses.label': '"Name"', 'uses.required': true, 'uses.maxLength': 40 },
+        attrs: {
+          'uses.label': '"Name"',
+          'uses.required': 'true',
+          'uses.disabled': 'false',
+          'uses.maxLength': '25',
+          'uses.hint': 'hintText',
+          'uses.readOnly': '!locked',
+          'uses.placeholder': null,
+          'uses.slot': '"actions"',
+          'produces.change': 'x',
+        },
       };
 
-      expect(astInputBindings(node)).toEqual({ label: 'Name', required: 'true', maxLength: '40' });
-      expect(() =>
-        astInputBindings({ id: 'field', type: 'TextInputs', attrs: { 'uses.label': 'Name' } }),
-      ).toThrow('attribute "uses.label" has the unquoted value Name, which is an expression');
+      expect(astInputBindings(node)).toEqual({
+        label: 'Name',
+        required: { expression: 'true' },
+        disabled: { expression: 'false' },
+        maxLength: { expression: '25' },
+        hint: { expression: 'hintText' },
+        readOnly: { expression: '!locked' },
+      });
+    });
+
+    it('TC-COMPOSE-13: rejects a list and an empty expression, and never rejects an unquoted string', () => {
       expect(() =>
         astInputBindings({
           id: 'field',
@@ -462,6 +512,38 @@ describe('OpenUI composition (plan phase 3)', () => {
           attrs: { 'uses.label': ['"a"', '"b"'] },
         }),
       ).toThrow('attribute "uses.label" is a list');
+      expect(() =>
+        astInputBindings({ id: 'field', type: 'TextInputs', attrs: { 'uses.label': ' ' } }),
+      ).toThrow('attribute "uses.label" is an empty expression');
+      expect(
+        astInputBindings({ id: 'field', type: 'TextInputs', attrs: { 'uses.label': 'Name' } }),
+      ).toEqual({ label: { expression: 'Name' } });
+    });
+
+    it('TC-COMPOSE-14: renders literals as quoted strings and expressions as written', () => {
+      const child = {
+        selector: 'app-x',
+        className: 'X',
+        inputs: ['label', 'required', 'size', 'enabled', 'title'],
+        outputs: [],
+      };
+      const bindings = astInputBindings({
+        id: 'field',
+        type: 'TextInputs',
+        attrs: {
+          'uses.label': '"It\'s \\"a\\""',
+          'uses.required': 'true',
+          'uses.size': '25',
+          'uses.enabled': 'a && !b',
+          'uses.noSuchInput': '7',
+          'uses.title': null,
+        },
+      });
+
+      expect(embedInTemplate('<!-- Begin children section -->\n', child, { bindings })).toContain(
+        '<app-x [label]="\'It\\\'s &quot;a&quot;\'" [required]="true" [size]="25" ' +
+          '[enabled]="a &amp;&amp; !b"></app-x>',
+      );
     });
 
     it('TC-COMPOSE-11: escapes text and bound string literals in generated templates', () => {

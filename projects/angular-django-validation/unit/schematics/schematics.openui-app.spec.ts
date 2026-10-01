@@ -87,7 +87,11 @@ const application: OpenUiElement = {
     {
       id: 'look',
       type: 'Presentation',
-      attrs: { 'uses.theme': '"purple-green"', 'uses.typography': false, 'uses.animations': true },
+      attrs: {
+        'uses.theme': '"purple-green"',
+        'uses.typography': 'false',
+        'uses.animations': 'true',
+      },
     },
     {
       id: 'host',
@@ -129,7 +133,7 @@ const toolBar: OpenUiElement = {
           attrs: {
             'uses.label': '"Refresh"',
             'uses.icon': '"refresh"',
-            'uses.disabled': true,
+            'uses.disabled': 'true',
             'produces.activate': null,
           },
         },
@@ -391,7 +395,8 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
           ),
         ),
       ).rejects.toThrow(
-        'attribute "uses.typography" must be the JSON value true or false, not "yes"',
+        'attribute "uses.typography" must be the unquoted string "true" or "false", ' +
+          'not the expression "yes"',
       );
     });
   });
@@ -724,7 +729,8 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
             },
           ],
         },
-        'attribute "uses.disabled" must be the JSON value true or false, not "yes"',
+        'attribute "uses.disabled" must be the unquoted string "true" or "false", ' +
+          'not the expression "yes"',
       ],
       [
         {

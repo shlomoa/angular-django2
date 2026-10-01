@@ -60,5 +60,16 @@ with [`embed-component`](embed-component.md) logic, in document order within
 its slot. Supported children are `SurfaceContainers` (recursively), `Form`
 (see [`reactive-form`](reactive-form.md)), and `TextInputs` / `RangeControl`
 (see [`form-field`](form-field.md)). A child's `uses.` attributes that name
-one of the child component's inputs are bound as string literals, for example
-`uses.label` `"\"Email\""` becomes `[label]="'Email'"`.
+one of the child component's inputs are bound as follows (an attribute value is
+a string or `null`; spec 4.5):
+
+| Attribute value              | Bound as                                               |
+| :--------------------------- | :----------------------------------------------------- |
+| quoted literal `"\"Email\""` | string literal: `[label]="'Email'"`                    |
+| unquoted `"true"`, `"25"`    | Angular expression: `[required]="true"`, `[size]="25"` |
+| any other unquoted string    | the Angular expression itself: `[enabled]="!locked"`   |
+| `null`                       | not bound                                              |
+
+An unquoted string is an Angular template expression, so it is bound as
+written and the schematic does not evaluate or validate it; a list is
+rejected. Attributes the child has no input for are ignored.

@@ -113,7 +113,7 @@ const appDocument: OpenUiDocument = createOpenUiDocument(
       {
         id: 'message',
         type: 'TextInputs',
-        attrs: { 'uses.multiline': true, 'uses.label': '"Message"' },
+        attrs: { 'uses.multiline': 'true', 'uses.label': '"Message"' },
       },
     ],
   },

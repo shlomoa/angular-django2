@@ -123,7 +123,7 @@ To generate a complete form, describe it as an OpenUI `Form` node in
 
 ```json
 {
-  "version": "0.11.0",
+  "version": "0.12.0",
   "id": "root",
   "type": "html",
   "children": [
@@ -138,20 +138,24 @@ To generate a complete form, describe it as an OpenUI `Form` node in
           "attrs": {
             "uses.type": "\"email\"",
             "uses.label": "\"Email\"",
-            "uses.required": true,
+            "uses.required": "true",
             "uses.autocomplete": "\"email\""
           }
         },
         {
           "id": "fullName",
           "type": "TextInputs",
-          "attrs": { "uses.label": "\"Full name\"", "uses.required": true, "uses.maxLength": 120 }
+          "attrs": {
+            "uses.label": "\"Full name\"",
+            "uses.required": "true",
+            "uses.maxLength": "120"
+          }
         },
         {
           "id": "notes",
           "type": "TextInputs",
           "attrs": {
-            "uses.multiline": true,
+            "uses.multiline": "true",
             "uses.label": "\"Notes\"",
             "uses.hint": "\"Optional context\""
           }
@@ -169,8 +173,9 @@ To generate a complete form, describe it as an OpenUI `Form` node in
 
 Each control's id is its payload key, `uses.type` picks the native control
 (`text` by default; `uses.multiline` makes a textarea), and validators are
-`uses.` attributes. String values are quoted inside the string
-(`"\"Email\""`); booleans and numbers are JSON values. See [OpenUI Form documents](cli/reactive-form.md#openui-form-documents)
+`uses.` attributes. An attribute value is a string or `null`. String literals
+are quoted inside the string (`"\"Email\""`); booleans and numbers are written
+as unquoted strings (`"true"`, `"120"`). See [OpenUI Form documents](cli/reactive-form.md#openui-form-documents)
 for the full attribute vocabulary.
 
 ```bash

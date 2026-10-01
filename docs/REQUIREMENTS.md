@@ -223,11 +223,14 @@ sources over lower-priority ones.
   candidates, `--node-id=<id>`; without `--node-id` they compile the first
   element of a supported type. The document is loaded and validated with
   `@shlomoa/openui-spec` before any mutation.
-- Attributes are categorized and typed (`@shlomoa/openui-spec` 0.11.0): `uses.x`
-  for inputs, `produces.x` for events and `behaves.x` for behaviors. String
-  literals are quoted inside the string (`"\"Users\""`); booleans and numbers
-  are JSON values; an unquoted string is an expression (only `behaves.x`,
-  `produces.x` and `uses.data` take one). Unsupported attributes are rejected, never ignored.
+- Attributes are categorized and typed (`@shlomoa/openui-spec` 0.12.0): `uses.x`
+  for inputs, `produces.x` for events and `behaves.x` for behaviors. An attribute
+  value is a string, `null` or a list of those. String literals are quoted inside
+  the string (`"\"Users\""`); booleans and numbers are unquoted strings (`"true"`,
+  `"25"`), which the schematics read only as exactly `"true"` or `"false"` and as
+  a JSON number; any other unquoted string is an expression (only `behaves.x`,
+  `produces.x` and `uses.data` take one, and an unquoted input value of an embedded
+  child component is bound as an Angular expression). Unsupported attributes are rejected, never ignored.
 - Options that a node describes cannot be combined with `--document`; the
   schematic reports the conflicting flags. Legacy CLI flags are translated into
   synthetic OpenUI nodes and compiled by the same code path.

@@ -49,7 +49,7 @@ ng generate angular-django2:reactive-form contact \
 
 ```json
 {
-  "version": "0.11.0",
+  "version": "0.12.0",
   "id": "root",
   "type": "html",
   "children": [
@@ -68,13 +68,13 @@ ng generate angular-django2:reactive-form contact \
           "attrs": {
             "uses.name": "\"first_name\"",
             "uses.label": "\"First name\"",
-            "uses.required": true
+            "uses.required": "true"
           }
         },
         {
           "id": "seats",
           "type": "RangeControl",
-          "attrs": { "uses.label": "\"Seats\"", "uses.min": 1 }
+          "attrs": { "uses.label": "\"Seats\"", "uses.min": "1" }
         },
         { "id": "contactSubmit", "type": "ActionControls", "attrs": { "uses.label": "\"Create\"" } }
       ]
@@ -92,9 +92,12 @@ ng generate angular-django2:reactive-form contact \
 | `fields`               | `TextInputs` / `RangeControl` children, in order                         |
 | field keys, validators | control attributes, see [form-field](form-field.md#openui-control-nodes) |
 
-Attribute values are typed: a string is a quoted literal inside the string
-(`"\"Create\""`), booleans and numbers are JSON values (`true`, `120`), and
-`behaves.submit` is an unquoted expression. Unknown attributes, other
+An attribute value is a string or `null`. A string literal is quoted inside
+the string (`"\"Create\""`), booleans and numbers are unquoted strings
+(`"true"`, `"120"`), and `behaves.submit` is an unquoted expression. The
+schematics read a boolean or number at generation time, so they accept exactly
+`"true"`, `"false"` and a string that is a JSON number, and reject any other
+expression (`"!x"`, `"(int)x"`), a quoted literal and a list. Unknown attributes, other
 child types, and more than one `ActionControls` child are rejected.
 Diagnostics name the node as `<document>#<nodeId>`; `fields[<n>]` is the n-th
 control child.
