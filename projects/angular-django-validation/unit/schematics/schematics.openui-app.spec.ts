@@ -197,7 +197,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
       expect(generated.files).toContain('/projects/plain/src/app/app.ts');
       expect(generated.files).not.toContain('/projects/plain/src/app/app.routes.ts');
 
-      const tree = await createWorkspace(openUiDocument(application));
+      const tree = await createWorkspace(openUiDocument(application, ...pages));
       await expect(
         runner.runSchematic('application', { document: DOCUMENT_PATH, routing: false }, tree),
       ).rejects.toThrow('--document cannot be combined with --routing');
