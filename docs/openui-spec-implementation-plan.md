@@ -1,7 +1,7 @@
 # OpenUI Specification Implementation Plan for `angular-django2` (`ngdj`)
 
 This plan describes how `angular-django2` (`ngdj`) implements the
-[OpenUI Specification](https://github.com/shlomoa/openui-spec), version 0.11.0
+[OpenUI Specification](https://github.com/shlomoa/openui-spec), version 0.12.0
 (`@shlomoa/openui-spec`, pinned in [`package.json`](../package.json)). It
 separates what is implemented today from what is planned.
 
@@ -55,11 +55,11 @@ it instead of repeating it.
 Current status: **partially met**.
 
 - **Object types**: met. Every document is validated by the canonical
-  `openui-spec` validator, which rejects types outside the 0.11.0 catalog.
+  `openui-spec` validator, which rejects types outside the 0.12.0 catalog.
 - **Application-scope attributes**: met. The attributes read on `Routing`,
   `Route`, `Navigation`, `NavItem`, `NavGroup`, `ToolBar`, `ToolAction`, `html`,
-  and `link` are 0.11.0 catalog attributes.
-- **Other attributes**: not met. The 0.11.0 catalog does not declare the
+  and `link` are 0.12.0 catalog attributes.
+- **Other attributes**: not met. The 0.12.0 catalog does not declare the
   following attributes for these instance types, so the attributes the
   schematics read on them are repository-local extensions. The validator
   accepts such a key, categorized (`uses.x`) or plain (`x`, spec 4.5), and does
@@ -82,11 +82,16 @@ Current status: **partially met**.
   - `uses.data` (`data-service`) and its `<apiPath>#<ApiService>` value format,
     written as an unquoted expression.
 
-Attribute values follow the typed rules of the spec: a string literal is quoted
-inside the string, booleans and numbers are JSON values, and an unquoted string
-is an expression. `readAstString` rejects an unquoted string, because it is an
-expression and not text; only Behaves, Produces and `uses.data` values are read
-as expressions (`readAstExpression`).
+Attribute values follow the rules of the spec: a value is a string, `null` or a
+list of those, and nothing else (no JSON number or Boolean). A string literal is
+quoted inside the string, a Boolean or number is an unquoted string (`"true"`,
+`"25"`), and any other unquoted string is an expression. `readAstString` rejects
+an unquoted string, because it is an expression and not text; only Behaves,
+Produces and `uses.data` values are read as expressions (`readAstExpression`).
+`readAstBoolean` accepts exactly `"true"` and `"false"` and `readAstNumber` a
+string that is a JSON number, because the schematics need the value at
+generation time and cannot evaluate an expression; both reject a quoted literal,
+any other expression and a list.
 
 ### 1.4 Parser ownership and integration status
 
@@ -117,6 +122,8 @@ as expressions (`readAstExpression`).
   - [#135](https://github.com/shlomoa/angular-django2/issues/135) /
     [#136](https://github.com/shlomoa/angular-django2/issues/136): openui-spec
     0.11.0 integration (typed attributes).
+  - [#140](https://github.com/shlomoa/angular-django2/issues/140): openui-spec
+    0.12.0 integration (attribute value grammar: a value is a string or `null`).
   - [#129](https://github.com/shlomoa/angular-django2/issues/129) /
     [#132](https://github.com/shlomoa/angular-django2/pull/132): `ToolBar`
     compilation.
@@ -155,7 +162,7 @@ the notes after the diagram); the widget scopes in §3 do not.
 graph TD
     subgraph Input["Input Boundary"]
         DOC["OpenUI JSON Document (app.openui.json)"]
-        PARSER["Canonical TypeScript Parser & Validator (@shlomoa/openui-spec 0.11.0)"]
+        PARSER["Canonical TypeScript Parser & Validator (@shlomoa/openui-spec 0.12.0)"]
         DOC --> PARSER
     end
 
@@ -264,7 +271,7 @@ What exists today:
 
 ## 3. Scope Implementation Matrix (Planned)
 
-Every row is **Planned**. Scope paths are canonical OpenUI 0.11.0
+Every row is **Planned**. Scope paths are canonical OpenUI 0.12.0
 `<category>/<id>` paths. The schematic names are proposed Angular / Material
 names, not OpenUI identifiers; for example, `accordion` does not appear in the
 OpenUI catalog, whose scope is `containers/expandablePanels`.
@@ -291,7 +298,7 @@ OpenUI catalog, whose scope is `containers/expandablePanels`.
 `Controls/Table/` scope was retired; `spec/scopes/Controls/` in 0.3.1 has no
 table scope.
 
-### Specification facts (OpenUI v0.3.1; the `table` contract is unchanged in 0.11.0)
+### Specification facts (OpenUI v0.3.1; the `table` contract is unchanged in 0.12.0)
 
 - **Identity**: scope `id: table`, scope `type: Table`. The instance element is
   `type: table`, with `tr` row children (`tableRow`).
@@ -342,6 +349,11 @@ table scope.
       ([#135](https://github.com/shlomoa/angular-django2/issues/135),
       [#136](https://github.com/shlomoa/angular-django2/issues/136)). The
       generated output is unchanged.
+- [ ] Migrate to openui-spec 0.12.0 (attribute value grammar): an attribute
+      value is a string, `null` or a list of those; booleans and numbers are
+      written as unquoted strings (`"true"`, `"25"`)
+      ([#140](https://github.com/shlomoa/angular-django2/issues/140)). Open:
+      the typed inputs of an embedded child component (`astInputBindings`).
 - [x] Compile `ToolBar` content
       ([#129](https://github.com/shlomoa/angular-django2/issues/129),
       [#132](https://github.com/shlomoa/angular-django2/pull/132); tests

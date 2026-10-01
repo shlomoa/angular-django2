@@ -37,8 +37,9 @@ For an end-to-end setup path, see the [tutorial](../TUTORIAL.md).
 The UI schematics also compile from an
 [OpenUI](https://github.com/shlomoa/openui-spec) JSON document: pass
 `--document=<path>` and, when the document holds several candidates,
-`--node-id=<id>`. Attributes are categorized (`uses.x`, `produces.x`, `behaves.x`) and typed: string
-literals are quoted inside the string, booleans and numbers are JSON values. Each command page has an _OpenUI_ section listing the node types
+`--node-id=<id>`. Attributes are categorized (`uses.x`, `produces.x`, `behaves.x`), and an attribute value is a string or
+`null`: string literals are quoted inside the string, booleans and numbers are written as unquoted strings
+(`"true"`, `"25"`). Each command page has an _OpenUI_ section listing the node types
 and attributes it accepts; the
 [repository requirements](https://github.com/shlomoa/angular-django2/blob/main/docs/REQUIREMENTS.md#openui-document-input-contracts)
 summarize them.
