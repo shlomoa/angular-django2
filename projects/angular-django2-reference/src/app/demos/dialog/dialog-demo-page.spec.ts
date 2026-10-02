@@ -1,7 +1,9 @@
 import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
+import { ConfirmDelete } from './confirm-delete/confirm-delete';
 import { DialogDemoPage } from './dialog-demo-page';
 
 function queryDocument<T extends Element>(selector: string): T | null {
@@ -147,6 +149,19 @@ describe('DialogDemoPage', () => {
     document.querySelector<HTMLButtonElement>('mat-dialog-actions button')?.click();
     await settle(fixture);
 
+    expect(page.querySelector('[data-testid="outcome"]')?.textContent).toContain(
+      'closed (produces.close)',
+    );
+  });
+
+  it('TC-DIALOG-DEMO-08: closing the open model closes the dialog and reports produces.close', async () => {
+    await openDialog();
+
+    const dialog = fixture.debugElement.query(By.directive(ConfirmDelete));
+    (dialog.componentInstance as ConfirmDelete).open.set(false);
+    await settle(fixture);
+
+    expect(queryDocument('[role="dialog"]')).toBeNull();
     expect(page.querySelector('[data-testid="outcome"]')?.textContent).toContain(
       'closed (produces.close)',
     );
