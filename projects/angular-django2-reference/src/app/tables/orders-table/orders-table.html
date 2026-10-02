@@ -1,0 +1,45 @@
+<div class="orders-table">
+  <mat-form-field class="orders-table__filter" subscriptSizing="dynamic">
+    <mat-label>{{ filterLabel() }}</mat-label>
+    <input matInput type="search" [value]="filterText()" (input)="onFilter($event)" />
+  </mat-form-field>
+  <div class="orders-table__scroll" role="region" tabindex="0" [attr.aria-label]="ariaLabel()">
+    <table
+      mat-table
+      [dataSource]="rows()"
+      matSort
+      [matSortActive]="sortActive()"
+      [matSortDirection]="sortDirection()"
+      (matSortChange)="onSort($event)"
+    >
+      @if (caption()) {
+        <caption [textContent]="caption()"></caption>
+      }
+      @for (column of columns(); track column.key) {
+        <ng-container [matColumnDef]="column.key">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            scope="col"
+            [mat-sort-header]="column.key"
+            [disabled]="!isSortable(column)"
+          >
+            {{ column.label }}
+          </th>
+          <td mat-cell *matCellDef="let row">{{ row[column.key] }}</td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="columnKeys(); sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnKeys()"></tr>
+    </table>
+  </div>
+  <mat-paginator
+    [length]="length()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="pageSizeOptions()"
+    showFirstLastButtons
+    aria-label="Select page of orders"
+    (page)="onPage($event)"
+  ></mat-paginator>
+</div>

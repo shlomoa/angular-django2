@@ -13,6 +13,7 @@
   <nav class="primary-nav" aria-label="Primary navigation">
     <a mat-button routerLink="/ui">UI</a>
     <a mat-button routerLink="/guides">Guides</a>
+    <a mat-button routerLink="/table">Table</a>
     <a mat-button routerLink="/" fragment="documentation">Documentation</a>
   </nav>
   <span class="toolbar-spacer"></span>
@@ -55,6 +56,10 @@
       <a mat-list-item routerLink="/guides" (click)="drawer.close()">
         <mat-icon matListItemIcon>menu_book</mat-icon>
         <span matListItemTitle>Guides</span>
+      </a>
+      <a mat-list-item routerLink="/widgets/stepper" (click)="drawer.close()">
+        <mat-icon matListItemIcon>linear_scale</mat-icon>
+        <span matListItemTitle>Stepper widget</span>
       </a>
       <a
         mat-list-item

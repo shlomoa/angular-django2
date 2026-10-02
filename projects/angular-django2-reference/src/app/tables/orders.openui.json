@@ -1,0 +1,21 @@
+{
+  "version": "0.12.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "orders",
+      "type": "table",
+      "attrs": {
+        "behaves.sort": "sortOrders($event)",
+        "behaves.filter": "filterOrders($event)",
+        "behaves.paginate": "paginateOrders($event)"
+      },
+      "children": [
+        { "id": "ordersCaption", "type": "caption" },
+        { "id": "ordersHeader", "type": "thead" },
+        { "id": "ordersRow", "type": "tr" }
+      ]
+    }
+  ]
+}

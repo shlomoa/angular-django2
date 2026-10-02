@@ -1,0 +1,51 @@
+<mat-stepper
+  [linear]="linear()"
+  [orientation]="orientation()"
+  [selectedIndex]="selectedIndex()"
+  (selectionChange)="onSelectionChange($event)"
+>
+  <mat-step label="Account">
+    <header>
+      <!-- Begin step-account-header section -->
+      <!-- End step-account-header section -->
+    </header>
+    <!-- Begin step-account-children section -->
+    <app-account-panel></app-account-panel>
+    <!-- End step-account-children section -->
+    <footer>
+      <!-- Begin step-account-actions section -->
+      <!-- End step-account-actions section -->
+      <button mat-button type="button" matStepperNext>Next</button>
+    </footer>
+  </mat-step>
+  <mat-step label="Preferences" [optional]="true">
+    <header>
+      <!-- Begin step-preferences-header section -->
+      <!-- End step-preferences-header section -->
+    </header>
+    <!-- Begin step-preferences-children section -->
+    <app-preferences-panel></app-preferences-panel>
+    <!-- End step-preferences-children section -->
+    <footer>
+      <!-- Begin step-preferences-actions section -->
+      <!-- End step-preferences-actions section -->
+      <button mat-button type="button" matStepperPrevious>Back</button>
+      <button mat-button type="button" matStepperNext>Next</button>
+    </footer>
+  </mat-step>
+  <mat-step label="Confirm">
+    <header>
+      <!-- Begin step-confirm-header section -->
+      <!-- End step-confirm-header section -->
+    </header>
+    <!-- Begin step-confirm-children section -->
+    <app-confirm-panel></app-confirm-panel>
+    <!-- End step-confirm-children section -->
+    <footer>
+      <!-- Begin step-confirm-actions section -->
+      <!-- End step-confirm-actions section -->
+      <button mat-button type="button" matStepperPrevious>Back</button>
+      <button mat-flat-button type="button" (click)="finish()">Finish</button>
+    </footer>
+  </mat-step>
+</mat-stepper>

@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+
+.stepper-demo {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  width: 100%;
+}
+
+.stepper-demo__header {
+  display: grid;
+  gap: 1rem;
+}
+
+.stepper-demo__header h2 {
+  color: var(--mat-sys-on-surface);
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.stepper-demo__eyebrow {
+  color: var(--mat-sys-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.stepper-demo__header p:not(.stepper-demo__eyebrow) {
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.6;
+  margin: 0;
+  max-inline-size: 70ch;
+}
+
+.stepper-demo__command {
+  background: var(--mat-sys-surface-container-high);
+  border-radius: 12px;
+  margin: 0;
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.stepper-demo__status {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}
+
+.stepper-demo__done {
+  color: var(--mat-sys-primary);
+}

@@ -36,15 +36,15 @@ it instead of repeating it.
   takes `--document` (and, for most, `--nodeId`) and compiles one node and its
   subtree: `reactive-form`, `form-field`, `field-component`, `component`,
   `complex-component`, `page`, `application`, `material-app`,
-  `workspace-setup`, and `data-service`. `material-setup` and `app-shell` are
+  `workspace-setup`, `data-service`, and `table`. `material-setup` and `app-shell` are
   CLI-driven by design. Evidence: the mapping document and the specs under
   `projects/angular-django-validation/unit/schematics/`.
 - **No schematic compiles a whole document.** Selecting artifacts and
   orchestrating schematics across a whole application belongs to
   `django-angular3` (`djng`), per the ownership boundary in
   [#27](https://github.com/shlomoa/angular-django2/issues/27).
-- **The component widgets in §3 are not implemented.** Documents that contain
-  them cannot be compiled yet.
+- **The component widgets in §3 are not implemented**, except `widgets/table`
+  (§4). Documents that contain the other widgets cannot be compiled yet.
 
 ### 1.3 Target constraint: spec-defined identifiers only
 
@@ -213,9 +213,12 @@ What exists today:
 - **Layer 3**, in part: `openapi-setup` generates Django CSRF, credential, and
   auth transport helpers; `data-service` generates data services with a DRF
   `results` / `count` response adapter; `page` registers auth guards.
-- **Not implemented**: the table behaviour bindings (`behaves.sort`,
-  `behaves.filter`, `behaves.paginate`), invoking
-  `@angular/material` schematics, and Django template view adapters.
+- **Implemented in `table`**: the behaviour bindings (`behaves.sort`,
+  `behaves.filter`, `behaves.paginate`) wired to generated handlers and
+  outputs, and DRF `limit`/`offset` and `ordering` helpers.
+- **Not implemented**: search/filter query sync, the `data-service` binding of
+  `table`, invoking `@angular/material` schematics, and Django template view
+  adapters.
 
 ### Layer 1: HTML5 + JavaScript (Web Standards Baseline)
 
@@ -273,17 +276,17 @@ What exists today:
 
 ## 3. Scope Implementation Matrix (Planned)
 
-Every row is **Planned**. Scope paths are canonical OpenUI 0.12.0
-`<category>/<id>` paths. The schematic names are proposed Angular / Material
+Every row is **Planned** unless its status says otherwise. Scope paths are canonical
+OpenUI 0.12.0 `<category>/<id>` paths. The schematic names are proposed Angular / Material
 names, not OpenUI identifiers; for example, `accordion` does not appear in the
 OpenUI catalog, whose scope is `containers/expandablePanels`.
 
 | OpenUI scope                  | Status  | Proposed schematic | Layer 1 building blocks                                                   | Layer 2 building blocks                           | Layer 3 `ngdj` specifics                                                 |
 | :---------------------------- | :------ | :----------------- | :------------------------------------------------------------------------ | :------------------------------------------------ | :----------------------------------------------------------------------- |
-| `widgets/table`               | Planned | `table`            | `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, ARIA table roles | `MatTable`, `MatSort`, `MatPaginator`             | DRF pagination adapter, search/filter query sync, `data-service` binding |
+| `widgets/table`               | Direct  | `table`            | `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, ARIA table roles | `MatTable`, `MatSort`, `MatPaginator`             | DRF pagination adapter, search/filter query sync, `data-service` binding |
 | `widgets/dataGrid`            | Planned | `data-grid`        | ARIA grid pattern, keyboard cell navigation                               | CDK Table, virtual scroll                         | Editable cells, multi-select, DRF batch updates                          |
 | `widgets/dialog`              | Planned | `dialog`           | Native `<dialog>`, focus trap                                             | `MatDialogModule`, CDK A11y                       | Strongly typed launch service, Django CRUD submit integration            |
-| `widgets/stepper`             | Planned | `stepper`          | Form validation events                                                    | `MatStepperModule`, `MatStep`                     | Multi-step `reactive-form` binding, draft state persistence              |
+| `widgets/stepper`             | Direct  | `stepper`          | Form validation events                                                    | `MatStepperModule`, `MatStep`                     | Multi-step `reactive-form` binding, draft state persistence              |
 | `containers/tabs`             | Planned | `tabs`             | ARIA tablist/tabpanel                                                     | `MatTabsModule`, CDK Portal                       | Lazy-loaded tab bodies via `embed-component`                             |
 | `containers/expandablePanels` | Planned | `accordion`        | `<details>/<summary>`, ARIA accordion                                     | `MatExpansionModule`                              | Multi/single expand mode, `embed-component` child slots                  |
 | `containers/sheetContainers`  | Planned | `bottom-sheet`     | CSS backdrop, touch drag                                                  | `MatBottomSheetModule`, CDK Overlay               | Dismiss gestures, mobile action sheet layout                             |
@@ -294,7 +297,7 @@ OpenUI catalog, whose scope is `containers/expandablePanels`.
 
 ---
 
-## 4. First Focus: `widgets/table` (Planned)
+## 4. First Focus: `widgets/table` (Implemented)
 
 `table` is a single specification concept under `widgets/`. The former
 `Controls/Table/` scope was retired; `spec/scopes/Controls/` in 0.3.1 has no
@@ -327,21 +330,30 @@ table scope.
   `produces.selectionChange`); loading, error and empty state (composed from the
   status indicator or feedback scopes). The catalog has no `Pagination` or
   `EmptyState` type.
-- **Open: columns and cells.** The scope declares no column attribute, and `th`
-  and `td` are not known object types (the validator reports
-  `catalog/unknown-type`); a `tr` is only a row. Undeclared `uses.*` keys on
-  `table` and `thead` are accepted as extension attributes. How the first
-  version expresses columns is decided in
-  [#142](https://github.com/shlomoa/angular-django2/issues/142).
+- **Columns and cells (decided in
+  [#142](https://github.com/shlomoa/angular-django2/issues/142)).** The scope
+  declares no column attribute, and `th` and `td` are not known object types
+  (the validator reports `catalog/unknown-type`); a `tr` is only a row. The
+  first version takes the column definitions from the host together with the
+  rows, and the document says nothing about columns: no `uses.columns`
+  extension is introduced. The schematic accepts only the three behaviours on
+  `table` and only `caption`, `thead` and `tr` children, and rejects everything
+  else.
 
-### Three-layer structure of `ngdj:table` (Planned)
+### Three-layer structure of `ngdj:table` (Implemented)
 
 1. **Layer 1**: semantic `<table>` with `role="table"`, a responsive horizontal
    scroll container, and a sticky `<th>` header row.
 2. **Layer 2**: Angular Material `mat-table` with `MatSortModule`
    (`mat-sort-header`) and `MatPaginatorModule` (`mat-paginator`).
-3. **Layer 3**: strongly typed standalone OnPush component wired to
-   `ngdj:data-service` and DRF pagination conventions.
+3. **Layer 3**: strongly typed standalone OnPush component whose sort, filter
+   and page outputs the host binds to its handlers, with DRF pagination and
+   ordering helpers. The `ngdj:data-service` binding and search/filter query
+   sync are not generated.
+
+The schematic is documented in [`cli/table.md`](cli/table.md); its tests are
+`TC-TABLE-01…18` in `schematics.table.spec.ts`, and the reference application
+hosts its output at `/table`.
 
 ---
 
@@ -381,9 +393,9 @@ Each item has a tracking issue. Missing scopes that are tracked are listed in
 [`ngdj-openui-spec-mapping.md`](ngdj-openui-spec-mapping.md) §5.
 
 - **Data presentation and dialogs**:
-  - [ ] `table` (`widgets/table`) ([#142](https://github.com/shlomoa/angular-django2/issues/142))
+  - [x] `table` (`widgets/table`) ([#142](https://github.com/shlomoa/angular-django2/issues/142))
   - [ ] `dialog` (`widgets/dialog`) ([#144](https://github.com/shlomoa/angular-django2/issues/144))
-  - [ ] `stepper` (`widgets/stepper`) ([#145](https://github.com/shlomoa/angular-django2/issues/145))
+  - [x] `stepper` (`widgets/stepper`) ([#145](https://github.com/shlomoa/angular-django2/issues/145))
 - **Containers and navigation**:
   - [ ] `tabs` (`containers/tabs`) ([#146](https://github.com/shlomoa/angular-django2/issues/146))
   - [ ] `accordion` (`containers/expandablePanels`) ([#147](https://github.com/shlomoa/angular-django2/issues/147))

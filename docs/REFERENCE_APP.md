@@ -40,10 +40,14 @@ projects/angular-django2-reference/src/app/
 │       ├── command-visualizer.ts  # Dynamic micro-sandboxes & terminal simulation
 │       ├── command-visualizer.scss# Scoped visualizer layout
 │       └── command-visualizer.spec.ts
-└── guides/
-    ├── guides-catalog.ts          # Step-by-step tutorial guides metadata
-    ├── guides-overview-page.ts    # Guide overview cards
-    └── guides-detail-page.ts      # Multi-step tutorial detail view
+├── guides/
+│   ├── guides-catalog.ts          # Step-by-step tutorial guides metadata
+│   ├── guides-overview-page.ts    # Guide overview cards
+│   └── guides-detail-page.ts      # Multi-step tutorial detail view
+└── widgets/
+    ├── onboarding.openui.json     # OpenUI Stepper document compiled by the stepper schematic
+    ├── onboarding/                # stepper schematic output for that document
+    └── stepper-demo-page.ts       # /widgets/stepper demonstration page
 ```
 
 ### Core Layer
@@ -66,6 +70,13 @@ projects/angular-django2-reference/src/app/
   - **`application`**: Renders an architecture matrix showcasing zoneless change detection and standalone routing.
   - **Terminal Simulation**: Displays Catppuccin-styled CLI output demonstrating schematic execution.
   - **Workspace File Tree**: Details file creation and update actions (`CREATE`, `UPDATE`).
+
+### Table Demonstration
+
+- `/table` (`src/app/tables`) hosts the unmodified output of the `table` schematic for `orders.openui.json`
+  (`orders-table/`). `TableDemoPage` is the host: it supplies the columns and the rows and handles the sort,
+  filter and page operations the document binds, against an in-memory stand-in for a Django REST framework list
+  endpoint (`orders-data.ts`).
 
 ### Interactive Guides Section
 

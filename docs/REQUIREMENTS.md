@@ -105,6 +105,8 @@ sources over lower-priority ones.
   - `openapi-setup`
   - `data-service`
   - `page`
+  - `stepper`
+  - `table`
 - The documented defaults and behavior currently expected are:
   - `ng-add`: register or prepend `angular-django2` in
     `cli.schematicCollections`
@@ -122,6 +124,15 @@ sources over lower-priority ones.
     routes only reference an already configured reusable guard and backend
     authorization remains authoritative; the schematic does not generate API
     clients, forms, shared components, or site-wide policy.
+  - `stepper`: compile an OpenUI `Stepper` node (`--document`; there is no
+    CLI-only mode) into a standalone `OnPush` Angular Material stepper
+    component with one `mat-step` per `step` child. It requires
+    `@angular/material` and `@angular/cdk` and validates the document, the
+    stepper and step attributes, and the step content before writing any file.
+    `uses.selectedIndex`, `uses.linear`, `uses.orientation`,
+    `produces.selectionChange` and `produces.complete` are compiled;
+    `uses.branching`, other attributes and other child types are rejected.
+    Step content is compiled and embedded by `uses.slot` as in `component`.
   - `embed-component`: wire a child component into a parent using the embedding
     hooks. In file mode, options are `--component` (child component `.ts` path)
     and `--parent` (parent component `.ts` path). In package mode (add
@@ -179,6 +190,21 @@ sources over lower-priority ones.
     Generation is create-only: a rerun leaves existing output untouched, and
     partial output fails. It requires `@angular/forms`, `@angular/material`,
     and `@angular/cdk` before mutation.
+  - `table`: compile an OpenUI `table` element (`--document`, `--node-id`; a
+    document is required) into a standalone `OnPush` Angular Material table
+    (`MatTable`, `MatSort`, `MatPaginator`) in `--path` (default
+    `src/app/shared/tables`) inside the selected application's source root. It
+    requires `@angular/material` and `@angular/cdk` before mutation and rejects
+    collisions before writes. The host supplies the column definitions together
+    with the rows; the document describes no column or cell. `behaves.sort`,
+    `behaves.filter` and `behaves.paginate` (host handler calls such as
+    `sortOrders($event)`) select the sorting, the filter field and the paginator
+    and are wired to the `sorted`, `filtered` and `paginated` outputs, which the
+    host handles; the component never sorts, filters or pages the rows.
+    Django REST framework `limit`/`offset` and `ordering` helpers are generated
+    with the paging and sorting features. Any attribute other than the three
+    behaviours, any child other than `caption`, `thead` and `tr`, and any child
+    of those, is rejected.
   - `service`, `class`, and `app-shell`: pass-through behavior
   - `material-setup`: configure Angular Material theming (prebuilt or custom)
     and providers in an existing project; options: `--theme`, `--typography`,
@@ -244,9 +270,11 @@ sources over lower-priority ones.
   | [`component`](cli/component.md#openui-surface-containers)                                                                            | `SurfaceContainers`; children compiled and embedded by `uses.slot`                                                                     |
   | [`complex-component`](cli/complex-component.md#openui-composite-containers)                                                          | `SurfaceContainers` as a Material card; optional `OverlayContainers` child                                                             |
   | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `uses.slot` sections                                                            |
+  | [`stepper`](cli/stepper.md#openui-stepper-nodes)                                                                                     | `Stepper` with `step` children (`uses.label`, `uses.optional`); step content composed by `uses.slot`                                   |
   | [`page`](cli/page.md#openui-page-nodes)                                                                                              | `DashboardPage` or `EmptyPage` with `uses.title`, `uses.route`, `uses.icon`, `uses.access`, `uses.authGuard`                           |
   | [`application`](cli/application.md#openui-application-documents), [`material-app`](cli/material-app.md#openui-application-documents) | `Application` with `Routing`, `Navigation`, `ToolBar`, `Presentation`; `material-app` renders validated toolbar rows and sidenav links |
   | [`workspace-setup`](cli/workspace-setup.md#openui-host-documents)                                                                    | `html` (`uses.lang`, `uses.dir`, `uses.title`) and `link` (`uses.rel`, `uses.href`)                                                    |
+  | [`table`](cli/table.md#openui-table-elements)                                                                                        | `table` with `caption`, `thead`, `tr` children and `behaves.sort`, `behaves.filter`, `behaves.paginate` host handler expressions       |
   | [`data-service`](cli/data-service.md#openui-data-bindings)                                                                           | any element with `uses.data` = `<apiPath>#<ApiService>` (unquoted)                                                                     |
 
 - `app-shell`, `material-setup`, `openapi-setup`, `project-structure`,

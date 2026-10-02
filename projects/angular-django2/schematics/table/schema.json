@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Table",
+  "title": "angular-django2 OpenUI table schematic",
+  "description": "Compile an OpenUI table element into a standalone OnPush Angular Material table component. Writes <name>-table.ts (component, column and page types, Django REST framework helpers), <name>-table.html (Material table, filter field, paginator) and <name>-table.scss to <path>/<name>-table. The host supplies the columns and the rows and handles the sort, filter and page outputs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["document"],
+  "properties": {
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a table node; behaves.sort, behaves.filter and behaves.paginate select the generated features."
+    },
+    "name": {
+      "type": "string",
+      "description": "Kebab-case name for the table component. Defaults to the dasherized id of the table node.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "default": "src/app/shared/tables",
+      "description": "Destination directory within the selected application's source root."
+    },
+    "project": {
+      "type": "string",
+      "description": "Target application project. Required when more than one application is available."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID within the OpenUI document to compile. When omitted, targets the first table element.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
+    }
+  }
+}

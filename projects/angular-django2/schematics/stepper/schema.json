@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Stepper",
+  "title": "angular-django2 stepper schematic",
+  "description": "Compile an OpenUI Stepper element (widgets/stepper) into a standalone OnPush Angular Material stepper component.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "description": "Kebab-case component name. Defaults to the dasherized node id.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "Destination directory within the selected application's source root. Defaults to <sourceRoot>/app."
+    },
+    "project": {
+      "type": "string",
+      "description": "Angular application project. Required when the workspace has more than one application."
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a Stepper node: uses.selectedIndex, uses.linear, uses.orientation, produces.selectionChange and produces.complete; uses.branching is not supported. Each step child (uses.label, uses.optional) has its children compiled and embedded by uses.slot."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID within the OpenUI document to compile. When omitted, targets the first Stepper element. Requires --document.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
+    }
+  },
+  "required": ["document"]
+}
