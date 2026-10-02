@@ -108,16 +108,15 @@ export function dialogOptionsFromAst(
   assertNoModalOverlay(document, node, documentPath);
 
   const regions = regionsFromAst(node, documentPath);
-  const title = regions.find((region) => region.node.type === 'header');
-  const titleSubject = title && astNodeSubject(documentPath, title.node);
+  const titleRegion = regions.find((region) => region.node.type === 'header')?.node;
 
   return {
     open: readAstBoolean(node, DIALOG_ATTRIBUTES.open, subject) ?? false,
     modal: readAstBoolean(node, DIALOG_ATTRIBUTES.modal, subject) ?? true,
     close: readMarker(node, DIALOG_ATTRIBUTES.close, subject),
     cancel: readMarker(node, DIALOG_ATTRIBUTES.cancel, subject),
-    title: title && readTitle(title.node, titleSubject as string),
-    hasTitleRegion: title !== undefined,
+    title: titleRegion && readTitle(titleRegion, astNodeSubject(documentPath, titleRegion)),
+    hasTitleRegion: titleRegion !== undefined,
     hasActionsRegion: regions.some((region) => region.node.type === 'footer'),
     regions,
   };
