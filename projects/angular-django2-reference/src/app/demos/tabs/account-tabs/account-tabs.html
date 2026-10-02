@@ -1,0 +1,22 @@
+<mat-tab-group [(selectedIndex)]="selectedIndex" (selectedTabChange)="emitTabChange($event)">
+  <mat-tab label="Profile">
+    <ng-template matTabContent>
+      <!-- Begin tab-profile-tab section -->
+      <app-profile-card></app-profile-card>
+      <!-- End tab-profile-tab section -->
+    </ng-template>
+  </mat-tab>
+  <mat-tab label="Billing">
+    <ng-template matTabContent>
+      <!-- Begin tab-billing-tab section -->
+      <app-billing-card></app-billing-card>
+      <!-- End tab-billing-tab section -->
+    </ng-template>
+  </mat-tab>
+  <mat-tab label="Archive" [disabled]="true">
+    <ng-template matTabContent>
+      <!-- Begin tab-archive-tab section -->
+      <!-- End tab-archive-tab section -->
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

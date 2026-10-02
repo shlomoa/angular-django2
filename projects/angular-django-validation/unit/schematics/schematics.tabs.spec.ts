@@ -170,7 +170,7 @@ describe('tabs schematic (containers/tabs)', () => {
       expect(source).toContain('readonly selectedTabChange = output<ViewTabsTabChange>();');
       expect(source).toContain('export interface ViewTabsTabChange {');
       expect(source).toContain(
-        "import { MatTabChangeEvent, MatTabsModule } from '@angular/material/tabs';",
+        "import type { MatTabChangeEvent } from '@angular/material/tabs';\nimport { MatTabsModule } from '@angular/material/tabs';",
       );
       expect(source).toContain(
         'this.selectedTabChange.emit({ index: event.index, label: event.tab.textLabel });',

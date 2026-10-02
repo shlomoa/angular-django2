@@ -185,10 +185,6 @@ function horizontalComponentSource(names: TabsComponentNames, options: TabsAstOp
     'model',
     ...(options.selectedTabChange ? ['output'] : []),
   ];
-  const materialImports = [
-    ...(options.selectedTabChange ? ['MatTabChangeEvent'] : []),
-    'MatTabsModule',
-  ];
   const outputs = options.selectedTabChange
     ? `${SELECTED_TAB_CHANGE_DOC}
   readonly selectedTabChange = output<${changeEventName(names)}>();
@@ -204,7 +200,7 @@ function horizontalComponentSource(names: TabsComponentNames, options: TabsAstOp
 
   return `// Begin import section
 import { ${coreImports.join(', ')} } from '@angular/core';
-import { ${materialImports.join(', ')} } from '@angular/material/tabs';
+${options.selectedTabChange ? "import type { MatTabChangeEvent } from '@angular/material/tabs';\n" : ''}import { MatTabsModule } from '@angular/material/tabs';
 // End import section
 
 ${options.selectedTabChange ? `${changeEventInterface(names)}\n` : ''}@Component({
@@ -304,7 +300,8 @@ ${outputs}  // End output signals section
 
     event.preventDefault();
     this.selectTab(index);
-    (event.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('[role="tab"]')[index]?.focus();
+    const tabs = (event.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('[role="tab"]');
+    tabs[index]?.focus();
   }
 
   private keyTarget(key: string): number | undefined {
