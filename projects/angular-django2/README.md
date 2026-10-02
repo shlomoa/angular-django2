@@ -59,6 +59,10 @@ The collection provides 18 specialized schematics grouped by functional domain:
 - **`field-component`**: Generates a convenience façade component wrapping canonical form fields.
 - **`reactive-form`**: Generates a strictly typed standalone OnPush Angular Material reactive form from a declarative JSON schema definition, complete with Django REST Framework error handling and initial value restoration.
 
+### Data Presentation
+
+- **`table`**: Compiles an OpenUI `table` element (`--document`) into a standalone OnPush Angular Material table; `behaves.sort`, `behaves.filter` and `behaves.paginate` select Material sorting, a filter field and paging, wired to outputs the host handles, and the host supplies the columns and rows.
+
 ### Routing & Architecture
 
 - **`page`**: Generates a standalone OnPush Angular Material routed page with its own lazy `Routes` definition and navigation metadata.

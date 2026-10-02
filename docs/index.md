@@ -31,6 +31,7 @@ and Material 3 theming demonstrations. See the
   [form-field](cli/form-field.md), or
   [reactive-form](cli/reactive-form.md)
 - **Pages:** [page](cli/page.md)
+- **Data presentation:** [table](cli/table.md)
 - **OpenAPI integration:** [openapi-setup](cli/openapi-setup.md) and
   [data-service](cli/data-service.md)
 

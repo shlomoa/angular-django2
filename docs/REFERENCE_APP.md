@@ -67,6 +67,13 @@ projects/angular-django2-reference/src/app/
   - **Terminal Simulation**: Displays Catppuccin-styled CLI output demonstrating schematic execution.
   - **Workspace File Tree**: Details file creation and update actions (`CREATE`, `UPDATE`).
 
+### Table Demonstration
+
+- `/table` (`src/app/tables`) hosts the unmodified output of the `table` schematic for `orders.openui.json`
+  (`orders-table/`). `TableDemoPage` is the host: it supplies the columns and the rows and handles the sort,
+  filter and page operations the document binds, against an in-memory stand-in for a Django REST framework list
+  endpoint (`orders-data.ts`).
+
 ### Interactive Guides Section
 
 The reference application provides a dedicated guides section at `/guides` that walks through package capabilities:

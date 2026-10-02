@@ -98,6 +98,9 @@ Current E2E coverage includes:
   verified with a development build
 - `E2E-09` — `page` generation in a real routed Angular Material workspace,
   verifying its lazy route and a development build
+- `E2E-TABLE-01` — `table` generation from an OpenUI document, hosted with
+  host-supplied columns and rows and the three behaviours bound, verified with
+  a development build
 - `E2E-11` — one-step app flow (`material-app`), verifying a production build and
   that the responsive Material sidenav layout, theme, and standard structure are
   present
