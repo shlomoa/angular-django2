@@ -46,6 +46,6 @@ describe('reference app routes', () => {
   });
 
   it('lazy-loads the dialog demonstration page', async () => {
-    await expect(routes[5].loadComponent?.()).resolves.toBe(DialogDemoPage);
+    await expect(routes[6].loadComponent?.()).resolves.toBe(DialogDemoPage);
   });
 });
