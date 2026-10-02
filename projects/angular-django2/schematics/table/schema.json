@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/schema",
   "$id": "AngularDjango2Table",
   "title": "angular-django2 OpenUI table schematic",
-  "description": "Compile an OpenUI table element into a standalone OnPush Angular Material table component.",
+  "description": "Compile an OpenUI table element into a standalone OnPush Angular Material table component. Writes <name>-table.ts (component, column and page types, Django REST framework helpers), <name>-table.html (Material table, filter field, paginator) and <name>-table.scss to <path>/<name>-table. The host supplies the columns and the rows and handles the sort, filter and page outputs.",
   "type": "object",
   "additionalProperties": false,
   "required": ["document"],
