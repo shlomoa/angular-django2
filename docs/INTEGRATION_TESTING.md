@@ -98,6 +98,9 @@ Current E2E coverage includes:
   verified with a development build
 - `E2E-09` — `page` generation in a real routed Angular Material workspace,
   verifying its lazy route and a development build
+- `E2E-TABLE-01` — `table` generation from an OpenUI document, hosted with
+  host-supplied columns and rows and the three behaviours bound, verified with
+  a development build
 - `E2E-DIALOG-01` — `dialog` generation from an OpenUI document with title,
   content, and actions children, hosted in a real Angular Material workspace and
   verified with a development build that type-checks the `[(open)]`, `modal`,

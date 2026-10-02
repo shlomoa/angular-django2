@@ -51,6 +51,11 @@
       "factory": "./field-component/index#fieldComponent",
       "schema": "./field-component/schema.json"
     },
+    "table": {
+      "description": "Compile an OpenUI table element into a standalone OnPush Angular Material table component.",
+      "factory": "./table/index#table",
+      "schema": "./table/schema.json"
+    },
     "form-field": {
       "description": "Generate a configurable standalone typed ControlValueAccessor Angular Material form field.",
       "factory": "./form-field/index#formField",

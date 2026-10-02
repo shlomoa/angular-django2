@@ -71,6 +71,13 @@ projects/angular-django2-reference/src/app/
   - **Terminal Simulation**: Displays Catppuccin-styled CLI output demonstrating schematic execution.
   - **Workspace File Tree**: Details file creation and update actions (`CREATE`, `UPDATE`).
 
+### Table Demonstration
+
+- `/table` (`src/app/tables`) hosts the unmodified output of the `table` schematic for `orders.openui.json`
+  (`orders-table/`). `TableDemoPage` is the host: it supplies the columns and the rows and handles the sort,
+  filter and page operations the document binds, against an in-memory stand-in for a Django REST framework list
+  endpoint (`orders-data.ts`).
+
 ### Dialog Demonstration
 
 The reference application demonstrates the [`dialog`](cli/dialog.md) schematic at `/demos/dialog`. The page opens `confirm-delete`, the component the schematic generates from `confirm-delete.openui.json`, in modal or non-modal mode and reports whether it was closed (`produces.close`) or dismissed with Escape or a backdrop click (`produces.cancel`).
