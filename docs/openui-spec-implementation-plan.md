@@ -276,23 +276,24 @@ What exists today:
 
 ## 3. Scope Implementation Matrix (Planned)
 
-Every row is **Planned**; `widgets/table`, the first focus, is Implemented (§4). Scope paths are canonical OpenUI 0.12.0
-`<category>/<id>` paths. The schematic names are proposed Angular / Material
+Every row is **Planned** unless its status says otherwise. Scope paths are canonical
+OpenUI 0.12.0 `<category>/<id>` paths. The schematic names are proposed Angular / Material
 names, not OpenUI identifiers; for example, `accordion` does not appear in the
 OpenUI catalog, whose scope is `containers/expandablePanels`.
 
-| OpenUI scope                  | Status  | Proposed schematic | Layer 1 building blocks                     | Layer 2 building blocks                           | Layer 3 `ngdj` specifics                                      |
-| :---------------------------- | :------ | :----------------- | :------------------------------------------ | :------------------------------------------------ | :------------------------------------------------------------ |
-| `widgets/dataGrid`            | Planned | `data-grid`        | ARIA grid pattern, keyboard cell navigation | CDK Table, virtual scroll                         | Editable cells, multi-select, DRF batch updates               |
-| `widgets/dialog`              | Planned | `dialog`           | Native `<dialog>`, focus trap               | `MatDialogModule`, CDK A11y                       | Strongly typed launch service, Django CRUD submit integration |
-| `widgets/stepper`             | Planned | `stepper`          | Form validation events                      | `MatStepperModule`, `MatStep`                     | Multi-step `reactive-form` binding, draft state persistence   |
-| `containers/tabs`             | Planned | `tabs`             | ARIA tablist/tabpanel                       | `MatTabsModule`, CDK Portal                       | Lazy-loaded tab bodies via `embed-component`                  |
-| `containers/expandablePanels` | Planned | `accordion`        | `<details>/<summary>`, ARIA accordion       | `MatExpansionModule`                              | Multi/single expand mode, `embed-component` child slots       |
-| `containers/sheetContainers`  | Planned | `bottom-sheet`     | CSS backdrop, touch drag                    | `MatBottomSheetModule`, CDK Overlay               | Dismiss gestures, mobile action sheet layout                  |
-| `widgets/menuWidgets`         | Planned | `menu`             | ARIA menu/menuitem, keyboard navigation     | `MatMenuModule`, `MatMenuTrigger`                 | Context menus, nested cascading menus, route-link integration |
-| `widgets/feedbackWidgets`     | Planned | `feedback`         | Live regions (`aria-live`)                  | `MatSnackBarModule`, CDK LiveAnnouncer            | Django messages framework adapter, HTTP error interceptor     |
-| `widgets/dateTimePickers`     | Planned | `date-picker`      | Native `<input type="date">`                | `MatDatepickerModule`, `provideNativeDateAdapter` | Date range support, Django ISO-8601 formatting                |
-| `widgets/chart`               | Planned | `chart`            | SVG primitives, Canvas API                  | Angular chart adapter (SVG/CDK)                   | DRF aggregation API data binding, responsive resizing         |
+| OpenUI scope                  | Status  | Proposed schematic | Layer 1 building blocks                                                   | Layer 2 building blocks                           | Layer 3 `ngdj` specifics                                                 |
+| :---------------------------- | :------ | :----------------- | :------------------------------------------------------------------------ | :------------------------------------------------ | :----------------------------------------------------------------------- |
+| `widgets/table`               | Direct  | `table`            | `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, ARIA table roles | `MatTable`, `MatSort`, `MatPaginator`             | DRF pagination adapter, search/filter query sync, `data-service` binding |
+| `widgets/dataGrid`            | Planned | `data-grid`        | ARIA grid pattern, keyboard cell navigation                               | CDK Table, virtual scroll                         | Editable cells, multi-select, DRF batch updates                          |
+| `widgets/dialog`              | Planned | `dialog`           | Native `<dialog>`, focus trap                                             | `MatDialogModule`, CDK A11y                       | Strongly typed launch service, Django CRUD submit integration            |
+| `widgets/stepper`             | Direct  | `stepper`          | Form validation events                                                    | `MatStepperModule`, `MatStep`                     | Multi-step `reactive-form` binding, draft state persistence              |
+| `containers/tabs`             | Planned | `tabs`             | ARIA tablist/tabpanel                                                     | `MatTabsModule`, CDK Portal                       | Lazy-loaded tab bodies via `embed-component`                             |
+| `containers/expandablePanels` | Planned | `accordion`        | `<details>/<summary>`, ARIA accordion                                     | `MatExpansionModule`                              | Multi/single expand mode, `embed-component` child slots                  |
+| `containers/sheetContainers`  | Planned | `bottom-sheet`     | CSS backdrop, touch drag                                                  | `MatBottomSheetModule`, CDK Overlay               | Dismiss gestures, mobile action sheet layout                             |
+| `widgets/menuWidgets`         | Planned | `menu`             | ARIA menu/menuitem, keyboard navigation                                   | `MatMenuModule`, `MatMenuTrigger`                 | Context menus, nested cascading menus, route-link integration            |
+| `widgets/feedbackWidgets`     | Planned | `feedback`         | Live regions (`aria-live`)                                                | `MatSnackBarModule`, CDK LiveAnnouncer            | Django messages framework adapter, HTTP error interceptor                |
+| `widgets/dateTimePickers`     | Planned | `date-picker`      | Native `<input type="date">`                                              | `MatDatepickerModule`, `provideNativeDateAdapter` | Date range support, Django ISO-8601 formatting                           |
+| `widgets/chart`               | Planned | `chart`            | SVG primitives, Canvas API                                                | Angular chart adapter (SVG/CDK)                   | DRF aggregation API data binding, responsive resizing                    |
 
 ---
 
@@ -394,7 +395,7 @@ Each item has a tracking issue. Missing scopes that are tracked are listed in
 - **Data presentation and dialogs**:
   - [x] `table` (`widgets/table`) ([#142](https://github.com/shlomoa/angular-django2/issues/142))
   - [ ] `dialog` (`widgets/dialog`) ([#144](https://github.com/shlomoa/angular-django2/issues/144))
-  - [ ] `stepper` (`widgets/stepper`) ([#145](https://github.com/shlomoa/angular-django2/issues/145))
+  - [x] `stepper` (`widgets/stepper`) ([#145](https://github.com/shlomoa/angular-django2/issues/145))
 - **Containers and navigation**:
   - [ ] `tabs` (`containers/tabs`) ([#146](https://github.com/shlomoa/angular-django2/issues/146))
   - [ ] `accordion` (`containers/expandablePanels`) ([#147](https://github.com/shlomoa/angular-django2/issues/147))

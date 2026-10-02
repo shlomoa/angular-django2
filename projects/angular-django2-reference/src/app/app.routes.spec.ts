@@ -4,6 +4,7 @@ import { GuidesOverviewPage } from './guides/guides-overview-page';
 import { UiCommandCategoryPage } from './ui/ui-command-category-page';
 import { TableDemoPage } from './tables/table-demo-page';
 import { UiCommandOverviewPage } from './ui/ui-command-overview-page';
+import { StepperDemoPage } from './widgets/stepper-demo-page';
 
 describe('reference app routes', () => {
   it('declares routed UI and guides pages', () => {
@@ -13,6 +14,7 @@ describe('reference app routes', () => {
       'table',
       'guides',
       'guides/:guideId',
+      'widgets/stepper',
     ]);
     expect(routes.every((route) => typeof route.loadComponent === 'function')).toBe(true);
   });
@@ -35,5 +37,9 @@ describe('reference app routes', () => {
 
   it('lazy-loads the guides detail page', async () => {
     await expect(routes[4].loadComponent?.()).resolves.toBe(GuidesDetailPage);
+  });
+
+  it('lazy-loads the stepper demonstration page', async () => {
+    await expect(routes[4].loadComponent?.()).resolves.toBe(StepperDemoPage);
   });
 });

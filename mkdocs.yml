@@ -37,7 +37,8 @@ nav:
           - Reactive form: cli/reactive-form.md
       - Pages:
           - Page: cli/page.md
-      - Data presentation:
+      - Widgets:
+          - Stepper: cli/stepper.md
           - Table: cli/table.md
   - Integrate and extend:
       - OpenAPI setup: cli/openapi-setup.md
