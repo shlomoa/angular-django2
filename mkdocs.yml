@@ -40,6 +40,7 @@ nav:
           - Page: cli/page.md
       - Widgets:
           - Stepper: cli/stepper.md
+          - Table: cli/table.md
   - Integrate and extend:
       - OpenAPI setup: cli/openapi-setup.md
       - Data service: cli/data-service.md

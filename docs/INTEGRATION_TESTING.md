@@ -98,6 +98,9 @@ Current E2E coverage includes:
   verified with a development build
 - `E2E-09` — `page` generation in a real routed Angular Material workspace,
   verifying its lazy route and a development build
+- `E2E-TABLE-01` — `table` generation from an OpenUI document, hosted with
+  host-supplied columns and rows and the three behaviours bound, verified with
+  a development build
 - `E2E-TABS-01` — `tabs` generation from an OpenUI document with a horizontal
   `Tabs` node (a form and a card as tab content, a disabled tab) and a vertical
   `Tabs` node (a nested `Tabs`), both hosted in the root component and verified

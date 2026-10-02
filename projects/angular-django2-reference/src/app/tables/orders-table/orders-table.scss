@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.orders-table__filter {
+  display: block;
+  max-width: 24rem;
+}
+
+.orders-table__scroll {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.orders-table__scroll table {
+  min-width: 100%;
+}

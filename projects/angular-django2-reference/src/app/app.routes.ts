@@ -12,6 +12,10 @@ export const routes: Routes = [
       import('./ui/ui-command-category-page').then((module) => module.UiCommandCategoryPage),
   },
   {
+    path: 'table',
+    loadComponent: () => import('./tables/table-demo-page').then((module) => module.TableDemoPage),
+  },
+  {
     path: 'guides',
     loadComponent: () =>
       import('./guides/guides-overview-page').then((module) => module.GuidesOverviewPage),
