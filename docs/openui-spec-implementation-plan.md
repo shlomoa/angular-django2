@@ -362,22 +362,23 @@ table scope.
 
 ### Planned
 
-None of these items has a tracking issue yet.
+Each item has a tracking issue. Missing scopes that are tracked are listed in
+[`ngdj-openui-spec-mapping.md`](ngdj-openui-spec-mapping.md) §5.
 
 - **Data presentation and dialogs**:
-  - [ ] `table` (`widgets/table`)
-  - [ ] `dialog` (`widgets/dialog`)
-  - [ ] `stepper` (`widgets/stepper`)
+  - [ ] `table` (`widgets/table`) ([#142](https://github.com/shlomoa/angular-django2/issues/142))
+  - [ ] `dialog` (`widgets/dialog`) ([#144](https://github.com/shlomoa/angular-django2/issues/144))
+  - [ ] `stepper` (`widgets/stepper`) ([#145](https://github.com/shlomoa/angular-django2/issues/145))
 - **Containers and navigation**:
-  - [ ] `tabs` (`containers/tabs`)
-  - [ ] `accordion` (`containers/expandablePanels`)
-  - [ ] `menu` (`widgets/menuWidgets`)
-  - [ ] `bottom-sheet` (`containers/sheetContainers`)
+  - [ ] `tabs` (`containers/tabs`) ([#146](https://github.com/shlomoa/angular-django2/issues/146))
+  - [ ] `accordion` (`containers/expandablePanels`) ([#147](https://github.com/shlomoa/angular-django2/issues/147))
+  - [ ] `menu` (`widgets/menuWidgets`) ([#149](https://github.com/shlomoa/angular-django2/issues/149))
+  - [ ] `bottom-sheet` (`containers/sheetContainers`) ([#148](https://github.com/shlomoa/angular-django2/issues/148))
 - **Pickers, feedback, and specialized widgets**:
-  - [ ] `date-picker` (`widgets/dateTimePickers`)
-  - [ ] `feedback` (`widgets/feedbackWidgets`)
-  - [ ] `data-grid` (`widgets/dataGrid`)
-  - [ ] `chart` (`widgets/chart`)
+  - [ ] `date-picker` (`widgets/dateTimePickers`) ([#151](https://github.com/shlomoa/angular-django2/issues/151))
+  - [ ] `feedback` (`widgets/feedbackWidgets`) ([#150](https://github.com/shlomoa/angular-django2/issues/150))
+  - [ ] `data-grid` (`widgets/dataGrid`) ([#143](https://github.com/shlomoa/angular-django2/issues/143))
+  - [ ] `chart` (`widgets/chart`) ([#152](https://github.com/shlomoa/angular-django2/issues/152))
 - **For each new schematic**:
   - [ ] Vitest unit tests in `projects/angular-django-validation/unit/schematics/`.
   - [ ] A demonstration page in `projects/angular-django2-reference`.
