@@ -40,6 +40,6 @@ describe('reference app routes', () => {
   });
 
   it('lazy-loads the stepper demonstration page', async () => {
-    await expect(routes[4].loadComponent?.()).resolves.toBe(StepperDemoPage);
+    await expect(routes[5].loadComponent?.()).resolves.toBe(StepperDemoPage);
   });
 });
