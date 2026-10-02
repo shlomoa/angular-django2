@@ -1,0 +1,54 @@
+{
+  "version": "0.12.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "onboarding",
+      "type": "Stepper",
+      "attrs": {
+        "uses.linear": "true",
+        "produces.selectionChange": null,
+        "produces.complete": null
+      },
+      "children": [
+        {
+          "id": "account",
+          "type": "step",
+          "attrs": { "uses.label": "\"Account\"" },
+          "children": [
+            {
+              "id": "accountPanel",
+              "type": "SurfaceContainers",
+              "attrs": { "uses.title": "\"Create your account\"" }
+            }
+          ]
+        },
+        {
+          "id": "preferences",
+          "type": "step",
+          "attrs": { "uses.label": "\"Preferences\"", "uses.optional": "true" },
+          "children": [
+            {
+              "id": "preferencesPanel",
+              "type": "SurfaceContainers",
+              "attrs": { "uses.title": "\"Choose your preferences\"" }
+            }
+          ]
+        },
+        {
+          "id": "confirm",
+          "type": "step",
+          "attrs": { "uses.label": "\"Confirm\"" },
+          "children": [
+            {
+              "id": "confirmPanel",
+              "type": "SurfaceContainers",
+              "attrs": { "uses.title": "\"Review and finish\"" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

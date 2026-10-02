@@ -182,6 +182,9 @@ describe('stepper schematic (widgets/stepper)', () => {
       expect(source).not.toContain('standalone: false');
       expect(source).toContain('imports: [MatButtonModule, MatStepperModule]');
       expect(source).toContain("import { MatStepperModule } from '@angular/material/stepper';");
+      expect(source).toContain(
+        "import type { StepperOrientation, StepperSelectionEvent } from '@angular/cdk/stepper';",
+      );
       expect(source).toContain('// Begin input signals section');
       expect(source).toContain('readonly selectedIndex = model(0);');
       expect(source).toContain('readonly linear = input(false);');

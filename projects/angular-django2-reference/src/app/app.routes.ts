@@ -21,4 +21,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./guides/guides-detail-page').then((module) => module.GuidesDetailPage),
   },
+  {
+    path: 'widgets/stepper',
+    loadComponent: () =>
+      import('./widgets/stepper-demo-page').then((module) => module.StepperDemoPage),
+  },
 ];

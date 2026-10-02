@@ -102,10 +102,11 @@ export function stepperComponentSource(content: string, options: StepperAstOptio
     'model',
     ...(options.selectionChange || options.complete ? ['output'] : []),
   ]);
-  result = addNamedImports(result, '@angular/cdk/stepper', [
-    'StepperOrientation',
-    'StepperSelectionEvent',
-  ]);
+  result = insertBeforeMarker(
+    result,
+    '// End import section',
+    "import type { StepperOrientation, StepperSelectionEvent } from '@angular/cdk/stepper';",
+  );
   result = addNamedImports(result, '@angular/material/button', ['MatButtonModule']);
   result = addNamedImports(result, '@angular/material/stepper', ['MatStepperModule']);
   result = addToImportsArray(result, ['MatButtonModule', 'MatStepperModule']);
