@@ -61,6 +61,11 @@
       "factory": "./reactive-form/index#reactiveForm",
       "schema": "./reactive-form/schema.json"
     },
+    "stepper": {
+      "description": "Compile an OpenUI Stepper element into a standalone OnPush Angular Material stepper component.",
+      "factory": "./stepper/index#stepper",
+      "schema": "./stepper/schema.json"
+    },
     "service": {
       "description": "Generate a service using the angular-django2 collection.",
       "factory": "./service/index#service",

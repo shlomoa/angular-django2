@@ -4,6 +4,7 @@ import { GuidesDetailPage } from './guides/guides-detail-page';
 import { GuidesOverviewPage } from './guides/guides-overview-page';
 import { UiCommandCategoryPage } from './ui/ui-command-category-page';
 import { UiCommandOverviewPage } from './ui/ui-command-overview-page';
+import { StepperDemoPage } from './widgets/stepper-demo-page';
 
 describe('reference app routes', () => {
   it('declares routed UI and guides pages', () => {
@@ -12,6 +13,7 @@ describe('reference app routes', () => {
       'ui/:categoryId',
       'guides',
       'guides/:guideId',
+      'widgets/stepper',
       'demos/tabs',
     ]);
     expect(routes.every((route) => typeof route.loadComponent === 'function')).toBe(true);
@@ -33,7 +35,11 @@ describe('reference app routes', () => {
     await expect(routes[3].loadComponent?.()).resolves.toBe(GuidesDetailPage);
   });
 
+  it('lazy-loads the stepper demonstration page', async () => {
+    await expect(routes[4].loadComponent?.()).resolves.toBe(StepperDemoPage);
+  });
+
   it('lazy-loads the tabs schematic demonstration page', async () => {
-    await expect(routes[4].loadComponent?.()).resolves.toBe(TabsDemoPage);
+    await expect(routes[5].loadComponent?.()).resolves.toBe(TabsDemoPage);
   });
 });

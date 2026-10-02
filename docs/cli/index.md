@@ -24,6 +24,7 @@ for options, defaults, constraints, prerequisites, and generated output.
 | Compile an OpenUI tabs container                              | [`tabs`](tabs.md)                                                                                              |
 | Generate typed Material fields or a reactive form             | [`field-component`](field-component.md), [`form-field`](form-field.md), or [`reactive-form`](reactive-form.md) |
 | Generate an OpenAPI client setup or its data-service wrapper  | [`openapi-setup`](openapi-setup.md) or [`data-service`](data-service.md)                                       |
+| Compile an OpenUI stepper (multi-step flow) into Material     | [`stepper`](stepper.md)                                                                                        |
 
 `material-app` combines [`application`](application.md),
 [`material-setup`](material-setup.md), and

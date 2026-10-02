@@ -106,6 +106,7 @@ sources over lower-priority ones.
   - `openapi-setup`
   - `data-service`
   - `page`
+  - `stepper`
 - The documented defaults and behavior currently expected are:
   - `ng-add`: register or prepend `angular-django2` in
     `cli.schematicCollections`
@@ -123,6 +124,15 @@ sources over lower-priority ones.
     routes only reference an already configured reusable guard and backend
     authorization remains authoritative; the schematic does not generate API
     clients, forms, shared components, or site-wide policy.
+  - `stepper`: compile an OpenUI `Stepper` node (`--document`; there is no
+    CLI-only mode) into a standalone `OnPush` Angular Material stepper
+    component with one `mat-step` per `step` child. It requires
+    `@angular/material` and `@angular/cdk` and validates the document, the
+    stepper and step attributes, and the step content before writing any file.
+    `uses.selectedIndex`, `uses.linear`, `uses.orientation`,
+    `produces.selectionChange` and `produces.complete` are compiled;
+    `uses.branching`, other attributes and other child types are rejected.
+    Step content is compiled and embedded by `uses.slot` as in `component`.
   - `tabs`: compile an OpenUI `Tabs` node (`--document`, required) into a
     standalone `OnPush` Angular Material component: a `mat-tab-group`, or for
     `uses.orientation` `vertical` an ARIA tablist; the content of each `tab` is
@@ -250,6 +260,7 @@ sources over lower-priority ones.
   | [`complex-component`](cli/complex-component.md#openui-composite-containers)                                                          | `SurfaceContainers` as a Material card; optional `OverlayContainers` child                                                             |
   | [`tabs`](cli/tabs.md#openui-tabs-nodes)                                                                                              | `Tabs` with `tab` children; the content of each tab is compiled and embedded                                                           |
   | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `uses.slot` sections                                                            |
+  | [`stepper`](cli/stepper.md#openui-stepper-nodes)                                                                                     | `Stepper` with `step` children (`uses.label`, `uses.optional`); step content composed by `uses.slot`                                   |
   | [`page`](cli/page.md#openui-page-nodes)                                                                                              | `DashboardPage` or `EmptyPage` with `uses.title`, `uses.route`, `uses.icon`, `uses.access`, `uses.authGuard`                           |
   | [`application`](cli/application.md#openui-application-documents), [`material-app`](cli/material-app.md#openui-application-documents) | `Application` with `Routing`, `Navigation`, `ToolBar`, `Presentation`; `material-app` renders validated toolbar rows and sidenav links |
   | [`workspace-setup`](cli/workspace-setup.md#openui-host-documents)                                                                    | `html` (`uses.lang`, `uses.dir`, `uses.title`) and `link` (`uses.rel`, `uses.href`)                                                    |

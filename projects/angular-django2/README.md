@@ -63,6 +63,7 @@ The collection provides 18 specialized schematics grouped by functional domain:
 ### Routing & Architecture
 
 - **`page`**: Generates a standalone OnPush Angular Material routed page with its own lazy `Routes` definition and navigation metadata.
+- **`stepper`**: Compiles an OpenUI `Stepper` element into a standalone OnPush Angular Material stepper whose steps host compiled, embedded content.
 - **`service`**: Scaffolds an injectable Angular service.
 - **`class`**: Scaffolds a TypeScript model class.
 
