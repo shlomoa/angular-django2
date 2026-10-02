@@ -1314,6 +1314,146 @@ export class App {
   );
 
   it(
+    'E2E-TABLE-01: table compiles an OpenUI table that a host drives and that builds in development mode',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'table-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        fs.writeFileSync(
+          path.join(appRoot, 'orders.openui.json'),
+          JSON.stringify({
+            version: '0.12.0',
+            id: 'root',
+            type: 'html',
+            children: [
+              {
+                id: 'orders',
+                type: 'table',
+                attrs: {
+                  'behaves.sort': 'sortOrders($event)',
+                  'behaves.filter': 'filterOrders($event)',
+                  'behaves.paginate': 'paginateOrders($event)',
+                },
+                children: [
+                  { id: 'ordersCaption', type: 'caption' },
+                  { id: 'ordersHeader', type: 'thead' },
+                  { id: 'ordersRow', type: 'tr' },
+                ],
+              },
+            ],
+          }),
+        );
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:table',
+            '--document=src/app/orders.openui.json',
+            '--node-id=orders',
+          ],
+          appPath,
+        );
+
+        const generated = fs.readFileSync(
+          path.join(appRoot, 'shared', 'tables', 'orders-table', 'orders-table.ts'),
+          'utf8',
+        );
+        expect(generated).toContain('export class OrdersTableComponent');
+        expect(generated).toContain('readonly sorted = output<Sort>()');
+        expect(generated).toContain('readonly paginated = output<OrdersTablePage>()');
+
+        const rootComponentPath = resolveAppComponentPath(appRoot);
+        const rootTemplatePath = resolveAppTemplatePath(appRoot);
+        fs.writeFileSync(
+          rootComponentPath,
+          `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import type { Sort } from '@angular/material/sort';
+import {
+  OrdersTableComponent,
+  ordersTableOrdering,
+  type OrdersTableColumn,
+  type OrdersTablePage,
+} from './shared/tables/orders-table/orders-table';
+
+interface Order {
+  id: number;
+  customer: string;
+}
+
+@Component({
+  selector: 'app-root',
+  imports: [OrdersTableComponent],
+  templateUrl: './${path.basename(rootTemplatePath)}',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class App {
+  readonly columns: readonly OrdersTableColumn<Order>[] = [
+    { key: 'id', label: 'Order' },
+    { key: 'customer', label: 'Customer', sortable: false },
+  ];
+  readonly rows = signal<readonly Order[]>([{ id: 1, customer: 'Acme' }]);
+  readonly ordering = signal<string | undefined>(undefined);
+
+  sortOrders(sort: Sort): void {
+    this.ordering.set(ordersTableOrdering(sort));
+  }
+
+  filterOrders(text: string): void {
+    this.rows.set(text ? [] : [{ id: 1, customer: 'Acme' }]);
+  }
+
+  paginateOrders(page: OrdersTablePage): void {
+    this.ordering.set(\`offset=\${page.offset}\`);
+  }
+}
+`,
+        );
+        fs.writeFileSync(
+          rootTemplatePath,
+          `<app-orders-table
+  caption="Orders"
+  [columns]="columns"
+  [rows]="rows()"
+  [totalRows]="1"
+  (sorted)="sortOrders($event)"
+  (filtered)="filterOrders($event)"
+  (paginated)="paginateOrders($event)"
+/>
+`,
+        );
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-TABLE-01');
+      }
+    },
+  );
+
+  it(
     'E2E-11: one-step app flow (material-app) builds and writes the responsive sidenav layout',
     { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {
