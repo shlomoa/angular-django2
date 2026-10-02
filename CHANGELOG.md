@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by Keep a Changelog and follows semantic versioning for released package versions.
 
+## [Unreleased]
+
+- Added the `table` schematic, which compiles an OpenUI `table` element (`widgets/table`, `--document`, `--node-id`) into a standalone `OnPush` Angular Material table. The host supplies the columns and the rows; `behaves.sort`, `behaves.filter` and `behaves.paginate` select Material sorting, a filter field and paging, wired to the `sorted`, `filtered` and `paginated` outputs the host handles. Unsupported attributes and child types are rejected. See `docs/cli/table.md`.
+- Added a table demonstration page to the reference application at `/table`.
+
 ## [0.6.1]
 
 - **Breaking:** OpenUI documents use `@shlomoa/openui-spec` 0.12.0 (pinned, no range), which narrows the attribute value grammar: an attribute value is a string, `null`, or a list of those. A JSON number or Boolean is no longer a value, alone or in a list, and the validator rejects it with `grammar/invalid-attribute-value`. A typed value is written as an unquoted string: `"uses.multiline": "true"`, `"uses.maxLength": "25"`. Documents written for 0.11.0 must be migrated (`python -m spec.bin.migrate` of openui-spec converts a Boolean or number to the string of its JSON text) and declare version `0.12.0`.

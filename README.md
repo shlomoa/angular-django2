@@ -49,6 +49,7 @@ The current schematics collection includes:
 - `data-service`
 - `page`
 - `stepper`
+- `table`
 
 ### Build, lint, and package this repository
 
