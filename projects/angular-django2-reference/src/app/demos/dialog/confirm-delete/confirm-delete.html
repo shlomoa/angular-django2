@@ -1,0 +1,16 @@
+<ng-template #dialogTemplate>
+  <h2 mat-dialog-title>Delete this report?</h2>
+  <!-- Begin header section -->
+  <!-- End header section -->
+  <mat-dialog-content id="confirm-delete-content">
+    <!-- Begin children section -->
+    <p>The report and its attachments are removed for everyone. This cannot be undone.</p>
+    <!-- End children section -->
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <!-- Begin actions section -->
+    <button mat-button mat-dialog-close>Keep report</button>
+    <button mat-flat-button mat-dialog-close>Delete report</button>
+    <!-- End actions section -->
+  </mat-dialog-actions>
+</ng-template>

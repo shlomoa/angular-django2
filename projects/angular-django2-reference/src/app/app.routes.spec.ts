@@ -1,4 +1,5 @@
 import { routes } from './app.routes';
+import { DialogDemoPage } from './demos/dialog/dialog-demo-page';
 import { GuidesDetailPage } from './guides/guides-detail-page';
 import { GuidesOverviewPage } from './guides/guides-overview-page';
 import { UiCommandCategoryPage } from './ui/ui-command-category-page';
@@ -11,6 +12,7 @@ describe('reference app routes', () => {
       'ui/:categoryId',
       'guides',
       'guides/:guideId',
+      'demos/dialog',
     ]);
     expect(routes.every((route) => typeof route.loadComponent === 'function')).toBe(true);
   });
@@ -29,5 +31,9 @@ describe('reference app routes', () => {
 
   it('lazy-loads the guides detail page', async () => {
     await expect(routes[3].loadComponent?.()).resolves.toBe(GuidesDetailPage);
+  });
+
+  it('lazy-loads the dialog demonstration page', async () => {
+    await expect(routes[4].loadComponent?.()).resolves.toBe(DialogDemoPage);
   });
 });

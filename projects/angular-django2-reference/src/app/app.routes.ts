@@ -21,4 +21,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./guides/guides-detail-page').then((module) => module.GuidesDetailPage),
   },
+  {
+    path: 'demos/dialog',
+    loadComponent: () =>
+      import('./demos/dialog/dialog-demo-page').then((module) => module.DialogDemoPage),
+  },
 ];

@@ -61,7 +61,6 @@ export function dialogComponentSource(names: DialogSourceNames, options: DialogA
     'ChangeDetectionStrategy',
     'Component',
     'DestroyRef',
-    'TemplateRef',
     'effect',
     'inject',
     'input',
@@ -70,9 +69,7 @@ export function dialogComponentSource(names: DialogSourceNames, options: DialogA
     'untracked',
     'viewChild',
   ];
-  const materialImports = ['MatDialog', 'MatDialogModule', 'MatDialogRef'].concat(
-    emits ? ['MatDialogState'] : [],
-  );
+  const materialImports = ['MatDialog', 'MatDialogModule'].concat(emits ? ['MatDialogState'] : []);
   const styleUrl = names.styleUrl === undefined ? '' : `  styleUrl: '${names.styleUrl}',\n`;
   const outputs = [
     ...(options.close
@@ -95,7 +92,9 @@ export function dialogComponentSource(names: DialogSourceNames, options: DialogA
 
   return `// Begin import section
 import { ${coreImports.join(', ')} } from '@angular/core';
+import type { TemplateRef } from '@angular/core';
 import { ${materialImports.join(', ')} } from '@angular/material/dialog';
+import type { MatDialogRef } from '@angular/material/dialog';
 ${emits ? "import { filter, merge } from 'rxjs';\n" : ''}// End import section
 
 /**
