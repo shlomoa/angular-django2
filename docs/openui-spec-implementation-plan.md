@@ -385,7 +385,7 @@ Each item has a tracking issue. Missing scopes that are tracked are listed in
   - [ ] `dialog` (`widgets/dialog`) ([#144](https://github.com/shlomoa/angular-django2/issues/144))
   - [ ] `stepper` (`widgets/stepper`) ([#145](https://github.com/shlomoa/angular-django2/issues/145))
 - **Containers and navigation**:
-  - [ ] `tabs` (`containers/tabs`) ([#146](https://github.com/shlomoa/angular-django2/issues/146))
+  - [x] `tabs` (`containers/tabs`) ([#146](https://github.com/shlomoa/angular-django2/issues/146))
   - [ ] `accordion` (`containers/expandablePanels`) ([#147](https://github.com/shlomoa/angular-django2/issues/147))
   - [ ] `menu` (`widgets/menuWidgets`) ([#149](https://github.com/shlomoa/angular-django2/issues/149))
   - [ ] `bottom-sheet` (`containers/sheetContainers`) ([#148](https://github.com/shlomoa/angular-django2/issues/148))

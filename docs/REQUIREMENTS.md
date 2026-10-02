@@ -94,6 +94,7 @@ sources over lower-priority ones.
   - `component`
   - `embed-component`
   - `complex-component`
+  - `tabs`
   - `field-component`
   - `form-field`
   - `reactive-form`
@@ -122,6 +123,10 @@ sources over lower-priority ones.
     routes only reference an already configured reusable guard and backend
     authorization remains authoritative; the schematic does not generate API
     clients, forms, shared components, or site-wide policy.
+  - `tabs`: compile an OpenUI `Tabs` node (`--document`, required) into a
+    standalone `OnPush` Angular Material component: a `mat-tab-group`, or for
+    `uses.orientation` `vertical` an ARIA tablist; the content of each `tab` is
+    compiled and embedded, and a page stack (tabs without a tab strip) is rejected
   - `embed-component`: wire a child component into a parent using the embedding
     hooks. In file mode, options are `--component` (child component `.ts` path)
     and `--parent` (parent component `.ts` path). In package mode (add
@@ -243,6 +248,7 @@ sources over lower-priority ones.
   | [`form-field`](cli/form-field.md#openui-control-nodes), [`field-component`](cli/field-component.md)                                  | `TextInputs` or `RangeControl`                                                                                                         |
   | [`component`](cli/component.md#openui-surface-containers)                                                                            | `SurfaceContainers`; children compiled and embedded by `uses.slot`                                                                     |
   | [`complex-component`](cli/complex-component.md#openui-composite-containers)                                                          | `SurfaceContainers` as a Material card; optional `OverlayContainers` child                                                             |
+  | [`tabs`](cli/tabs.md#openui-tabs-nodes)                                                                                              | `Tabs` with `tab` children; the content of each tab is compiled and embedded                                                           |
   | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `uses.slot` sections                                                            |
   | [`page`](cli/page.md#openui-page-nodes)                                                                                              | `DashboardPage` or `EmptyPage` with `uses.title`, `uses.route`, `uses.icon`, `uses.access`, `uses.authGuard`                           |
   | [`application`](cli/application.md#openui-application-documents), [`material-app`](cli/material-app.md#openui-application-documents) | `Application` with `Routing`, `Navigation`, `ToolBar`, `Presentation`; `material-app` renders validated toolbar rows and sidenav links |

@@ -31,6 +31,7 @@ nav:
           - Component: cli/component.md
           - Embed a component: cli/embed-component.md
           - Complex component: cli/complex-component.md
+          - Tabs: cli/tabs.md
       - Forms:
           - Field component: cli/field-component.md
           - Form field: cli/form-field.md
