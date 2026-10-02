@@ -25,8 +25,8 @@ and Material 3 theming demonstrations. See the
 ## Generate focused features
 
 - **Components:** [component](cli/component.md),
-  [embed-component](cli/embed-component.md), or
-  [complex-component](cli/complex-component.md)
+  [embed-component](cli/embed-component.md),
+  [complex-component](cli/complex-component.md), or [tabs](cli/tabs.md)
 - **Forms:** [field-component](cli/field-component.md),
   [form-field](cli/form-field.md), or
   [reactive-form](cli/reactive-form.md)

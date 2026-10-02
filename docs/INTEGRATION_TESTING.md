@@ -98,6 +98,10 @@ Current E2E coverage includes:
   verified with a development build
 - `E2E-09` — `page` generation in a real routed Angular Material workspace,
   verifying its lazy route and a development build
+- `E2E-TABS-01` — `tabs` generation from an OpenUI document with a horizontal
+  `Tabs` node (a form and a card as tab content, a disabled tab) and a vertical
+  `Tabs` node (a nested `Tabs`), both hosted in the root component and verified
+  with a development build
 - `E2E-11` — one-step app flow (`material-app`), verifying a production build and
   that the responsive Material sidenav layout, theme, and standard structure are
   present
