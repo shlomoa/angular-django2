@@ -1,0 +1,31 @@
+<section class="table-demo" aria-labelledby="table-demo-title">
+  <app-breadcrumbs [items]="[{ label: 'Table' }]" />
+
+  <header class="table-demo__header">
+    <p class="eyebrow">OpenUI widget</p>
+    <h2 id="table-demo-title">Table</h2>
+    <p>
+      The <code>table</code> schematic compiles an OpenUI <code>table</code> element into a
+      standalone Angular Material table. This page hosts its unmodified output: it supplies the
+      columns and the rows, and handles the sorting, filtering and paging that the document binds to
+      <code>sortOrders($event)</code>, <code>filterOrders($event)</code> and
+      <code>paginateOrders($event)</code>.
+    </p>
+  </header>
+
+  <app-orders-table
+    caption="Orders"
+    ariaLabel="Orders table"
+    [columns]="columns"
+    [rows]="response().results"
+    [totalRows]="response().count"
+    [sortActive]="sort().active"
+    [sortDirection]="sort().direction"
+    [filterText]="search()"
+    [pageIndex]="page().pageIndex"
+    [pageSize]="page().pageSize"
+    (sorted)="sortOrders($event)"
+    (filtered)="filterOrders($event)"
+    (paginated)="paginateOrders($event)"
+  />
+</section>

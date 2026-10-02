@@ -167,7 +167,7 @@ describe('table schematic', () => {
   it('TC-TABLE-06: renders the caption and the header row only when the document has them', () => {
     const full = output(compile(createApplicationTree()));
     expect(full.html).toContain('@if (caption())');
-    expect(full.html).toContain('<caption>{{ caption() }}</caption>');
+    expect(full.html).toContain('<caption [textContent]="caption()"></caption>');
     expect(full.html).toContain(
       '<tr mat-header-row *matHeaderRowDef="columnKeys(); sticky: true"></tr>',
     );
@@ -175,7 +175,7 @@ describe('table schematic', () => {
     expect(full.ts).toContain("readonly caption = input('')");
 
     const bare = output(compileNode(tableWith(undefined, [{ id: 'r', type: 'tr' }])));
-    expect(bare.html).not.toContain('<caption>');
+    expect(bare.html).not.toContain('<caption');
     expect(bare.html).not.toContain('mat-header-row');
     expect(bare.html).not.toContain('mat-header-cell');
     expect(bare.ts).not.toContain('caption');

@@ -37,6 +37,8 @@ function displayName(names: TableNames): string {
   return strings.capitalize(strings.dasherize(names.name).replace(/-/g, ' '));
 }
 
+const PRINT_WIDTH = 100;
+
 /** Quote text as a single-quoted TypeScript string literal. */
 function quote(value: string): string {
   return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
@@ -65,9 +67,7 @@ export function tableComponentSource(definition: TableDefinition, names: TableNa
     coreImports.push('output');
   }
 
-  const imports: string[] = [
-    `import { ${coreImports.sort(compareImports).join(', ')} } from '@angular/core';`,
-  ];
+  const imports: string[] = [importStatement(coreImports.sort(compareImports), '@angular/core')];
   if (filter !== undefined) {
     imports.push(`import { MatFormFieldModule } from '@angular/material/form-field';`);
     imports.push(`import { MatInputModule } from '@angular/material/input';`);
@@ -284,6 +284,14 @@ export function tableComponentSource(definition: TableDefinition, names: TableNa
   return `${lines.join('\n')}\n`;
 }
 
+/** An import statement, wrapped one name per line when it exceeds the print width. */
+function importStatement(names: readonly string[], from: string): string {
+  const single = `import { ${names.join(', ')} } from '${from}';`;
+  return single.length <= PRINT_WIDTH
+    ? single
+    : `import {\n${names.map((name) => `  ${name},`).join('\n')}\n} from '${from}';`;
+}
+
 function compareImports(left: string, right: string): number {
   return left.localeCompare(right, 'en', { sensitivity: 'base' });
 }
@@ -357,10 +365,14 @@ export function tableTemplate(definition: TableDefinition, names: TableNames): s
       '(matSortChange)="onSort($event)"',
     );
   }
-  lines.push(`    <table ${tableAttributes.join(' ')}>`);
+  if (sort === undefined) {
+    lines.push(`    <table ${tableAttributes.join(' ')}>`);
+  } else {
+    lines.push(`    <table`, ...tableAttributes.map((attribute) => `      ${attribute}`), `    >`);
+  }
   if (definition.caption) {
     lines.push(`      @if (caption()) {`);
-    lines.push(`        <caption>{{ caption() }}</caption>`);
+    lines.push(`        <caption [textContent]="caption()"></caption>`);
     lines.push(`      }`);
   }
   lines.push(`      @for (column of columns(); track column.key) {`);
@@ -368,7 +380,13 @@ export function tableTemplate(definition: TableDefinition, names: TableNames): s
   if (definition.header) {
     if (sort !== undefined) {
       lines.push(
-        `          <th mat-header-cell *matHeaderCellDef scope="col" [mat-sort-header]="column.key" [disabled]="!isSortable(column)">`,
+        `          <th`,
+        `            mat-header-cell`,
+        `            *matHeaderCellDef`,
+        `            scope="col"`,
+        `            [mat-sort-header]="column.key"`,
+        `            [disabled]="!isSortable(column)"`,
+        `          >`,
       );
       lines.push(`            {{ column.label }}`);
       lines.push(`          </th>`);

@@ -2,6 +2,7 @@ import { routes } from './app.routes';
 import { GuidesDetailPage } from './guides/guides-detail-page';
 import { GuidesOverviewPage } from './guides/guides-overview-page';
 import { UiCommandCategoryPage } from './ui/ui-command-category-page';
+import { TableDemoPage } from './tables/table-demo-page';
 import { UiCommandOverviewPage } from './ui/ui-command-overview-page';
 
 describe('reference app routes', () => {
@@ -9,6 +10,7 @@ describe('reference app routes', () => {
     expect(routes.map((route) => route.path)).toEqual([
       'ui',
       'ui/:categoryId',
+      'table',
       'guides',
       'guides/:guideId',
     ]);
@@ -23,11 +25,15 @@ describe('reference app routes', () => {
     await expect(routes[1].loadComponent?.()).resolves.toBe(UiCommandCategoryPage);
   });
 
+  it('lazy-loads the table demonstration page', async () => {
+    await expect(routes[2].loadComponent?.()).resolves.toBe(TableDemoPage);
+  });
+
   it('lazy-loads the guides overview page', async () => {
-    await expect(routes[2].loadComponent?.()).resolves.toBe(GuidesOverviewPage);
+    await expect(routes[3].loadComponent?.()).resolves.toBe(GuidesOverviewPage);
   });
 
   it('lazy-loads the guides detail page', async () => {
-    await expect(routes[3].loadComponent?.()).resolves.toBe(GuidesDetailPage);
+    await expect(routes[4].loadComponent?.()).resolves.toBe(GuidesDetailPage);
   });
 });
