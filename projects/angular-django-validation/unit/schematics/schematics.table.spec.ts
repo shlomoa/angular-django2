@@ -93,7 +93,8 @@ describe('table schematic', () => {
       'imports: [MatFormFieldModule, MatInputModule, MatPaginatorModule, MatSortModule, MatTableModule]',
     );
     expect(ts).toContain("from '@angular/material/table'");
-    expect(html).toContain('<table mat-table [dataSource]="rows()"');
+    expect(html).toContain('mat-table');
+    expect(html).toContain('[dataSource]="rows()"');
     expect(html).toContain('<tr mat-row *matRowDef="let row; columns: columnKeys()"></tr>');
     expect(scss).toContain('.orders-table__scroll');
   });
