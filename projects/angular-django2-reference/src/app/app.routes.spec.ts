@@ -46,6 +46,6 @@ describe('reference app routes', () => {
   });
 
   it('lazy-loads the tabs schematic demonstration page', async () => {
-    await expect(routes[5].loadComponent?.()).resolves.toBe(TabsDemoPage);
+    await expect(routes[6].loadComponent?.()).resolves.toBe(TabsDemoPage);
   });
 });
