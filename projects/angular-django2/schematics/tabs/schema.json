@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Tabs",
+  "title": "angular-django2 tabs schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "description": "Kebab-case component name. Defaults to the dasherized node id.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "Destination directory within the application source tree. Defaults to the application app directory."
+    },
+    "project": {
+      "type": "string",
+      "description": "The target Angular application project. Required when the workspace has multiple applications."
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a Tabs node (uses.selectedIndex, uses.orientation, produces.selectedTabChange) with tab children (uses.label, uses.disabled); the content of each tab is compiled and embedded."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID within the OpenUI document to compile. When omitted, targets the first Tabs element.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
+    }
+  },
+  "required": ["document"]
+}

@@ -287,7 +287,7 @@ OpenUI catalog, whose scope is `containers/expandablePanels`.
 | `widgets/dataGrid`            | Planned | `data-grid`        | ARIA grid pattern, keyboard cell navigation                               | CDK Table, virtual scroll                         | Editable cells, multi-select, DRF batch updates                          |
 | `widgets/dialog`              | Planned | `dialog`           | Native `<dialog>`, focus trap                                             | `MatDialogModule`, CDK A11y                       | Strongly typed launch service, Django CRUD submit integration            |
 | `widgets/stepper`             | Direct  | `stepper`          | Form validation events                                                    | `MatStepperModule`, `MatStep`                     | Multi-step `reactive-form` binding, draft state persistence              |
-| `containers/tabs`             | Planned | `tabs`             | ARIA tablist/tabpanel                                                     | `MatTabsModule`, CDK Portal                       | Lazy-loaded tab bodies via `embed-component`                             |
+| `containers/tabs`             | Direct  | `tabs`             | ARIA tablist/tabpanel                                                     | `MatTabsModule`, CDK Portal                       | Lazy-loaded tab bodies via `embed-component`                             |
 | `containers/expandablePanels` | Planned | `accordion`        | `<details>/<summary>`, ARIA accordion                                     | `MatExpansionModule`                              | Multi/single expand mode, `embed-component` child slots                  |
 | `containers/sheetContainers`  | Planned | `bottom-sheet`     | CSS backdrop, touch drag                                                  | `MatBottomSheetModule`, CDK Overlay               | Dismiss gestures, mobile action sheet layout                             |
 | `widgets/menuWidgets`         | Planned | `menu`             | ARIA menu/menuitem, keyboard navigation                                   | `MatMenuModule`, `MatMenuTrigger`                 | Context menus, nested cascading menus, route-link integration            |
@@ -397,7 +397,7 @@ Each item has a tracking issue. Missing scopes that are tracked are listed in
   - [ ] `dialog` (`widgets/dialog`) ([#144](https://github.com/shlomoa/angular-django2/issues/144))
   - [x] `stepper` (`widgets/stepper`) ([#145](https://github.com/shlomoa/angular-django2/issues/145))
 - **Containers and navigation**:
-  - [ ] `tabs` (`containers/tabs`) ([#146](https://github.com/shlomoa/angular-django2/issues/146))
+  - [x] `tabs` (`containers/tabs`) ([#146](https://github.com/shlomoa/angular-django2/issues/146))
   - [ ] `accordion` (`containers/expandablePanels`) ([#147](https://github.com/shlomoa/angular-django2/issues/147))
   - [ ] `menu` (`widgets/menuWidgets`) ([#149](https://github.com/shlomoa/angular-django2/issues/149))
   - [ ] `bottom-sheet` (`containers/sheetContainers`) ([#148](https://github.com/shlomoa/angular-django2/issues/148))

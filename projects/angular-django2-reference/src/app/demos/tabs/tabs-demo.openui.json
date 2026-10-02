@@ -1,0 +1,101 @@
+{
+  "version": "0.12.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "accountTabs",
+      "type": "Tabs",
+      "attrs": {
+        "uses.selectedIndex": "0",
+        "uses.orientation": "\"horizontal\"",
+        "produces.selectedTabChange": null
+      },
+      "children": [
+        {
+          "id": "profileTab",
+          "type": "tab",
+          "attrs": { "uses.label": "\"Profile\"" },
+          "children": [
+            {
+              "id": "profileCard",
+              "type": "SurfaceContainers",
+              "attrs": { "uses.title": "\"Profile\"" },
+              "children": [
+                {
+                  "id": "contactCard",
+                  "type": "SurfaceContainers",
+                  "attrs": { "uses.title": "\"Contact\"" }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "billingTab",
+          "type": "tab",
+          "attrs": { "uses.label": "\"Billing\"" },
+          "children": [
+            {
+              "id": "billingCard",
+              "type": "SurfaceContainers",
+              "attrs": { "uses.title": "\"Billing\"" }
+            }
+          ]
+        },
+        {
+          "id": "archiveTab",
+          "type": "tab",
+          "attrs": { "uses.label": "\"Archive\"", "uses.disabled": "true" }
+        }
+      ]
+    },
+    {
+      "id": "settingsTabs",
+      "type": "Tabs",
+      "attrs": {
+        "uses.selectedIndex": "1",
+        "uses.orientation": "\"vertical\"",
+        "produces.selectedTabChange": null
+      },
+      "children": [
+        {
+          "id": "generalTab",
+          "type": "tab",
+          "attrs": { "uses.label": "\"General\"" },
+          "children": [
+            {
+              "id": "generalCard",
+              "type": "SurfaceContainers",
+              "attrs": { "uses.title": "\"General\"" }
+            }
+          ]
+        },
+        {
+          "id": "securityTab",
+          "type": "tab",
+          "attrs": { "uses.label": "\"Security\"" },
+          "children": [
+            {
+              "id": "securityCard",
+              "type": "SurfaceContainers",
+              "attrs": { "uses.title": "\"Security\"" }
+            }
+          ]
+        },
+        {
+          "id": "advancedTab",
+          "type": "tab",
+          "attrs": { "uses.label": "\"Advanced\"" },
+          "children": [
+            {
+              "id": "advancedCard",
+              "type": "SurfaceContainers",
+              "attrs": { "uses.title": "\"Advanced\"" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

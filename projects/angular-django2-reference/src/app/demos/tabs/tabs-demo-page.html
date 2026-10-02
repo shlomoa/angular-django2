@@ -1,0 +1,40 @@
+<section class="tabs-demo" aria-labelledby="tabs-demo-title">
+  <h1 id="tabs-demo-title">Tabs</h1>
+  <p class="tabs-demo__lead">
+    Output of <code>ng generate angular-django2:tabs</code> for the two <code>Tabs</code> nodes of
+    <code>tabs-demo.openui.json</code>.
+  </p>
+
+  <section class="tabs-demo__section" aria-labelledby="tabs-demo-horizontal">
+    <h2 id="tabs-demo-horizontal">Horizontal tab group</h2>
+    <p>
+      <code>uses.orientation</code> <code>horizontal</code> compiles to a Material tab group. The
+      Archive tab is disabled (<code>uses.disabled</code>).
+    </p>
+    <app-account-tabs (selectedTabChange)="accountChange.set($event)"></app-account-tabs>
+    <p class="tabs-demo__status" role="status">
+      @if (accountChange(); as change) {
+        Selected tab {{ change.index }}: {{ change.label }}
+      } @else {
+        No tab change yet.
+      }
+    </p>
+  </section>
+
+  <section class="tabs-demo__section" aria-labelledby="tabs-demo-vertical">
+    <h2 id="tabs-demo-vertical">Vertical tab list</h2>
+    <p>
+      <code>uses.orientation</code> <code>vertical</code> with <code>uses.selectedIndex</code>
+      <code>1</code> compiles to an ARIA tablist; Arrow Up, Arrow Down, Home and End move the
+      selection.
+    </p>
+    <app-settings-tabs (selectedTabChange)="settingsChange.set($event)"></app-settings-tabs>
+    <p class="tabs-demo__status" role="status">
+      @if (settingsChange(); as change) {
+        Selected tab {{ change.index }}: {{ change.label }}
+      } @else {
+        No tab change yet.
+      }
+    </p>
+  </section>
+</section>

@@ -1,0 +1,87 @@
+<div class="tabs tabs-vertical">
+  <div class="tabs-list" role="tablist" aria-orientation="vertical" (keydown)="onKeydown($event)">
+    <button
+      mat-button
+      type="button"
+      role="tab"
+      class="tabs-tab"
+      [id]="tabId(0)"
+      [attr.aria-controls]="panelId(0)"
+      [attr.aria-selected]="selectedIndex() === 0"
+      [class.tabs-tab-selected]="selectedIndex() === 0"
+      [tabindex]="selectedIndex() === 0 ? 0 : -1"
+      (click)="selectTab(0)"
+    >
+      General
+    </button>
+    <button
+      mat-button
+      type="button"
+      role="tab"
+      class="tabs-tab"
+      [id]="tabId(1)"
+      [attr.aria-controls]="panelId(1)"
+      [attr.aria-selected]="selectedIndex() === 1"
+      [class.tabs-tab-selected]="selectedIndex() === 1"
+      [tabindex]="selectedIndex() === 1 ? 0 : -1"
+      (click)="selectTab(1)"
+    >
+      Security
+    </button>
+    <button
+      mat-button
+      type="button"
+      role="tab"
+      class="tabs-tab"
+      [id]="tabId(2)"
+      [attr.aria-controls]="panelId(2)"
+      [attr.aria-selected]="selectedIndex() === 2"
+      [class.tabs-tab-selected]="selectedIndex() === 2"
+      [tabindex]="selectedIndex() === 2 ? 0 : -1"
+      (click)="selectTab(2)"
+    >
+      Advanced
+    </button>
+  </div>
+  <div class="tabs-panels">
+    @if (selectedIndex() === 0) {
+      <div
+        class="tabs-panel"
+        role="tabpanel"
+        tabindex="0"
+        [id]="panelId(0)"
+        [attr.aria-labelledby]="tabId(0)"
+      >
+        <!-- Begin tab-general-tab section -->
+        <app-general-card></app-general-card>
+        <!-- End tab-general-tab section -->
+      </div>
+    }
+    @if (selectedIndex() === 1) {
+      <div
+        class="tabs-panel"
+        role="tabpanel"
+        tabindex="0"
+        [id]="panelId(1)"
+        [attr.aria-labelledby]="tabId(1)"
+      >
+        <!-- Begin tab-security-tab section -->
+        <app-security-card></app-security-card>
+        <!-- End tab-security-tab section -->
+      </div>
+    }
+    @if (selectedIndex() === 2) {
+      <div
+        class="tabs-panel"
+        role="tabpanel"
+        tabindex="0"
+        [id]="panelId(2)"
+        [attr.aria-labelledby]="tabId(2)"
+      >
+        <!-- Begin tab-advanced-tab section -->
+        <app-advanced-card></app-advanced-card>
+        <!-- End tab-advanced-tab section -->
+      </div>
+    }
+  </div>
+</div>

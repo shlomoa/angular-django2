@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.tabs-demo {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.tabs-demo__section {
+  margin-block: 32px;
+}
+
+.tabs-demo__status {
+  margin-block-start: 12px;
+  color: var(--mat-sys-on-surface-variant);
+}
