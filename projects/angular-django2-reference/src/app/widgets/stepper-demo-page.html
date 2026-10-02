@@ -1,0 +1,32 @@
+<section class="stepper-demo" aria-labelledby="stepper-demo-title">
+  <app-breadcrumbs [items]="[{ label: 'Widgets' }, { label: 'Stepper' }]" />
+
+  <header class="stepper-demo__header">
+    <p class="stepper-demo__eyebrow">Widget demonstration</p>
+    <h2 id="stepper-demo-title">Stepper</h2>
+    <p>
+      The <code>stepper</code> schematic compiles an OpenUI <code>Stepper</code> element into a
+      standalone <code>OnPush</code> Angular Material stepper. The stepper below is the generated
+      output for <code>onboarding.openui.json</code>: three steps, linear, with a
+      <code>selectionChange</code> and a <code>complete</code> output.
+    </p>
+  </header>
+
+  <pre
+    class="stepper-demo__command"
+    aria-label="Generation command"
+  ><code>{{ command }}</code></pre>
+
+  <mat-card appearance="outlined" class="stepper-demo__card">
+    <mat-card-content>
+      <app-onboarding (selectionChange)="onSelectionChange($event)" (complete)="onComplete()" />
+    </mat-card-content>
+  </mat-card>
+
+  <p class="stepper-demo__status" role="status" aria-live="polite">
+    {{ status() }}
+    @if (completed()) {
+      <strong class="stepper-demo__done"> The stepper emitted complete.</strong>
+    }
+  </p>
+</section>

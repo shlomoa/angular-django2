@@ -22,6 +22,11 @@ export const routes: Routes = [
       import('./guides/guides-detail-page').then((module) => module.GuidesDetailPage),
   },
   {
+    path: 'widgets/stepper',
+    loadComponent: () =>
+      import('./widgets/stepper-demo-page').then((module) => module.StepperDemoPage),
+  },
+  {
     path: 'demos/dialog',
     loadComponent: () =>
       import('./demos/dialog/dialog-demo-page').then((module) => module.DialogDemoPage),

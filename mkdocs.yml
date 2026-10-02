@@ -31,13 +31,15 @@ nav:
           - Component: cli/component.md
           - Embed a component: cli/embed-component.md
           - Complex component: cli/complex-component.md
-          - Dialog: cli/dialog.md
       - Forms:
           - Field component: cli/field-component.md
           - Form field: cli/form-field.md
           - Reactive form: cli/reactive-form.md
       - Pages:
           - Page: cli/page.md
+      - Widgets:
+          - Dialog: cli/dialog.md
+          - Stepper: cli/stepper.md
   - Integrate and extend:
       - OpenAPI setup: cli/openapi-setup.md
       - Data service: cli/data-service.md

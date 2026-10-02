@@ -40,10 +40,14 @@ projects/angular-django2-reference/src/app/
 │       ├── command-visualizer.ts  # Dynamic micro-sandboxes & terminal simulation
 │       ├── command-visualizer.scss# Scoped visualizer layout
 │       └── command-visualizer.spec.ts
-└── guides/
-    ├── guides-catalog.ts          # Step-by-step tutorial guides metadata
-    ├── guides-overview-page.ts    # Guide overview cards
-    └── guides-detail-page.ts      # Multi-step tutorial detail view
+├── guides/
+│   ├── guides-catalog.ts          # Step-by-step tutorial guides metadata
+│   ├── guides-overview-page.ts    # Guide overview cards
+│   └── guides-detail-page.ts      # Multi-step tutorial detail view
+└── widgets/
+    ├── onboarding.openui.json     # OpenUI Stepper document compiled by the stepper schematic
+    ├── onboarding/                # stepper schematic output for that document
+    └── stepper-demo-page.ts       # /widgets/stepper demonstration page
 ```
 
 ### Core Layer
