@@ -31,6 +31,11 @@ export const routes: Routes = [
       import('./widgets/stepper-demo-page').then((module) => module.StepperDemoPage),
   },
   {
+    path: 'demos/tabs',
+    loadComponent: () =>
+      import('./demos/tabs/tabs-demo-page').then((module) => module.TabsDemoPage),
+  },
+  {
     path: 'demos/dialog',
     loadComponent: () =>
       import('./demos/dialog/dialog-demo-page').then((module) => module.DialogDemoPage),

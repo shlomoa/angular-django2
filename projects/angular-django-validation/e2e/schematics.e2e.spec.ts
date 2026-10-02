@@ -1454,6 +1454,156 @@ export class App {
   );
 
   it(
+    'E2E-TABS-01: tabs compiles horizontal and vertical OpenUI Tabs nodes that build in development mode',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'tabs-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+      const tab = (id: string, label: string, children: object[] = []) => ({
+        id,
+        type: 'tab',
+        attrs: { 'uses.label': JSON.stringify(label) },
+        ...(children.length > 0 ? { children } : {}),
+      });
+      const document = {
+        version: '0.12.0',
+        id: 'root',
+        type: 'html',
+        children: [
+          {
+            id: 'accountTabs',
+            type: 'Tabs',
+            attrs: { 'uses.selectedIndex': '1', 'produces.selectedTabChange': null },
+            children: [
+              tab('profileTab', 'Profile', [
+                {
+                  id: 'signup',
+                  type: 'Form',
+                  attrs: { 'uses.title': '"Sign up"', 'uses.action': '"/api/signup/"' },
+                  children: [
+                    {
+                      id: 'email',
+                      type: 'TextInputs',
+                      attrs: { 'uses.type': '"email"', 'uses.label': '"Email"' },
+                    },
+                  ],
+                },
+              ]),
+              tab('billingTab', 'Billing', [
+                {
+                  id: 'billingCard',
+                  type: 'SurfaceContainers',
+                  attrs: { 'uses.title': '"Billing"' },
+                },
+              ]),
+              {
+                id: 'archiveTab',
+                type: 'tab',
+                attrs: { 'uses.label': '"Archive"', 'uses.disabled': 'true' },
+              },
+            ],
+          },
+          {
+            id: 'settingsTabs',
+            type: 'Tabs',
+            attrs: { 'uses.orientation': '"vertical"', 'produces.selectedTabChange': null },
+            children: [
+              tab('generalTab', 'General', [{ id: 'generalCard', type: 'SurfaceContainers' }]),
+              tab('moreTab', 'More', [
+                {
+                  id: 'innerTabs',
+                  type: 'Tabs',
+                  children: [tab('oneTab', 'One'), tab('twoTab', 'Two')],
+                },
+              ]),
+            ],
+          },
+        ],
+      };
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        fs.writeFileSync(path.join(appRoot, 'tabs.openui.json'), JSON.stringify(document, null, 2));
+        for (const nodeId of ['accountTabs', 'settingsTabs']) {
+          execAngularCli(
+            [
+              'generate',
+              'angular-django2:tabs',
+              '--document=src/app/tabs.openui.json',
+              `--node-id=${nodeId}`,
+              '--path=src/app/features',
+            ],
+            appPath,
+          );
+        }
+
+        const horizontalTemplate = fs.readFileSync(
+          path.join(appRoot, 'features', 'account-tabs', 'account-tabs.html'),
+          'utf8',
+        );
+        expect(horizontalTemplate).toContain('<mat-tab-group [(selectedIndex)]="selectedIndex"');
+        expect(horizontalTemplate).toContain('<mat-tab label="Archive" [disabled]="true">');
+        expect(horizontalTemplate).toContain('<app-signup-form');
+        const verticalTemplate = fs.readFileSync(
+          path.join(appRoot, 'features', 'settings-tabs', 'settings-tabs.html'),
+          'utf8',
+        );
+        expect(verticalTemplate).toContain('aria-orientation="vertical"');
+        expect(verticalTemplate).toContain('<app-inner-tabs></app-inner-tabs>');
+
+        // Host both generated components in the root component so the build compiles them.
+        fs.writeFileSync(
+          resolveAppComponentPath(appRoot),
+          `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { AccountTabs } from './features/account-tabs/account-tabs';
+import { SettingsTabs } from './features/settings-tabs/settings-tabs';
+
+@Component({
+  selector: 'app-root',
+  imports: [AccountTabs, SettingsTabs],
+  template: \`
+    <app-account-tabs [selectedIndex]="1" (selectedTabChange)="last.set($event.label)" />
+    <app-settings-tabs (selectedTabChange)="last.set($event.label)" />
+    <p>{{ last() }}</p>
+  \`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class App {
+  protected readonly last = signal('');
+}
+`,
+        );
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-TABS-01');
+      }
+    },
+  );
+
+  it(
     'E2E-DIALOG-01: dialog generates a Material dialog component hosted in a buildable application',
     { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {

@@ -101,6 +101,10 @@ Current E2E coverage includes:
 - `E2E-TABLE-01` — `table` generation from an OpenUI document, hosted with
   host-supplied columns and rows and the three behaviours bound, verified with
   a development build
+- `E2E-TABS-01` — `tabs` generation from an OpenUI document with a horizontal
+  `Tabs` node (a form and a card as tab content, a disabled tab) and a vertical
+  `Tabs` node (a nested `Tabs`), both hosted in the root component and verified
+  with a development build
 - `E2E-DIALOG-01` — `dialog` generation from an OpenUI document with title,
   content, and actions children, hosted in a real Angular Material workspace and
   verified with a development build that type-checks the `[(open)]`, `modal`,

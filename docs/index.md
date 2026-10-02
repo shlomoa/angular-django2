@@ -26,8 +26,8 @@ and Material 3 theming demonstrations. See the
 
 - **Components:** [component](cli/component.md),
   [embed-component](cli/embed-component.md),
-  [complex-component](cli/complex-component.md), or
-  [dialog](cli/dialog.md)
+  [complex-component](cli/complex-component.md), [dialog](cli/dialog.md), or
+  [tabs](cli/tabs.md)
 - **Forms:** [field-component](cli/field-component.md),
   [form-field](cli/form-field.md), or
   [reactive-form](cli/reactive-form.md)

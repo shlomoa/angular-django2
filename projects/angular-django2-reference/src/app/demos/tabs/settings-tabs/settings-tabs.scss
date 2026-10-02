@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+
+.tabs-vertical {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.tabs-list {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.tabs-tab {
+  justify-content: flex-start;
+}
+
+.tabs-tab-selected {
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+.tabs-panels {
+  flex: 1 1 auto;
+  min-width: 0;
+}

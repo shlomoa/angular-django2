@@ -94,6 +94,7 @@ sources over lower-priority ones.
   - `component`
   - `embed-component`
   - `complex-component`
+  - `tabs`
   - `dialog`
   - `field-component`
   - `form-field`
@@ -134,6 +135,10 @@ sources over lower-priority ones.
     `produces.selectionChange` and `produces.complete` are compiled;
     `uses.branching`, other attributes and other child types are rejected.
     Step content is compiled and embedded by `uses.slot` as in `component`.
+  - `tabs`: compile an OpenUI `Tabs` node (`--document`, required) into a
+    standalone `OnPush` Angular Material component: a `mat-tab-group`, or for
+    `uses.orientation` `vertical` an ARIA tablist; the content of each `tab` is
+    compiled and embedded, and a page stack (tabs without a tab strip) is rejected
   - `embed-component`: wire a child component into a parent using the embedding
     hooks. In file mode, options are `--component` (child component `.ts` path)
     and `--parent` (parent component `.ts` path). In package mode (add
@@ -282,6 +287,7 @@ sources over lower-priority ones.
   | [`form-field`](cli/form-field.md#openui-control-nodes), [`field-component`](cli/field-component.md)                                  | `TextInputs` or `RangeControl`                                                                                                         |
   | [`component`](cli/component.md#openui-surface-containers)                                                                            | `SurfaceContainers`; children compiled and embedded by `uses.slot`                                                                     |
   | [`complex-component`](cli/complex-component.md#openui-composite-containers)                                                          | `SurfaceContainers` as a Material card; optional `OverlayContainers` child                                                             |
+  | [`tabs`](cli/tabs.md#openui-tabs-nodes)                                                                                              | `Tabs` with `tab` children; the content of each tab is compiled and embedded                                                           |
   | [`dialog`](cli/dialog.md#openui-dialog-nodes)                                                                                        | `dialog` with `header` / `section` / `footer` regions; `uses.open`, `uses.modal`, `produces.close`, `produces.cancel`                  |
   | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `uses.slot` sections                                                            |
   | [`stepper`](cli/stepper.md#openui-stepper-nodes)                                                                                     | `Stepper` with `step` children (`uses.label`, `uses.optional`); step content composed by `uses.slot`                                   |
