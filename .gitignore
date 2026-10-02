@@ -2,7 +2,6 @@
 
 # Compiled output
 **/dist
-/tmp
 /out-tsc
 /bazel-out
 
@@ -47,9 +46,6 @@ playwright-report/
 # Environment files
 /.env
 /.venv
-
-# Temporary local scaffolds
-/_tmp_*/
 
 # TypeScript cache
 *.tsbuildinfo
