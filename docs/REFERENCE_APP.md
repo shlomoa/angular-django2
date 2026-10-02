@@ -67,6 +67,10 @@ projects/angular-django2-reference/src/app/
   - **Terminal Simulation**: Displays Catppuccin-styled CLI output demonstrating schematic execution.
   - **Workspace File Tree**: Details file creation and update actions (`CREATE`, `UPDATE`).
 
+### Dialog Demonstration
+
+The reference application demonstrates the [`dialog`](cli/dialog.md) schematic at `/demos/dialog`. The page opens `confirm-delete`, the component the schematic generates from `confirm-delete.openui.json`, in modal or non-modal mode and reports whether it was closed (`produces.close`) or dismissed with Escape or a backdrop click (`produces.cancel`).
+
 ### Interactive Guides Section
 
 The reference application provides a dedicated guides section at `/guides` that walks through package capabilities:

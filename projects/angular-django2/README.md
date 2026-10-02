@@ -52,6 +52,7 @@ The collection provides 18 specialized schematics grouped by functional domain:
 - **`component`**: Generates standalone OnPush components with embedding hook markers (`imports`, `injected services`, `inputs`, `outputs`, and template `children`).
 - **`embed-component`**: Wires child components into parent components using embedding hooks in file mode or package mode (e.g. embedding Material components).
 - **`complex-component`**: Composes `component` and `embed-component` to create, modify, or confirmed-delete advanced standalone OnPush Material components featuring `<ng-container>` multi-slot projection BKM, mixins, or CDK overlay dialogs.
+- **`dialog`**: Compiles an OpenUI `dialog` element into a standalone OnPush Angular Material dialog component with `open`/`modal` signals, `closed`/`cancelled` outputs, and title, content, and actions regions composed like `component` slots.
 
 ### Form Engineering
 

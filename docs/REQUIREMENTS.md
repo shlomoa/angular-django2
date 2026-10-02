@@ -94,6 +94,7 @@ sources over lower-priority ones.
   - `component`
   - `embed-component`
   - `complex-component`
+  - `dialog`
   - `field-component`
   - `form-field`
   - `reactive-form`
@@ -137,6 +138,18 @@ sources over lower-priority ones.
     It requires a kebab-case name, an application-source-tree path, and a
     non-empty feature list limited to `mixins`, `nested`, `projection`, and
     `cdk-overlay`; delete requires explicit confirmation.
+  - `dialog`: compile an OpenUI `dialog` element (`widgets/dialog`) into a
+    standalone `OnPush` Angular Material dialog component. It requires
+    `--document` and `@angular/material` and `@angular/cdk` before mutation.
+    `uses.open` and `uses.modal` become the `open` model and `modal` input,
+    `produces.close` and `produces.cancel` (`null` markers) become the `closed`
+    and `cancelled` outputs, and the `header`, `section` and `footer` regions
+    map to the `header`, `children` and `actions` slots of the `component`
+    composition. A modal dialog has a backdrop and `aria-modal`; focus moves in,
+    is held and is restored, and Escape or a backdrop click dismisses it. Other
+    attributes, children, `uses.slot` on a region child, and a `ModalOverlay`
+    behavior that targets the dialog are rejected. `complex-component` keeps its
+    `OverlayContainers` CDK overlay path unchanged.
   - `field-component`: create a simple, string-valued Angular Material
     field-control convenience component using the canonical `form-field`
     implementation. It supports the narrow `--kind` contract of `text`,
@@ -243,6 +256,7 @@ sources over lower-priority ones.
   | [`form-field`](cli/form-field.md#openui-control-nodes), [`field-component`](cli/field-component.md)                                  | `TextInputs` or `RangeControl`                                                                                                         |
   | [`component`](cli/component.md#openui-surface-containers)                                                                            | `SurfaceContainers`; children compiled and embedded by `uses.slot`                                                                     |
   | [`complex-component`](cli/complex-component.md#openui-composite-containers)                                                          | `SurfaceContainers` as a Material card; optional `OverlayContainers` child                                                             |
+  | [`dialog`](cli/dialog.md#openui-dialog-nodes)                                                                                        | `dialog` with `header` / `section` / `footer` regions; `uses.open`, `uses.modal`, `produces.close`, `produces.cancel`                  |
   | [`embed-component`](cli/embed-component.md)                                                                                          | `--slot` (`header`, `content`, `actions`) matching the `uses.slot` sections                                                            |
   | [`page`](cli/page.md#openui-page-nodes)                                                                                              | `DashboardPage` or `EmptyPage` with `uses.title`, `uses.route`, `uses.icon`, `uses.access`, `uses.authGuard`                           |
   | [`application`](cli/application.md#openui-application-documents), [`material-app`](cli/material-app.md#openui-application-documents) | `Application` with `Routing`, `Navigation`, `ToolBar`, `Presentation`; `material-app` renders validated toolbar rows and sidenav links |
