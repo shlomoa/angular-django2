@@ -1441,4 +1441,125 @@ export class App {
       }
     },
   );
+
+  it(
+    'E2E-STEPPER-01: stepper compiles an OpenUI Stepper with embedded form content into a buildable Material stepper',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const appName = 'stepper-app';
+      const appPath = path.join(tempArea.path, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+      const document = {
+        version: '0.12.0',
+        id: 'root',
+        type: 'html',
+        children: [
+          {
+            id: 'checkout',
+            type: 'Stepper',
+            attrs: {
+              'uses.linear': 'true',
+              'uses.orientation': '"vertical"',
+              'produces.selectionChange': null,
+              'produces.complete': null,
+            },
+            children: [
+              {
+                id: 'shipping',
+                type: 'step',
+                attrs: { 'uses.label': '"Shipping"' },
+                children: [
+                  {
+                    id: 'address',
+                    type: 'Form',
+                    attrs: { 'uses.title': '"Address"', 'uses.action': '"/api/address/"' },
+                    children: [
+                      { id: 'street', type: 'TextInputs', attrs: { 'uses.label': '"Street"' } },
+                    ],
+                  },
+                ],
+              },
+              {
+                id: 'review',
+                type: 'step',
+                attrs: { 'uses.optional': 'true' },
+                children: [
+                  {
+                    id: 'summary',
+                    type: 'SurfaceContainers',
+                    attrs: { 'uses.title': '"Summary"', 'uses.slot': '"actions"' },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+        fs.writeFileSync(
+          path.join(appPath, 'checkout.openui.json'),
+          JSON.stringify(document, null, 2),
+        );
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:stepper',
+            '--document=checkout.openui.json',
+            '--path=src/app/features',
+          ],
+          appPath,
+        );
+
+        const stepperRoot = path.join(appPath, 'src', 'app', 'features', 'checkout');
+        const template = fs.readFileSync(path.join(stepperRoot, 'checkout.html'), 'utf8');
+        expect(template).toContain('<mat-stepper');
+        expect(template).toContain('<mat-step label="Shipping">');
+        expect(template).toContain('<mat-step label="Review" [optional]="true">');
+        expect(template).toContain('(click)="finish()"');
+        expect(template).toMatch(/step-shipping-children section -->\n\s+<app-address-form/);
+        expect(template).toMatch(/step-review-actions section -->\n\s+<app-summary>/);
+        const source = fs.readFileSync(path.join(stepperRoot, 'checkout.ts'), 'utf8');
+        expect(source).toContain('MatStepperModule');
+        expect(source).toContain('readonly complete = output<void>();');
+        expect(fs.existsSync(path.join(stepperRoot, 'address-form', 'address-form.ts'))).toBe(true);
+        expect(fs.existsSync(path.join(stepperRoot, 'summary', 'summary.ts'))).toBe(true);
+
+        // Works: render the stepper from the root component and build under strict templates.
+        const appRoot = path.join(appPath, 'src', 'app');
+        const appSource = fs
+          .readFileSync(resolveAppComponentPath(appRoot), 'utf8')
+          .replace(/imports:\s*\[([^\]]*)\]/, (_match, items: string) => {
+            return `imports: [${[items.trim(), 'Checkout'].filter(Boolean).join(', ')}]`;
+          });
+        fs.writeFileSync(
+          resolveAppComponentPath(appRoot),
+          `import { Checkout } from './features/checkout/checkout';\n${appSource}`,
+        );
+        fs.writeFileSync(resolveAppTemplatePath(appRoot), '<app-checkout />\n');
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-STEPPER-01');
+      }
+    },
+  );
 });
