@@ -7,13 +7,13 @@ exactly one class. For the architecture and roadmap, see the
 
 ## 0. Classification
 
-| Class                          | Meaning                                                                                                              |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------- |
-| **Direct (OpenUI in)**         | The schematic compiles OpenUI nodes from `--document`. Implemented, with named tests. §1 lists the supported subset. |
-| **Conceptual / CLI by design** | The schematic corresponds to an OpenUI concept but takes CLI options, or the concept is realized indirectly.         |
-| **Planned**                    | A spec-first schematic that is not built yet. Documents containing the scope cannot be compiled.                     |
-| **Tooling only**               | Angular CLI or project tooling with no OpenUI counterpart.                                                           |
-| **Missing**                    | An OpenUI scope with no schematic, no coverage through another schematic, and no plan.                               |
+| Class                          | Meaning                                                                                                                 |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| **Direct (OpenUI in)**         | The schematic compiles OpenUI nodes from `--document`. Implemented, with named tests. §1 lists the supported subset.    |
+| **Conceptual / CLI by design** | The schematic corresponds to an OpenUI concept but takes CLI options, or the concept is realized indirectly.            |
+| **Planned**                    | A spec-first schematic that is not built yet. Documents containing the scope cannot be compiled.                        |
+| **Tooling only**               | Angular CLI or project tooling with no OpenUI counterpart.                                                              |
+| **Missing**                    | An OpenUI scope with no schematic of its own. §5 says whether it is tracked by an issue, not planned, or cross-cutting. |
 
 Scope paths are canonical OpenUI 0.12.0 `<category>/<id>` paths. Test IDs refer to
 specs in `projects/angular-django-validation/unit/schematics/`. Some IDs are
@@ -173,22 +173,22 @@ These are current behavior, documented by maintainer decision:
 
 Spec-first schematics that are not built yet. The schematic names are proposed
 Angular / Material names, not OpenUI identifiers. Details:
-[implementation plan](openui-spec-implementation-plan.md) §3–§5. None has a
-tracking issue yet.
+[implementation plan](openui-spec-implementation-plan.md) §3–§5. Each has a
+tracking issue.
 
-| OpenUI scope                  | Proposed schematic |
-| :---------------------------- | :----------------- |
-| `widgets/table`               | `table`            |
-| `widgets/dataGrid`            | `data-grid`        |
-| `widgets/dialog`              | `dialog`           |
-| `widgets/stepper`             | `stepper`          |
-| `containers/tabs`             | `tabs`             |
-| `containers/expandablePanels` | `accordion`        |
-| `containers/sheetContainers`  | `bottom-sheet`     |
-| `widgets/menuWidgets`         | `menu`             |
-| `widgets/feedbackWidgets`     | `feedback`         |
-| `widgets/dateTimePickers`     | `date-picker`      |
-| `widgets/chart`               | `chart`            |
+| OpenUI scope                  | Proposed schematic | Issue                                                         |
+| :---------------------------- | :----------------- | :------------------------------------------------------------ |
+| `widgets/table`               | `table`            | [#142](https://github.com/shlomoa/angular-django2/issues/142) |
+| `widgets/dataGrid`            | `data-grid`        | [#143](https://github.com/shlomoa/angular-django2/issues/143) |
+| `widgets/dialog`              | `dialog`           | [#144](https://github.com/shlomoa/angular-django2/issues/144) |
+| `widgets/stepper`             | `stepper`          | [#145](https://github.com/shlomoa/angular-django2/issues/145) |
+| `containers/tabs`             | `tabs`             | [#146](https://github.com/shlomoa/angular-django2/issues/146) |
+| `containers/expandablePanels` | `accordion`        | [#147](https://github.com/shlomoa/angular-django2/issues/147) |
+| `containers/sheetContainers`  | `bottom-sheet`     | [#148](https://github.com/shlomoa/angular-django2/issues/148) |
+| `widgets/menuWidgets`         | `menu`             | [#149](https://github.com/shlomoa/angular-django2/issues/149) |
+| `widgets/feedbackWidgets`     | `feedback`         | [#150](https://github.com/shlomoa/angular-django2/issues/150) |
+| `widgets/dateTimePickers`     | `date-picker`      | [#151](https://github.com/shlomoa/angular-django2/issues/151) |
+| `widgets/chart`               | `chart`            | [#152](https://github.com/shlomoa/angular-django2/issues/152) |
 
 ---
 
@@ -209,27 +209,34 @@ classified as Direct because it compiles `html` and `link` nodes (§1.2).
 
 ## 5. Missing
 
-OpenUI 0.12.0 scopes with no schematic, no coverage through another schematic,
-and no plan:
+OpenUI 0.12.0 scopes with no schematic of their own. The status says whether the
+scope is tracked by an issue, not planned (and why), or a cross-cutting
+vocabulary. Priorities: P1 builds first, P2 next. The triage is recorded in
+[#108](https://github.com/shlomoa/angular-django2/issues/108).
 
-| OpenUI scope                                                                                                                                                        | Notes                                                                                                      |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------- |
-| `views/report`                                                                                                                                                      | No report view. `data-service` generates data transport from a `uses.data` binding only; it renders no UI. |
-| `widgets/list`                                                                                                                                                      |                                                                                                            |
-| `widgets/navigationWidgets`                                                                                                                                         | The `material-app` sidenav comes from `application/navigation` (§1.2), not from this scope.                |
-| `widgets/mediaWidgets`                                                                                                                                              |                                                                                                            |
-| `containers/grid`                                                                                                                                                   |                                                                                                            |
-| `containers/structuralContainers`                                                                                                                                   | Composition uses `uses.slot` sections inside `SurfaceContainers` (§2), not structural container nodes.     |
-| `containers/splitters`                                                                                                                                              |                                                                                                            |
-| `controls/native`                                                                                                                                                   |                                                                                                            |
-| `controls/choiceControls`                                                                                                                                           | `form-field` rejects this node type.                                                                       |
-| `controls/pickerControl`                                                                                                                                            | `form-field` rejects this node type.                                                                       |
-| `controls/displayPrimitives`                                                                                                                                        |                                                                                                            |
-| `controls/statusIndicator`                                                                                                                                          |                                                                                                            |
-| `controls/drawingAndCapture`                                                                                                                                        |                                                                                                            |
-| `controls/linkAndScrollControls`                                                                                                                                    |                                                                                                            |
-| `behaviors/dragAndDrop`, `behaviors/resizable`, `behaviors/collapsible`, `behaviors/inputAssistance`, `behaviors/modalOverlay`, `behaviors/viewportAndFocusControl` |                                                                                                            |
-| `interaction`, `internationalization`, `layout`                                                                                                                     | Cross-cutting vocabularies with no one-to-one schematic.                                                   |
+| OpenUI scope                                    | Status        | Notes                                                                                                                                                                                                    |
+| :---------------------------------------------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `views/report`                                  | Tracked       | [#160](https://github.com/shlomoa/angular-django2/issues/160) (P1, after `widgets/table` and `widgets/list`). `data-service` generates data transport from a `uses.data` binding only; it renders no UI. |
+| `widgets/list`                                  | Tracked       | [#159](https://github.com/shlomoa/angular-django2/issues/159) (P1).                                                                                                                                      |
+| `widgets/navigationWidgets`                     | Tracked       | [#165](https://github.com/shlomoa/angular-django2/issues/165) (P2, breadcrumbs and pagination only). The `material-app` sidenav comes from `application/navigation` (§1.2), not from this scope.         |
+| `widgets/mediaWidgets`                          | Not planned   | Deferred; no demand found.                                                                                                                                                                               |
+| `containers/grid`                               | Tracked       | [#166](https://github.com/shlomoa/angular-django2/issues/166) (P2).                                                                                                                                      |
+| `containers/structuralContainers`               | Not planned   | Covered by existing schematics: composition uses `uses.slot` sections inside `SurfaceContainers` (§2), not structural container nodes.                                                                   |
+| `containers/splitters`                          | Not planned   | Deferred; no demand found.                                                                                                                                                                               |
+| `controls/native`                               | Not planned   | Covered through `controls/choiceControls` and `controls/pickerControl`.                                                                                                                                  |
+| `controls/choiceControls`                       | Tracked       | [#158](https://github.com/shlomoa/angular-django2/issues/158) (P1). `form-field` rejects this node type.                                                                                                 |
+| `controls/pickerControl`                        | Tracked       | [#162](https://github.com/shlomoa/angular-django2/issues/162) (P2, file kind first). `form-field` rejects this node type.                                                                                |
+| `controls/displayPrimitives`                    | Tracked       | [#163](https://github.com/shlomoa/angular-django2/issues/163) (P2).                                                                                                                                      |
+| `controls/statusIndicator`                      | Tracked       | [#164](https://github.com/shlomoa/angular-django2/issues/164) (P2).                                                                                                                                      |
+| `controls/drawingAndCapture`                    | Not planned   | Deferred; no demand found.                                                                                                                                                                               |
+| `controls/linkAndScrollControls`                | Not planned   | Covered by existing navigation: `NavItem` and `ToolAction` (§1.2).                                                                                                                                       |
+| `behaviors/dragAndDrop`                         | Not planned   | Deferred; no demand found.                                                                                                                                                                               |
+| `behaviors/resizable`                           | Not planned   | Deferred; no demand found.                                                                                                                                                                               |
+| `behaviors/collapsible`                         | Tracked       | With `containers/expandablePanels` in [#147](https://github.com/shlomoa/angular-django2/issues/147).                                                                                                     |
+| `behaviors/inputAssistance`                     | Tracked       | [#161](https://github.com/shlomoa/angular-django2/issues/161) (P2).                                                                                                                                      |
+| `behaviors/modalOverlay`                        | Tracked       | With `widgets/dialog` in [#144](https://github.com/shlomoa/angular-django2/issues/144).                                                                                                                  |
+| `behaviors/viewportAndFocusControl`             | Not planned   | Deferred; no demand found.                                                                                                                                                                               |
+| `interaction`, `internationalization`, `layout` | Cross-cutting | Vocabularies with no one-to-one schematic.                                                                                                                                                               |
 
 `controls/actionControls` is Direct only as the `reactive-form` submit action
 (§1.2); no schematic generates standalone action controls.

@@ -172,7 +172,7 @@ graph TD
         PARSER --> AST
 
         subgraph Layer3["Layer 3: ngdj Specifics (Full-Stack Django & Signals)"]
-            L3_1["OpenUI Attribute Bindings: uses.data, uses.loading, uses.error, behaves.sort, behaves.filter, behaves.paginate"]
+            L3_1["OpenUI Behaviour Bindings: behaves.sort, behaves.filter, behaves.paginate wired to host handlers"]
             L3_2["Django REST Framework (DRF) Integration: { count, next, previous, results }"]
             L3_3["Integration with ngdj:data-service & OpenAPI Client"]
             L3_4["CSRF Cookie Injection & Django Template View Adapters"]
@@ -213,8 +213,8 @@ What exists today:
 - **Layer 3**, in part: `openapi-setup` generates Django CSRF, credential, and
   auth transport helpers; `data-service` generates data services with a DRF
   `results` / `count` response adapter; `page` registers auth guards.
-- **Not implemented**: the table attribute bindings (`uses.data`, `uses.loading`,
-  `uses.error`, `behaves.sort`, `behaves.filter`, `behaves.paginate`), invoking
+- **Not implemented**: the table behaviour bindings (`behaves.sort`,
+  `behaves.filter`, `behaves.paginate`), invoking
   `@angular/material` schematics, and Django template view adapters.
 
 ### Layer 1: HTML5 + JavaScript (Web Standards Baseline)
@@ -255,9 +255,11 @@ What exists today:
   components to Django backends, and enforcing standalone `OnPush`
   architectures.
 - **Capabilities (target)**:
-  - **OpenUI attribute mapping**: binding `uses.data`, `uses.loading`, `uses.error`,
-    `behaves.sort`, `behaves.filter`, `behaves.paginate`, and `produces.selectionChange` to typed Angular
-    signals (`input()`, `output()`, `computed()`).
+  - **OpenUI attribute mapping**: wiring the declared `behaves.sort`,
+    `behaves.filter` and `behaves.paginate` expressions (and, where a scope
+    declares them, `uses.selection` and `produces.selectionChange`) to typed
+    Angular signals (`input()`, `output()`, `computed()`). Loading and error
+    state are component state, not OpenUI attributes.
   - **Django REST Framework (DRF) bridge**: standard DRF pagination responses
     (`{ count: number, next: string | null, previous: string | null, results: T[] }`),
     query parameters (`?limit=20&offset=40` or `?page=2&page_size=20`), and
@@ -312,12 +314,25 @@ table scope.
   uses exactly this contract: a `table` with `(sort)`, `(filter)`, and
   `(paginate)` and `tr` rows (the pre-0.6.0 key style). In 0.3.0 the example used attributes and child
   types outside the contract; 0.3.1 fixed it
-  ([openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154)).
-- **Not in the contract**: data binding (`uses.data`, `uses.selection`,
-  `uses.loading`, `uses.error`, `produces.selectionChange`), column definitions, pagination, and empty
-  state. The catalog has no `Column`, `Pagination`, or `EmptyState` type. Before
-  `ngdj:table` depends on any of these, they must become part of the
-  `openui-spec` contract (§1.3).
+  ([openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154)). In 0.12.0
+  the worked example binds the three behaviours to host handler expressions:
+  `sortOrders($event)`, `filterOrders($event)` and `paginateOrders($event)`.
+- **Data and operations are host-supplied.** A Behaves value is a
+  target-language expression ([spec 4.5](https://github.com/shlomoa/openui-spec/blob/main/spec/README.md#45-attributes-and-their-categories)),
+  so the document carries no data source and `table` needs no data attribute
+  in the contract. The Layer 3 adapter wires the three handlers to the DRF
+  pagination conventions; `data-service` (`uses.data`, an `angular-django2`
+  extension) is a generator choice, not a contract requirement.
+- **Not part of Table**: row selection (Data grid declares `uses.selection` and
+  `produces.selectionChange`); loading, error and empty state (composed from the
+  status indicator or feedback scopes). The catalog has no `Pagination` or
+  `EmptyState` type.
+- **Open: columns and cells.** The scope declares no column attribute, and `th`
+  and `td` are not known object types (the validator reports
+  `catalog/unknown-type`); a `tr` is only a row. Undeclared `uses.*` keys on
+  `table` and `thead` are accepted as extension attributes. How the first
+  version expresses columns is decided in
+  [#142](https://github.com/shlomoa/angular-django2/issues/142).
 
 ### Three-layer structure of `ngdj:table` (Planned)
 
@@ -362,22 +377,23 @@ table scope.
 
 ### Planned
 
-None of these items has a tracking issue yet.
+Each item has a tracking issue. Missing scopes that are tracked are listed in
+[`ngdj-openui-spec-mapping.md`](ngdj-openui-spec-mapping.md) §5.
 
 - **Data presentation and dialogs**:
-  - [ ] `table` (`widgets/table`)
-  - [ ] `dialog` (`widgets/dialog`)
-  - [ ] `stepper` (`widgets/stepper`)
+  - [ ] `table` (`widgets/table`) ([#142](https://github.com/shlomoa/angular-django2/issues/142))
+  - [ ] `dialog` (`widgets/dialog`) ([#144](https://github.com/shlomoa/angular-django2/issues/144))
+  - [ ] `stepper` (`widgets/stepper`) ([#145](https://github.com/shlomoa/angular-django2/issues/145))
 - **Containers and navigation**:
-  - [ ] `tabs` (`containers/tabs`)
-  - [ ] `accordion` (`containers/expandablePanels`)
-  - [ ] `menu` (`widgets/menuWidgets`)
-  - [ ] `bottom-sheet` (`containers/sheetContainers`)
+  - [ ] `tabs` (`containers/tabs`) ([#146](https://github.com/shlomoa/angular-django2/issues/146))
+  - [ ] `accordion` (`containers/expandablePanels`) ([#147](https://github.com/shlomoa/angular-django2/issues/147))
+  - [ ] `menu` (`widgets/menuWidgets`) ([#149](https://github.com/shlomoa/angular-django2/issues/149))
+  - [ ] `bottom-sheet` (`containers/sheetContainers`) ([#148](https://github.com/shlomoa/angular-django2/issues/148))
 - **Pickers, feedback, and specialized widgets**:
-  - [ ] `date-picker` (`widgets/dateTimePickers`)
-  - [ ] `feedback` (`widgets/feedbackWidgets`)
-  - [ ] `data-grid` (`widgets/dataGrid`)
-  - [ ] `chart` (`widgets/chart`)
+  - [ ] `date-picker` (`widgets/dateTimePickers`) ([#151](https://github.com/shlomoa/angular-django2/issues/151))
+  - [ ] `feedback` (`widgets/feedbackWidgets`) ([#150](https://github.com/shlomoa/angular-django2/issues/150))
+  - [ ] `data-grid` (`widgets/dataGrid`) ([#143](https://github.com/shlomoa/angular-django2/issues/143))
+  - [ ] `chart` (`widgets/chart`) ([#152](https://github.com/shlomoa/angular-django2/issues/152))
 - **For each new schematic**:
   - [ ] Vitest unit tests in `projects/angular-django-validation/unit/schematics/`.
   - [ ] A demonstration page in `projects/angular-django2-reference`.
