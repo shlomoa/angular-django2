@@ -48,6 +48,7 @@ The current schematics collection includes:
 - `openapi-setup`
 - `data-service`
 - `page`
+- `stepper`
 
 ### Build, lint, and package this repository
 
