@@ -1,0 +1,32 @@
+{
+  "version": "0.12.0",
+  "id": "root",
+  "type": "html",
+  "children": [
+    {
+      "id": "confirmDelete",
+      "type": "dialog",
+      "attrs": {
+        "uses.open": "false",
+        "uses.modal": "true",
+        "produces.close": null,
+        "produces.cancel": null
+      },
+      "children": [
+        {
+          "id": "dialogTitle",
+          "type": "header",
+          "attrs": { "uses.title": "\"Delete this report?\"" }
+        },
+        {
+          "id": "dialogContent",
+          "type": "section"
+        },
+        {
+          "id": "dialogActions",
+          "type": "footer"
+        }
+      ]
+    }
+  ]
+}

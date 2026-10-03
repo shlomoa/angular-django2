@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "AngularDjango2Dialog",
+  "title": "angular-django2 dialog schematic",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "description": "Kebab-case name of the dialog component and its directory. Defaults to the dasherized node id.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "path": {
+      "type": "string",
+      "format": "path",
+      "description": "Directory that receives the dialog directory, within the selected application source root. Defaults to the application's app directory."
+    },
+    "project": {
+      "type": "string",
+      "description": "Angular application project. Required when the workspace has multiple application source roots."
+    },
+    "document": {
+      "type": "string",
+      "format": "path",
+      "description": "Workspace-relative path to a canonical OpenUI JSON document (*.openui.json or *.json). Compiles a dialog node into a Material dialog component: uses.open, uses.modal, produces.close and produces.cancel come from the node, and the children of its header, section and footer regions are compiled and embedded into the title, content and actions sections."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Optional element ID within the OpenUI document to compile. When omitted, targets the first dialog element.",
+      "aliases": ["element-id", "elementId", "node-id", "nodeId"]
+    }
+  },
+  "required": ["document"]
+}

@@ -38,6 +38,7 @@ The current schematics collection includes:
 - `embed-component`
 - `complex-component`
 - `tabs`
+- `dialog`
 - `field-component`
 - `form-field`
 - `reactive-form`

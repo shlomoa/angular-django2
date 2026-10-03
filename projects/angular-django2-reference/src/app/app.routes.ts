@@ -35,4 +35,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./demos/tabs/tabs-demo-page').then((module) => module.TabsDemoPage),
   },
+  {
+    path: 'demos/dialog',
+    loadComponent: () =>
+      import('./demos/dialog/dialog-demo-page').then((module) => module.DialogDemoPage),
+  },
 ];

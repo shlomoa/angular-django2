@@ -1,0 +1,60 @@
+<section class="dialog-demo" aria-labelledby="dialog-demo-title">
+  <h1 id="dialog-demo-title">Dialog</h1>
+  <p>
+    The <code>dialog</code> schematic compiles an OpenUI <code>dialog</code> element
+    (<code>widgets/dialog</code>) into a standalone Angular Material dialog component. Its
+    <code>uses.open</code> and <code>uses.modal</code> attributes become the <code>open</code> and
+    <code>modal</code> signals, and <code>produces.close</code> and
+    <code>produces.cancel</code> become the <code>closed</code> and <code>cancelled</code> outputs.
+  </p>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Try the generated dialog</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-slide-toggle [checked]="modal()" (change)="modal.set($event.checked)">
+        Modal
+      </mat-slide-toggle>
+      <p>
+        A modal dialog has a backdrop and sets <code>aria-modal</code>. Focus moves into the dialog
+        and returns to the button when it closes. A button closes the dialog; Escape or a backdrop
+        click dismisses it.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button type="button" (click)="show()">Open dialog</button>
+    </mat-card-actions>
+  </mat-card>
+
+  <p class="dialog-demo__outcome" aria-live="polite" data-testid="outcome">
+    @switch (outcome()) {
+      @case ('closed') {
+        Last outcome: closed (<code>produces.close</code>).
+      }
+      @case ('cancelled') {
+        Last outcome: dismissed (<code>produces.cancel</code>).
+      }
+      @default {
+        No dialog has ended yet.
+      }
+    }
+  </p>
+
+  <h2>Generate it</h2>
+  <pre><code>{{ command }}</code></pre>
+  <p>The OpenUI element the command compiles:</p>
+  <pre><code>{{ documentSource }}</code></pre>
+  <p>
+    The regions map to the <code>header</code>, <code>children</code> and <code>actions</code>
+    sections of the component composition. Add buttons to the actions section, for example
+    <code>&lt;button mat-button mat-dialog-close&gt;</code>.
+  </p>
+
+  <app-confirm-delete
+    [(open)]="open"
+    [modal]="modal()"
+    (closed)="outcome.set('closed')"
+    (cancelled)="outcome.set('cancelled')"
+  />
+</section>

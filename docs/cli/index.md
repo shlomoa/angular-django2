@@ -22,6 +22,7 @@ for options, defaults, constraints, prerequisites, and generated output.
 | Generate a component, page, service, or class                 | [`component`](component.md), [`page`](page.md), [`service`](service.md), or [`class`](class.md)                |
 | Compose or embed advanced components                          | [`embed-component`](embed-component.md) or [`complex-component`](complex-component.md)                         |
 | Compile an OpenUI tabs container                              | [`tabs`](tabs.md)                                                                                              |
+| Generate a Material dialog from an OpenUI element             | [`dialog`](dialog.md)                                                                                          |
 | Generate typed Material fields or a reactive form             | [`field-component`](field-component.md), [`form-field`](form-field.md), or [`reactive-form`](reactive-form.md) |
 | Generate an OpenAPI client setup or its data-service wrapper  | [`openapi-setup`](openapi-setup.md) or [`data-service`](data-service.md)                                       |
 | Compile an OpenUI stepper (multi-step flow) into Material     | [`stepper`](stepper.md)                                                                                        |

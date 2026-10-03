@@ -192,7 +192,7 @@ The reference application provides interactive explorations for the full collect
 | -------------------------- | ------------------------------------------------------------------ |
 | **Workspace Setup**        | `ng-add`, `workspace-setup`, `material-setup`, `project-structure` |
 | **Application Generation** | `application`, `material-app`, `app-shell`                         |
-| **Component Authoring**    | `component`, `embed-component`, `complex-component`                |
+| **Component Authoring**    | `component`, `embed-component`, `complex-component`, `dialog`      |
 | **Form Engineering**       | `field-component`, `form-field`, `reactive-form`                   |
 | **Routing & Architecture** | `page`, `service`, `class`                                         |
 | **OpenAPI & Data Flow**    | `openapi-setup`, `data-service`                                    |

@@ -1604,6 +1604,139 @@ export class App {
   );
 
   it(
+    'E2E-DIALOG-01: dialog generates a Material dialog component hosted in a buildable application',
+    { timeout: DEFAULT_E2E_TIMEOUT },
+    async () => {
+      const tempArea = createE2ETempArea(repoRoot, debugMode);
+      const workspacePath = tempArea.path;
+      const appName = 'dialog-app';
+      const appPath = path.join(workspacePath, appName);
+      const libraryPath = getLibraryPackagePath();
+      const parentDir = path.dirname(repoRoot);
+      const relativeDirectory = path.relative(parentDir, appPath);
+
+      try {
+        execAngularCli(
+          [
+            'new',
+            appName,
+            `--directory=${relativeDirectory}`,
+            '--skip-git',
+            '--skip-install',
+            '--routing=false',
+            '--style=scss',
+            '--defaults',
+          ],
+          parentDir,
+        );
+        execCommand('npm install', appPath);
+        execCommand('npm install @angular/material @angular/cdk', appPath);
+        execCommand(`npm install "${libraryPath}"`, appPath);
+        execAngularCli(['add', 'angular-django2', '--skip-confirmation'], appPath);
+
+        const appRoot = path.join(appPath, 'src', 'app');
+        fs.writeFileSync(
+          path.join(appRoot, 'confirm-delete.openui.json'),
+          JSON.stringify({
+            version: '0.12.0',
+            id: 'root',
+            type: 'html',
+            children: [
+              {
+                id: 'confirmDelete',
+                type: 'dialog',
+                attrs: {
+                  'uses.open': 'false',
+                  'uses.modal': 'true',
+                  'produces.close': null,
+                  'produces.cancel': null,
+                },
+                children: [
+                  {
+                    id: 'dialogTitle',
+                    type: 'header',
+                    attrs: { 'uses.title': '"Delete this report?"' },
+                  },
+                  {
+                    id: 'dialogContent',
+                    type: 'section',
+                    children: [{ id: 'warning', type: 'SurfaceContainers' }],
+                  },
+                  {
+                    id: 'dialogActions',
+                    type: 'footer',
+                    children: [
+                      { id: 'nickname', type: 'TextInputs', attrs: { 'uses.label': '"Nickname"' } },
+                    ],
+                  },
+                ],
+              },
+            ],
+          }),
+        );
+        execAngularCli(
+          [
+            'generate',
+            'angular-django2:dialog',
+            '--document=src/app/confirm-delete.openui.json',
+            '--path=src/app/features',
+          ],
+          appPath,
+        );
+
+        const dialogRoot = path.join(appRoot, 'features', 'confirm-delete');
+        const dialogSource = fs.readFileSync(path.join(dialogRoot, 'confirm-delete.ts'), 'utf8');
+        const dialogTemplate = fs.readFileSync(
+          path.join(dialogRoot, 'confirm-delete.html'),
+          'utf8',
+        );
+        expect(dialogSource).toContain('readonly open = model(false);');
+        expect(dialogSource).toContain('readonly cancelled = output<void>();');
+        expect(dialogSource).toContain("import { Warning } from './warning/warning';");
+        expect(dialogTemplate).toContain('<h2 mat-dialog-title>Delete this report?</h2>');
+        expect(dialogTemplate).toContain('<app-warning></app-warning>');
+        expect(fs.existsSync(path.join(dialogRoot, 'nickname-field', 'nickname-field.ts'))).toBe(
+          true,
+        );
+
+        // Host the dialog so the build type-checks its bindings under strict templates.
+        fs.writeFileSync(
+          resolveAppComponentPath(appRoot),
+          `import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ConfirmDelete } from './features/confirm-delete/confirm-delete';
+
+@Component({
+  selector: 'app-root',
+  imports: [ConfirmDelete],
+  templateUrl: './app.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class App {
+  protected readonly open = signal(false);
+  protected readonly outcome = signal('');
+}
+`,
+        );
+        fs.writeFileSync(
+          resolveAppTemplatePath(appRoot),
+          `<button type="button" (click)="open.set(true)">Open dialog</button>
+<p>{{ outcome() }}</p>
+<app-confirm-delete
+  [(open)]="open"
+  [modal]="true"
+  (closed)="outcome.set('closed')"
+  (cancelled)="outcome.set('cancelled')"
+/>
+`,
+        );
+        execAngularCli(['build', '--configuration=development'], appPath);
+      } finally {
+        cleanupWorkspace(tempArea, 'E2E-DIALOG-01');
+      }
+    },
+  );
+
+  it(
     'E2E-11: one-step app flow (material-app) builds and writes the responsive sidenav layout',
     { timeout: DEFAULT_E2E_TIMEOUT },
     async () => {

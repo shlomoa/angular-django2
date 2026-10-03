@@ -53,6 +53,7 @@ The collection provides 18 specialized schematics grouped by functional domain:
 - **`embed-component`**: Wires child components into parent components using embedding hooks in file mode or package mode (e.g. embedding Material components).
 - **`complex-component`**: Composes `component` and `embed-component` to create, modify, or confirmed-delete advanced standalone OnPush Material components featuring `<ng-container>` multi-slot projection BKM, mixins, or CDK overlay dialogs.
 - **`tabs`**: Compiles an OpenUI `Tabs` container (`--document`) into a standalone OnPush Angular Material tabs component (a `mat-tab-group`, or an ARIA tablist for vertical tabs) and embeds the compiled content of each tab.
+- **`dialog`**: Compiles an OpenUI `dialog` element into a standalone OnPush Angular Material dialog component with `open`/`modal` signals, `closed`/`cancelled` outputs, and title, content, and actions regions composed like `component` slots.
 
 ### Form Engineering
 

@@ -39,6 +39,7 @@ nav:
       - Pages:
           - Page: cli/page.md
       - Widgets:
+          - Dialog: cli/dialog.md
           - Stepper: cli/stepper.md
           - Table: cli/table.md
   - Integrate and extend:

@@ -46,6 +46,11 @@
       "factory": "./complex-component/index#complexComponent",
       "schema": "./complex-component/schema.json"
     },
+    "dialog": {
+      "description": "Compile an OpenUI dialog element into a standalone OnPush Angular Material dialog component.",
+      "factory": "./dialog/index#dialog",
+      "schema": "./dialog/schema.json"
+    },
     "field-component": {
       "description": "Generate a simple typed Angular Material field-control convenience component.",
       "factory": "./field-component/index#fieldComponent",

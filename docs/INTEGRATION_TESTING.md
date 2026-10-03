@@ -105,6 +105,10 @@ Current E2E coverage includes:
   `Tabs` node (a form and a card as tab content, a disabled tab) and a vertical
   `Tabs` node (a nested `Tabs`), both hosted in the root component and verified
   with a development build
+- `E2E-DIALOG-01` — `dialog` generation from an OpenUI document with title,
+  content, and actions children, hosted in a real Angular Material workspace and
+  verified with a development build that type-checks the `[(open)]`, `modal`,
+  `closed`, and `cancelled` bindings under strict templates
 - `E2E-11` — one-step app flow (`material-app`), verifying a production build and
   that the responsive Material sidenav layout, theme, and standard structure are
   present
