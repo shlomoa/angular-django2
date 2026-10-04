@@ -297,6 +297,60 @@ describe('angular-django2 schematics', () => {
       expect(appComponentHtml).not.toContain('<div class="content">');
     });
 
+    it('replaces the default app spec with one that matches the Material layout', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify({
+          version: 1,
+          projects: {
+            'test-app': { root: 'projects/test-app', sourceRoot: 'projects/test-app/src' },
+          },
+        }),
+      );
+      tree.create('projects/test-app/src/app/app.ts', 'export class App {}');
+      tree.create('projects/test-app/src/app/app.html', '<h1>Hello, test-app</h1>');
+      tree.create('projects/test-app/src/app/app.scss', '');
+      tree.create('projects/test-app/src/app/app.spec.ts', "expect('h1').toBe('h1');");
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      } as never;
+
+      generateMaterialLayout(tree, context, 'test-app', 'scss', { title: "Gardener's" });
+
+      const spec = tree.read('projects/test-app/src/app/app.spec.ts')!.toString();
+      expect(spec).toContain("import { App } from './app';");
+      expect(spec).toContain('providers: [provideRouter([])]');
+      expect(spec).toContain("toContain('Gardener\\'s')");
+      expect(spec).not.toContain('h1');
+      expect(spec).not.toMatch(/CLASS_NAME|COMPONENT_FILE|REPLACE_APP_NAME/);
+    });
+
+    it('does not create an app spec when the project has none', () => {
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify({
+          version: 1,
+          projects: {
+            'test-app': { root: 'projects/test-app', sourceRoot: 'projects/test-app/src' },
+          },
+        }),
+      );
+      tree.create('projects/test-app/src/app/app.ts', 'export class App {}');
+
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+      } as never;
+
+      generateMaterialLayout(tree, context, 'test-app', 'scss');
+
+      expect(tree.exists('projects/test-app/src/app/app.spec.ts')).toBe(false);
+    });
+
     it('TC-APP-03: handles package.json gracefully when missing', () => {
       const tree = Tree.empty();
 
