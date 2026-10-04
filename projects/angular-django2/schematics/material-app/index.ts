@@ -20,6 +20,7 @@ import {
   MATERIAL_ICONS_STYLESHEET_HREF,
   MATERIAL_ICONS_STYLESHEET_LINK,
   MATERIAL_LAYOUT_COMPONENT_TS,
+  MATERIAL_LAYOUT_SPEC_TS,
   MATERIAL_LAYOUT_STYLES,
   MATERIAL_LAYOUT_TEMPLATE,
 } from '../utility/material-constants';
@@ -343,6 +344,19 @@ export function generateMaterialLayout(
       .replace('TOOLBAR_ACTION_HANDLERS', materialLayoutActionHandlers(layout.toolBar));
     tree.overwrite(tsPath, componentContent);
     context.logger.info(`Updated Material layout component ${tsPath}.`);
+
+    // The default spec targets the default component, which the layout replaced.
+    const specPath = tsPath.replace(/\.ts$/, '.spec.ts');
+    if (tree.exists(specPath)) {
+      const componentFile = tsPath.endsWith('app.ts') ? 'app' : 'app.component';
+      tree.overwrite(
+        specPath,
+        MATERIAL_LAYOUT_SPEC_TS.replaceAll('CLASS_NAME', className)
+          .replace('COMPONENT_FILE', componentFile)
+          .replace('REPLACE_APP_NAME', escapeSingleQuotedString(layout.title ?? projectName)),
+      );
+      context.logger.info(`Updated Material layout spec ${specPath}.`);
+    }
   } else {
     context.logger.warn(
       `Could not find app component TypeScript file for project "${projectName}".`,

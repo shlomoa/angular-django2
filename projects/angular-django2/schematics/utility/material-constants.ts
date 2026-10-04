@@ -93,6 +93,37 @@ export class CLASS_NAME {
 }
 `;
 
+/**
+ * Unit spec for the Material layout component. The default spec the Angular
+ * application schematic generates expects an `h1` and no router, so it fails
+ * against the sidenav layout (NG0201 for `RouterLink`).
+ */
+export const MATERIAL_LAYOUT_SPEC_TS = `import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { CLASS_NAME } from './COMPONENT_FILE';
+
+describe('CLASS_NAME', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CLASS_NAME],
+      providers: [provideRouter([])],
+    }).compileComponents();
+  });
+
+  it('should create the app', () => {
+    const fixture = TestBed.createComponent(CLASS_NAME);
+    expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should render the title in the toolbar', async () => {
+    const fixture = TestBed.createComponent(CLASS_NAME);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('mat-toolbar')?.textContent).toContain('REPLACE_APP_NAME');
+  });
+});
+`;
+
 export const MATERIAL_ICONS_STYLESHEET_HREF =
   'https://fonts.googleapis.com/icon?family=Material+Icons';
 export const MATERIAL_ICONS_STYLESHEET_LINK = `<link rel="stylesheet" href="${MATERIAL_ICONS_STYLESHEET_HREF}" />`;
