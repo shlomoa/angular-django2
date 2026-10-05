@@ -6,8 +6,13 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+## [0.6.2]
+
 - Added the `table` schematic, which compiles an OpenUI `table` element (`widgets/table`, `--document`, `--node-id`) into a standalone `OnPush` Angular Material table. The host supplies the columns and the rows; `behaves.sort`, `behaves.filter` and `behaves.paginate` select Material sorting, a filter field and paging, wired to the `sorted`, `filtered` and `paginated` outputs the host handles. Unsupported attributes and child types are rejected. See `docs/cli/table.md`.
 - Added a table demonstration page to the reference application at `/table`.
+- Added the `dialog` schematic for generating an Angular Material dialog from an OpenUI `dialog` widget, with end-to-end coverage and a reference application demonstration page.
+- Added the `stepper` schematic for generating an Angular Material stepper from an OpenUI `stepper` container, with a reference application demonstration page.
+- Added the `tabs` schematic for generating Angular Material tabs from an OpenUI `tabs` container, with end-to-end coverage and a reference application demonstration page.
 - The `material-app` schematic replaces the application's default `app.spec.ts` (or `app.component.spec.ts`) together with the component, so the generated unit test provides the router and asserts the toolbar title. The default spec expected an `h1` and failed against the sidenav layout with `NG0201: No provider found for ActivatedRoute`.
 
 ## [0.6.1]
