@@ -41,7 +41,7 @@ const DEFAULT_CONTROL_TYPES: Record<(typeof CONTROL_AST_NODE_TYPES)[number], str
   RangeControl: 'number',
 };
 
-/** Attribute keys understood on control nodes (the catalog does not declare every one; see `docs/ngdj-openui-spec-mapping.md`). */
+/** Attribute keys understood on control nodes (the catalog does not declare every one; see `extensions` in `schematics/command-mapping.json`). */
 export const CONTROL_ATTRIBUTES = {
   type: 'uses.type',
   multiline: 'uses.multiline',

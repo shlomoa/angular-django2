@@ -81,8 +81,9 @@ reject any other expression, a quoted literal and a list. The catalog declares s
 attributes (`TextInputs`: `uses.label`, `uses.value`, `uses.placeholder`,
 `uses.type`, `uses.multiline`, `uses.maxLength`, `uses.required`; `RangeControl`:
 `uses.label`, `uses.value`, `uses.min`, `uses.max`); the others are extensions the
-schematics define (see the
-[mapping document](https://github.com/shlomoa/angular-django2/blob/main/docs/ngdj-openui-spec-mapping.md)).
+schematics define (the
+[command mapping](https://github.com/shlomoa/angular-django2/blob/main/projects/angular-django2/schematics/command-mapping.json)
+lists them as `extensions` of each node type).
 
 | Attribute                                                                                   | Used by                         |
 | :------------------------------------------------------------------------------------------ | :------------------------------ |
