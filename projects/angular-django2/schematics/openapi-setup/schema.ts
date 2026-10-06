@@ -18,6 +18,14 @@ export interface OpenapiSetupSchema {
   helpersPath?: string;
 
   /**
+   * Authorization scheme the generated interceptor sends. `bearer` sends
+   * `Authorization: Bearer <token>`; `basic` sends
+   * `Authorization: Basic <base64 of username:password>`.
+   * @default "bearer"
+   */
+  authScheme?: 'bearer' | 'basic';
+
+  /**
    * When true, skips generating the Django auth/CSRF/transport and resource
    * adapter helpers.
    * @default false

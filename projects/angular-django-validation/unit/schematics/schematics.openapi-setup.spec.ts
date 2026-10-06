@@ -349,5 +349,79 @@ describe('angular-django2 schematics', () => {
 
       expect(secondContent).toBe(firstContent);
     });
+
+    describe('authScheme', () => {
+      function generate(options: Parameters<typeof openapiSetup>[0]): Tree {
+        const tree = Tree.empty();
+        tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+
+        const context = {
+          addTask: vi.fn(),
+          logger: { info: vi.fn(), warn: vi.fn() },
+        } as never;
+
+        return openapiSetup(options)(tree, context) as Tree;
+      }
+
+      const transportOf = (tree: Tree): string =>
+        tree.read('/src/app/api-integration/django-transport.ts')!.toString();
+
+      it('TC-API-16: defaults to the bearer scheme and an explicit bearer is identical', () => {
+        const byDefault = transportOf(generate({}));
+        const explicit = transportOf(generate({ authScheme: 'bearer' }));
+
+        expect(explicit).toBe(byDefault);
+        expect(byDefault).toContain("const AUTH_SCHEME = 'Bearer';");
+        expect(byDefault).toContain('export type DjangoAuthTokenFactory = () => string | null;');
+        expect(byDefault).not.toContain('Basic');
+      });
+
+      it('TC-API-17: basic emits an Authorization: Basic header from username and password', () => {
+        const transport = transportOf(generate({ authScheme: 'basic' }));
+
+        expect(transport).toContain("const AUTH_SCHEME = 'Basic';");
+        expect(transport).toContain('export interface DjangoBasicCredentials');
+        expect(transport).toContain(
+          'export type DjangoAuthTokenFactory = () => DjangoBasicCredentials | null;',
+        );
+        expect(transport).toContain('new TextEncoder().encode(');
+        expect(transport).toContain('btoa(');
+        expect(transport).toContain('[AUTH_SCHEME, encodeBasicCredentials(credentials)].join');
+        expect(transport).not.toContain('Bearer');
+      });
+
+      it('TC-API-18: the basic scheme keeps the shared transport composition points', () => {
+        const transport = transportOf(generate({ authScheme: 'basic' }));
+
+        expect(transport).toContain('export function provideDjangoApiTransport(');
+        expect(transport).toContain('export function readCsrfCookie(');
+        expect(transport).toContain('export const djangoAuthInterceptor');
+        expect(transport).toContain('export function djangoCredentialsInterceptor(');
+        expect(transport).toContain('export const DJANGO_AUTH_TOKEN');
+        expect(transport).toContain('factory: () => () => null');
+      });
+
+      it('TC-API-19: authScheme changes only the transport helper and is idempotent', () => {
+        const bearer = generate({});
+        const basic = generate({ authScheme: 'basic' });
+
+        for (const file of ['resource-adapter.ts', 'index.ts', 'resource-adapter.spec.ts']) {
+          const path = `/src/app/api-integration/${file}`;
+          expect(basic.read(path)!.toString()).toBe(bearer.read(path)!.toString());
+        }
+
+        const context = {
+          addTask: vi.fn(),
+          logger: { info: vi.fn(), warn: vi.fn() },
+        } as never;
+        const before = transportOf(basic);
+        const rerun = openapiSetup({ authScheme: 'basic' })(basic, context) as Tree;
+        expect(transportOf(rerun)).toBe(before);
+      });
+
+      it('TC-API-20: rejects an unsupported scheme', () => {
+        expect(() => generate({ authScheme: 'digest' as never })).toThrow(/authScheme/);
+      });
+    });
   });
 });

@@ -24,6 +24,13 @@
       "default": "src/app/api-integration",
       "aliases": ["helpers-path", "helpersPath"]
     },
+    "authScheme": {
+      "type": "string",
+      "enum": ["bearer", "basic"],
+      "description": "Authorization scheme the generated interceptor sends: bearer (Authorization: Bearer <token>) or basic (Authorization: Basic <base64 of username:password>)",
+      "default": "bearer",
+      "aliases": ["auth-scheme", "authScheme"]
+    },
     "skipHelpers": {
       "type": "boolean",
       "description": "When true, skips generating the Django auth/CSRF/transport and resource adapter helpers",

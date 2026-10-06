@@ -1,3 +1,8 @@
+/** Authorization scheme of the generated transport. */
+export type OpenapiSetupAuthScheme = 'bearer' | 'basic';
+
+export const DEFAULT_AUTH_SCHEME: OpenapiSetupAuthScheme = 'bearer';
+
 export interface OpenapiSetupHelperFile {
   /** Path relative to the resolved helpers directory. */
   fileName: string;
@@ -8,15 +13,103 @@ export interface OpenapiSetupHelperFile {
 }
 
 /**
+ * Credential types and the factory seam for the selected authorization scheme.
+ * @internal
+ */
+function authCredentialTypesContent(authScheme: OpenapiSetupAuthScheme): string {
+  if (authScheme === 'basic') {
+    return `/**
+ * Basic credentials sent as \`Authorization: Basic <base64 of username:password>\`.
+ */
+export interface DjangoBasicCredentials {
+  username: string;
+  password: string;
+}
+
+/**
+ * Factory that resolves the current Basic credentials (or \`null\` when
+ * anonymous). Provide your own factory to attach them to outgoing requests;
+ * keep the credentials in memory rather than in web storage.
+ */
+export type DjangoAuthTokenFactory = () => DjangoBasicCredentials | null;
+`;
+  }
+
+  return `/**
+ * Factory that resolves the current auth token (or \`null\` when anonymous).
+ * Provide your own factory to attach a bearer token to outgoing requests.
+ */
+export type DjangoAuthTokenFactory = () => string | null;
+`;
+}
+
+/**
+ * Authorization header interceptor for the selected authorization scheme.
+ * @internal
+ */
+function authInterceptorContent(authScheme: OpenapiSetupAuthScheme): string {
+  if (authScheme === 'basic') {
+    return `/**
+ * Authorization scheme used by {@link djangoAuthInterceptor}.
+ */
+const AUTH_SCHEME = 'Basic';
+
+/**
+ * Encode Basic credentials as base64 of their UTF-8 \`username:password\` form.
+ */
+function encodeBasicCredentials(credentials: DjangoBasicCredentials): string {
+  const bytes = new TextEncoder().encode(\`\${credentials.username}:\${credentials.password}\`);
+  return btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(''));
+}
+
+/**
+ * Interceptor that attaches a Basic \`Authorization\` header when the configured
+ * {@link DjangoAuthTokenFactory} returns credentials.
+ */
+export const djangoAuthInterceptor: HttpInterceptorFn = (req, next) => {
+  const credentials = inject(DJANGO_AUTH_TOKEN)();
+  if (!credentials) {
+    return next(req);
+  }
+
+  const authorization = [AUTH_SCHEME, encodeBasicCredentials(credentials)].join(' ');
+  return next(req.clone({ setHeaders: { Authorization: authorization } }));
+};
+`;
+  }
+
+  return `/**
+ * Authorization scheme used by {@link djangoAuthInterceptor}.
+ */
+const AUTH_SCHEME = 'Bearer';
+
+/**
+ * Interceptor that attaches a bearer \`Authorization\` header when the configured
+ * {@link DjangoAuthTokenFactory} returns a token.
+ */
+export const djangoAuthInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(DJANGO_AUTH_TOKEN)();
+  if (!token) {
+    return next(req);
+  }
+
+  const authorization = [AUTH_SCHEME, token].join(' ');
+  return next(req.clone({ setHeaders: { Authorization: authorization } }));
+};
+`;
+}
+
+/**
  * Django auth, CSRF, and transport helpers.
  *
  * These artifacts wire an ng-openapi-gen generated client to a Django backend
- * with explicit CSRF, credential, and bearer-token transport behavior. The
+ * with explicit CSRF, credential, and `Authorization` header transport
+ * behavior for the selected scheme (bearer token or Basic credentials). The
  * wiring stays visible in application code instead of hiding behind a
  * package-owned interceptor.
  * @internal
  */
-function transportContent(): string {
+function transportContent(authScheme: OpenapiSetupAuthScheme): string {
   return `import type { HttpInterceptorFn } from '@angular/common/http';
 import {
   provideHttpClient,
@@ -44,12 +137,7 @@ const DEFAULT_TRANSPORT_OPTIONS: Required<DjangoApiTransportOptions> = {
   withCredentials: true,
 };
 
-/**
- * Factory that resolves the current auth token (or \`null\` when anonymous).
- * Provide your own factory to attach a bearer token to outgoing requests.
- */
-export type DjangoAuthTokenFactory = () => string | null;
-
+${authCredentialTypesContent(authScheme)}
 /**
  * Injection token holding the {@link DjangoAuthTokenFactory}. Defaults to an
  * anonymous factory that never attaches an \`Authorization\` header.
@@ -76,25 +164,7 @@ export function readCsrfCookie(cookieName = 'csrftoken'): string | null {
   return match ? decodeURIComponent(match.slice(prefix.length)) : null;
 }
 
-/**
- * Authorization scheme used by {@link djangoAuthInterceptor}.
- */
-const AUTH_SCHEME = 'Bearer';
-
-/**
- * Interceptor that attaches a bearer \`Authorization\` header when the configured
- * {@link DjangoAuthTokenFactory} returns a token.
- */
-export const djangoAuthInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = inject(DJANGO_AUTH_TOKEN)();
-  if (!token) {
-    return next(req);
-  }
-
-  const authorization = [AUTH_SCHEME, token].join(' ');
-  return next(req.clone({ setHeaders: { Authorization: authorization } }));
-};
-
+${authInterceptorContent(authScheme)}
 /**
  * Build an interceptor that opts requests into credentialed (cookie) transport.
  */
@@ -106,7 +176,7 @@ export function djangoCredentialsInterceptor(withCredentials: boolean): HttpInte
  * Provide the HTTP transport for a Django-backed OpenAPI client.
  *
  * Wires Angular's built-in XSRF handling with the Django cookie/header names,
- * a credentials interceptor, and a bearer-token auth interceptor. Combine with
+ * a credentials interceptor, and a ${authScheme === 'basic' ? 'Basic' : 'bearer-token'} auth interceptor. Combine with
  * the generated \`ApiConfiguration\` to point requests at your API root:
  *
  * \`\`\`typescript
@@ -324,9 +394,15 @@ describe('ResourceAdapter', () => {
  * Build the list of generated integration helper artifacts.
  * @internal
  */
-export function getHelperFiles(): OpenapiSetupHelperFile[] {
+export function getHelperFiles(
+  authScheme: OpenapiSetupAuthScheme = DEFAULT_AUTH_SCHEME,
+): OpenapiSetupHelperFile[] {
+  if (authScheme !== 'bearer' && authScheme !== 'basic') {
+    throw new Error(`Unsupported authScheme "${String(authScheme)}". Use "bearer" or "basic".`);
+  }
+
   return [
-    { fileName: 'django-transport.ts', content: transportContent() },
+    { fileName: 'django-transport.ts', content: transportContent(authScheme) },
     { fileName: 'resource-adapter.ts', content: resourceAdapterContent() },
     { fileName: 'index.ts', content: barrelContent() },
     { fileName: 'django-transport.spec.ts', content: transportSpecContent(), spec: true },

@@ -254,7 +254,7 @@ sources over lower-priority ones.
     `PaginatedResult` in `resource-adapter.ts`, and a barrel `index.ts`; options:
     `--openapi-spec-file` (default: `openapi.json`), `--output-path` (default:
     `src/app/api`), `--helpers-path` (default: `src/app/api-integration`),
-    `--skip-helpers`, `--skip-tests`
+    `--auth-scheme` (`bearer` default, or `basic`), `--skip-helpers`, `--skip-tests`
   - `data-service`: generate a typed `*DataService` wrapper around an
     ng-openapi-gen `*ApiService` with search and CRUD helpers; options:
     `--api-service`, `--api-path` (default: `../api/services`), `--path`,

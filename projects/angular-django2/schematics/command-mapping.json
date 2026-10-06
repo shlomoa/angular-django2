@@ -1881,6 +1881,14 @@
             "source": "default"
           },
           {
+            "name": "authScheme",
+            "flag": "--auth-scheme",
+            "type": "string",
+            "enum": ["bearer", "basic"],
+            "default": "bearer",
+            "source": "default"
+          },
+          {
             "name": "skipHelpers",
             "flag": "--skip-helpers",
             "type": "boolean",
@@ -1921,7 +1929,7 @@
           "cli": [
             {
               "file": "projects/angular-django-validation/unit/schematics/schematics.openapi-setup.spec.ts",
-              "ids": ["TC-API-01..15"]
+              "ids": ["TC-API-01..20"]
             }
           ],
           "rerun": [
@@ -1932,7 +1940,7 @@
           ]
         },
         "capabilities": {
-          "transportSchemes": ["bearer"],
+          "transportSchemes": ["bearer", "basic"],
           "cookieCredentials": true,
           "csrfHelper": true
         },
@@ -1942,13 +1950,8 @@
           "the generate:api script in package.json",
           "<helpersPath>/ (authorization, CSRF, transport and resource-adapter helpers and their specs unless --skip-tests)"
         ],
-        "gaps": [
-          {
-            "issue": "shlomoa/angular-django2#190",
-            "summary": "The authorization scheme of the generated interceptor is fixed to Bearer (templates.ts AUTH_SCHEME); there is no option to select Basic."
-          }
-        ],
         "notes": [
+          "--auth-scheme selects the Authorization header form of the generated interceptor: bearer sends Bearer <token>, basic sends Basic <base64 of UTF-8 username:password>. The scheme is applied when the helpers are first written; an existing django-transport.ts is skipped, so changing it needs the file removed first (shlomoa/angular-django2#199).",
           "ng-openapi-gen itself is a third-party tool wrapped by django-angular3 and is not described here."
         ]
       },
