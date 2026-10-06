@@ -79,6 +79,39 @@ The collection provides 18 specialized schematics grouped by functional domain:
 
 ---
 
+## Command mapping for orchestrators
+
+The package ships a machine-readable map of what its commands do, for tools that decide which
+command to run when an OpenUI document or an OpenAPI contract changes (for example
+[`django-angular3`](https://github.com/shlomoa/django-angular3), which keeps change detection and
+orchestration). `angular-django2` owns the file, the command contracts and their parameters.
+
+```js
+const mapping = require(require.resolve('angular-django2/schematics/command-mapping.json'));
+```
+
+The file validates against `command-mapping.schema.json`, shipped next to it. Its content version is
+the version of the package that contains it; `mappingVersion` is the version of the file format.
+
+| Section        | Content                                                                                                                                                                        |
+| :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ui.commands`  | The commands that compile OpenUI nodes: parameters, document and node selection, behavior on existing output, per-operation status, tests, gaps.                               |
+| `ui.nodes`     | Each OpenUI node type: its command (or the root command that compiles it), child types, supported attributes and the status of create, update, delete and move.                |
+| `api.commands` | Capabilities and parameters of the two commands in the OpenAPI lane, `openapi-setup` and `data-service`. Routing from OpenAPI changes to commands belongs to the orchestrator. |
+| `tooling`      | Commands with no OpenUI or OpenAPI counterpart.                                                                                                                                |
+| `scopes`       | Every scope of the pinned OpenUI catalog, and how it is covered: direct, conceptual, tracked by an issue, not planned or cross-cutting.                                        |
+| `limitations`  | Known limitations that are not tied to one node type.                                                                                                                          |
+
+An operation is `supported`, `partial`, `unsupported`, `indirect` (applied by regenerating the node's
+root command) or `tooling-only`. A command that exists is not assumed to support create, update,
+delete and move: every non-supported status names a reason and a tracking issue. Most commands are
+create-only today, so an orchestrator must treat `unsupported` as a failure, never as a no-op.
+
+The package's own test suite checks the file against the collection, the option schema of every
+command, the specs it cites and the catalog, so it cannot drift from the code.
+
+---
+
 ## Package Dependencies
 
 `angular-django2` authoritatively declares and maintains its runtime dependencies for Angular 22:

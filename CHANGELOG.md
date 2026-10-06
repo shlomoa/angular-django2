@@ -6,6 +6,8 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+- Added `schematics/command-mapping.json` and `command-mapping.schema.json` to the package: a machine-readable mapping between changes to an OpenUI document or an OpenAPI contract and the ngdj commands, for orchestrators such as `django-angular3`. It lists every command with its parameters, behavior on existing output and per-operation status (create, update, delete, move), the OpenUI node types and their root commands, an `api` section for `openapi-setup` and `data-service`, and every scope of the pinned OpenUI catalog. It records what is create-only today instead of assuming support. The validation suite checks it against the collection, the option schemas, the cited specs and the catalog, and a new re-run spec pins what nine commands do on existing output (`TC-MAPPING-RERUN-01…09`).
+
 ## [0.6.2]
 
 - Added the `table` schematic, which compiles an OpenUI `table` element (`widgets/table`, `--document`, `--node-id`) into a standalone `OnPush` Angular Material table. The host supplies the columns and the rows; `behaves.sort`, `behaves.filter` and `behaves.paginate` select Material sorting, a filter field and paging, wired to the `sorted`, `filtered` and `paginated` outputs the host handles. Unsupported attributes and child types are rejected. See `docs/cli/table.md`.
