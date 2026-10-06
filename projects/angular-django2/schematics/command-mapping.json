@@ -851,7 +851,7 @@
         },
         "gaps": [
           {
-            "issue": "shlomoa/angular-django2#198",
+            "issue": "shlomoa/angular-django2#205",
             "summary": "Re-running material-app prepends a duplicate comment line to styles.scss on every run; the cause is in material-setup, which it runs."
           }
         ],
@@ -1016,7 +1016,7 @@
         },
         "gaps": [
           {
-            "issue": "shlomoa/angular-django2#198",
+            "issue": "shlomoa/angular-django2#205",
             "summary": "With a prebuilt theme a second run prepends a duplicate comment line to styles.scss (material-setup/index.ts updateStylesFile); TC-M4 checks only angular.json."
           }
         ],

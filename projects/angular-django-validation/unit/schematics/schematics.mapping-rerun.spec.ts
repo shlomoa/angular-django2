@@ -317,7 +317,7 @@ describe('command mapping: behavior on existing output (TC-MAPPING-RERUN)', () =
   });
 
   /**
-   * Known defect (shlomoa/angular-django2#198): with a prebuilt theme material-setup prepends the
+   * Known defect (shlomoa/angular-django2#205): with a prebuilt theme material-setup prepends the
    * same comment to styles.scss on every run. `it.fails` passes while the defect exists and fails
    * once it is fixed, which is the signal to change the mapping's material-setup and material-app
    * entries and turn this into a plain test.
