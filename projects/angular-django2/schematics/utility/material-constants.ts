@@ -14,12 +14,7 @@ export const THEME_MAPPING: Record<string, string> = {
  * Material layout template for app.component.html
  * Responsive sidenav layout with toolbar and content area
  */
-export const MATERIAL_LAYOUT_TEMPLATE = `<mat-toolbar color="primary"TOOLBAR_ATTRIBUTES>
-TOOLBAR_TITLE_ROW_START  <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span>{{ title }}</span>
-TOOLBAR_TITLE_ROW_ENDTOOLBAR_ROWS</mat-toolbar>
+export const MATERIAL_LAYOUT_TEMPLATE = `TOOLBAR_REGION
 
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #drawer mode="side" opened class="sidenav">
@@ -28,6 +23,7 @@ TOOLBAR_TITLE_ROW_ENDTOOLBAR_ROWS</mat-toolbar>
         <mat-icon matListItemIcon>home</mat-icon>
         <span matListItemTitle>Home</span>
       </a>
+      NAV_REGION
     </mat-nav-list>
   </mat-sidenav>
 
@@ -35,6 +31,17 @@ TOOLBAR_TITLE_ROW_ENDTOOLBAR_ROWS</mat-toolbar>
     <router-outlet />
   </mat-sidenav-content>
 </mat-sidenav-container>
+`;
+
+/**
+ * The toolbar of the Material layout, the first generated region of the template.
+ */
+export const MATERIAL_LAYOUT_TOOLBAR = `<mat-toolbar color="primary"TOOLBAR_ATTRIBUTES>
+TOOLBAR_TITLE_ROW_START  <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span>{{ title }}</span>
+TOOLBAR_TITLE_ROW_ENDTOOLBAR_ROWS</mat-toolbar>
 `;
 
 /**
@@ -88,7 +95,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './STYLE_FILE',
 })
 export class CLASS_NAME {
-  title = 'REPLACE_APP_NAME';
+TITLE_REGION
   TOOLBAR_ACTION_HANDLERS
 }
 `;
@@ -119,7 +126,7 @@ describe('CLASS_NAME', () => {
     const fixture = TestBed.createComponent(CLASS_NAME);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('mat-toolbar')?.textContent).toContain('REPLACE_APP_NAME');
+TITLE_ASSERTION_REGION
   });
 });
 `;

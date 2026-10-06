@@ -3,6 +3,7 @@ import { SchematicsException } from '@angular-devkit/schematics';
 import type { WorkspaceConfig } from '../utility/workspace';
 import { readWorkspace, requireWorkspaceProject, writeWorkspace } from '../utility/workspace';
 import { THEME_MAPPING } from '../utility/material-constants';
+import { beginMarker, endMarker, renderRegion } from '../utility/generated-regions';
 
 interface MaterialSetupOptions {
   project: string;
@@ -26,10 +27,14 @@ export function materialSetup(options: MaterialSetupOptions): Rule {
     const projectRoot = projectConfig.root || '';
     const stylesPath = projectRoot ? `${projectRoot}/src/styles.scss` : 'src/styles.scss';
 
-    // Update angular.json for prebuilt themes
-    if (theme !== 'custom') {
-      updateAngularJsonStyles(tree, context, workspace, project, THEME_MAPPING[theme]);
-    }
+    // Update angular.json: a prebuilt theme is a styles entry, the custom theme is not
+    updateAngularJsonStyles(
+      tree,
+      context,
+      workspace,
+      project,
+      theme === 'custom' ? undefined : THEME_MAPPING[theme],
+    );
 
     // Update styles.scss
     updateStylesFile(tree, context, stylesPath, theme, typography);
@@ -41,12 +46,16 @@ export function materialSetup(options: MaterialSetupOptions): Rule {
   };
 }
 
+/**
+ * Makes the project's styles array hold the selected prebuilt theme and no other, so a re-run with
+ * a changed theme swaps it. Without a theme path (the custom theme) it holds no prebuilt theme.
+ */
 function updateAngularJsonStyles(
   tree: Tree,
   context: SchematicContext,
   workspace: WorkspaceConfig,
   project: string,
-  themePath: string,
+  themePath: string | undefined,
 ): void {
   const projectConfig = workspace.projects?.[project];
   if (!projectConfig?.architect?.build?.options) {
@@ -55,44 +64,45 @@ function updateAngularJsonStyles(
 
   const buildOptions = projectConfig!.architect!.build!.options!;
   const styles = buildOptions.styles || [];
+  const prebuiltThemes = new Set<unknown>(Object.values(THEME_MAPPING));
+  const withoutPrebuilt = styles.filter((entry) => !prebuiltThemes.has(entry));
+  const updated =
+    themePath === undefined
+      ? withoutPrebuilt
+      : styles.includes(themePath)
+        ? styles.filter((entry) => entry === themePath || !prebuiltThemes.has(entry))
+        : [themePath, ...withoutPrebuilt];
 
-  // Check if the theme is already added (idempotency)
-  if (!styles.includes(themePath)) {
-    buildOptions.styles = [themePath, ...styles];
-    writeWorkspace(tree, workspace);
-    context.logger.info(`Added Angular Material theme "${themePath}" to project "${project}".`);
-  } else {
-    context.logger.info(`Angular Material theme "${themePath}" is already configured.`);
-  }
-}
-
-function updateStylesFile(
-  tree: Tree,
-  context: SchematicContext,
-  stylesPath: string,
-  theme: string,
-  typography: boolean,
-): void {
-  let stylesContent = '';
-
-  if (tree.exists(stylesPath)) {
-    stylesContent = tree.read(stylesPath)!.toString();
-  }
-
-  // Check if Material styles are already configured (idempotency): the custom theme writes the
-  // `@use` line, a prebuilt theme writes the marker comment.
-  if (
-    stylesContent.includes("@use '@angular/material'") ||
-    stylesContent.includes(PREBUILT_THEME_COMMENT)
-  ) {
-    context.logger.info(`Angular Material styles are already configured in ${stylesPath}.`);
+  if (JSON.stringify(updated) === JSON.stringify(styles)) {
+    context.logger.info(
+      themePath
+        ? `Angular Material theme "${themePath}" is already configured.`
+        : 'No prebuilt Angular Material theme is configured.',
+    );
     return;
   }
+  buildOptions.styles = updated;
+  writeWorkspace(tree, workspace);
+  context.logger.info(
+    themePath
+      ? `Set Angular Material theme "${themePath}" for project "${project}".`
+      : `Removed the prebuilt Angular Material theme from project "${project}".`,
+  );
+}
 
-  if (theme === 'custom') {
-    const typographyConfig = typography ? 'mat.define-typography-config()' : 'null';
-    const customThemeContent = `
-@use '@angular/material' as mat;
+/**
+ * The text of the theme region of `styles.scss`: the custom theme's definition, or for a prebuilt
+ * theme (loaded through the angular.json styles array) the marker comment.
+ */
+function themeBlock(theme: string, typography: boolean): string {
+  if (theme !== 'custom') {
+    return PREBUILT_THEME_COMMENT;
+  }
+  const typographyConfig = typography ? 'mat.define-typography-config()' : 'null';
+  return renderRegion(
+    'theme',
+    'css',
+    `@use '@angular/material' as mat;
 
 @include mat.core();
 
@@ -111,19 +121,68 @@ $theme: mat.define-light-theme((
 ));
 
 @include mat.all-component-themes($theme);
+`,
+  );
+}
 
-`;
-    stylesContent = customThemeContent + stylesContent;
+/**
+ * Where the theme block already is in the file: a marked custom theme, the custom theme of an
+ * earlier version (no markers) or the prebuilt marker comment.
+ */
+function findThemeBlock(content: string): { start: number; end: number } | undefined {
+  const begin = content.indexOf(beginMarker('theme', 'css'));
+  const end = content.indexOf(endMarker('theme', 'css'), begin);
+  if (begin !== -1 && end !== -1) {
+    return { start: begin, end: end + endMarker('theme', 'css').length };
+  }
+  const legacy =
+    /@use '@angular\/material' as mat;[\s\S]*?@include mat\.all-component-themes\(\$theme\);/.exec(
+      content,
+    );
+  if (legacy) {
+    return { start: legacy.index, end: legacy.index + legacy[0].length };
+  }
+  const comment = content.indexOf(PREBUILT_THEME_COMMENT);
+  if (comment !== -1) {
+    return { start: comment, end: comment + PREBUILT_THEME_COMMENT.length };
+  }
+  return undefined;
+}
+
+function updateStylesFile(
+  tree: Tree,
+  context: SchematicContext,
+  stylesPath: string,
+  theme: string,
+  typography: boolean,
+): void {
+  const exists = tree.exists(stylesPath);
+  const stylesContent = exists ? tree.read(stylesPath)!.toString() : '';
+  const block = themeBlock(theme, typography);
+  const found = findThemeBlock(stylesContent);
+
+  let updated: string;
+  if (found) {
+    // A re-run replaces the theme block in place (idempotent for unchanged options, and a changed
+    // theme or typography is applied); what surrounds the block is not touched.
+    updated = stylesContent.slice(0, found.start) + block + stylesContent.slice(found.end);
+  } else if (stylesContent.includes("@use '@angular/material'")) {
+    // A theme written by hand: leave it as it is.
+    context.logger.info(`Angular Material styles are already configured in ${stylesPath}.`);
+    return;
   } else {
-    // For prebuilt themes, just add a comment as the theme is included via angular.json
-    stylesContent = `${PREBUILT_THEME_COMMENT}\n\n` + stylesContent;
+    updated = `${block}\n\n${stylesContent}`;
   }
 
-  if (tree.exists(stylesPath)) {
-    tree.overwrite(stylesPath, stylesContent);
+  if (updated === stylesContent) {
+    context.logger.info(`Angular Material styles are already configured in ${stylesPath}.`);
+    return;
+  }
+  if (exists) {
+    tree.overwrite(stylesPath, updated);
     context.logger.info(`Updated ${stylesPath} with Angular Material style configuration.`);
   } else {
-    tree.create(stylesPath, stylesContent);
+    tree.create(stylesPath, updated);
     context.logger.info(`Created ${stylesPath} with Angular Material style configuration.`);
   }
 }
@@ -146,12 +205,19 @@ function updateAppConfig(
 
   let appConfigContent = tree.read(appConfigPath)!.toString();
 
-  // Check if Material providers are already added (idempotency)
-  if (
-    appConfigContent.includes('provideAnimations') ||
-    appConfigContent.includes('provideNoopAnimations')
-  ) {
+  // Check if a Material provider is already added (idempotency); a changed `animations` option
+  // swaps the provider.
+  const wanted = animations ? 'provideAnimations' : 'provideNoopAnimations';
+  const other = animations ? 'provideNoopAnimations' : 'provideAnimations';
+  if (appConfigContent.includes(wanted) && !appConfigContent.includes(other)) {
     context.logger.info(`Material animation provider is already configured in ${appConfigPath}.`);
+    return;
+  }
+  if (appConfigContent.includes(other)) {
+    tree.overwrite(appConfigPath, appConfigContent.replaceAll(other, wanted));
+    context.logger.info(
+      `Switched the Material animation provider to ${wanted}() in ${appConfigPath}.`,
+    );
     return;
   }
 

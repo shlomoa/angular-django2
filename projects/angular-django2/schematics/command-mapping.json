@@ -810,7 +810,7 @@
         ],
         "onExisting": {
           "outcome": "rewrite",
-          "detail": "Skips project creation when the project exists and rewrites the layout, the app component and its spec from the document, so a changed document is applied."
+          "detail": "Skips project creation when the project exists and re-derives the layout from the document: only the generated regions of the layout, component, styles and spec are replaced, so a changed document is applied and edits made around those regions are kept. A file without generated regions (Angular's default, or output of an earlier version) is replaced whole once. An unchanged document leaves the output byte-identical."
         },
         "operations": {
           "create": { "status": "supported" },
@@ -837,6 +837,10 @@
             {
               "file": "projects/angular-django-validation/unit/schematics/schematics.mapping-rerun.spec.ts",
               "ids": ["TC-MAPPING-RERUN-07"]
+            },
+            {
+              "file": "projects/angular-django-validation/unit/schematics/schematics.material-app-update.spec.ts",
+              "ids": ["TC-APP-UPDATE-01..06"]
             }
           ]
         },
@@ -978,7 +982,7 @@
         ],
         "onExisting": {
           "outcome": "no-op",
-          "detail": "Idempotent: the theme is added to the angular.json styles once, and styles.scss is left unchanged when it already holds the custom theme's @use line or the prebuilt theme's marker comment."
+          "detail": "Idempotent: a second run with unchanged options leaves the project byte-identical. A changed option is applied: the theme is swapped in the angular.json styles array and the styles.scss theme block, the typography changes the custom theme, and the animations option swaps the provider. A theme written by hand into styles.scss is left alone."
         },
         "operations": {
           "create": { "status": "tooling-only" },
@@ -997,6 +1001,10 @@
             {
               "file": "projects/angular-django-validation/unit/schematics/schematics.material-setup.spec.ts",
               "ids": ["TC-M4"]
+            },
+            {
+              "file": "projects/angular-django-validation/unit/schematics/schematics.material-app-update.spec.ts",
+              "ids": ["TC-APP-UPDATE-01"]
             },
             {
               "file": "projects/angular-django-validation/unit/schematics/schematics.mapping-rerun.spec.ts",

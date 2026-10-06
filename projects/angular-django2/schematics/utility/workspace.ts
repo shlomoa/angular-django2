@@ -48,9 +48,15 @@ export function readWorkspace(
   return JSON.parse(angularJson.toString()) as WorkspaceConfig;
 }
 
-/** Write angular.json using the repository's stable two-space JSON formatting. */
+/**
+ * Write angular.json using the repository's stable two-space JSON formatting, keeping the line
+ * endings the file already has (Angular writes CRLF on Windows).
+ */
 export function writeWorkspace(tree: Tree, workspace: WorkspaceConfig): void {
-  tree.overwrite(ANGULAR_JSON_PATH, `${JSON.stringify(workspace, null, 2)}\n`);
+  const existing = tree.read(ANGULAR_JSON_PATH)?.toString() ?? '';
+  const eol = existing.includes('\r\n') ? '\r\n' : '\n';
+  const content = `${JSON.stringify(workspace, null, 2)}\n`;
+  tree.overwrite(ANGULAR_JSON_PATH, eol === '\n' ? content : content.replaceAll('\n', eol));
 }
 
 /** Resolve a project from angular.json or throw a consistent SchematicsException. */

@@ -32,6 +32,35 @@ Supported options:
 | `--style`      | `scss`                       | Stylesheet format.                                                                                                |
 | `--prefix`     | `app`                        | Component selector prefix.                                                                                        |
 
+## Re-running on an existing project
+
+When the project already exists, `material-app` skips creating it and re-derives the
+layout, so a changed document (a route, a navigation item, a toolbar action, the title or
+a presentation token) is applied by running the same command again. The result matches a
+clean regeneration, and an unchanged document leaves the output byte-identical.
+
+The layout files mark the text the schematic owns between `openui:begin <name>` and
+`openui:end <name>` comments:
+
+| File          | Generated regions                                                      |
+| ------------- | ---------------------------------------------------------------------- |
+| `app.html`    | `toolbar` (the whole toolbar) and `nav` (the sidenav links after Home) |
+| `app.scss`    | `layout`                                                               |
+| `app.ts`      | `title`                                                                |
+| `app.spec.ts` | `title` (the toolbar title assertion)                                  |
+
+- A re-run replaces only the text inside these regions; anything you add around them
+  (extra markup, styles, members, imports, tests) is kept. Do not edit inside a region:
+  the next run overwrites it.
+- Toolbar action handlers are not in a region. A re-run adds a stub for a new
+  `produces.activate` action and never changes or removes a handler, so an implemented
+  handler survives, and so does one whose action left the document.
+- A file without any region (Angular's default file, or output of an earlier version, or a
+  file written by hand) is replaced whole once; later runs keep your edits.
+- If you delete the markers of one region in a file that has others, that region is left
+  as it is and the run logs a warning.
+- A `Presentation` change is applied by [`material-setup`](material-setup.md#re-running).
+
 ## OpenUI application documents
 
 With `--document`, the application is compiled from an OpenUI `Application`

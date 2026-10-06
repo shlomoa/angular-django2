@@ -23,7 +23,10 @@ import {
   MATERIAL_LAYOUT_SPEC_TS,
   MATERIAL_LAYOUT_STYLES,
   MATERIAL_LAYOUT_TEMPLATE,
+  MATERIAL_LAYOUT_TOOLBAR,
 } from '../utility/material-constants';
+import type { CommentStyle } from '../utility/generated-regions';
+import { hasRegion, renderRegion, replaceRegion } from '../utility/generated-regions';
 
 type ResolvedMaterialAppSchema = Required<Omit<MaterialAppSchema, 'document' | 'nodeId'>> & {
   /** Layout customizations compiled from an OpenUI document. */
@@ -279,6 +282,51 @@ export function updateIndexHtmlWithMaterialIcons(
   context.logger.info(`Added Material Icons stylesheet to ${indexHtmlPath}.`);
 }
 
+/** A generated region of a layout file: the text a re-run replaces. */
+interface LayoutRegion {
+  name: string;
+  style: CommentStyle;
+  body: string;
+}
+
+/**
+ * Writes a layout file. A file without any generated region (the Angular default, or output from
+ * before regions existed) is replaced whole; a file with regions has only those regions replaced,
+ * so edits around them survive a re-run. A region whose markers a user removed is left alone.
+ */
+function writeLayoutFile(
+  tree: Tree,
+  context: SchematicContext,
+  path: string,
+  generated: string,
+  regions: readonly LayoutRegion[],
+  description: string,
+): void {
+  const current = tree.read(path)!.toString();
+  if (!regions.some(({ name, style }) => hasRegion(current, name, style))) {
+    tree.overwrite(path, generated);
+    context.logger.info(`Updated Material layout ${description} ${path}.`);
+    return;
+  }
+  let updated = current;
+  for (const { name, style, body } of regions) {
+    const next = replaceRegion(updated, name, style, body);
+    if (next === undefined) {
+      context.logger.warn(
+        `${path} has no complete "${name}" region; leaving that part of the ${description} as it is.`,
+      );
+    } else {
+      updated = next;
+    }
+  }
+  if (updated !== current) {
+    tree.overwrite(path, updated);
+    context.logger.info(
+      `Updated the generated regions of the Material layout ${description} ${path}.`,
+    );
+  }
+}
+
 /**
  * Generate the Material sidenav layout by updating app.component files
  * @internal exported for direct unit testing; see note on addMaterialDependencies.
@@ -303,8 +351,14 @@ export function generateMaterialLayout(
   const htmlPaths = [`${appRoot}/app.html`, `${appRoot}/app.component.html`];
   const htmlPath = htmlPaths.find((p) => tree.exists(p));
   if (htmlPath) {
-    tree.overwrite(htmlPath, materialLayoutTemplate(layout.navigation ?? [], layout.toolBar));
-    context.logger.info(`Updated Material layout template ${htmlPath}.`);
+    writeLayoutFile(
+      tree,
+      context,
+      htmlPath,
+      materialLayoutTemplate(layout.navigation ?? [], layout.toolBar),
+      materialTemplateRegions(layout.navigation ?? [], layout.toolBar),
+      'template',
+    );
   } else {
     context.logger.warn(`Could not find app template file for project "${projectName}".`);
   }
@@ -317,8 +371,14 @@ export function generateMaterialLayout(
   ];
   const stylePath = stylePaths.find((p) => tree.exists(p));
   if (stylePath) {
-    tree.overwrite(stylePath, materialLayoutStyles(layout.toolBar));
-    context.logger.info(`Updated Material layout styles ${stylePath}.`);
+    writeLayoutFile(
+      tree,
+      context,
+      stylePath,
+      materialLayoutStyles(layout.toolBar),
+      [{ name: 'layout', style: 'css', body: materialLayoutStylesBody(layout.toolBar) }],
+      'styles',
+    );
   } else {
     context.logger.warn(`Could not find app style file for project "${projectName}".`);
   }
@@ -333,35 +393,77 @@ export function generateMaterialLayout(
       ? `app.${styleExtension}`
       : `app.component.${styleExtension}`;
     const className = tsPath.endsWith('app.ts') ? 'App' : 'AppComponent';
+    const title = escapeSingleQuotedString(layout.title ?? projectName);
+    const titleBody = `  title = '${title}';\n`;
 
     const componentContent = MATERIAL_LAYOUT_COMPONENT_TS.replace(
-      'REPLACE_APP_NAME',
-      escapeSingleQuotedString(layout.title ?? projectName),
+      'TITLE_REGION',
+      () => `  ${renderRegion('title', 'ts', titleBody, '  ')}`,
     )
       .replace('TEMPLATE_FILE', templateFile)
       .replace('STYLE_FILE', styleFile)
       .replace('CLASS_NAME', className)
-      .replace('TOOLBAR_ACTION_HANDLERS', materialLayoutActionHandlers(layout.toolBar));
-    tree.overwrite(tsPath, componentContent);
-    context.logger.info(`Updated Material layout component ${tsPath}.`);
+      .replace('TOOLBAR_ACTION_HANDLERS', () => materialLayoutActionHandlers(layout.toolBar));
+    writeLayoutFile(
+      tree,
+      context,
+      tsPath,
+      componentContent,
+      [{ name: 'title', style: 'ts', body: titleBody }],
+      'component',
+    );
+    addMissingActionHandlers(tree, context, tsPath, layout.toolBar);
 
     // The default spec targets the default component, which the layout replaced.
     const specPath = tsPath.replace(/\.ts$/, '.spec.ts');
     if (tree.exists(specPath)) {
       const componentFile = tsPath.endsWith('app.ts') ? 'app' : 'app.component';
-      tree.overwrite(
+      const assertionBody = `    expect(compiled.querySelector('mat-toolbar')?.textContent).toContain('${title}');\n`;
+      writeLayoutFile(
+        tree,
+        context,
         specPath,
         MATERIAL_LAYOUT_SPEC_TS.replaceAll('CLASS_NAME', className)
           .replace('COMPONENT_FILE', componentFile)
-          .replace('REPLACE_APP_NAME', escapeSingleQuotedString(layout.title ?? projectName)),
+          .replace(
+            'TITLE_ASSERTION_REGION',
+            () => `    ${renderRegion('title', 'ts', assertionBody, '    ')}`,
+          ),
+        [{ name: 'title', style: 'ts', body: assertionBody }],
+        'spec',
       );
-      context.logger.info(`Updated Material layout spec ${specPath}.`);
     }
   } else {
     context.logger.warn(
       `Could not find app component TypeScript file for project "${projectName}".`,
     );
   }
+}
+
+/**
+ * A re-run adds a stub for a toolbar action handler the component does not have yet. It never
+ * changes or removes a handler: the user implements the stubs, and one whose action left the
+ * document is harmless.
+ */
+function addMissingActionHandlers(
+  tree: Tree,
+  context: SchematicContext,
+  tsPath: string,
+  toolBar: ToolBarAstOptions | undefined,
+): void {
+  const content = tree.read(tsPath)!.toString();
+  const missing = toolbarActionHandlerNames(toolBar).filter(
+    (handler) => !new RegExp(`\\b${handler}\\s*\\(`).test(content),
+  );
+  const classEnd = content.lastIndexOf('\n}');
+  if (missing.length === 0 || classEnd === -1) {
+    return;
+  }
+  tree.overwrite(
+    tsPath,
+    `${content.slice(0, classEnd)}\n${missing.map(actionHandlerStub).join('\n\n')}\n${content.slice(classEnd)}`,
+  );
+  context.logger.info(`Added toolbar action handler stubs to ${tsPath}: ${missing.join(', ')}.`);
 }
 
 /**
@@ -374,6 +476,18 @@ export function materialLayoutTemplate(
   navigation: readonly NavigationAstLink[],
   toolBar: ToolBarAstOptions | undefined = undefined,
 ): string {
+  const regions = materialTemplateRegions(navigation, toolBar);
+  const [toolbar, nav] = [regions[0], regions[1]];
+  return MATERIAL_LAYOUT_TEMPLATE.replace('TOOLBAR_REGION', () =>
+    renderRegion(toolbar.name, toolbar.style, toolbar.body),
+  ).replace('NAV_REGION', () => renderRegion(nav.name, nav.style, nav.body, '      '));
+}
+
+/** The generated regions of the layout template: the toolbar and the sidenav links. */
+function materialTemplateRegions(
+  navigation: readonly NavigationAstLink[],
+  toolBar: ToolBarAstOptions | undefined,
+): [LayoutRegion, LayoutRegion] {
   const links = navigation.map((link) => {
     const icon = link.icon ? `        <mat-icon matListItemIcon>${link.icon}</mat-icon>\n` : '';
     const linkAttributes = link.disabled
@@ -387,14 +501,17 @@ export function materialLayoutTemplate(
     );
   });
 
-  return MATERIAL_LAYOUT_TEMPLATE.replace(
-    '    </mat-nav-list>',
-    `${links.join('')}    </mat-nav-list>`,
+  const toolbarBody = MATERIAL_LAYOUT_TOOLBAR.replace(
+    'TOOLBAR_ATTRIBUTES',
+    materialToolbarAttributes(toolBar),
   )
-    .replace('TOOLBAR_ATTRIBUTES', materialToolbarAttributes(toolBar))
     .replace('TOOLBAR_TITLE_ROW_START', toolBar ? '  <mat-toolbar-row>\n' : '')
     .replace('TOOLBAR_TITLE_ROW_END', toolBar ? '  </mat-toolbar-row>\n' : '')
-    .replace('TOOLBAR_ROWS', materialToolbarRows(toolBar));
+    .replace('TOOLBAR_ROWS', () => materialToolbarRows(toolBar));
+  return [
+    { name: 'toolbar', style: 'html', body: toolbarBody },
+    { name: 'nav', style: 'html', body: links.join('') },
+  ];
 }
 
 function materialToolbarAttributes(toolBar: ToolBarAstOptions | undefined): string {
@@ -424,8 +541,8 @@ function materialToolbarRows(toolBar: ToolBarAstOptions | undefined): string {
     .join('');
 }
 
-function materialLayoutActionHandlers(toolBar: ToolBarAstOptions | undefined): string {
-  const handlers = [
+function toolbarActionHandlerNames(toolBar: ToolBarAstOptions | undefined): string[] {
+  return [
     ...new Set(
       (toolBar?.rows ?? []).flatMap((row) =>
         row.actions
@@ -434,26 +551,33 @@ function materialLayoutActionHandlers(toolBar: ToolBarAstOptions | undefined): s
       ),
     ),
   ];
+}
+
+function actionHandlerStub(handler: string): string {
+  return `  ${handler}($event: unknown): void {\n    throw new Error('${handler} is not implemented');\n  }`;
+}
+
+function materialLayoutActionHandlers(toolBar: ToolBarAstOptions | undefined): string {
+  const handlers = toolbarActionHandlerNames(toolBar);
   if (handlers.length === 0) {
     return '';
   }
-  return `\n${handlers
-    .map(
-      (handler) =>
-        `  ${handler}($event: unknown): void {\n    throw new Error('${handler} is not implemented');\n  }`,
-    )
-    .join('\n\n')}\n`;
+  return `\n${handlers.map(actionHandlerStub).join('\n\n')}\n`;
 }
 
 function materialToolbarActionHandler(actionId: string): string {
   return `on${strings.classify(actionId)}Activate`;
 }
 
-function materialLayoutStyles(toolBar: ToolBarAstOptions | undefined): string {
+function materialLayoutStylesBody(toolBar: ToolBarAstOptions | undefined): string {
   return MATERIAL_LAYOUT_STYLES.replace(
     'TOOLBAR_HEIGHT',
     `${64 * (1 + (toolBar?.rows.length ?? 0))}px`,
   );
+}
+
+function materialLayoutStyles(toolBar: ToolBarAstOptions | undefined): string {
+  return `${renderRegion('layout', 'css', materialLayoutStylesBody(toolBar))}\n`;
 }
 
 function escapeTemplateAttribute(value: string): string {

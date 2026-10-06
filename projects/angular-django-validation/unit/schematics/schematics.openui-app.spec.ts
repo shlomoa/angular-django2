@@ -526,7 +526,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
         { route: 'orders', label: 'Orders', icon: undefined, disabled: false },
       ]);
       expect(materialLayoutTemplate([{ route: 'a', label: '{a}', icon: undefined }])).toContain(
-        '<a mat-list-item routerLink="/a" routerLinkActive="active">\n        <span matListItemTitle>&#123;a&#125;</span>\n      </a>\n    </mat-nav-list>',
+        '<a mat-list-item routerLink="/a" routerLinkActive="active">\n        <span matListItemTitle>&#123;a&#125;</span>\n      </a>\n      <!-- openui:end nav -->\n    </mat-nav-list>',
       );
     });
   });

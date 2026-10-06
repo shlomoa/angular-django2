@@ -166,6 +166,32 @@ describe('angular-django2 schematics', () => {
       }
     });
 
+    it('TC-M5: keeps the CRLF line endings of angular.json when it changes the theme', () => {
+      const tree = Tree.empty();
+      const angularJson = {
+        version: 1,
+        projects: {
+          'test-app': {
+            root: 'projects/test-app',
+            architect: { build: { options: { styles: ['projects/test-app/src/styles.scss'] } } },
+          },
+        },
+      };
+      tree.create('/angular.json', JSON.stringify(angularJson, null, 2).replaceAll('\n', '\r\n'));
+      tree.create('projects/test-app/src/styles.scss', '');
+
+      const updatedTree = materialSetup({
+        project: 'test-app',
+        theme: 'indigo-pink',
+        typography: true,
+        animations: true,
+      })(tree, createSchematicContext()) as Tree;
+
+      const content = updatedTree.read('/angular.json')!.toString();
+      expect(content).toContain('indigo-pink.css');
+      expect(content.replaceAll('\r\n', '')).not.toContain('\n');
+    });
+
     it('throws when project does not exist', () => {
       const tree = Tree.empty();
       tree.create(

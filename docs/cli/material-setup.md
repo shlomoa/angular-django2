@@ -31,8 +31,21 @@ For a prebuilt theme, the schematic adds its stylesheet to the target build's
 `angular.json` `styles` array. For `custom`, it writes the Material Sass theme
 to the project's `src/styles.scss`; otherwise it records that the theme is
 loaded through `angular.json`. When `src/app/app.config.ts` exists and has a
-providers array, it adds the selected animation provider. Existing Material
-style or animation-provider configuration is left unchanged.
+providers array, it adds the selected animation provider.
+
+## Re-running
+
+A second run with unchanged options leaves the project byte-identical. A changed
+option is applied:
+
+- A changed `--theme` replaces the previous prebuilt theme in the `angular.json`
+  `styles` array (`custom` removes it) and replaces the theme block of `styles.scss`: the
+  marker comment for a prebuilt theme, the `openui:begin theme` / `openui:end theme`
+  region for `custom`. Text around the block is kept.
+- A changed `--typography` changes the custom theme.
+- A changed `--animations` swaps `provideAnimations()` and `provideNoopAnimations()`.
+- A Material theme you wrote into `styles.scss` yourself (an `@use '@angular/material'`
+  outside the generated block) is left unchanged.
 
 ## Related commands
 
