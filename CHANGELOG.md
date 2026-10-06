@@ -6,6 +6,8 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+- Fixed `material-setup` with a prebuilt theme prepending its marker comment to `styles.scss` on every run, so `material-setup` and `material-app` were not idempotent. A second run with unchanged options now leaves `styles.scss` byte-identical for every prebuilt theme and for the custom theme; the first-run output is unchanged.
+
 ## [0.6.2]
 
 - Added the `table` schematic, which compiles an OpenUI `table` element (`widgets/table`, `--document`, `--node-id`) into a standalone `OnPush` Angular Material table. The host supplies the columns and the rows; `behaves.sort`, `behaves.filter` and `behaves.paginate` select Material sorting, a filter field and paging, wired to the `sorted`, `filtered` and `paginated` outputs the host handles. Unsupported attributes and child types are rejected. See `docs/cli/table.md`.
