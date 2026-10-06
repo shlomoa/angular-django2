@@ -1063,7 +1063,7 @@
         "commands": [
           {
             "command": "material-app",
-            "when": "the Material layout (the default for generated applications)"
+            "when": "the Material sidenav layout; django-angular3 ng_gen_app invokes material-app"
           },
           { "command": "application" }
         ],
@@ -1425,10 +1425,7 @@
           }
         },
         "commands": [
-          {
-            "command": "form-field",
-            "when": "a reusable ControlValueAccessor field is wanted (default)"
-          },
+          { "command": "form-field", "when": "a reusable ControlValueAccessor field is wanted" },
           {
             "command": "field-component",
             "when": "a simple typed convenience component is wanted"
@@ -1469,7 +1466,8 @@
           ]
         },
         "notes": [
-          "uses.type accepts text, email and password; search, tel and url are rejected. uses.multiline \"true\" selects a textarea."
+          "uses.type accepts text, email and password; search, tel and url are rejected. uses.multiline \"true\" selects a textarea.",
+          "Both commands accept the same node and the document does not select between them: the choice belongs to the orchestrator. The order lists form-field first because reactive-form composes it."
         ]
       },
       "RangeControl": {
