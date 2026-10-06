@@ -41,12 +41,28 @@ For an end-to-end setup path, see the [tutorial](../TUTORIAL.md).
 The UI schematics also compile from an
 [OpenUI](https://github.com/shlomoa/openui-spec) JSON document: pass
 `--document=<path>` and, when the document holds several candidates,
-`--node-id=<id>`. Attributes are categorized (`uses.x`, `produces.x`, `behaves.x`), and an attribute value is a string or
-`null`: string literals are quoted inside the string, booleans and numbers are written as unquoted strings
-(`"true"`, `"25"`). Each command page has an _OpenUI_ section listing the node types
+`--node-id=<id>`. Each command page has an _OpenUI_ section listing the node types
 and attributes it accepts; the
 [repository requirements](https://github.com/shlomoa/angular-django2/blob/main/docs/REQUIREMENTS.md#openui-document-input-contracts)
 summarize them.
+
+### Attribute notation
+
+Attribute keys are categorized (OpenUI 0.12.0): `uses.x` for inputs, `produces.x`
+for events and `behaves.x` for behaviors. An attribute value is a string, `null`
+or a list of those. A string literal is quoted inside the string
+(`"\"Users\""`); a boolean or number is an unquoted string (`"true"`, `"25"`);
+any other unquoted string is a binding or expression. The spec also allows a
+plain `<name>` key with no category; the commands accept only the categorized
+keys they list and reject a plain key as unsupported. Element references are
+quoted element ids.
+
+Where an attribute table of a command page marks an attribute **†**, it is an
+`angular-django2` extension: the OpenUI catalog does not declare it for that
+type. The extensions are
+recorded in the
+[command mapping](https://github.com/shlomoa/angular-django2/blob/main/projects/angular-django2/schematics/command-mapping.json)
+(`extensions` of each node type under `ui.nodes`).
 
 ## Discover command help
 

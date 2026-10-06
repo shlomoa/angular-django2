@@ -33,8 +33,9 @@ form. Option names, attribute notation, and the document rules are those of the
 | `tab`  | `uses.disabled`†             | `"true"` or `"false"`                            | A disabled tab cannot be selected.                                   |
 
 † `angular-django2` extension: the catalog declares no attribute for a `tab`
-(its scope leaves the label and disabled state to the tab). See the
-[mapping](../ngdj-openui-spec-mapping.md#13-attributes-outside-the-openui-0120-contract).
+(its scope leaves the label and disabled state to the tab). The
+[command mapping](https://github.com/shlomoa/angular-django2/blob/main/projects/angular-django2/schematics/command-mapping.json)
+lists these extensions under `ui.nodes.tab.attributes.extensions`.
 
 A `Tabs` node needs at least one `tab` child. The schematic rejects, and never
 ignores, every other attribute and child type, an out-of-range
