@@ -176,7 +176,7 @@ describe('command mapping', () => {
     expect(valid ? [] : validate.errors, 'schema errors').toEqual([]);
   });
 
-  it('TC-MAPPING-02: states the format version and the pinned OpenUI specification version', () => {
+  it('TC-MAPPING-02: states the format version and the pinned OpenUI package version', () => {
     expect(mapping.mappingVersion).toBe(1);
     expect(mapping.openuiSpecVersion).toBe(packageManifest.dependencies['@shlomoa/openui-spec']);
   });

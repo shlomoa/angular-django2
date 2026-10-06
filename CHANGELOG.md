@@ -6,6 +6,10 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+## [0.6.3]
+
+- Updated the pinned `@shlomoa/openui-spec` dependency to 0.12.1. The OpenUI document specification and catalog remain at 0.12.0.
+
 - Re-running `material-app` on an existing project applies a changed `Application` document (a route, nav item, toolbar action, title or presentation token) and keeps edits made around the generated output. The layout, component, styles and spec files mark the generated text between `openui:begin` and `openui:end` comments, and a re-run replaces only those regions; a file without markers is replaced whole once. A new toolbar action gets a handler stub, and an existing handler is never changed or removed. The result of a re-run equals a clean regeneration.
 - `material-setup` applies a changed option on a re-run: a changed `--theme` swaps the prebuilt theme in `angular.json` and the theme block of `styles.scss` (the custom theme is now written between `openui:begin theme` and `openui:end theme` comments), a changed `--typography` changes the custom theme, and a changed `--animations` swaps the animation provider.
 

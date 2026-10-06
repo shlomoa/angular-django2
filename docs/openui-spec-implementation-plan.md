@@ -1,8 +1,8 @@
 # OpenUI Specification Implementation Plan for `angular-django2` (`ngdj`)
 
 This plan describes how `angular-django2` (`ngdj`) implements the
-[OpenUI Specification](https://github.com/shlomoa/openui-spec), version 0.12.0
-(`@shlomoa/openui-spec`, pinned in [`package.json`](../package.json)). It
+[OpenUI Specification](https://github.com/shlomoa/openui-spec), version 0.12.0,
+through `@shlomoa/openui-spec` 0.12.1 (pinned in [`package.json`](../package.json)). It
 separates what is implemented today from what is planned.
 
 **Status legend**

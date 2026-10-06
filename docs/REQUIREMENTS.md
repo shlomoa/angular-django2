@@ -267,7 +267,7 @@ sources over lower-priority ones.
   candidates, `--node-id=<id>`; without `--node-id` they compile the first
   element of a supported type. The document is loaded and validated with
   `@shlomoa/openui-spec` before any mutation.
-- Attributes are categorized and typed (`@shlomoa/openui-spec` 0.12.0): `uses.x`
+- Attributes are categorized and typed (`@shlomoa/openui-spec` 0.12.1): `uses.x`
   for inputs, `produces.x` for events and `behaves.x` for behaviors. An attribute
   value is a string, `null` or a list of those. String literals are quoted inside
   the string (`"\"Users\""`); booleans and numbers are unquoted strings (`"true"`,
