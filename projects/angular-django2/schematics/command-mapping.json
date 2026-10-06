@@ -2367,7 +2367,8 @@
       "scope": "widgets/stepper",
       "class": "direct",
       "nodeTypes": ["Stepper", "step"],
-      "reason": "Compiled by the stepper command (shlomoa/angular-django2#172, 0.6.2; #145 closed). Not yet a composable child of SurfaceContainers or DashboardPage; a stepper in a dialog and binding each step to its reactive form were left as follow-ups."
+      "issue": "shlomoa/angular-django2#206",
+      "reason": "Compiled by the stepper command (shlomoa/angular-django2#172, 0.6.2; #145 closed). Not yet a composable child of SurfaceContainers, DashboardPage or a dialog region, and its steps are not bound to their reactive forms; both are tracked in the linked issue."
     },
     {
       "scope": "widgets/dialog",
