@@ -814,11 +814,7 @@
         },
         "operations": {
           "create": { "status": "supported" },
-          "update": {
-            "status": "partial",
-            "reason": "A changed document is applied by re-running (navigation, routes, toolbar, html title); the run is not idempotent: styles.scss gains another copy of a comment line each time.",
-            "gap": "shlomoa/angular-django2#198"
-          },
+          "update": { "status": "supported" },
           "delete": {
             "status": "unsupported",
             "reason": "There is no delete mode.",
@@ -849,12 +845,6 @@
           "node": "--node-id",
           "default": "the first Application node"
         },
-        "gaps": [
-          {
-            "issue": "shlomoa/angular-django2#205",
-            "summary": "Re-running material-app prepends a duplicate comment line to styles.scss on every run; the cause is in material-setup, which it runs."
-          }
-        ],
         "notes": [
           "Route paths have two unsynchronized sources: page registers DashboardPage uses.route and material-app links to Route uses.path."
         ]
@@ -987,8 +977,8 @@
           { "name": "animations", "flag": "--animations", "type": "boolean", "default": true }
         ],
         "onExisting": {
-          "outcome": "rewrite",
-          "detail": "angular.json styles are not duplicated, but with a prebuilt theme styles.scss gains another copy of a comment line on every run: the repeat guard looks for @use '@angular/material', which only the custom theme writes."
+          "outcome": "no-op",
+          "detail": "Idempotent: the theme is added to the angular.json styles once, and styles.scss is left unchanged when it already holds the custom theme's @use line or the prebuilt theme's marker comment."
         },
         "operations": {
           "create": { "status": "tooling-only" },
@@ -1014,14 +1004,8 @@
             }
           ]
         },
-        "gaps": [
-          {
-            "issue": "shlomoa/angular-django2#205",
-            "summary": "With a prebuilt theme a second run prepends a duplicate comment line to styles.scss (material-setup/index.ts updateStylesFile); TC-M4 checks only angular.json."
-          }
-        ],
         "notes": [
-          "material-app --document reads the Presentation node and passes the tokens on; it runs this command on every run, so it inherits the repeat."
+          "material-app --document reads the Presentation node and passes the tokens on; it runs this command on every run."
         ]
       },
       "app-shell": {
@@ -1056,11 +1040,7 @@
         "role": "root",
         "operations": {
           "create": { "status": "supported" },
-          "update": {
-            "status": "partial",
-            "reason": "A changed document is applied by re-running material-app (navigation, routes, toolbar, html title); the run is not idempotent.",
-            "gap": "shlomoa/angular-django2#198"
-          },
+          "update": { "status": "supported" },
           "delete": {
             "status": "unsupported",
             "reason": "There is no delete mode.",
