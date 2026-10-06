@@ -23,7 +23,7 @@ projects/angular-django-validation/
 ├── unit/                      # Unit-level test suites
 │   ├── schematics/            # Isolated schematic unit specs and mocks
 │   ├── integration/           # SchematicTestRunner integration suites
-│   └── meta/                  # Sync-metadata, release-version, and CLI doc tests
+│   └── meta/                  # Sync-metadata, release-version, CLI doc and command-mapping contract tests
 └── e2e/                       # End-to-end test suites and testing vehicles
     ├── utils/                 # Temp-area workspace allocation, cleanup, and runners
     ├── schematics.e2e.spec.ts # Real workspace generation & build validation

@@ -34,6 +34,7 @@
     "@angular/cli": "^22.0.9",
     "@angular/build": "^22.0.9",
     "@angular/compiler-cli": "^22.0.8",
+    "ajv": "8.20.0",
     "@playwright/test": "^1.52.0",
     "playwright": "^1.52.0",
     "vitest": "^4.1.10",
