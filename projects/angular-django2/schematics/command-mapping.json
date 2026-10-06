@@ -2328,7 +2328,11 @@
       "reason": "behaves.validate (shlomoa/angular-django2#188) and produces.dirtyChange (shlomoa/angular-django2#189) are declared by the catalog and rejected."
     },
     { "scope": "widgets/chart", "class": "tracked", "issue": "shlomoa/angular-django2#152" },
-    { "scope": "widgets/table", "class": "direct", "nodeTypes": ["table"] },
+    {
+      "scope": "widgets/table",
+      "class": "direct",
+      "nodeTypes": ["table", "caption", "thead", "tr"]
+    },
     { "scope": "widgets/dataGrid", "class": "tracked", "issue": "shlomoa/angular-django2#143" },
     { "scope": "widgets/list", "class": "tracked", "issue": "shlomoa/angular-django2#159" },
     {
