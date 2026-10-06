@@ -852,7 +852,7 @@
         "gaps": [
           {
             "issue": "shlomoa/angular-django2#198",
-            "summary": "Re-running material-app prepends a duplicate comment line to styles.scss on every run."
+            "summary": "Re-running material-app prepends a duplicate comment line to styles.scss on every run; the cause is in material-setup, which it runs."
           }
         ],
         "notes": [
@@ -987,8 +987,8 @@
           { "name": "animations", "flag": "--animations", "type": "boolean", "default": true }
         ],
         "onExisting": {
-          "outcome": "no-op",
-          "detail": "Idempotent: a second run does not duplicate styles."
+          "outcome": "rewrite",
+          "detail": "angular.json styles are not duplicated, but with a prebuilt theme styles.scss gains another copy of a comment line on every run: the repeat guard looks for @use '@angular/material', which only the custom theme writes."
         },
         "operations": {
           "create": { "status": "tooling-only" },
@@ -1007,10 +1007,22 @@
             {
               "file": "projects/angular-django-validation/unit/schematics/schematics.material-setup.spec.ts",
               "ids": ["TC-M4"]
+            },
+            {
+              "file": "projects/angular-django-validation/unit/schematics/schematics.mapping-rerun.spec.ts",
+              "ids": ["TC-MAPPING-RERUN-10"]
             }
           ]
         },
-        "notes": ["material-app --document reads the Presentation node and passes the tokens on."]
+        "gaps": [
+          {
+            "issue": "shlomoa/angular-django2#198",
+            "summary": "With a prebuilt theme a second run prepends a duplicate comment line to styles.scss (material-setup/index.ts updateStylesFile); TC-M4 checks only angular.json."
+          }
+        ],
+        "notes": [
+          "material-app --document reads the Presentation node and passes the tokens on; it runs this command on every run, so it inherits the repeat."
+        ]
       },
       "app-shell": {
         "classification": "conceptual",

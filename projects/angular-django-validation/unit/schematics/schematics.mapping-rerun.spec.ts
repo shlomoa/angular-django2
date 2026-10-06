@@ -316,6 +316,44 @@ describe('command mapping: behavior on existing output (TC-MAPPING-RERUN)', () =
     });
   });
 
+  /**
+   * Known defect (shlomoa/angular-django2#198): with a prebuilt theme material-setup prepends the
+   * same comment to styles.scss on every run. `it.fails` passes while the defect exists and fails
+   * once it is fixed, which is the signal to change the mapping's material-setup and material-app
+   * entries and turn this into a plain test.
+   */
+  it.fails(
+    'TC-MAPPING-RERUN-10: material-setup leaves styles.scss unchanged on a second run',
+    async () => {
+      expect(command('material-setup').onExisting.outcome).toBe('rewrite');
+      const tree = Tree.empty();
+      tree.create(
+        '/angular.json',
+        JSON.stringify({
+          version: 1,
+          projects: {
+            'test-app': {
+              root: 'projects/test-app',
+              sourceRoot: 'projects/test-app/src',
+              architect: { build: { options: { styles: ['projects/test-app/src/styles.scss'] } } },
+            },
+          },
+        }),
+      );
+      tree.create('projects/test-app/src/styles.scss', '/* existing styles */\n');
+      const options = {
+        project: 'test-app',
+        theme: 'indigo-pink',
+        typography: true,
+        animations: true,
+      };
+      const first = await runner.runSchematic('material-setup', options, tree);
+      const afterFirst = first.readContent('/projects/test-app/src/styles.scss');
+      const second = await runner.runSchematic('material-setup', options, first);
+      expect(second.readContent('/projects/test-app/src/styles.scss')).toBe(afterFirst);
+    },
+  );
+
   it('TC-MAPPING-RERUN-09: complex-component accepts only --mode=create with --document', async () => {
     expect(command('complex-component').operations['update'].status).toBe('partial');
     expect(command('complex-component').operations['delete'].status).toBe('partial');
