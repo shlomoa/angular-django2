@@ -12,9 +12,12 @@ separates what is implemented today from what is planned.
 - **Planned**: not implemented. Everything not marked Implemented is Planned.
 
 The per-schematic contract (accepted node types, supported attributes, test IDs,
-and known limitations) is maintained in
-[`ngdj-openui-spec-mapping.md`](ngdj-openui-spec-mapping.md). This plan links to
-it instead of repeating it.
+known limitations, and planned and missing scopes with their issues) is
+maintained in the machine-readable command mapping,
+[`projects/angular-django2/schematics/command-mapping.json`](../projects/angular-django2/schematics/command-mapping.json),
+which ships in the package and is validated by
+`unit/meta/command-mapping.spec.ts` (`TC-MAPPING-01…08`). This plan links to it
+instead of repeating it.
 
 ---
 
@@ -37,12 +40,12 @@ it instead of repeating it.
   subtree: `reactive-form`, `form-field`, `field-component`, `component`,
   `complex-component`, `page`, `application`, `material-app`,
   `workspace-setup`, `data-service`, and `table`. `material-setup` and `app-shell` are
-  CLI-driven by design. Evidence: the mapping document and the specs under
+  CLI-driven by design. Evidence: the command mapping and the specs under
   `projects/angular-django-validation/unit/schematics/`.
-- **No schematic compiles a whole document.** Selecting artifacts and
-  orchestrating schematics across a whole application belongs to
+- **No schematic compiles a whole document.** Detecting changes, selecting
+  artifacts and orchestrating schematics across a whole application belongs to
   `django-angular3` (`djng`), per the ownership boundary in
-  [#27](https://github.com/shlomoa/angular-django2/issues/27).
+  [#27](https://github.com/shlomoa/angular-django2/issues/27) (see §1.4).
 - **The component widgets in §3 are not implemented**, except `widgets/table`
   (§4). Documents that contain the other widgets cannot be compiled yet.
 
@@ -95,19 +98,30 @@ any other expression and a list.
 
 ### 1.4 Parser ownership and integration status
 
-- **`openui-spec` owns** the grammar, JSON Schema (`openui.schema.json`),
-  vocabulary catalog (`openui.json`), and the TypeScript parser, validator, and
-  AST types (`OpenUiJson`, `OpenUiDocument`, `OpenUiElement`). The TypeScript
-  package was delivered by
-  [openui-spec#135](https://github.com/shlomoa/openui-spec/issues/135)
-  (closed).
+- **Ownership boundary**
+  ([#27](https://github.com/shlomoa/angular-django2/issues/27)):
+  - **`openui-spec` owns** the grammar, JSON Schema (`openui.schema.json`),
+    vocabulary catalog (`openui.json`), the TypeScript parser, validator, and
+    AST types (`OpenUiJson`, `OpenUiDocument`, `OpenUiElement`), and the
+    comparator. The TypeScript package was delivered by
+    [openui-spec#135](https://github.com/shlomoa/openui-spec/issues/135)
+    (closed).
+  - **`django-angular3` (`djng`) owns** change detection and orchestration:
+    detecting what changed in an OpenUI document or an OpenAPI contract,
+    selecting the artifacts and running the commands for a whole application.
+  - **`angular-django2` (`ngdj`) owns** its command mapping and parameter
+    contracts: the public schematic contracts, the generated output, and the
+    machine-readable mapping that `djng` reads (the OpenUI node-type routing,
+    and the capabilities and parameters of its commands, including
+    `openapi-setup` and `data-service`). Routing from OpenAPI subjects to
+    commands belongs to `djng`.
 - **Utility support (Implemented)**: `readOpenUiDocument()` and
   `validateOpenUiDocument()` in `schematics/utility/openui.ts` load documents
   and validate them with the canonical validator, and
   `schematics/utility/ast-compiler.ts` resolves and reads nodes. Tests:
   `schematics.openui.spec.ts` (`TC-OPENUI-01…04`) and `ast-compiler.spec.ts`.
 - **Production schematic integration (Implemented)**: the schematics listed in
-  §1.2 consume the validated AST. Tests: see the mapping document.
+  §1.2 consume the validated AST. Tests: see the command mapping.
 - **Integration history** (all closed or merged):
   - [#98](https://github.com/shlomoa/angular-django2/issues/98): parser and
     validator integration epic.
@@ -364,7 +378,7 @@ hosts its output at `/table`.
 - [x] Consume the canonical TypeScript parser, validator, and AST types from
       `@shlomoa/openui-spec` (§1.4).
 - [x] Compile OpenUI nodes in the existing schematics (§1.2). Contracts and
-      test IDs: [`ngdj-openui-spec-mapping.md`](ngdj-openui-spec-mapping.md).
+      test IDs: the command mapping.
 - [x] Integrate openui-spec 0.3.0, including `Routing` / `Navigation`
       compilation in `material-app`
       ([#131](https://github.com/shlomoa/angular-django2/pull/131)).
@@ -389,8 +403,8 @@ hosts its output at `/table`.
 
 ### Planned
 
-Each item has a tracking issue. Missing scopes that are tracked are listed in
-[`ngdj-openui-spec-mapping.md`](ngdj-openui-spec-mapping.md) §5.
+Each item has a tracking issue. Missing scopes that are tracked are listed in the
+`scopes` section of the command mapping.
 
 - **Data presentation and dialogs**:
   - [x] `table` (`widgets/table`) ([#142](https://github.com/shlomoa/angular-django2/issues/142))
@@ -409,5 +423,52 @@ Each item has a tracking issue. Missing scopes that are tracked are listed in
 - **For each new schematic**:
   - [ ] Vitest unit tests in `projects/angular-django-validation/unit/schematics/`.
   - [ ] A demonstration page in `projects/angular-django2-reference`.
-  - [ ] A mapping entry in [`ngdj-openui-spec-mapping.md`](ngdj-openui-spec-mapping.md).
+  - [ ] A mapping entry in the command mapping.
   - [ ] Passing `npm run test:node` and `npm run test:e2e`.
+
+---
+
+## Appendix A. Naming conventions in OpenUI 0.12.0
+
+Scope ids are camelCase. Their number tells whether a scope is a discrete
+concept or a family:
+
+- **Singular ids are discrete concepts**: `chart`, `table`, `dataGrid`, `list`,
+  `stepper`, `dialog`, `form`, `report`, `pickerControl`, `rangeControl`,
+  `statusIndicator`, `native`, `grid`, `dashboard`, `shellPage`, `emptyPage`,
+  `route`, `navItem`, `navGroup`, `toolBarRow`, `toolAction`.
+- **Plural or grouped ids are families**: `feedbackWidgets`, `mediaWidgets`,
+  `navigationWidgets`, `menuWidgets`, `dateTimePickers`, `expandablePanels`,
+  `tabs`, `surfaceContainers`, `sheetContainers`, `overlayContainers`,
+  `structuralContainers`, `splitters`, `actionControls`, `textInputs`,
+  `choiceControls`, `drawingAndCapture`, `displayPrimitives`,
+  `linkAndScrollControls`, `toolBars`.
+
+Obsolete names from earlier versions of this document and their 0.12.0 names
+(unchanged since 0.3.1):
+`charts` → `chart`, `lists` → `list`, `tables` → `table`, `data_grid` →
+`dataGrid`, `forms` → `form`, `reports` → `report`, `pickerControls` →
+`pickerControl`, `rangeControls` → `rangeControl`, `statusIndicators` →
+`statusIndicator`, `expandable_panels` → `expandablePanels`,
+`sheet_containers` → `sheetContainers`, `menu_widgets` → `menuWidgets`,
+`feedback_widgets` → `feedbackWidgets`, `date_time_pickers` →
+`dateTimePickers`.
+
+Other rules:
+
+- `dateTimePickers` is under `widgets/`, not `controls/`. `dashboard`,
+  `shellPage`, and `emptyPage` are under `pages/`; `views/` holds only
+  `report` and `form`.
+- Documents use the **instance type**, which can differ from the scope type:
+  `application/toolBars` → `ToolBar`, `application/favicon` → `link`,
+  `application/indexHtml` → `html`, `pages/dashboard` → `DashboardPage`,
+  `widgets/table` → `table`.
+- Material-style names such as `accordion`, `bottom-sheet`, `menu`, `feedback`,
+  and `date-picker` are proposed schematic names, not OpenUI identifiers. The
+  OpenUI catalog has no `accordion`; the scope is
+  `containers/expandablePanels`.
+- `table` is a single concept under `widgets/`; the former `Controls/Table/`
+  scope was retired. Its normative attributes are `behaves.sort`,
+  `behaves.filter`, and `behaves.paginate`, with `tr` row children. The 0.3.1 worked example follows this
+  contract; the 0.3.0 example did not
+  ([openui-spec#154](https://github.com/shlomoa/openui-spec/issues/154)).

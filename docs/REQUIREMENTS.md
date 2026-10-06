@@ -310,6 +310,12 @@ sources over lower-priority ones.
   Angular workspace operations.
 - The `ng add angular-django2` schematic is invoked automatically by
   django-angular3 to register the schematic collection.
+- Ownership boundary
+  ([#27](https://github.com/shlomoa/angular-django2/issues/27)): `openui-spec`
+  owns the grammar, validator, catalog and comparator; django-angular3 owns
+  change detection and orchestration; angular-django2 owns its command mapping
+  and parameter contracts, shipped as `schematics/command-mapping.json`
+  ([implementation plan §1.4](openui-spec-implementation-plan.md#14-parser-ownership-and-integration-status)).
 - Documentation and code should reflect this integration relationship where
   relevant.
 
