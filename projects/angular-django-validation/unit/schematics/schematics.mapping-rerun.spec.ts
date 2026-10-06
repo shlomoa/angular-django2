@@ -264,8 +264,8 @@ describe('command mapping: behavior on existing output (TC-MAPPING-RERUN)', () =
 
     it('TC-MAPPING-RERUN-07: material-app applies a changed document when re-run', async () => {
       expect(command('material-app').onExisting.outcome).toBe('rewrite');
-      expect(command('material-app').operations['update'].status).toBe('partial');
-      expect(mapping.ui.nodes['Application'].operations['update'].status).toBe('partial');
+      expect(command('material-app').operations['update'].status).toBe('supported');
+      expect(mapping.ui.nodes['Application'].operations['update'].status).toBe('supported');
 
       const options = { document: DOCUMENT_PATH, name: 'shop', defaults: true };
       const first = await runner.runSchematic(
@@ -282,6 +282,9 @@ describe('command mapping: behavior on existing output (TC-MAPPING-RERUN)', () =
       expect(contains(second, layout, 'Beta2')).toBe(true);
       expect(contains(second, layout, 'Gamma')).toBe(true);
       expect(contains(second, '/projects/shop/src/app/app.ts', 'Title Beta2')).toBe(true);
+
+      const third = await runner.runSchematic('material-app', options, second);
+      expect(snapshot(third)).toEqual(snapshot(second));
     });
 
     it('TC-MAPPING-RERUN-08: workspace-setup applies a changed html and link when re-run', async () => {
@@ -316,43 +319,34 @@ describe('command mapping: behavior on existing output (TC-MAPPING-RERUN)', () =
     });
   });
 
-  /**
-   * Known defect (shlomoa/angular-django2#205): with a prebuilt theme material-setup prepends the
-   * same comment to styles.scss on every run. `it.fails` passes while the defect exists and fails
-   * once it is fixed, which is the signal to change the mapping's material-setup and material-app
-   * entries and turn this into a plain test.
-   */
-  it.fails(
-    'TC-MAPPING-RERUN-10: material-setup leaves styles.scss unchanged on a second run',
-    async () => {
-      expect(command('material-setup').onExisting.outcome).toBe('rewrite');
-      const tree = Tree.empty();
-      tree.create(
-        '/angular.json',
-        JSON.stringify({
-          version: 1,
-          projects: {
-            'test-app': {
-              root: 'projects/test-app',
-              sourceRoot: 'projects/test-app/src',
-              architect: { build: { options: { styles: ['projects/test-app/src/styles.scss'] } } },
-            },
+  it('TC-MAPPING-RERUN-10: material-setup leaves styles.scss unchanged on a second run', async () => {
+    expect(command('material-setup').onExisting.outcome).toBe('no-op');
+    const tree = Tree.empty();
+    tree.create(
+      '/angular.json',
+      JSON.stringify({
+        version: 1,
+        projects: {
+          'test-app': {
+            root: 'projects/test-app',
+            sourceRoot: 'projects/test-app/src',
+            architect: { build: { options: { styles: ['projects/test-app/src/styles.scss'] } } },
           },
-        }),
-      );
-      tree.create('projects/test-app/src/styles.scss', '/* existing styles */\n');
-      const options = {
-        project: 'test-app',
-        theme: 'indigo-pink',
-        typography: true,
-        animations: true,
-      };
-      const first = await runner.runSchematic('material-setup', options, tree);
-      const afterFirst = first.readContent('/projects/test-app/src/styles.scss');
-      const second = await runner.runSchematic('material-setup', options, first);
-      expect(second.readContent('/projects/test-app/src/styles.scss')).toBe(afterFirst);
-    },
-  );
+        },
+      }),
+    );
+    tree.create('projects/test-app/src/styles.scss', '/* existing styles */\n');
+    const options = {
+      project: 'test-app',
+      theme: 'indigo-pink',
+      typography: true,
+      animations: true,
+    };
+    const first = await runner.runSchematic('material-setup', options, tree);
+    const afterFirst = first.readContent('/projects/test-app/src/styles.scss');
+    const second = await runner.runSchematic('material-setup', options, first);
+    expect(second.readContent('/projects/test-app/src/styles.scss')).toBe(afterFirst);
+  });
 
   it('TC-MAPPING-RERUN-09: complex-component accepts only --mode=create with --document', async () => {
     expect(command('complex-component').operations['update'].status).toBe('partial');

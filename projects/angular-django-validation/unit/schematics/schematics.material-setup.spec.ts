@@ -112,7 +112,13 @@ describe('angular-django2 schematics', () => {
       expect(stylesContent).not.toContain('mat.define-typography-config()');
     });
 
-    it('TC-M4: is idempotent - does not duplicate styles when run twice', () => {
+    it.each([
+      'indigo-pink',
+      'deeppurple-amber',
+      'pink-bluegrey',
+      'purple-green',
+      'custom',
+    ] as const)('TC-M4: is idempotent - does not duplicate styles when run twice (%s)', (theme) => {
       const tree = Tree.empty();
       const angularJson = {
         version: 1,
@@ -132,31 +138,32 @@ describe('angular-django2 schematics', () => {
       };
       tree.create('/angular.json', JSON.stringify(angularJson, null, 2));
       tree.create('projects/test-app/src/styles.scss', '/* existing styles */\n');
+      const run = (input: Tree): Tree =>
+        materialSetup({
+          project: 'test-app',
+          theme,
+          typography: true,
+          animations: true,
+        })(input, createSchematicContext()) as Tree;
+      const stylesPath = 'projects/test-app/src/styles.scss';
 
-      // Run once
-      let updatedTree = materialSetup({
-        project: 'test-app',
-        theme: 'indigo-pink',
-        typography: true,
-        animations: true,
-      })(tree, createSchematicContext()) as Tree;
+      const firstTree = run(tree);
+      const firstStyles = firstTree.read(stylesPath)!.toString();
+      const firstAngularJson = firstTree.read('/angular.json')!.toString();
 
-      // Run again
-      updatedTree = materialSetup({
-        project: 'test-app',
-        theme: 'indigo-pink',
-        typography: true,
-        animations: true,
-      })(updatedTree, createSchematicContext()) as Tree;
+      const secondTree = run(firstTree);
 
-      const updatedAngularJson = JSON.parse(updatedTree.read('/angular.json')!.toString());
-      const styles = updatedAngularJson.projects['test-app'].architect.build.options.styles;
+      expect(secondTree.read(stylesPath)!.toString()).toBe(firstStyles);
+      expect(secondTree.read('/angular.json')!.toString()).toBe(firstAngularJson);
 
-      // Count occurrences of the theme
-      const themeCount = styles.filter(
-        (s: string) => s === '@angular/material/prebuilt-themes/indigo-pink.css',
-      ).length;
-      expect(themeCount).toBe(1);
+      if (theme !== 'custom') {
+        const styles = JSON.parse(secondTree.read('/angular.json')!.toString()).projects['test-app']
+          .architect.build.options.styles;
+        const themeCount = styles.filter(
+          (s: string) => s === `@angular/material/prebuilt-themes/${theme}.css`,
+        ).length;
+        expect(themeCount).toBe(1);
+      }
     });
 
     it('throws when project does not exist', () => {

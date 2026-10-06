@@ -11,6 +11,9 @@ interface MaterialSetupOptions {
   animations: boolean;
 }
 
+const PREBUILT_THEME_COMMENT =
+  '/* Angular Material theme is loaded via angular.json styles array */';
+
 export function materialSetup(options: MaterialSetupOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const { project, theme, typography, animations } = options;
@@ -76,8 +79,12 @@ function updateStylesFile(
     stylesContent = tree.read(stylesPath)!.toString();
   }
 
-  // Check if Material styles are already configured (idempotency)
-  if (stylesContent.includes("@use '@angular/material'")) {
+  // Check if Material styles are already configured (idempotency): the custom theme writes the
+  // `@use` line, a prebuilt theme writes the marker comment.
+  if (
+    stylesContent.includes("@use '@angular/material'") ||
+    stylesContent.includes(PREBUILT_THEME_COMMENT)
+  ) {
     context.logger.info(`Angular Material styles are already configured in ${stylesPath}.`);
     return;
   }
@@ -109,8 +116,7 @@ $theme: mat.define-light-theme((
     stylesContent = customThemeContent + stylesContent;
   } else {
     // For prebuilt themes, just add a comment as the theme is included via angular.json
-    const prebuiltComment = `/* Angular Material theme is loaded via angular.json styles array */\n\n`;
-    stylesContent = prebuiltComment + stylesContent;
+    stylesContent = `${PREBUILT_THEME_COMMENT}\n\n` + stylesContent;
   }
 
   if (tree.exists(stylesPath)) {
