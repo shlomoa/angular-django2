@@ -19,6 +19,7 @@ Current checked-in automation:
 The published tarball contains:
 
 - the compiled schematics collection from `projects/angular-django2/schematics`, including `ng-add`, `application`, `material-setup`, `project-structure`, `component`, `page`, `embed-component`, `complex-component`, `dialog`, `field-component`, `form-field`, `reactive-form`, `app-shell`, `service`, `class`, `material-app`, `workspace-setup`, `openapi-setup`, `data-service`, and `table`
+- the command mapping `schematics/command-mapping.json` and its JSON Schema `schematics/command-mapping.schema.json`, copied with the other top-level JSON files of the schematics folder
 - the package README and manifest generated into `projects/angular-django2/dist`
 
 ## Package Manifest Ownership
