@@ -96,7 +96,7 @@ function generateHelperArtifacts(
 
   const helpersDir = normalize(options.helpersPath || DEFAULT_HELPERS_PATH);
 
-  for (const file of getHelperFiles()) {
+  for (const file of getHelperFiles(options.authScheme)) {
     if (file.spec && options.skipTests) {
       continue;
     }
