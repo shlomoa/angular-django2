@@ -6,6 +6,8 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+## [0.7.0]
+
 - Added `--auth-scheme` to `openapi-setup` (#190). The generated `django-transport.ts` always sent `Authorization: Bearer <token>`, and `DJANGO_AUTH_TOKEN` supplies only the value, so a backend that authenticates with HTTP Basic could not be reached through the helpers (a Basic value returned from the factory was sent as `Bearer Basic …`). `--auth-scheme=basic` generates an interceptor that reads `{ username, password }` from `DJANGO_AUTH_TOKEN` and sends `Authorization: Basic <base64 of UTF-8 username:password>`. The default is `bearer` and its output is unchanged. In `command-mapping.json`, `transportSchemes` lists both schemes and the #190 gap is closed.
 
 ## [0.6.3]
