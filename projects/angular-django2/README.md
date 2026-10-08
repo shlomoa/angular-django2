@@ -150,4 +150,4 @@ An interactive Angular Material 3 reference application showcasing all schematic
 
 ## License
 
-MIT © [Shlomo Anker](https://github.com/shlomoa)
+MIT © [Shlomo Anglister](https://github.com/shlomoa)
