@@ -6,4 +6,4 @@ Read [AGENTS.md](./AGENTS.md) first.
 
 ## Claude-Specific Notes
 
-- Answer yes/no questions with "Yes" or "No" first, then stop unless detail is requested or needed to avoid a misleading answer. Keep answers short.
+There are currently no additional Claude-only repository rules.s
