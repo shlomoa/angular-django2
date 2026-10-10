@@ -6,6 +6,8 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+## [0.7.1]
+
 - Fixed `data-service` writing the fixed import `../api/services` (#213). A relative import resolves from the importing file, so the output only compiled when the service sat one folder below `api/`, which neither schematic default does. Without `--document`, the imports of `services` and `strict-http-response` are now computed from the data service to the client location read from `ng-openapi-gen.json` (`src/app/api` when the file is missing). `--api-path` starting with `.` is used verbatim; any other `--api-path` is an application path and is relativized. The second import is no longer derived with `.replace('/services', '')`. The schematic also fails early when the generated barrel does not export the wrapped class (the message lists the exported services), when `strict-http-response.ts` is missing, or when `ng-openapi-gen.json` sets `services: false`; it warns when the client is not generated yet. The default class name uses the `serviceSuffix` of `ng-openapi-gen.json`. The generated spec builds its responses with `HttpResponse` so it type-checks.
 - Added the E2E tests `INT-DS-API-01` to `INT-DS-API-05`, which run `openapi-setup`, `ng-openapi-gen` and `data-service` in a real workspace and compile the result with `tsc --strict`, and the opt-in live check `INT-DS-API-06` (`NGDJ_LIVE_GITHUB=1`) against the GitHub search API. See `docs/INTEGRATION_TESTING.md`.
 - `openapi-setup` now writes `services: true` and `serviceSuffix: "ApiService"` to `ng-openapi-gen.json`; `ng-openapi-gen` 1.x generated no services with the previous defaults.
