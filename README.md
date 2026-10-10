@@ -117,6 +117,9 @@ Common commands:
   tmp-area cleanup
 - `npm run test:e2e:debug` — the same E2E suite without tmp-area cleanup,
   useful for failure debugging
+- `NGDJ_LIVE_GITHUB=1` — opts the E2E suite into the live GitHub check
+  `INT-DS-API-06`; see
+  [Live checks (opt-in)](docs/INTEGRATION_TESTING.md#live-checks-opt-in)
 
 The CI-friendly test command is:
 

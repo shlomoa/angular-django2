@@ -146,12 +146,9 @@ to this package (the GitHub schema has TS2411 in `nullable-integration.ts`).
 
 `-03` to `-05` use a small committed OpenAPI document (tag `search`) and run offline.
 
-- `INT-DS-API-06` — live and opt-in: set `NGDJ_LIVE_GITHUB=1` to run an unauthenticated
-  `GET https://api.github.com/search/issues?q=repo:angular/components&per_page=1` and
-  assert that `total_count` is a number and `items[0]` has `created_at`, `state`, `number`
-  and `title` (the Material example's four columns). HTTP 403 and 429 mean the rate limit
-  was reached and skip the test, like the example's `isRateLimitReached`. It needs no
-  workspace and is never part of `test:ci`.
+- `INT-DS-API-06` — live and opt-in (`NGDJ_LIVE_GITHUB=1`): an unauthenticated request
+  to the real GitHub search API, checked for the response shape the data service maps.
+  See [Live checks (opt-in)](#live-checks-opt-in).
 
 The E2E suite uses `projects/angular-django-validation/e2e/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.
@@ -185,7 +182,7 @@ validation:
 | `npm run test:node`             | Node-side unit specs plus the schematic integration suite                                                                                        |
 | `npm run test:node:watch`       | Watch mode for the same Node-side unit and integration specs                                                                                     |
 | `npm run cleanup:e2e:tmp-areas` | Removes stale repo-root E2E temp workspaces from previous runs                                                                                   |
-| `npm run test:e2e`              | End-to-end schematic suite in `projects/angular-django-validation/e2e/schematics.e2e.spec.ts`, with stale tmp-area cleanup                       |
+| `npm run test:e2e`              | End-to-end suites in `projects/angular-django-validation/e2e/`, with stale tmp-area cleanup; live checks stay off unless opted in                |
 | `npm run test:e2e:watch`        | Watch mode for the E2E suite, with stale tmp-area cleanup before watch starts                                                                    |
 | `npm run test:e2e:debug`        | End-to-end schematic suite without temp-area cleanup, useful for failure debugging                                                               |
 | `npm run test:playwright`       | Playwright E2E browser tests for reference app shell, guides, and visualizer micro-sandboxes                                                     |
@@ -218,6 +215,11 @@ The E2E suite additionally expects:
 2. enough disk space for temporary Angular workspaces
 3. Node.js and npm available in `PATH`
 4. a free port for the `ng serve` step used by `E2E-01`
+5. for `INT-DS-API-01` and `-02`, network access to `raw.githubusercontent.com`: the pinned GitHub
+   REST schema (about 13 MB) is downloaded once into `angular-django2-test/` under the OS temp
+   directory and reused; when it cannot be downloaded, those two tests are skipped
+6. a Node.js version the installed Angular CLI supports (`ng` refuses to start on an older
+   one, which fails every E2E scenario that runs `ng generate`)
 
 ### Windows cleanup note
 
@@ -295,6 +297,44 @@ Debug flow:
 - when debug mode is enabled, stale tmp-area cleanup is skipped and current
   E2E workspaces are preserved for manual inspection after a failure
 
+## Live checks (opt-in)
+
+A live check calls a real third-party service, so it is off by default and is never part
+of `npm run test:ci`.
+
+| Variable           | Value | Enables                                                                     |
+| ------------------ | ----- | --------------------------------------------------------------------------- |
+| `NGDJ_LIVE_GITHUB` | `1`   | `INT-DS-API-06`: unauthenticated `GET https://api.github.com/search/issues` |
+
+`INT-DS-API-06` requests `?q=repo:angular/components&per_page=1` and asserts that
+`total_count` is a number and `items[0]` has `created_at`, `state`, `number` and `title`
+(the four columns of the Angular Material "Table retrieving data through HTTP" example,
+which `SearchDataService.search` maps). It needs no workspace. HTTP 403 and 429 mean the
+unauthenticated rate limit was reached and the test is skipped, like the example's
+`isRateLimitReached`; any other failure, including a network error, fails the test.
+
+Run it alone, from `projects/angular-django-validation`:
+
+```bash
+NGDJ_LIVE_GITHUB=1 npx vitest run --config vitest.e2e.config.mts \
+  e2e/data_service_api.e2e.spec.ts -t INT-DS-API-06
+```
+
+```powershell
+$env:NGDJ_LIVE_GITHUB = '1'
+npx vitest run --config vitest.e2e.config.mts e2e/data_service_api.e2e.spec.ts -t INT-DS-API-06
+Remove-Item Env:NGDJ_LIVE_GITHUB
+```
+
+```bat
+set NGDJ_LIVE_GITHUB=1
+npx vitest run --config vitest.e2e.config.mts e2e/data_service_api.e2e.spec.ts -t INT-DS-API-06
+set NGDJ_LIVE_GITHUB=
+```
+
+Setting the variable before `npm run test:e2e` runs the check together with the rest of the
+E2E suite. Without the variable the test is reported as skipped.
+
 ## Temp-area harness configuration
 
 `projects/angular-django-validation/e2e/utils/temp_areas.ts` is the single temp-area implementation used across
@@ -349,7 +389,7 @@ scripts.
 
 Update this file when any of the following change:
 
-- integration or E2E spec coverage
+- integration or E2E spec coverage, including opt-in live checks and their variables
 - temp workspace helpers or environment variables
 - build prerequisites for integration-oriented validation
 - command coverage for `test:node`, `test:e2e`, or `test:ci`
