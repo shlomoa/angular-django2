@@ -1,6 +1,17 @@
 import { strings } from '@angular-devkit/core';
 import type { DataServiceSchema } from './schema';
 
+/**
+ * Import specifiers of the generated ng-openapi-gen client, relative to the data service file.
+ * @internal
+ */
+export interface DataServiceImports {
+  /** Specifier of the `services` barrel that exports the wrapped class. */
+  apiServicesImport: string;
+  /** Specifier of the client output root that holds `strict-http-response`. */
+  apiRootImport: string;
+}
+
 export interface DataServiceNames {
   className: string;
   serviceName: string;
@@ -15,16 +26,16 @@ export interface DataServiceNames {
 export function generateServiceContent(
   options: DataServiceSchema,
   names: DataServiceNames,
+  imports: DataServiceImports,
 ): string {
   const apiServiceImport = options.apiService || names.apiServiceName;
-  const apiPath = options.apiPath || '../api/services';
 
   return `import { Injectable } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { ${apiServiceImport} } from '${apiPath}';
-import type { StrictHttpResponse } from '${apiPath.replace('/services', '')}/strict-http-response';
+import { ${apiServiceImport} } from '${imports.apiServicesImport}';
+import type { StrictHttpResponse } from '${imports.apiRootImport}/strict-http-response';
 
 export interface ItemsType<ItemType> {
   items: ItemType[];
@@ -233,15 +244,19 @@ export class ${names.serviceName} {
  * Generate the spec file content.
  * @internal
  */
-export function generateSpecContent(options: DataServiceSchema, names: DataServiceNames): string {
+export function generateSpecContent(
+  options: DataServiceSchema,
+  names: DataServiceNames,
+  imports: DataServiceImports,
+): string {
   const apiServiceImport = options.apiService || names.apiServiceName;
-  const apiPath = options.apiPath || '../api/services';
 
-  return `import { TestBed } from '@angular/core/testing';
+  return `import { HttpResponse } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { ${names.serviceName} } from './${names.fileName}.data.service';
-import { ${apiServiceImport} } from '${apiPath}';
-import type { StrictHttpResponse } from '${apiPath.replace('/services', '')}/strict-http-response';
+import { ${apiServiceImport} } from '${imports.apiServicesImport}';
+import type { StrictHttpResponse } from '${imports.apiRootImport}/strict-http-response';
 
 describe('${names.serviceName}', () => {
   let service: ${names.serviceName};
@@ -274,15 +289,10 @@ describe('${names.serviceName}', () => {
 
   describe('search', () => {
     it('should transform and return search results', (done) => {
-      const mockResponse: StrictHttpResponse<{ results: any[]; count: number }> = {
+      const mockResponse = new HttpResponse<{ results: any[]; count: number }>({
         body: { results: [{ id: 1 }, { id: 2 }], count: 2 },
         status: 200,
-        statusText: 'OK',
-        url: 'test-url',
-        ok: true,
-        headers: {} as any,
-        type: 4,
-      };
+      }) as StrictHttpResponse<{ results: any[]; count: number }>;
 
       const searchFn = jasmine.createSpy('searchFn').and.returnValue(of(mockResponse));
       const toItems = (body: any) => ({ items: body.results, total_count: body.count });
@@ -324,15 +334,10 @@ describe('${names.serviceName}', () => {
 
   describe('list', () => {
     it('should return list results', (done) => {
-      const mockResponse: StrictHttpResponse<any[]> = {
+      const mockResponse = new HttpResponse<any[]>({
         body: [{ id: 1 }, { id: 2 }],
         status: 200,
-        statusText: 'OK',
-        url: 'test-url',
-        ok: true,
-        headers: {} as any,
-        type: 4,
-      };
+      }) as StrictHttpResponse<any[]>;
 
       const listFn = jasmine.createSpy('listFn').and.returnValue(of(mockResponse));
 
@@ -346,15 +351,10 @@ describe('${names.serviceName}', () => {
     });
 
     it('should transform list results when transform function provided', (done) => {
-      const mockResponse: StrictHttpResponse<{ data: any[] }> = {
+      const mockResponse = new HttpResponse<{ data: any[] }>({
         body: { data: [{ id: 1 }, { id: 2 }] },
         status: 200,
-        statusText: 'OK',
-        url: 'test-url',
-        ok: true,
-        headers: {} as any,
-        type: 4,
-      };
+      }) as StrictHttpResponse<{ data: any[] }>;
 
       const listFn = jasmine.createSpy('listFn').and.returnValue(of(mockResponse));
       const transform = (body: any) => body.data;
@@ -371,15 +371,10 @@ describe('${names.serviceName}', () => {
 
   describe('get', () => {
     it('should return a single item', (done) => {
-      const mockResponse: StrictHttpResponse<any> = {
+      const mockResponse = new HttpResponse<any>({
         body: { id: 1, name: 'Test' },
         status: 200,
-        statusText: 'OK',
-        url: 'test-url',
-        ok: true,
-        headers: {} as any,
-        type: 4,
-      };
+      }) as StrictHttpResponse<any>;
 
       const getFn = jasmine.createSpy('getFn').and.returnValue(of(mockResponse));
 
@@ -395,15 +390,10 @@ describe('${names.serviceName}', () => {
 
   describe('create', () => {
     it('should create and return the created item', (done) => {
-      const mockResponse: StrictHttpResponse<any> = {
+      const mockResponse = new HttpResponse<any>({
         body: { id: 1, name: 'New Item' },
         status: 201,
-        statusText: 'Created',
-        url: 'test-url',
-        ok: true,
-        headers: {} as any,
-        type: 4,
-      };
+      }) as StrictHttpResponse<any>;
 
       const createFn = jasmine.createSpy('createFn').and.returnValue(of(mockResponse));
 
@@ -419,15 +409,10 @@ describe('${names.serviceName}', () => {
 
   describe('update', () => {
     it('should update and return the updated item', (done) => {
-      const mockResponse: StrictHttpResponse<any> = {
+      const mockResponse = new HttpResponse<any>({
         body: { id: 1, name: 'Updated Item' },
         status: 200,
-        statusText: 'OK',
-        url: 'test-url',
-        ok: true,
-        headers: {} as any,
-        type: 4,
-      };
+      }) as StrictHttpResponse<any>;
 
       const updateFn = jasmine.createSpy('updateFn').and.returnValue(of(mockResponse));
 
@@ -443,15 +428,10 @@ describe('${names.serviceName}', () => {
 
   describe('delete', () => {
     it('should delete an item', (done) => {
-      const mockResponse: StrictHttpResponse<void> = {
-        body: undefined as any,
+      const mockResponse = new HttpResponse<void>({
+        body: undefined,
         status: 204,
-        statusText: 'No Content',
-        url: 'test-url',
-        ok: true,
-        headers: {} as any,
-        type: 4,
-      };
+      }) as StrictHttpResponse<void>;
 
       const deleteFn = jasmine.createSpy('deleteFn').and.returnValue(of(mockResponse));
 

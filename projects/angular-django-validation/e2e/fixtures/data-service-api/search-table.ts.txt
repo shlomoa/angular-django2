@@ -1,0 +1,66 @@
+import { Injectable, inject } from '@angular/core';
+import type { SortDirection } from '@angular/material/sort';
+import type { Observable } from 'rxjs';
+import { from } from 'rxjs';
+import { SearchApiService } from '../../api/services';
+import type { ItemsType } from './services/search/search.data.service';
+import { SearchDataService } from './services/search/search.data.service';
+
+/**
+ * Consumer of the generated `SearchDataService`, written after the Angular Material example
+ * "Table retrieving data through HTTP"
+ * (https://material.angular.dev/components/table/examples): it loads the issues of
+ * `repo:angular/components` through the GitHub REST `search/issues` operation and shows the
+ * columns `created`, `state`, `number` and `title`.
+ *
+ * Copied into the e2e workspace at `src/app/features/search/search-table.ts` so the relative
+ * imports resolve against the generated client and data service.
+ */
+type SearchParams = Parameters<SearchApiService['searchIssuesAndPullRequests$Response']>[0];
+
+export interface GithubIssue {
+  created_at: string;
+  state: string;
+  number: number;
+  title: string;
+}
+
+export const DISPLAYED_COLUMNS = ['created', 'state', 'number', 'title'] as const;
+
+export const REPOSITORY_QUERY = 'repo:angular/components';
+
+@Injectable({ providedIn: 'root' })
+export class GithubIssuesTable {
+  private readonly dataService = inject(SearchDataService);
+  private readonly api = inject(SearchApiService);
+
+  load(sort: string, order: SortDirection, pageIndex: number): Observable<ItemsType<GithubIssue>> {
+    return this.dataService.search(
+      sort,
+      order,
+      pageIndex,
+      REPOSITORY_QUERY,
+      (params) =>
+        from(
+          this.api.searchIssuesAndPullRequests$Response({
+            q: params.query,
+            sort: params.sort as SearchParams['sort'],
+            order: params.order as SearchParams['order'],
+            page: params.page,
+            per_page: params.per_page,
+          }),
+        ),
+      (body) => ({
+        total_count: body.total_count,
+        items: body.items.map(
+          (item): GithubIssue => ({
+            created_at: item.created_at,
+            state: item.state,
+            number: item.number,
+            title: item.title,
+          }),
+        ),
+      }),
+    );
+  }
+}

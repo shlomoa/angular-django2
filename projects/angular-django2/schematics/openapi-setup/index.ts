@@ -23,6 +23,10 @@ function getDefaultConfig(options: OpenapiSetupSchema): object {
     $schema: 'node_modules/ng-openapi-gen/ng-openapi-gen-schema.json',
     input: options.openapiSpecFile || 'openapi.json',
     output: options.outputPath || 'src/app/api',
+    // ng-openapi-gen 1.x generates services only on request; the data-service schematic wraps
+    // the `<Resource>ApiService` classes these two options produce.
+    services: true,
+    serviceSuffix: 'ApiService',
   };
 }
 

@@ -54,6 +54,8 @@ describe('angular-django2 schematics', () => {
         $schema: 'node_modules/ng-openapi-gen/ng-openapi-gen-schema.json',
         input: 'openapi.json',
         output: 'src/app/api',
+        services: true,
+        serviceSuffix: 'ApiService',
       });
     });
 

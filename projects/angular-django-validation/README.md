@@ -27,6 +27,8 @@ projects/angular-django-validation/
 └── e2e/                       # End-to-end test suites and testing vehicles
     ├── utils/                 # Temp-area workspace allocation, cleanup, and runners
     ├── schematics.e2e.spec.ts # Real workspace generation & build validation
+    ├── data_service_api.e2e.spec.ts # data-service against an ng-openapi-gen client (INT-DS-API-01 to -06)
+    ├── fixtures/              # Committed consumer sources compiled by the E2E specs
     ├── test_application.spec.ts # Application generation validation
     └── playwright/            # Playwright browser automation suites
         ├── app-smoke.spec.ts  # Application load and smoke testing
@@ -66,6 +68,11 @@ npm run test:e2e:debug
 
 # Clean up stale temp workspaces
 npm run cleanup:e2e
+
+# Opt-in live check (INT-DS-API-06): calls the real GitHub search API, off by default.
+# Bash; see docs/INTEGRATION_TESTING.md#live-checks-opt-in for PowerShell and cmd.
+NGDJ_LIVE_GITHUB=1 npx vitest run --config vitest.e2e.config.mts \
+  e2e/data_service_api.e2e.spec.ts -t INT-DS-API-06
 
 # Run Playwright browser test specs (smoke tests & responsive layout placement across viewports)
 npm run test:playwright

@@ -17,14 +17,17 @@ export interface DataServiceSchema {
   project?: string;
 
   /**
-   * The name of the generated OpenAPI service to wrap
+   * The name of the generated OpenAPI service to wrap. Defaults to the classified resource name
+   * plus the `serviceSuffix` of `ng-openapi-gen.json` (`ApiService` when the file is missing).
    * @example 'UsersApiService'
    */
   apiService?: string;
 
   /**
-   * The import path to the generated API service
-   * @default '../api/services'
+   * Where the generated API services are. A path starting with `.` is the import specifier,
+   * used verbatim; any other path is an application path, relativized to the data service.
+   * Defaults to the `output` of `ng-openapi-gen.json` plus `/services`.
+   * @example '../../../../api/services' or 'src/app/api/services'
    */
   apiPath?: string;
 

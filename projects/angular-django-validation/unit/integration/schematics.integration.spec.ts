@@ -285,6 +285,8 @@ Read [these instructions first](https://github.com/shlomoa/internal/blob/main/gi
       const config = JSON.parse(tree.readContent('/ng-openapi-gen.json'));
       expect(config.input).toBe('openapi.json');
       expect(config.output).toBe('src/app/api');
+      expect(config.services).toBe(true);
+      expect(config.serviceSuffix).toBe('ApiService');
     });
 
     it('INT-API-02: handles custom paths correctly', async () => {

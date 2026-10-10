@@ -65,6 +65,7 @@ You can run commands from the repository root using workspace delegation or dire
 - Run Playwright E2E tests: `npm run test:playwright`
 - Run end-to-end schematic suite: `npm run test:e2e` (with automatic stale tmp-area cleanup)
 - Run E2E in debug mode: `npm run test:e2e:debug` (preserves temporary workspaces on failure)
+- Opt in to the live GitHub check `INT-DS-API-06` with `NGDJ_LIVE_GITHUB=1` (off by default, never in `test:ci`; see [Live checks](docs/INTEGRATION_TESTING.md#live-checks-opt-in))
 - Lint validation suite: `npm run lint:validation`
 
 ## Development Notes
