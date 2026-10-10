@@ -8,7 +8,10 @@ npm install
 npm run generate:api
 ```
 
-`openapi-setup` writes `ng-openapi-gen.json`, adds `ng-openapi-gen` to
+`openapi-setup` writes `ng-openapi-gen.json` (`input`, `output`, `services: true`
+and `serviceSuffix: "ApiService"`, so `ng-openapi-gen` 1.x generates one
+`<Tag>ApiService` per OpenAPI tag for [`data-service`](data-service.md) to wrap),
+adds `ng-openapi-gen` to
 `devDependencies`, and adds a `generate:api` npm script. It also generates
 Django integration helpers under `--helpers-path` (default
 `src/app/api-integration/`):

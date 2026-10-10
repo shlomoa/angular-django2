@@ -27,12 +27,12 @@
     },
     "apiService": {
       "type": "string",
-      "description": "The name of the generated OpenAPI service to wrap (e.g., 'UsersApiService'). If not provided, will be inferred from the resource name. Not allowed with --document.",
+      "description": "The name of the generated OpenAPI service to wrap (e.g., 'UsersApiService'). If not provided, it is the classified resource name plus the \"serviceSuffix\" of ng-openapi-gen.json (default 'ApiService'). Not allowed with --document.",
       "aliases": ["api-service", "apiService"]
     },
     "apiPath": {
       "type": "string",
-      "description": "The import path to the generated API service. Defaults to '../api/services'. Not allowed with --document.",
+      "description": "Where the generated API services are. A path starting with '.' is used verbatim as the import specifier; any other path is an application path (e.g. src/app/api/services) turned into an import relative to the data service. Defaults to the \"output\" of ng-openapi-gen.json (src/app/api) plus '/services'. Not allowed with --document.",
       "aliases": ["api-path", "apiPath"]
     },
     "flat": {

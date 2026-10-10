@@ -253,11 +253,18 @@ sources over lower-priority ones.
     `django-transport.ts`, an API-contract-derived `ResourceAdapter` with a DRF-style
     `PaginatedResult` in `resource-adapter.ts`, and a barrel `index.ts`; options:
     `--openapi-spec-file` (default: `openapi.json`), `--output-path` (default:
-    `src/app/api`), `--helpers-path` (default: `src/app/api-integration`),
+    `src/app/api`; the config sets `services: true` and `serviceSuffix:
+"ApiService"`), `--helpers-path` (default: `src/app/api-integration`),
     `--auth-scheme` (`bearer` default, or `basic`), `--skip-helpers`, `--skip-tests`
   - `data-service`: generate a typed `*DataService` wrapper around an
-    ng-openapi-gen `*ApiService` with search and CRUD helpers; options:
-    `--api-service`, `--api-path` (default: `../api/services`), `--path`,
+    ng-openapi-gen `*ApiService` with search and CRUD helpers; run it after
+    `openapi-setup` and `npm run generate:api`; the resource name maps to the
+    OpenAPI tag (`classify(name)` plus the `serviceSuffix`); the client import is
+    computed relative to the data service from `output` of `ng-openapi-gen.json`
+    (default `src/app/api`) and the schematic fails when the generated barrel
+    does not export the wrapped class, `strict-http-response.ts` is missing, or
+    `services` is `false`; options: `--api-service`, `--api-path` (a relative
+    specifier, used verbatim, or an application path, relativized), `--path`,
     `--flat`, `--skip-tests`
 
 ### OpenUI document input contracts

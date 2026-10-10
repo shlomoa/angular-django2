@@ -10,8 +10,9 @@ import {
   resolveApplicationProjectName,
 } from '../utility/workspace';
 import { DATA_ATTRIBUTE, dataBindingFromAst } from './ast';
+import { relativeImport, resolveApiClient, verifyApiClient } from './api-client';
 import type { DataServiceSchema } from './schema';
-import type { DataServiceNames } from './templates';
+import type { DataServiceImports, DataServiceNames } from './templates';
 import { generateServiceContent, generateSpecContent } from './templates';
 
 /**
@@ -81,7 +82,26 @@ export function dataService(options: DataServiceSchema): Rule {
     if (!options.name) {
       throw new SchematicsException('Option "name" is required unless --document is given.');
     }
-    return generateDataService({ ...options, name: options.name });
+    const name = options.name;
+    return (tree: Tree, context: SchematicContext) => {
+      const names = getNames(name);
+      const workspace = readWorkspace(tree);
+      const project = requireWorkspaceProject(
+        workspace,
+        resolveApplicationProjectName(workspace, options.project),
+      );
+      const client = resolveApiClient(
+        tree,
+        project,
+        getDestinationPath(options, names),
+        options,
+        names.className,
+      );
+      const apiService = options.apiService || client.apiServiceName;
+      verifyApiClient(tree, context, client, apiService, name);
+
+      return generateDataService({ ...options, name, apiService }, client)(tree, context);
+    };
   }
 
   const conflicting = (['apiService', 'apiPath'] as const).filter(
@@ -118,20 +138,22 @@ export function dataService(options: DataServiceSchema): Rule {
     );
     const serviceDirectory = getDestinationPath({ flat: options.flat, path: servicePath }, names);
     const apiPath = resolveApplicationTargetDirectory(project, binding.apiPath, binding.apiPath);
-    const relativeApiPath = path.posix.relative(serviceDirectory, apiPath);
 
-    return generateDataService({
-      ...options,
-      name,
-      path: servicePath,
-      apiService: binding.apiService,
-      apiPath: relativeApiPath.startsWith('.') ? relativeApiPath : `./${relativeApiPath}`,
-    })(tree, context);
+    return generateDataService(
+      { ...options, name, path: servicePath, apiService: binding.apiService },
+      {
+        apiServicesImport: relativeImport(serviceDirectory, apiPath),
+        apiRootImport: relativeImport(serviceDirectory, path.posix.dirname(apiPath)),
+      },
+    )(tree, context);
   };
 }
 
 /** Generate the data service files from resolved CLI options. */
-function generateDataService(options: DataServiceSchema & { name: string }): Rule {
+function generateDataService(
+  options: DataServiceSchema & { name: string },
+  imports: DataServiceImports,
+): Rule {
   return (tree: Tree, context: SchematicContext) => {
     context.logger.info(`Generating data service for resource: ${options.name}`);
 
@@ -145,7 +167,7 @@ function generateDataService(options: DataServiceSchema & { name: string }): Rul
       tree,
       context,
       serviceFilePath,
-      generateServiceContent(options, names),
+      generateServiceContent(options, names, imports),
       'Service',
     );
 
@@ -154,7 +176,13 @@ function generateDataService(options: DataServiceSchema & { name: string }): Rul
         path.join(destinationPath, `${names.fileName}.data.service.spec.ts`),
       );
 
-      createFileIfMissing(tree, context, specFilePath, generateSpecContent(options, names), 'Spec');
+      createFileIfMissing(
+        tree,
+        context,
+        specFilePath,
+        generateSpecContent(options, names, imports),
+        'Spec',
+      );
     }
 
     context.logger.info(`✓ Data service generation complete!`);
