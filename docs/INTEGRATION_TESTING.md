@@ -22,6 +22,8 @@ The validation suite is organized under `projects/angular-django-validation`:
   tests using `SchematicTestRunner`
 - `projects/angular-django-validation/e2e/schematics.e2e.spec.ts` — end-to-end schematic tests against real
   Angular workspaces
+- `projects/angular-django-validation/e2e/data_service_api.e2e.spec.ts` — `data-service` against a
+  real `ng-openapi-gen` client (`INT-DS-API-01` to `INT-DS-API-05`)
 - `projects/angular-django-validation/e2e/test_application.spec.ts` — temp-area-backed application generation
   validation that installs the built package and verifies `ng generate
 angular-django2:application` can build
@@ -115,6 +117,34 @@ Current E2E coverage includes:
 - `E2E-12` — step-by-step app flow (`application` + `material-setup` +
   `project-structure`), verifying a production build, the theme and standard
   structure, and that the sidenav layout is absent (only `material-app` writes it)
+
+### `data-service` against an `ng-openapi-gen` client
+
+`e2e/data_service_api.e2e.spec.ts` shares one Angular workspace (Angular Material,
+`ng-openapi-gen`, `@types/jasmine`) and resets the generated client between tests. Each
+test runs the documented flow — `openapi-setup`, `ng-openapi-gen`, `data-service` — and
+compiles the result with `tsc --strict`. Only diagnostics in `src/app/features/**` count,
+because the generated models of a large schema can fail `strict` for reasons unrelated
+to this package (the GitHub schema has TS2411 in `nullable-integration.ts`).
+
+- `INT-DS-API-01` — GitHub REST schema, pinned by commit SHA of
+  [github/rest-api-description](https://github.com/github/rest-api-description)
+  (`includeTags: ["search"]`), `data-service search` with no `--api-path`: the
+  service compiles with zero diagnostics. The schema (about 13 MB) is downloaded once
+  into the OS temp directory; the test is skipped when it cannot be downloaded.
+- `INT-DS-API-02` — the committed consumer
+  `e2e/fixtures/data-service-api/search-table.ts.txt` implements the Angular Material
+  "Table retrieving data through HTTP" flow through `SearchDataService.search(...)` and
+  `SearchApiService.searchIssuesAndPullRequests$Response` (adapted with `from`) and
+  compiles together with the generated files. Skipped offline, like `-01`.
+- `INT-DS-API-03` — `openapi-setup --output-path src/app/shared/api`: the data service
+  imports that location.
+- `INT-DS-API-04` — an unknown resource, `services: false` and a missing
+  `strict-http-response.ts` each fail with an actionable message and write no file; an
+  ungenerated client gives a warning and a file with the computed path.
+- `INT-DS-API-05` — the generated `*.data.service.spec.ts` compiles with jasmine types.
+
+`-03` to `-05` use a small committed OpenAPI document (tag `search`) and run offline.
 
 The E2E suite uses `projects/angular-django-validation/e2e/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.
