@@ -23,7 +23,7 @@ The validation suite is organized under `projects/angular-django-validation`:
 - `projects/angular-django-validation/e2e/schematics.e2e.spec.ts` — end-to-end schematic tests against real
   Angular workspaces
 - `projects/angular-django-validation/e2e/data_service_api.e2e.spec.ts` — `data-service` against a
-  real `ng-openapi-gen` client (`INT-DS-API-01` to `INT-DS-API-05`)
+  real `ng-openapi-gen` client (`INT-DS-API-01` to `INT-DS-API-06`)
 - `projects/angular-django-validation/e2e/test_application.spec.ts` — temp-area-backed application generation
   validation that installs the built package and verifies `ng generate
 angular-django2:application` can build
@@ -145,6 +145,13 @@ to this package (the GitHub schema has TS2411 in `nullable-integration.ts`).
 - `INT-DS-API-05` — the generated `*.data.service.spec.ts` compiles with jasmine types.
 
 `-03` to `-05` use a small committed OpenAPI document (tag `search`) and run offline.
+
+- `INT-DS-API-06` — live and opt-in: set `NGDJ_LIVE_GITHUB=1` to run an unauthenticated
+  `GET https://api.github.com/search/issues?q=repo:angular/components&per_page=1` and
+  assert that `total_count` is a number and `items[0]` has `created_at`, `state`, `number`
+  and `title` (the Material example's four columns). HTTP 403 and 429 mean the rate limit
+  was reached and skip the test, like the example's `isRateLimitReached`. It needs no
+  workspace and is never part of `test:ci`.
 
 The E2E suite uses `projects/angular-django-validation/e2e/utils/temp_areas.ts` to anchor temporary workspaces
 to the repository root and centralize cleanup and debug-mode behavior.

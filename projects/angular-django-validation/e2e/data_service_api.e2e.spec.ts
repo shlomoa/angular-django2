@@ -1,6 +1,6 @@
 /**
  * End-to-end tests for the `data-service` schematic against a real `ng-openapi-gen` client
- * (INT-DS-API-01 to INT-DS-API-05).
+ * (INT-DS-API-01 to INT-DS-API-05), and the opt-in live GitHub check INT-DS-API-06.
  *
  * One Angular workspace is created and shared by the tests. Each test resets the generated client
  * and data service, runs the documented flow (`openapi-setup`, `ng-openapi-gen`, `data-service`)
@@ -387,4 +387,42 @@ describe('data-service against an ng-openapi-gen client', () => {
     expect(fs.existsSync(resolve(specPath))).toBe(true);
     expect(compile([specPath], ['jasmine'])).toEqual([]);
   });
+});
+
+/**
+ * INT-DS-API-06 calls the real GitHub REST API that the Angular Material "Table retrieving data
+ * through HTTP" example uses, to check that the response shape `SearchDataService.search` maps
+ * (`total_count`, `items[]` with the example's four columns) is still the live one. It needs no
+ * workspace, is off unless `NGDJ_LIVE_GITHUB=1`, and is never part of `test:ci`.
+ */
+describe.skipIf(process.env['NGDJ_LIVE_GITHUB'] !== '1')('live GitHub search API', () => {
+  it(
+    'INT-DS-API-06: search/issues returns the shape the data service maps',
+    { timeout: 60 * 1000 },
+    async (context) => {
+      const response = await fetch(
+        'https://api.github.com/search/issues?q=repo:angular/components&per_page=1',
+        {
+          headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'angular-django2-e2e' },
+          signal: AbortSignal.timeout(30 * 1000),
+        },
+      );
+
+      // Like the example's `isRateLimitReached`: an unauthenticated client is limited.
+      if (response.status === 403 || response.status === 429) {
+        return context.skip();
+      }
+      expect(response.status).toBe(200);
+
+      const body = (await response.json()) as {
+        total_count: unknown;
+        items: Record<string, unknown>[];
+      };
+      expect(typeof body.total_count).toBe('number');
+      expect(body.items.length).toBeGreaterThan(0);
+      for (const column of ['created_at', 'state', 'number', 'title']) {
+        expect(body.items[0], `items[0].${column}`).toHaveProperty(column);
+      }
+    },
+  );
 });
