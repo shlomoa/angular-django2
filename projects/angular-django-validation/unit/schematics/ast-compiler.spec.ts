@@ -1,5 +1,4 @@
 import { Tree } from '@angular-devkit/schematics';
-import { defaultCatalog } from '@shlomoa/openui-spec';
 import type { OpenUiDocument } from '@shlomoa/openui-spec';
 import { describe, expect, it } from 'vitest';
 
@@ -17,14 +16,12 @@ import {
   createSyntheticAstNode,
   resolveAstNode,
   toAstNodeId,
-  SYNTHETIC_OPENUI_VERSION,
 } from 'angular-django2/schematics/utility/ast-compiler';
 import { readOpenUiDocument } from 'angular-django2/schematics/utility/openui';
 
 const DOCUMENT_PATH = 'documents/app.openui.json';
 
 const APP_DOCUMENT = {
-  version: SYNTHETIC_OPENUI_VERSION,
   id: 'root',
   type: 'html',
   children: [
@@ -192,7 +189,6 @@ describe('OpenUI AST compiler core', () => {
       const document = createSyntheticAstDocument([form]);
 
       expect(document).toEqual({
-        version: SYNTHETIC_OPENUI_VERSION,
         id: 'root',
         type: 'html',
         children: [
@@ -406,8 +402,12 @@ describe('OpenUI AST compiler core', () => {
       }
     });
 
-    it('TC-AST-18: stamps synthetic documents with the installed openui-spec version', () => {
-      expect(SYNTHETIC_OPENUI_VERSION).toBe(defaultCatalog().version);
+    it('TC-AST-18: emits synthetic documents without a version member', () => {
+      expect(createSyntheticAstDocument([{ id: 'card', type: 'SurfaceContainers' }])).toEqual({
+        id: 'root',
+        type: 'html',
+        children: [{ id: 'card', type: 'SurfaceContainers' }],
+      });
     });
   });
 });

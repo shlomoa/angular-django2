@@ -123,7 +123,6 @@ To generate a complete form, describe it as an OpenUI `Form` node in
 
 ```json
 {
-  "version": "0.12.0",
   "id": "root",
   "type": "html",
   "children": [

@@ -16,7 +16,7 @@ import {
  * Contract test for command-mapping.json, the machine-readable mapping between OpenUI/OpenAPI
  * changes and ngdj commands that django-angular3 consumes. The file is checked against its JSON
  * Schema, against the collection, the option schema of every command, the specs it cites and the
- * pinned OpenUI catalog, so it cannot drift from the code.
+ * installed OpenUI catalog, so it cannot drift from the code.
  */
 interface TestRef {
   file: string;
@@ -102,9 +102,25 @@ const readJson = <T>(path: string): T => JSON.parse(readFileSync(path, 'utf8')) 
 const repoRoot = getRepoRoot();
 const mapping = readJson<Mapping>(join(schematicsDir, 'command-mapping.json'));
 const mappingSchema = readJson<object>(join(schematicsDir, 'command-mapping.schema.json'));
-const packageManifest = readJson<{ dependencies: Record<string, string> }>(
-  join(repoRoot, 'projects/angular-django2/package.json'),
-);
+
+/** Root directory of the installed `@shlomoa/openui-spec` package. */
+function openuiSpecPackageRoot(): string {
+  const require = createRequire(import.meta.url);
+  let directory = dirname(require.resolve('@shlomoa/openui-spec'));
+  while (!existsSync(join(directory, 'spec/openui.json'))) {
+    const parent = dirname(directory);
+    expect(parent, 'the @shlomoa/openui-spec package must contain spec/openui.json').not.toBe(
+      directory,
+    );
+    directory = parent;
+  }
+  return directory;
+}
+
+/** The OpenUI schema version shipped by the installed `@shlomoa/openui-spec` package. */
+function installedSchemaVersion(): string {
+  return readFileSync(join(openuiSpecPackageRoot(), 'SCHEMA_VERSION'), 'utf8').trim();
+}
 
 const lanes: [string, Record<string, Command>][] = [
   ['ui', mapping.ui.commands],
@@ -137,15 +153,7 @@ function catalogScopes(): {
   leaflessCategories: Set<string>;
   categories: Set<string>;
 } {
-  const require = createRequire(import.meta.url);
-  let directory = dirname(require.resolve('@shlomoa/openui-spec'));
-  while (!existsSync(join(directory, 'spec/openui.json'))) {
-    const parent = dirname(directory);
-    expect(parent, 'the @shlomoa/openui-spec package must contain spec/openui.json').not.toBe(
-      directory,
-    );
-    directory = parent;
-  }
+  const directory = openuiSpecPackageRoot();
   const catalog = readJson<CatalogNode>(join(directory, 'spec/openui.json'));
   const leaves = new Set<string>();
   const categories = new Set<string>();
@@ -176,9 +184,9 @@ describe('command mapping', () => {
     expect(valid ? [] : validate.errors, 'schema errors').toEqual([]);
   });
 
-  it('TC-MAPPING-02: states the format version and the pinned OpenUI package version', () => {
+  it('TC-MAPPING-02: states the format version and the installed OpenUI schema version', () => {
     expect(mapping.mappingVersion).toBe(1);
-    expect(mapping.openuiSpecVersion).toBe(packageManifest.dependencies['@shlomoa/openui-spec']);
+    expect(mapping.openuiSpecVersion).toBe(installedSchemaVersion());
   });
 
   it('TC-MAPPING-03: describes every collection command exactly once, in the right lane', () => {

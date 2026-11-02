@@ -507,7 +507,7 @@ describe('stepper schematic (widgets/stepper)', () => {
         ),
       ).rejects.toThrow(/has type "SurfaceContainers" but this schematic expects "Stepper"/);
 
-      const invalid = await createApplicationTree('{"version":"0.12.0","id":"root","type":"nope"}');
+      const invalid = await createApplicationTree('{"id":"root","type":"nope"}');
       await expect(
         runner.runSchematic('stepper', { document: DOCUMENT_PATH, project: 'demo-app' }, invalid),
       ).rejects.toThrow(/is invalid/);

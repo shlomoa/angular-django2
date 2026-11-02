@@ -99,7 +99,7 @@ the version of the package that contains it; `mappingVersion` is the version of 
 | `ui.nodes`     | Each OpenUI node type: its command (or the root command that compiles it), child types, supported attributes and the status of create, update, delete and move.                |
 | `api.commands` | Capabilities and parameters of the two commands in the OpenAPI lane, `openapi-setup` and `data-service`. Routing from OpenAPI changes to commands belongs to the orchestrator. |
 | `tooling`      | Commands with no OpenUI or OpenAPI counterpart.                                                                                                                                |
-| `scopes`       | Every scope of the pinned OpenUI catalog, and how it is covered: direct, conceptual, tracked by an issue, not planned or cross-cutting.                                        |
+| `scopes`       | Every scope of the installed OpenUI catalog, and how it is covered: direct, conceptual, tracked by an issue, not planned or cross-cutting.                                     |
 | `limitations`  | Known limitations that are not tied to one node type.                                                                                                                          |
 
 An operation is `supported`, `partial`, `unsupported`, `indirect` (applied by regenerating the node's

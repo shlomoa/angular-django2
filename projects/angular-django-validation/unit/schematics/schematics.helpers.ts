@@ -41,14 +41,10 @@ export const createMockContext = () =>
   }) as never;
 
 import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
-import {
-  SYNTHETIC_OPENUI_ROOT_TYPE,
-  SYNTHETIC_OPENUI_VERSION,
-} from 'angular-django2/schematics/utility/ast-compiler';
+import { SYNTHETIC_OPENUI_ROOT_TYPE } from 'angular-django2/schematics/utility/ast-compiler';
 
 export function createOpenUiDocument(...children: OpenUiElement[]): OpenUiDocument {
   return {
-    version: SYNTHETIC_OPENUI_VERSION,
     id: 'root',
     type: SYNTHETIC_OPENUI_ROOT_TYPE,
     children: [...children],

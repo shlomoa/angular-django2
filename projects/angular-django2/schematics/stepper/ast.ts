@@ -1,5 +1,5 @@
 /**
- * OpenUI stepper vocabulary (`widgets/stepper`, OpenUI 0.12.0) and its decoder.
+ * OpenUI stepper vocabulary (`widgets/stepper`) and its decoder.
  *
  * A `Stepper` node compiles into a standalone OnPush Angular Material stepper.
  * Its attributes decode as follows (typed values are unquoted strings, enum

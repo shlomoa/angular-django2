@@ -3,7 +3,7 @@
  * its templates.
  *
  * A `Tabs` node compiles into a standalone OnPush component. Its attributes are
- * those of the `Tabs` contract (openui-spec 0.12.0, `spec/scopes/Containers/tabs.scope.md`):
+ * those of the `Tabs` contract (openui-spec, `spec/scopes/Containers/tabs.scope.md`):
  *
  * | OpenUI attribute              | Value                                      | Generated                                              |
  * | :---------------------------- | :----------------------------------------- | :----------------------------------------------------- |
