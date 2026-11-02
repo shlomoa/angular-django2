@@ -16,18 +16,11 @@
 import { strings } from '@angular-devkit/core';
 import { SchematicsException } from '@angular-devkit/schematics';
 import type { SchematicContext, Tree } from '@angular-devkit/schematics';
-import { Attribute, defaultCatalog } from '@shlomoa/openui-spec';
+import { Attribute } from '@shlomoa/openui-spec';
 import type { OpenUiDocument, OpenUiElement } from '@shlomoa/openui-spec';
 
 import { readOpenUiDocument, validateOpenUiDocument } from './openui';
 import type { WorkspaceConfig, WorkspaceProject } from './workspace';
-
-/**
- * OpenUI specification version stamped on synthetic documents: the version of
- * the installed `@shlomoa/openui-spec` package, which equals the spec version it
- * implements.
- */
-export const SYNTHETIC_OPENUI_VERSION = defaultCatalog().version;
 
 /** Root type used for synthetic documents; matches the canonical catalog root. */
 export const SYNTHETIC_OPENUI_ROOT_TYPE = 'html';
@@ -476,7 +469,6 @@ export function createSyntheticAstDocument(
 ): OpenUiDocument {
   return validateOpenUiDocument(
     {
-      version: SYNTHETIC_OPENUI_VERSION,
       id: 'root',
       type: SYNTHETIC_OPENUI_ROOT_TYPE,
       children: [...children],

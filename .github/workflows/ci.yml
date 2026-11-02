@@ -48,6 +48,14 @@ jobs:
           node-version: 24
           cache: npm
 
+      # The root manifest links the local openui-spec build at ../openui-spec/dist/openui-spec
+      - name: Build openui-spec
+        shell: bash
+        run: |
+          git clone --depth 1 https://github.com/shlomoa/openui-spec.git ../openui-spec
+          npm ci --prefix ../openui-spec
+          npm run build --prefix ../openui-spec
+
       - name: Install dependencies
         run: npm ci
 

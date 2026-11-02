@@ -1,5 +1,5 @@
 /**
- * OpenUI dialog vocabulary (`widgets/dialog`, openui-spec 0.12.0), read by the
+ * OpenUI dialog vocabulary (`widgets/dialog`), read by the
  * `dialog` schematic.
  *
  * A `dialog` node compiles into one standalone OnPush component that opens an

@@ -48,7 +48,7 @@ summarize them.
 
 ### Attribute notation
 
-Attribute keys are categorized (OpenUI 0.12.0): `uses.x` for inputs, `produces.x`
+Attribute keys are categorized (OpenUI): `uses.x` for inputs, `produces.x`
 for events and `behaves.x` for behaviors. An attribute value is a string, `null`
 or a list of those. A string literal is quoted inside the string
 (`"\"Users\""`); a boolean or number is an unquoted string (`"true"`, `"25"`);

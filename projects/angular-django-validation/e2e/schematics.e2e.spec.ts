@@ -1348,7 +1348,6 @@ export class App {
         fs.writeFileSync(
           path.join(appRoot, 'orders.openui.json'),
           JSON.stringify({
-            version: '0.12.0',
             id: 'root',
             type: 'html',
             children: [
@@ -1471,7 +1470,6 @@ export class App {
         ...(children.length > 0 ? { children } : {}),
       });
       const document = {
-        version: '0.12.0',
         id: 'root',
         type: 'html',
         children: [
@@ -1638,7 +1636,6 @@ export class App {
         fs.writeFileSync(
           path.join(appRoot, 'confirm-delete.openui.json'),
           JSON.stringify({
-            version: '0.12.0',
             id: 'root',
             type: 'html',
             children: [

@@ -49,7 +49,6 @@ ng generate angular-django2:reactive-form contact \
 
 ```json
 {
-  "version": "0.12.0",
   "id": "root",
   "type": "html",
   "children": [
