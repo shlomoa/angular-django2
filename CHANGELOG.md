@@ -6,7 +6,9 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
-- **Breaking:** The OpenUI schema version now comes from the installed `@shlomoa/openui-spec` package (its `SCHEMA_VERSION` file) instead of being pinned per release. OpenUI documents no longer declare a `version` member — the new grammar rejects it — so the schematics, the reference application documents, the documentation examples and the test fixtures drop it, and synthetic documents are emitted without one. `command-mapping.json` states the installed schema version in `openuiSpecVersion`, and `TC-MAPPING-02` checks it against the `SCHEMA_VERSION` file of the installed package. The dependency on `@shlomoa/openui-spec` is no longer pinned to an exact registry version: the workspace installs it from the local build at `../openui-spec/dist/openui-spec`, and the installed package is the single version authority.
+## [0.8.0]
+
+- **Breaking:** The OpenUI schema version now comes from the installed `@shlomoa/openui-spec` package (its `SCHEMA_VERSION` file) instead of being pinned per release. OpenUI documents no longer declare a `version` member — the new grammar rejects it — so the schematics, the reference application documents, the documentation examples and the test fixtures drop it, and synthetic documents are emitted without one. `command-mapping.json` states the installed schema version in `openuiSpecVersion`, and `TC-MAPPING-02` checks it against the `SCHEMA_VERSION` file of the installed package. The published package no longer pins `@shlomoa/openui-spec` to an exact version: it declares the dependency as `*`, and the installed package is the single version authority. The workspace root links the local build at `../openui-spec/dist/openui-spec`, and CI builds the sibling `shlomoa/openui-spec` repository before installing.
 
 ## [0.7.1]
 
