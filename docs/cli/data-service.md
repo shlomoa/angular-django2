@@ -30,6 +30,9 @@ Options:
 
 ## Expected input
 
+The generated spec uses the vitest idiom of the Angular 22 test runner: async test functions that await
+`firstValueFrom`, `vi.fn()` stubs and `vi.spyOn`, with no Jasmine `done` callbacks or `jasmine.*` helpers.
+
 Run `data-service` after [`openapi-setup`](openapi-setup.md) and
 `npm run generate:api`, with `ng-openapi-gen` 1.0.5 or later and `services: true`
 (the `openapi-setup` default).
