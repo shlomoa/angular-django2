@@ -30,6 +30,11 @@ export interface ResolvedReactiveFormIntegration {
   method: string;
   importPath: string;
   propertyName: string;
+  /**
+   * The method returns a `Promise` (declared `Promise<...>` or `async`), as the ng-openapi-gen client
+   * does with `promises` enabled. The submit wraps it with `from(...)`; an Observable is used as is.
+   */
+  returnsPromise?: boolean;
 }
 
 export interface ReactiveFormTemplateOptions {
@@ -125,6 +130,9 @@ export function reactiveFormComponentSource(options: ReactiveFormTemplateOptions
   lines.push(importStatement(coreImports, '@angular/core'));
   if (options.integration) {
     lines.push(importStatement(['takeUntilDestroyed'], '@angular/core/rxjs-interop'));
+    if (options.integration.returnsPromise) {
+      lines.push(importStatement(['from'], 'rxjs'));
+    }
   }
   lines.push(
     importStatement(
@@ -260,8 +268,14 @@ export function reactiveFormComponentSource(options: ReactiveFormTemplateOptions
   lines.push('');
   lines.push(`    this.status.set('submitting');`);
   if (options.integration) {
-    lines.push(`    this.${options.integration.propertyName}`);
-    lines.push(`      .${options.integration.method}(this.form.getRawValue())`);
+    const property = `this.${options.integration.propertyName}`;
+    const method = options.integration.method;
+    if (options.integration.returnsPromise) {
+      lines.push(`    from(${property}.${method}(this.form.getRawValue()))`);
+    } else {
+      lines.push(`    ${property}`);
+      lines.push(`      .${method}(this.form.getRawValue())`);
+    }
     lines.push(`      .pipe(takeUntilDestroyed(this.destroyRef))`);
     lines.push(`      .subscribe({`);
     lines.push(`        next: () => this.completeSubmit(),`);

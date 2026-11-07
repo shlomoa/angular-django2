@@ -362,6 +362,49 @@ export class ContactSubmitService {
     expect(component).not.toContain('output<');
   });
 
+  it.each([
+    [
+      'a Promise<T> return type',
+      'create(payload: unknown): Promise<unknown> {\n    throw new Error();\n  }',
+      true,
+    ],
+    ['an async method', 'async create(payload: unknown) {\n    return payload;\n  }', true],
+    [
+      'an Observable<T> return type',
+      'create(payload: unknown): Observable<unknown> {\n    throw new Error();\n  }',
+      false,
+    ],
+    ['no return type', 'create(payload: unknown) {\n    return payload;\n  }', false],
+  ])(
+    'TC-REACTIVE-FORM-25: the submit of a method with %s wraps a Promise only when it returns one',
+    (_case, member, promise) => {
+      const integration = {
+        artifact: 'src/app/api-integration/contact-submit.ts',
+        symbol: 'ContactSubmitService',
+        method: 'create',
+      };
+      const tree = createApplicationTree({ ...DEFINITION, integration });
+      tree.create(
+        '/src/app/api-integration/contact-submit.ts',
+        `import { Observable } from 'rxjs';\n\nexport class ContactSubmitService {\n  ${member}\n}\n`,
+      );
+
+      const component = readContent(generate(tree), COMPONENT_PATH);
+
+      expect(component).toContain('.pipe(takeUntilDestroyed(this.destroyRef))');
+      if (promise) {
+        expect(component).toContain("import { from } from 'rxjs';");
+        expect(component).toContain(
+          'from(this.contactSubmitService.create(this.form.getRawValue()))',
+        );
+      } else {
+        expect(component).not.toContain("import { from } from 'rxjs';");
+        expect(component).toContain('.create(this.form.getRawValue())');
+        expect(component).not.toContain('from(this.contactSubmitService');
+      }
+    },
+  );
+
   it('TC-REACTIVE-FORM-09: is create-only and deterministic on rerun', () => {
     const tree = createApplicationTree();
     const context = createContext();
