@@ -2,6 +2,7 @@ import { strings } from '@angular-devkit/core';
 import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { SchematicsException } from '@angular-devkit/schematics';
 import * as path from 'node:path';
+import * as ts from 'typescript';
 import {
   formFieldPrimitiveDescriptor,
   type FormFieldPrimitiveDescriptor,
@@ -416,7 +417,44 @@ function resolveIntegration(
     method: integration.method,
     importPath: relativeImportPath(componentDirectory, artifactPath),
     propertyName: strings.camelize(integration.symbol),
+    ...(methodReturnsPromise(content, integration.symbol, integration.method)
+      ? { returnsPromise: true }
+      : {}),
   };
+}
+
+/**
+ * Whether `symbol.method` is declared to return a `Promise` (`: Promise<...>` or `async`), read from
+ * the artifact source. Anything else, including an unannotated or overloaded method, is treated as
+ * an Observable, which is what the schematic generated before.
+ */
+export function methodReturnsPromise(source: string, symbol: string, method: string): boolean {
+  const sourceFile = ts.createSourceFile('artifact.ts', source, ts.ScriptTarget.Latest, true);
+  for (const statement of sourceFile.statements) {
+    if (!ts.isClassDeclaration(statement) || statement.name?.text !== symbol) {
+      continue;
+    }
+    for (const member of statement.members) {
+      if (
+        ts.isMethodDeclaration(member) &&
+        ts.isIdentifier(member.name) &&
+        member.name.text === method
+      ) {
+        const isAsync = member.modifiers?.some(
+          (modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword,
+        );
+        const returnType = member.type;
+        return (
+          isAsync === true ||
+          (returnType !== undefined &&
+            ts.isTypeReferenceNode(returnType) &&
+            ts.isIdentifier(returnType.typeName) &&
+            returnType.typeName.text === 'Promise')
+        );
+      }
+    }
+  }
+  return false;
 }
 
 function relativeImportPath(fromDirectory: string, targetPath: string): string {

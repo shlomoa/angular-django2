@@ -297,6 +297,15 @@ integration mode the component injects the artifact, calls
 `failSubmit()`. Without an `integration` block, the component emits a typed
 `submitted` output and leaves transport to the caller.
 
+### Observable or Promise result
+
+The call is composed as an RxJS `Observable`. The schematic reads the declared return
+type of the method from the artifact source: a method declared `Promise<...>` or `async`
+(the ng-openapi-gen client returns promises when its `promises` option is on) is wrapped
+as `from(<symbol>.<method>(payload))` with `import { from } from 'rxjs'`, so that
+`.pipe(takeUntilDestroyed(...))` type-checks. Any other method, including one without a
+return type annotation, generates the `.pipe` call on the result directly, as before.
+
 ## Create-only and idempotency
 
 Generation is create-only and deterministic. Rerunning the schematic with the
