@@ -18,20 +18,21 @@ also adds the Google Material Icons stylesheet to the generated app
 
 Supported options:
 
-| Option         | Default                      | Description                                                                                                       |
-| -------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `name`         | Required positional argument | Application name.                                                                                                 |
-| `--theme`      | `indigo-pink`                | Angular Material prebuilt theme: `indigo-pink`, `deeppurple-amber`, `pink-bluegrey`, `purple-green`, or `custom`. |
-| `--typography` | `true`                       | Include Angular Material typography styles.                                                                       |
-| `--animations` | `true`                       | Enable Angular animations.                                                                                        |
-| `--routing`    | `true`                       | Enable routing.                                                                                                   |
-| `--standalone` | `true`                       | Generate standalone components.                                                                                   |
-| `--ssr`        | `false`                      | Configure the generated application for SSR and SSG/prerendering.                                                 |
-| `--zoneless`   | `true`                       | Generate an application that does not use `zone.js`.                                                              |
-| `--defaults`   | `true`                       | Disable interactive prompts for options that have defaults.                                                       |
-| `--style`      | `scss`                       | Stylesheet format.                                                                                                |
-| `--prefix`     | `app`                        | Component selector prefix.                                                                                        |
-| `--auth-guard` | `authGuard`                  | Identifier of the existing guard that protected routes use (see [Protected routes](#protected-routes)).           |
+| Option              | Default                      | Description                                                                                                       |
+| ------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `name`              | Required positional argument | Application name.                                                                                                 |
+| `--theme`           | `indigo-pink`                | Angular Material prebuilt theme: `indigo-pink`, `deeppurple-amber`, `pink-bluegrey`, `purple-green`, or `custom`. |
+| `--typography`      | `true`                       | Include Angular Material typography styles.                                                                       |
+| `--animations`      | `true`                       | Enable Angular animations.                                                                                        |
+| `--routing`         | `true`                       | Enable routing.                                                                                                   |
+| `--standalone`      | `true`                       | Generate standalone components.                                                                                   |
+| `--ssr`             | `false`                      | Configure the generated application for SSR and SSG/prerendering.                                                 |
+| `--zoneless`        | `true`                       | Generate an application that does not use `zone.js`.                                                              |
+| `--defaults`        | `true`                       | Disable interactive prompts for options that have defaults.                                                       |
+| `--style`           | `scss`                       | Stylesheet format.                                                                                                |
+| `--prefix`          | `app`                        | Component selector prefix.                                                                                        |
+| `--auth-guard`      | `authGuard`                  | Identifier of the existing guard that protected routes use (see [Protected routes](#protected-routes)).           |
+| `--auth-guard-path` | none                         | Project-relative module path of the guard file, without extension (see [Protected routes](#protected-routes)).    |
 
 ## Re-running on an existing project
 
@@ -113,4 +114,9 @@ a guard or an authentication service: that code belongs to the site.
 - A client-side guard is not an authorization boundary; the backend must enforce access too.
 - On a new application the guard cannot exist yet, so a document with protected routes fails
   until the application has one: create the application, add the site's guard, then run the
-  command again.
+  command again. With `--auth-guard-path=src/app/auth/auth.guard` (a project-relative module
+  path without extension) the command adds `import { authGuard } from './auth/auth.guard';` to
+  `app.routes.ts` itself, unless the file already imports the guard, so a first generation
+  succeeds and a re-run never duplicates the import. The guard file does not have to exist when
+  the command runs (the site adds it before the build); a path with an extension, an absolute
+  path or a path outside the project is rejected.

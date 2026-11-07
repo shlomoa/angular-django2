@@ -13,6 +13,12 @@ export interface MaterialAppSchema {
   prefix?: string;
   /** Existing guard identifier applied to protected routes of the document. Defaults to `authGuard`. */
   authGuard?: string;
+  /**
+   * Project-relative module path of the guard file, without extension (for example
+   * `src/app/auth/auth.guard`). `app.routes.ts` gets the import when it lacks one; the file
+   * does not have to exist yet.
+   */
+  authGuardPath?: string;
   /** Workspace-relative path to an OpenUI document with an `Application` node. */
   document?: string;
   /** Element id of the `Application` node. Requires `document`. */

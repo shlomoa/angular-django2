@@ -980,6 +980,70 @@ describe('material-app --document: protected routes (Route uses.access)', () => 
     );
   });
 
+  it('TC-APP-33: --auth-guard-path imports the guard in a first-generated app.routes.ts and never twice', async () => {
+    const workspace = (await angularRunner.runSchematic(
+      'workspace',
+      { name: 'demo', version: '22.0.0', newProjectRoot: 'projects' },
+      Tree.empty(),
+    )) as UnitTestTree;
+    workspace.create(`/${DOCUMENT_PATH}`, documentWithAccess('"protected"'));
+
+    const generated = await runner.runSchematic(
+      'material-app',
+      { document: DOCUMENT_PATH, authGuardPath: 'src/app/auth/auth.guard' },
+      workspace,
+    );
+
+    const routes = generated.readContent(`${APP}/app.routes.ts`);
+    expect(routes).toContain("import { authGuard } from './auth/auth.guard';");
+    expect(generated.readContent(`${APP}/app.ts`)).toContain(
+      "import { authGuard } from './auth/auth.guard';",
+    );
+    expect(generated.readContent(`${APP}/app.html`)).toContain('@if (canAccessProtected()) {');
+    expect(generated.files).not.toContain(`${APP}/auth/auth.guard.ts`);
+
+    const again = await runner.runSchematic(
+      'material-app',
+      { document: DOCUMENT_PATH, authGuardPath: 'src/app/auth/auth.guard' },
+      generated,
+    );
+    expect(again.readContent(`${APP}/app.routes.ts`).split('auth/auth.guard').length - 1).toBe(1);
+  });
+
+  it('TC-APP-34: --auth-guard-path leaves an import the file already has and applies the guard to a declared route', async () => {
+    const tree = await generate();
+    addSiteGuard(tree);
+    tree.overwrite(`/${DOCUMENT_PATH}`, documentWithAccess('"protected"'));
+
+    const generated = await runner.runSchematic(
+      'material-app',
+      { document: DOCUMENT_PATH, authGuardPath: 'src/app/elsewhere/guard' },
+      tree,
+    );
+
+    const routes = generated.readContent(`${APP}/app.routes.ts`);
+    expect(routes).not.toContain('elsewhere/guard');
+    expect(routes.split('authGuard').length - 1).toBe(1);
+    expect(generated.readContent(`${APP}/features/orders.routes.ts`)).toContain(
+      'canActivate: [authGuard]',
+    );
+  });
+
+  it('TC-APP-35: rejects an --auth-guard-path with an extension or outside the project', async () => {
+    const workspace = (await angularRunner.runSchematic(
+      'workspace',
+      { name: 'demo', version: '22.0.0', newProjectRoot: 'projects' },
+      Tree.empty(),
+    )) as UnitTestTree;
+    workspace.create(`/${DOCUMENT_PATH}`, documentWithAccess('"protected"'));
+
+    for (const authGuardPath of ['src/app/auth/auth.guard.ts', '../auth', '/abs/guard', '']) {
+      await expect(
+        runner.runSchematic('material-app', { document: DOCUMENT_PATH, authGuardPath }, workspace),
+      ).rejects.toThrow(/--auth-guard-path .* must be a project-relative module path/);
+    }
+  });
+
   it('TC-APP-32: material-app compiles the shell of a document whose Routes target Form and page nodes', async () => {
     const withForm = {
       ...application,

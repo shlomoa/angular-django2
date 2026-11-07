@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import { strings } from '@angular-devkit/core';
 import type { Rule, Tree, SchematicContext } from '@angular-devkit/schematics';
 import { chain, externalSchematic, SchematicsException } from '@angular-devkit/schematics';
@@ -27,11 +28,20 @@ import {
   MATERIAL_LAYOUT_TEMPLATE,
   MATERIAL_LAYOUT_TOOLBAR,
 } from '../utility/material-constants';
-import { applyGuardToRoutes, findImportedGuard } from '../utility/route-access';
+import {
+  applyGuardToRoutes,
+  ensureGuardImport,
+  findImportedGuard,
+  guardModuleSpecifier,
+} from '../utility/route-access';
 import type { CommentStyle } from '../utility/generated-regions';
 import { endMarker, hasRegion, renderRegion, replaceRegion } from '../utility/generated-regions';
 
-type ResolvedMaterialAppSchema = Required<Omit<MaterialAppSchema, 'document' | 'nodeId'>> & {
+type ResolvedMaterialAppSchema = Required<
+  Omit<MaterialAppSchema, 'document' | 'nodeId' | 'authGuardPath'>
+> & {
+  /** Project-relative module path of the guard file; see {@link MaterialAppSchema.authGuardPath}. */
+  authGuardPath?: string;
   /** Layout customizations compiled from an OpenUI document. */
   layout?: MaterialLayoutOptions;
   /** `uses.path` of the document's `Route` nodes with `uses.access` `protected`. */
@@ -197,6 +207,18 @@ function applyRouteAccessRule(options: ResolvedMaterialAppSchema): Rule {
       return tree;
     }
     const appRoutesPath = `${applicationAppRoot(tree, options.name)}/app.routes.ts`;
+    if (options.authGuardPath !== undefined) {
+      ensureGuardImport(
+        tree,
+        appRoutesPath,
+        options.authGuard,
+        guardModuleSpecifier(
+          applicationProjectRoot(tree, options.name),
+          options.authGuardPath,
+          path.posix.dirname(appRoutesPath),
+        ),
+      );
+    }
     const unmatched = applyGuardToRoutes(
       tree,
       appRoutesPath,
@@ -220,6 +242,12 @@ function applyRouteAccessRule(options: ResolvedMaterialAppSchema): Rule {
 function applicationAppRoot(tree: Tree, projectName: string): string {
   const projectRoot = requireWorkspaceProject(readWorkspace(tree), projectName).root || '';
   return projectRoot ? `/${projectRoot}/src/app` : '/src/app';
+}
+
+/** The workspace path of the project root (`/` for a root project). */
+function applicationProjectRoot(tree: Tree, projectName: string): string {
+  const projectRoot = requireWorkspaceProject(readWorkspace(tree), projectName).root || '';
+  return projectRoot ? `/${projectRoot}` : '/';
 }
 
 function addMaterialDependenciesRule(): Rule {
