@@ -322,7 +322,7 @@ describe('readCsrfCookie', () => {
  * @internal
  */
 function resourceAdapterSpecContent(): string {
-  return `import { of, throwError } from 'rxjs';
+  return `import { firstValueFrom, of, throwError } from 'rxjs';
 import { PaginatedResult, ResourceAdapter, ResourceQuery } from './resource-adapter';
 
 interface Contact {
@@ -365,26 +365,21 @@ class ContactsAdapter extends ResourceAdapter<Contact> {
 }
 
 describe('ResourceAdapter', () => {
-  it('passes successful responses through adapt()', (done) => {
+  it('passes successful responses through adapt()', async () => {
     const adapter = new ContactsAdapter();
 
-    adapter.list().subscribe((page) => {
-      expect(page.count).toBe(1);
-      expect(page.results[0].name).toBe('Ada');
-      done();
-    });
+    const page = await firstValueFrom(adapter.list());
+
+    expect(page.count).toBe(1);
+    expect(page.results[0].name).toBe('Ada');
   });
 
-  it('routes failures through the onError hook', (done) => {
+  it('routes failures through the onError hook', async () => {
     const adapter = new ContactsAdapter();
 
-    adapter.delete(1).subscribe({
-      next: () => done.fail('expected an error'),
-      error: () => {
-        expect(adapter.errors).toContain('delete');
-        done();
-      },
-    });
+    await expect(firstValueFrom(adapter.delete(1))).rejects.toThrow('boom');
+
+    expect(adapter.errors).toContain('delete');
   });
 });
 `;

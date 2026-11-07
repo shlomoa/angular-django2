@@ -236,6 +236,26 @@ describe('angular-django2 schematics', () => {
       expect(updatedTree.exists('/src/app/api-integration/resource-adapter.spec.ts')).toBe(true);
     });
 
+    it('TC-API-21: the generated resource-adapter spec uses the vitest idiom, with no done callback', () => {
+      const tree = Tree.empty();
+      tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
+      const context = {
+        addTask: vi.fn(),
+        logger: { info: vi.fn(), warn: vi.fn() },
+      } as never;
+
+      const spec = (openapiSetup({})(tree, context) as Tree)
+        .read('/src/app/api-integration/resource-adapter.spec.ts')!
+        .toString();
+
+      expect(spec).not.toMatch(/\bdone\b/);
+      expect(spec).toContain("import { firstValueFrom, of, throwError } from 'rxjs';");
+      expect(spec).toContain("it('passes successful responses through adapt()', async () => {");
+      expect(spec).toContain(
+        "await expect(firstValueFrom(adapter.delete(1))).rejects.toThrow('boom');",
+      );
+    });
+
     it('TC-API-10: transport helper exposes auth, CSRF, and transport composition points', () => {
       const tree = Tree.empty();
       tree.create('/package.json', JSON.stringify({ name: 'test-app' }, null, 2));
