@@ -420,7 +420,110 @@ function resolveIntegration(
     ...(methodReturnsPromise(content, integration.symbol, integration.method)
       ? { returnsPromise: true }
       : {}),
+    ...(methodTakesBodyParams(
+      tree,
+      `/${artifactPath}`,
+      content,
+      integration.symbol,
+      integration.method,
+    )
+      ? { wrapsBody: true }
+      : {}),
   };
+}
+
+/** The class member `symbol.method` of the source, when it is a method declaration. */
+function classMethod(
+  sourceFile: ts.SourceFile,
+  symbol: string,
+  method: string,
+): ts.MethodDeclaration | undefined {
+  for (const statement of sourceFile.statements) {
+    if (ts.isClassDeclaration(statement) && statement.name?.text === symbol) {
+      return statement.members.find(
+        (member): member is ts.MethodDeclaration =>
+          ts.isMethodDeclaration(member) &&
+          ts.isIdentifier(member.name) &&
+          member.name.text === method,
+      );
+    }
+  }
+  return undefined;
+}
+
+/** Whether the named interface or type literal alias declares a `body` property. */
+function declaresBody(sourceFile: ts.SourceFile, typeName: string): boolean {
+  for (const statement of sourceFile.statements) {
+    let members: readonly ts.TypeElement[] | undefined;
+    if (ts.isInterfaceDeclaration(statement) && statement.name.text === typeName) {
+      members = statement.members;
+    } else if (
+      ts.isTypeAliasDeclaration(statement) &&
+      statement.name.text === typeName &&
+      ts.isTypeLiteralNode(statement.type)
+    ) {
+      members = statement.type.members;
+    }
+    if (members) {
+      return members.some(
+        (member) =>
+          ts.isPropertySignature(member) &&
+          ts.isIdentifier(member.name) &&
+          member.name.text === 'body',
+      );
+    }
+  }
+  return false;
+}
+
+/**
+ * Whether the first parameter of `symbol.method` is a parameter object with a `body`
+ * property, as in the ng-openapi-gen `<Operation>$Params` interface. The type is read from the
+ * artifact itself or from the relative module that the artifact imports it from. A method that
+ * takes the value directly, or whose parameter type cannot be resolved, is not wrapped.
+ */
+export function methodTakesBodyParams(
+  tree: Tree,
+  artifactPath: string,
+  source: string,
+  symbol: string,
+  method: string,
+): boolean {
+  const sourceFile = ts.createSourceFile(artifactPath, source, ts.ScriptTarget.Latest, true);
+  const parameter = classMethod(sourceFile, symbol, method)?.parameters[0];
+  const typeNode = parameter?.type;
+  if (!typeNode || !ts.isTypeReferenceNode(typeNode) || !ts.isIdentifier(typeNode.typeName)) {
+    return false;
+  }
+  const typeName = typeNode.typeName.text;
+  if (declaresBody(sourceFile, typeName)) {
+    return true;
+  }
+  for (const statement of sourceFile.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      !statement.moduleSpecifier.text.startsWith('.') ||
+      !statement.importClause?.namedBindings ||
+      !ts.isNamedImports(statement.importClause.namedBindings) ||
+      !statement.importClause.namedBindings.elements.some(
+        (element) => element.name.text === typeName,
+      )
+    ) {
+      continue;
+    }
+    const base = path.posix.join(path.posix.dirname(artifactPath), statement.moduleSpecifier.text);
+    for (const candidate of [`${base}.ts`, `${base}/index.ts`]) {
+      const imported = tree.read(candidate)?.toString();
+      if (imported !== undefined) {
+        return declaresBody(
+          ts.createSourceFile(candidate, imported, ts.ScriptTarget.Latest, true),
+          typeName,
+        );
+      }
+    }
+  }
+  return false;
 }
 
 /**

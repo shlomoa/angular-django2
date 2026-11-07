@@ -405,6 +405,83 @@ export class ContactSubmitService {
     },
   );
 
+  describe('TC-REACTIVE-FORM-26: the submit argument follows the parameter type of the method', () => {
+    const integration = {
+      artifact: 'src/app/api-integration/contact-submit.ts',
+      symbol: 'ContactSubmitService',
+      method: 'create',
+    };
+    const generateWith = (artifact: string, files: Record<string, string> = {}): string => {
+      const tree = createApplicationTree({ ...DEFINITION, integration });
+      tree.create('/src/app/api-integration/contact-submit.ts', artifact);
+      for (const [file, content] of Object.entries(files)) {
+        tree.create(file, content);
+      }
+      return readContent(generate(tree), COMPONENT_PATH);
+    };
+
+    it('passes { body: value } for an imported ng-openapi-gen $Params type with a body', () => {
+      const component = generateWith(
+        `import { Observable } from 'rxjs';
+import { Create$Params } from '../api/fn/create';
+
+export class ContactSubmitService {
+  create(params: Create$Params): Observable<unknown> {
+    throw new Error();
+  }
+}
+`,
+        {
+          '/src/app/api/fn/create.ts':
+            'export interface Create$Params {\n  body: { first_name: string };\n}\n',
+        },
+      );
+
+      expect(component).toContain('.create({ body: this.form.getRawValue() })');
+      expect(component).not.toContain('.create(this.form.getRawValue())');
+    });
+
+    it('passes { body: value } for a parameter type declared in the artifact', () => {
+      const component = generateWith(
+        `export interface CreateParams {
+  body?: unknown;
+}
+
+export class ContactSubmitService {
+  create(params: CreateParams): unknown {
+    return params;
+  }
+}
+`,
+      );
+
+      expect(component).toContain('.create({ body: this.form.getRawValue() })');
+    });
+
+    it.each([
+      [
+        'a method taking the value directly',
+        'export class ContactSubmitService {\n  create(payload: unknown): unknown {\n    return payload;\n  }\n}\n',
+        {},
+      ],
+      [
+        'a parameter type without a body',
+        "import { Plain } from './plain';\n\nexport class ContactSubmitService {\n  create(params: Plain): unknown {\n    return params;\n  }\n}\n",
+        { '/src/app/api-integration/plain.ts': 'export interface Plain {\n  name: string;\n}\n' },
+      ],
+      [
+        'a parameter type that cannot be resolved',
+        "import { Missing } from '../nowhere/missing';\n\nexport class ContactSubmitService {\n  create(params: Missing): unknown {\n    return params;\n  }\n}\n",
+        {},
+      ],
+    ])('keeps the form value as the argument for %s', (_case, artifact, files) => {
+      const component = generateWith(artifact, files);
+
+      expect(component).toContain('.create(this.form.getRawValue())');
+      expect(component).not.toContain('{ body:');
+    });
+  });
+
   it('TC-REACTIVE-FORM-09: is create-only and deterministic on rerun', () => {
     const tree = createApplicationTree();
     const context = createContext();

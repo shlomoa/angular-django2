@@ -297,6 +297,16 @@ integration mode the component injects the artifact, calls
 `failSubmit()`. Without an `integration` block, the component emits a typed
 `submitted` output and leaves transport to the caller.
 
+### Argument of the method
+
+The schematic reads the type of the first parameter of the method from the artifact
+(declared there, or imported from a relative module such as the ng-openapi-gen
+`fn/<tag>/<operation>.ts` file). When that type is an interface or a type literal alias
+with a `body` property, as the ng-openapi-gen `<Operation>$Params` type is, the form value
+is passed as `<symbol>.<method>({ body: payload })`. A method that takes the form value
+directly, a parameter type without `body`, or a type that cannot be resolved generates
+`<symbol>.<method>(payload)` as before.
+
 ### Observable or Promise result
 
 The call is composed as an RxJS `Observable`. The schematic reads the declared return
