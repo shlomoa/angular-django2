@@ -6,6 +6,8 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+- `material-app --document` and `application --document` accept, among the `Application` children, the `Form` and page nodes that a `Route` targets through `uses.target` (#227). The shell compiles only its own nodes and generates nothing for the targeted ones, which `reactive-form` and `page` compile. A `Form` that no `Route` targets still fails with "not a supported Application child". This lets the whole-document plan of django-angular3 start with the `material-app` step on a document that holds forms and pages.
+
 - Fixed the `*.data.service.spec.ts` that `data-service` generates (#225). It used Jasmine-style `(done) => ...` callbacks (`done()`, `done.fail`) and the Jasmine helpers `jasmine.createSpy`, `jasmine.createSpyObj`, `jasmine.SpyObj`, `jasmine.any` and `spyOn`, which do not compile under the Angular 22 vitest runner. The generated specs are now async functions that await `firstValueFrom` and use `vi.fn()` stubs and `vi.spyOn`.
 
 - Fixed the `resource-adapter.spec.ts` that `openapi-setup` generates (#222). It used Jasmine-style `(done) => ...` callbacks (`done()`, `done.fail`), which do not compile under the Angular 22 vitest runner (`TS2349`, `TS2339`), so `ng test` failed on every workspace produced by `openapi-setup`. The generated specs are now async functions that await `firstValueFrom`. The `data-service` spec template still has `done` callbacks and is tracked separately.

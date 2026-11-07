@@ -19,7 +19,9 @@ instead when the responsive Material sidenav layout is also needed.
 With `--document`, `--name` defaults to the dasherized id of the OpenUI
 `Application` node (the first, or the one named by `--node-id`), and routing is
 enabled when that node has a `Routing` child; `--routing` is not allowed.
-An optional `ToolBar` is decoded and validated with its `ToolBarRow` and
+A `Form` or page node that a `Route` targets through `uses.target` may sit among the
+`Application` children; it is left to its own schematic, and any other unsupported child is
+rejected. An optional `ToolBar` is decoded and validated with its `ToolBarRow` and
 `ToolAction` content. Use [`material-app`](material-app.md) to render those
 validated command rows in a Material layout.
 

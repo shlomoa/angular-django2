@@ -120,8 +120,13 @@ export function applicationFromAst(
   const subject = astNodeSubject(documentPath, node);
   assertAstAttributes(node, [], subject);
 
+  // A node that a `Route` targets (a form or a page) is compiled by its own schematic
+  // (`reactive-form`, `page`), so the shell tolerates it among the Application children.
+  const routeTargets = routeTargetIds(node, documentPath);
   const unsupported = (node.children ?? []).find(
-    (child) => !(APPLICATION_CHILD_AST_TYPES as readonly string[]).includes(child.type),
+    (child) =>
+      !(APPLICATION_CHILD_AST_TYPES as readonly string[]).includes(child.type) &&
+      !routeTargets.has(child.id),
   );
   if (unsupported) {
     throw new SchematicsException(
@@ -137,6 +142,37 @@ export function applicationFromAst(
     routing: directChild(node, 'Routing', documentPath) !== undefined,
     toolBar: toolBarFromAst(node, documentPath),
   };
+}
+
+/**
+ * The ids named by the `uses.target` of the `Route` nodes under the `Routing` child of the
+ * `Application`. Malformed routes are reported when the routing itself is compiled.
+ */
+function routeTargetIds(application: OpenUiElement, documentPath: string): Set<string> {
+  const targets = new Set<string>();
+  const collect = (node: OpenUiElement): void => {
+    if (node.type === 'Route') {
+      const target = readAstString(
+        node,
+        ROUTE_ATTRIBUTES.target,
+        astNodeSubject(documentPath, node),
+      );
+      if (target) {
+        targets.add(target);
+      }
+    }
+    for (const child of node.children ?? []) {
+      collect(child);
+    }
+  };
+  for (const routing of application.children ?? []) {
+    if (routing.type === 'Routing') {
+      for (const route of routing.children ?? []) {
+        collect(route);
+      }
+    }
+  }
+  return targets;
 }
 
 /** A sidenav entry compiled from a `NavItem` and its referenced `Route`. */

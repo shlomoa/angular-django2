@@ -459,6 +459,47 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
     });
   });
 
+  describe('Application children that a Route targets', () => {
+    const route = (id: string, target: string): OpenUiElement => ({
+      id,
+      type: 'Route',
+      attrs: { 'uses.path': `"${id}"`, 'uses.target': `"${target}"` },
+    });
+    const gardens = (...extra: OpenUiElement[]): OpenUiElement => ({
+      id: 'root',
+      type: 'Application',
+      children: [
+        { id: 'host', type: 'html', attrs: { 'uses.lang': '"he"' } },
+        {
+          id: 'appRouting',
+          type: 'Routing',
+          children: [route('register', 'registerForm'), route('account', 'accountPage')],
+        },
+        { id: 'nav', type: 'Navigation' },
+        { id: 'registerForm', type: 'Form' },
+        { id: 'accountPage', type: 'EmptyPage' },
+        ...extra,
+      ],
+    });
+
+    it('TC-APP-30: accepts the Form and page nodes that a Route targets and leaves them to their own schematics', () => {
+      const document = gardens();
+      const result = applicationFromAst(document, DOCUMENT_PATH, undefined);
+
+      expect(result.name).toBe('root');
+      expect(result.routing).toBe(true);
+      expect(navigationLinksFromAst(result.node, document, DOCUMENT_PATH)).toEqual([]);
+    });
+
+    it('TC-APP-31: still rejects a Form that no Route targets', () => {
+      expect(() =>
+        applicationFromAst(gardens({ id: 'strayForm', type: 'Form' }), DOCUMENT_PATH, undefined),
+      ).toThrow(
+        'OpenUI node "app.openui.json#strayForm" has type "Form", which is not a supported Application child.',
+      );
+    });
+  });
+
   describe('indexHtmlFromAst', () => {
     const hebrewAttrs = { 'uses.lang': '"he"', 'uses.dir': '"rtl"', 'uses.title': '"גינות"' };
 
@@ -937,6 +978,52 @@ describe('material-app --document: protected routes (Route uses.access)', () => 
     expect(generated.readContent(`${APP}/features/orders.routes.ts`)).toContain(
       'canActivate: [adminGuard]',
     );
+  });
+
+  it('TC-APP-32: material-app compiles the shell of a document whose Routes target Form and page nodes', async () => {
+    const withForm = {
+      ...application,
+      children: [
+        ...application.children!.map((child) =>
+          child.type === 'Routing'
+            ? {
+                ...child,
+                children: [
+                  ...child.children!,
+                  {
+                    id: 'newsletterRoute',
+                    type: 'Route',
+                    attrs: { 'uses.path': '"newsletter"', 'uses.target': '"newsletterForm"' },
+                  },
+                ],
+              }
+            : child,
+        ),
+        { id: 'newsletterForm', type: 'Form', attrs: { 'uses.title': '"Newsletter"' } },
+      ],
+    };
+    const workspace = (await angularRunner.runSchematic(
+      'workspace',
+      { name: 'demo', version: '22.0.0', newProjectRoot: 'projects' },
+      Tree.empty(),
+    )) as UnitTestTree;
+    workspace.create(`/${DOCUMENT_PATH}`, openUiDocument(withForm, ...pages));
+
+    const generated = await runner.runSchematic(
+      'material-app',
+      { document: DOCUMENT_PATH },
+      workspace,
+    );
+
+    expect(generated.files).toContain(`${APP}/app.routes.ts`);
+    expect(generated.readContent(`${APP}/app.html`)).toContain('routerLink="/me/profile"');
+    expect(generated.files.filter((file) => file.includes('newsletter'))).toEqual([]);
+
+    withForm.children.push({ id: 'strayForm', type: 'Form', attrs: {} });
+    workspace.overwrite(`/${DOCUMENT_PATH}`, openUiDocument(withForm, ...pages));
+    await expect(
+      runner.runSchematic('material-app', { document: DOCUMENT_PATH }, workspace),
+    ).rejects.toThrow('"Form", which is not a supported Application child');
   });
 
   it('TC-APP-20: leaves public routes unchanged', async () => {

@@ -75,6 +75,11 @@ ng generate angular-django2:material-app --document=app.openui.json
 - `--name` defaults to the dasherized `Application` id; `html` `uses.title` sets the
   existing toolbar title.
 - Routing is enabled when the `Application` has a `Routing` child.
+- The shell is compiled from the `Routing`, `Navigation`, `ToolBar`, `Presentation`, `html` and
+  `link` children. A `Form` or page node that a `Route` targets through `uses.target` may sit
+  among the `Application` children as well: `material-app` generates nothing for it (compile it
+  with [`reactive-form`](reactive-form.md) or [`page`](page.md)). Any other child that is not a
+  shell node and not a `Route` target is rejected with "not a supported Application child".
 - A `Presentation` child sets `uses.theme` (a `--theme` value) and
   `uses.typography` / `uses.animations` (`"true"` or `"false"`).
 - Every `DashboardPage` in the document adds a sidenav link after Home, using
