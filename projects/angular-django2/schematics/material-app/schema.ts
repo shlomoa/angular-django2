@@ -11,6 +11,8 @@ export interface MaterialAppSchema {
   defaults?: boolean;
   style?: string;
   prefix?: string;
+  /** Existing guard identifier applied to protected routes of the document. Defaults to `authGuard`. */
+  authGuard?: string;
   /** Workspace-relative path to an OpenUI document with an `Application` node. */
   document?: string;
   /** Element id of the `Application` node. Requires `document`. */

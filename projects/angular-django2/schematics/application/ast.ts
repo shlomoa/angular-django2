@@ -145,6 +145,60 @@ export interface NavigationAstLink {
   label: string;
   icon: string | undefined;
   disabled: boolean;
+  /** The referenced `Route` has `uses.access` `protected` (set only then): an anonymous user does not see the link. */
+  protected?: boolean;
+}
+
+/** The `uses.access` values `material-app` accepts on a `Route`. */
+export type RouteAccessMode = 'public' | 'protected';
+const ROUTE_ACCESS_MODES: readonly RouteAccessMode[] = ['public', 'protected'];
+
+/** The access policy of a `Route`: its `uses.access`, `public` when absent. */
+function routeAccess(route: OpenUiElement, documentPath: string): RouteAccessMode {
+  const subject = astNodeSubject(documentPath, route);
+  const access = readAstString(route, ROUTE_ATTRIBUTES.access, subject);
+  if (access === undefined) {
+    return 'public';
+  }
+  if (!ROUTE_ACCESS_MODES.includes(access as RouteAccessMode)) {
+    throw new SchematicsException(
+      `OpenUI node "${subject}": ${ROUTE_ATTRIBUTES.access}="${access}" is not supported. ` +
+        `Supported values: ${ROUTE_ACCESS_MODES.join(', ')}.`,
+    );
+  }
+  return access as RouteAccessMode;
+}
+
+/**
+ * The `uses.path` of every `Route` of the `Application` whose `uses.access` is `protected`, in
+ * document order.
+ *
+ * @throws SchematicsException for an unsupported `uses.access` value or a route without a path.
+ */
+export function protectedRoutePathsFromAst(
+  application: OpenUiElement,
+  document: OpenUiDocument,
+  documentPath: string,
+): string[] {
+  const routing = directChild(application, 'Routing', documentPath);
+  if (!routing) {
+    return [];
+  }
+  const protectedPaths: string[] = [];
+  for (const route of routesFromAst(routing, document, documentPath).values()) {
+    if (routeAccess(route, documentPath) !== 'protected') {
+      continue;
+    }
+    const subject = astNodeSubject(documentPath, route);
+    const routePath = readAstString(route, ROUTE_ATTRIBUTES.path, subject);
+    if (!routePath) {
+      throw new SchematicsException(
+        `OpenUI node "${subject}" requires a non-empty ${ROUTE_ATTRIBUTES.path} to be protected.`,
+      );
+    }
+    protectedPaths.push(routePath);
+  }
+  return protectedPaths;
 }
 
 const ROUTING_ATTRIBUTES = { defaultRoute: 'uses.defaultRoute' } as const;
@@ -292,6 +346,7 @@ function routesFromAst(
       );
     }
     assertAstAttributes(node, Object.values(ROUTE_ATTRIBUTES), routeSubject);
+    routeAccess(node, documentPath);
     const target = readElementReference(node, ROUTE_ATTRIBUTES.target, routeSubject);
     const redirect = readElementReference(node, ROUTE_ATTRIBUTES.redirectTo, routeSubject);
     if ((target === undefined) === (redirect === undefined)) {
@@ -383,6 +438,7 @@ function collectNavigationLinks(
       label,
       icon,
       disabled: readAstBoolean(child, NAV_ITEM_ATTRIBUTES.disabled, subject) ?? false,
+      ...(routeAccess(route, documentPath) === 'protected' ? { protected: true } : {}),
     });
   }
 }

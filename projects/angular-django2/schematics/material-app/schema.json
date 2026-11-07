@@ -60,6 +60,11 @@
       "description": "Component selector prefix.",
       "default": "app"
     },
+    "authGuard": {
+      "type": "string",
+      "description": "Identifier of the existing guard that app.routes.ts already imports. With --document, it is applied to every Route whose uses.access is protected; the command fails naming it when it is not imported. Defaults to authGuard.",
+      "aliases": ["auth-guard", "authGuard"]
+    },
     "document": {
       "type": "string",
       "format": "path",
