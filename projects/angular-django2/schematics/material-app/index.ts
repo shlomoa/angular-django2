@@ -8,6 +8,7 @@ import {
   indexHtmlFromAst,
   navigationLinksFromAst,
   presentationFromAst,
+  protectedRoutePathsFromAst,
   type NavigationAstLink,
   type ToolBarAstOptions,
 } from '../application/ast';
@@ -25,12 +26,15 @@ import {
   MATERIAL_LAYOUT_TEMPLATE,
   MATERIAL_LAYOUT_TOOLBAR,
 } from '../utility/material-constants';
+import { applyGuardToRoutes, findImportedGuard } from '../utility/route-access';
 import type { CommentStyle } from '../utility/generated-regions';
-import { hasRegion, renderRegion, replaceRegion } from '../utility/generated-regions';
+import { endMarker, hasRegion, renderRegion, replaceRegion } from '../utility/generated-regions';
 
 type ResolvedMaterialAppSchema = Required<Omit<MaterialAppSchema, 'document' | 'nodeId'>> & {
   /** Layout customizations compiled from an OpenUI document. */
   layout?: MaterialLayoutOptions;
+  /** `uses.path` of the document's `Route` nodes with `uses.access` `protected`. */
+  protectedRoutes: readonly string[];
 };
 
 /** Toolbar title and extra sidenav links for the Material layout. */
@@ -41,6 +45,11 @@ export interface MaterialLayoutOptions {
   navigation?: readonly NavigationAstLink[];
   /** Command rows added after the title row. */
   toolBar?: ToolBarAstOptions;
+  /**
+   * The existing guard that decides whether protected links show. Set when the navigation has a
+   * link to a protected route; the shell then evaluates this guard for the current visitor.
+   */
+  accessGuard?: { name: string; moduleSpecifier: string };
 }
 
 /** Options the OpenUI document describes; they cannot be combined with `--document`. */
@@ -57,7 +66,8 @@ const DEFAULT_MATERIAL_APP_OPTIONS = {
   defaults: true,
   style: 'scss',
   prefix: 'app',
-} as const satisfies Omit<ResolvedMaterialAppSchema, 'name'>;
+  authGuard: 'authGuard',
+} as const satisfies Omit<ResolvedMaterialAppSchema, 'name' | 'protectedRoutes'>;
 
 function resolveMaterialAppOptions(
   tree: Tree,
@@ -75,7 +85,12 @@ function resolveMaterialAppOptions(
     if (!cliOptions.name) {
       throw new SchematicsException('Option "name" is required unless --document is given.');
     }
-    return { ...DEFAULT_MATERIAL_APP_OPTIONS, ...cliOptions, name: cliOptions.name };
+    return {
+      ...DEFAULT_MATERIAL_APP_OPTIONS,
+      ...cliOptions,
+      name: cliOptions.name,
+      protectedRoutes: [],
+    };
   }
 
   const conflicting = NODE_DESCRIBED_OPTIONS.filter((option) => options[option] !== undefined);
@@ -91,6 +106,7 @@ function resolveMaterialAppOptions(
   const presentation = presentationFromAst(app.node, documentPath);
   const navigation = navigationLinksFromAst(app.node, document, documentPath);
   const host = indexHtmlFromAst(document, documentPath);
+  const protectedRoutes = protectedRoutePathsFromAst(app.node, document, documentPath);
 
   return {
     ...DEFAULT_MATERIAL_APP_OPTIONS,
@@ -102,6 +118,7 @@ function resolveMaterialAppOptions(
     typography: presentation.typography ?? DEFAULT_MATERIAL_APP_OPTIONS.typography,
     animations: presentation.animations ?? DEFAULT_MATERIAL_APP_OPTIONS.animations,
     layout: { title: host?.title, navigation, toolBar: app.toolBar },
+    protectedRoutes,
   };
 }
 
@@ -161,8 +178,45 @@ function applyMaterialSetupRule(options: ResolvedMaterialAppSchema): Rule {
     addMaterialDependenciesRule(),
     generateMaterialSetup(options),
     generateProjectStructure(options),
+    applyRouteAccessRule(options),
     finalizeMaterialLayoutRule(options),
   ]);
+}
+
+/**
+ * Applies the application's existing guard to the routes with `uses.access` `protected`, and
+ * lets the layout hide their navigation links from a visitor the guard turns away. Fails naming
+ * the guard when `app.routes.ts` does not import it: the guard is site-owned and never generated.
+ */
+function applyRouteAccessRule(options: ResolvedMaterialAppSchema): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    if (options.protectedRoutes.length === 0) {
+      return tree;
+    }
+    const appRoutesPath = `${applicationAppRoot(tree, options.name)}/app.routes.ts`;
+    const unmatched = applyGuardToRoutes(
+      tree,
+      appRoutesPath,
+      options.authGuard,
+      options.protectedRoutes,
+    );
+    const guard = findImportedGuard(tree.read(appRoutesPath)!.toString(), options.authGuard)!;
+    options.layout = { ...options.layout, accessGuard: guard };
+    context.logger.info(
+      `Applied the "${options.authGuard}" guard to the protected routes: ${options.protectedRoutes.join(', ')}.`,
+    );
+    if (unmatched.length > 0) {
+      context.logger.info(
+        `No route declaration found yet for: ${unmatched.join(', ')}; generate their pages with the guard configured.`,
+      );
+    }
+    return tree;
+  };
+}
+
+function applicationAppRoot(tree: Tree, projectName: string): string {
+  const projectRoot = requireWorkspaceProject(readWorkspace(tree), projectName).root || '';
+  return projectRoot ? `/${projectRoot}/src/app` : '/src/app';
 }
 
 function addMaterialDependenciesRule(): Rule {
@@ -404,12 +458,19 @@ export function generateMaterialLayout(
       .replace('STYLE_FILE', styleFile)
       .replace('CLASS_NAME', className)
       .replace('TOOLBAR_ACTION_HANDLERS', () => materialLayoutActionHandlers(layout.toolBar));
+    const accessRegions = materialAccessRegions(layout.accessGuard);
+    if (layout.accessGuard) {
+      insertMissingAccessRegions(tree, tsPath, accessRegions);
+    }
     writeLayoutFile(
       tree,
       context,
       tsPath,
-      componentContent,
-      [{ name: 'title', style: 'ts', body: titleBody }],
+      withAccessRegions(componentContent, accessRegions),
+      [
+        { name: 'title', style: 'ts', body: titleBody },
+        ...accessRegionsToWrite(tree.read(tsPath)!.toString(), accessRegions, layout.accessGuard),
+      ],
       'component',
     );
     addMissingActionHandlers(tree, context, tsPath, layout.toolBar);
@@ -438,6 +499,102 @@ export function generateMaterialLayout(
       `Could not find app component TypeScript file for project "${projectName}".`,
     );
   }
+}
+
+const ACCESS_IMPORTS_REGION = 'imports-for-protected-access';
+const ACCESS_REGION = 'protected-access';
+
+/** The two regions of the shell component that evaluate the guard for the navigation links. */
+function materialAccessRegions(
+  guard: MaterialLayoutOptions['accessGuard'],
+): [LayoutRegion, LayoutRegion] {
+  const imports = guard
+    ? "import { Injector, inject, runInInjectionContext } from '@angular/core';\n" +
+      "import { toSignal } from '@angular/core/rxjs-interop';\n" +
+      "import { NavigationEnd, Router } from '@angular/router';\n" +
+      "import { catchError, filter, from, isObservable, map, of, startWith, switchMap, take } from 'rxjs';\n" +
+      `import { ${guard.name} } from '${guard.moduleSpecifier}';\n`
+    : '';
+  const body = guard
+    ? `  private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
+
+  /** Whether the \`${guard.name}\` guard lets the current visitor in; protected links show only then. */
+  protected readonly canAccessProtected = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      startWith(undefined),
+      switchMap(() => {
+        const state = this.router.routerState.snapshot;
+        const result = runInInjectionContext(this.injector, () => ${guard.name}(state.root, state));
+        return isObservable(result) ? result.pipe(take(1)) : from(Promise.resolve(result));
+      }),
+      map((allowed) => allowed === true),
+      catchError(() => of(false)),
+    ),
+    { initialValue: false },
+  );
+`
+    : '';
+  return [
+    { name: ACCESS_IMPORTS_REGION, style: 'ts', body: imports },
+    { name: ACCESS_REGION, style: 'ts', body },
+  ];
+}
+
+/** Adds the access regions to freshly generated component text (only when the guard is set). */
+function withAccessRegions(content: string, regions: readonly LayoutRegion[]): string {
+  if (!regions[1].body) {
+    return content;
+  }
+  const iconImport = "import { MatIconModule } from '@angular/material/icon';\n";
+  const titleEnd = endMarker('title', 'ts');
+  return content
+    .replace(
+      iconImport,
+      () => `${iconImport}${renderRegion(regions[0].name, 'ts', regions[0].body)}\n`,
+    )
+    .replace(
+      titleEnd,
+      () => `${titleEnd}\n\n  ${renderRegion(regions[1].name, 'ts', regions[1].body, '  ')}`,
+    );
+}
+
+/** A component generated before the access regions existed gets them inserted, empty. */
+function insertMissingAccessRegions(
+  tree: Tree,
+  tsPath: string,
+  regions: readonly LayoutRegion[],
+): void {
+  const current = tree.read(tsPath)!.toString();
+  const titleEnd = endMarker('title', 'ts');
+  if (
+    !hasRegion(current, 'title', 'ts') ||
+    hasRegion(current, ACCESS_REGION, 'ts') ||
+    !current.includes(titleEnd)
+  ) {
+    return;
+  }
+  const empty = (region: LayoutRegion): string => renderRegion(region.name, 'ts', '');
+  const lastImport = [...current.matchAll(/^import .*;$/gm)].at(-1);
+  const importEnd = lastImport ? lastImport.index + lastImport[0].length : 0;
+  const withBody = current.replace(
+    titleEnd,
+    () => `${titleEnd}\n\n  ${renderRegion(regions[1].name, 'ts', '', '  ')}`,
+  );
+  tree.overwrite(
+    tsPath,
+    `${withBody.slice(0, importEnd)}\n${empty(regions[0])}${withBody.slice(importEnd)}`,
+  );
+}
+
+/** The access regions a write replaces: both when a guard is set, else those a file still has. */
+function accessRegionsToWrite(
+  current: string,
+  regions: readonly LayoutRegion[],
+  guard: MaterialLayoutOptions['accessGuard'],
+): LayoutRegion[] {
+  return regions.filter((region) => guard || hasRegion(current, region.name, region.style));
 }
 
 /**
@@ -493,12 +650,15 @@ function materialTemplateRegions(
     const linkAttributes = link.disabled
       ? ' aria-disabled="true" tabindex="-1"'
       : ` routerLink="/${link.route}" routerLinkActive="active"`;
-    return (
+    const anchor =
       `      <a mat-list-item${linkAttributes}>\n` +
       icon +
       `        <span matListItemTitle>${escapeTemplateText(link.label)}</span>\n` +
-      '      </a>\n'
-    );
+      '      </a>\n';
+    // A protected route's link shows only for a visitor the application's guard lets in.
+    return link.protected
+      ? `      @if (canAccessProtected()) {\n${anchor.replace(/^/gm, '  ').replace(/ +$/, '')}      }\n`
+      : anchor;
   });
 
   const toolbarBody = MATERIAL_LAYOUT_TOOLBAR.replace(

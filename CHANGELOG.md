@@ -6,6 +6,8 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+- `material-app --document` applies an existing guard to `Route` nodes with `uses.access` `protected` (#216). The guard (`--auth-guard`, default `authGuard`) must be imported by `app.routes.ts`; the command adds it to `canActivate` of the generated route with the same path and fails naming the guard when it is missing. The `NavItem` of a protected route is shown only to a visitor the guard lets in. `uses.access` accepts `public` (default) and `protected`; other values are rejected. No guard or authentication service is generated. See `docs/cli/material-app.md`. Tests `TC-APP-18` to `TC-APP-22`.
+
 ## [0.8.0]
 
 - **Breaking:** The OpenUI schema version now comes from the installed `@shlomoa/openui-spec` package (its `SCHEMA_VERSION` file) instead of being pinned per release. OpenUI documents no longer declare a `version` member — the new grammar rejects it — so the schematics, the reference application documents, the documentation examples and the test fixtures drop it, and synthetic documents are emitted without one. `command-mapping.json` states the installed schema version in `openuiSpecVersion`, and `TC-MAPPING-02` checks it against the `SCHEMA_VERSION` file of the installed package. The published package no longer pins `@shlomoa/openui-spec` to an exact version: it declares the dependency as `*`, and the installed package is the single version authority. The workspace root links the local build at `../openui-spec/dist/openui-spec`, and CI builds the sibling `shlomoa/openui-spec` repository before installing.

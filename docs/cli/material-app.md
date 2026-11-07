@@ -31,6 +31,7 @@ Supported options:
 | `--defaults`   | `true`                       | Disable interactive prompts for options that have defaults.                                                       |
 | `--style`      | `scss`                       | Stylesheet format.                                                                                                |
 | `--prefix`     | `app`                        | Component selector prefix.                                                                                        |
+| `--auth-guard` | `authGuard`                  | Identifier of the existing guard that protected routes use (see [Protected routes](#protected-routes)).           |
 
 ## Re-running on an existing project
 
@@ -84,3 +85,27 @@ ng generate angular-django2:material-app --document=app.openui.json
   after the title row. Each `ToolAction` renders its required `uses.label`, optional
   `uses.icon`, and `uses.disabled` state; `produces.activate: null` generates a matching
   `on<ActionId>Activate($event)` handler stub for the application to implement.
+
+## Protected routes
+
+A `Route` whose `uses.access` is `protected` (`public` is the default; any other value is
+rejected) is guarded by an application guard that already exists. `material-app` never creates
+a guard or an authentication service: that code belongs to the site.
+
+- The guard is the identifier given by `--auth-guard` (default `authGuard`). `app.routes.ts`
+  must import it. If it does not, the command fails with a message naming the missing guard and
+  changes nothing.
+- The guard is added to `canActivate` of the generated route declaration with the same `path`
+  (in `app.routes.ts` or in a feature's `*.routes.ts` file), with an import when the file lacks
+  one. A route that already has the guard is left unchanged, so a re-run is idempotent. A
+  protected route with no declaration yet is reported in the log; its page applies the guard
+  when it is generated (see [`page`](page.md#openui-page-nodes)).
+- The sidenav link of a `NavItem` that references a protected route is wrapped in
+  `@if (canAccessProtected())`. The component evaluates the same guard for the current visitor
+  after every navigation, so an anonymous visitor does not see the link and a signed-in visitor
+  does. The generated code lives in the `imports-for-protected-access` and `protected-access` regions of the component.
+  A route without `uses.access`, or with `public`, produces the same output as before.
+- A client-side guard is not an authorization boundary; the backend must enforce access too.
+- On a new application the guard cannot exist yet, so a document with protected routes fails
+  until the application has one: create the application, add the site's guard, then run the
+  command again.

@@ -782,3 +782,167 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
     }
   });
 });
+
+describe('material-app --document: protected routes (Route uses.access)', () => {
+  let runner: SchematicTestRunner;
+  let angularRunner: SchematicTestRunner;
+
+  beforeEach(() => {
+    runner = new SchematicTestRunner('angular-django2', collectionPath);
+    angularRunner = new SchematicTestRunner('@schematics/angular', angularCollectionPath);
+  });
+
+  /** The shop application with `uses.access` on the orders Route. */
+  function documentWithAccess(access: string | undefined): string {
+    const routing = application.children!.find((child) => child.type === 'Routing')!;
+    const routes = routing.children!.map((route) =>
+      route.id === 'ordersRoute' && access !== undefined
+        ? { ...route, attrs: { ...route.attrs, 'uses.access': access } }
+        : route,
+    );
+    const withAccess = {
+      ...application,
+      children: application.children!.map((child) =>
+        child.type === 'Routing' ? { ...child, children: routes } : child,
+      ),
+    };
+    return openUiDocument(withAccess, ...pages);
+  }
+
+  /** A generated application whose document has no protected route yet. */
+  async function generate(access: string | undefined = undefined): Promise<UnitTestTree> {
+    const workspace = (await angularRunner.runSchematic(
+      'workspace',
+      { name: 'demo', version: '22.0.0', newProjectRoot: 'projects' },
+      Tree.empty(),
+    )) as UnitTestTree;
+    workspace.create(`/${DOCUMENT_PATH}`, documentWithAccess(access));
+    return runner.runSchematic('material-app', { document: DOCUMENT_PATH }, workspace);
+  }
+
+  /** Adds the site's guard to the generated application and a feature route for `orders`. */
+  function addSiteGuard(tree: UnitTestTree, guardName = 'authGuard'): void {
+    tree.create(
+      `${APP}/auth/auth.guard.ts`,
+      `import type { CanActivateFn } from '@angular/router';\nexport const ${guardName}: CanActivateFn = () => false;\n`,
+    );
+    const routes = tree.readContent(`${APP}/app.routes.ts`);
+    tree.overwrite(
+      `${APP}/app.routes.ts`,
+      `import { ${guardName} } from './auth/auth.guard';\nimport { ordersRoutes } from './features/orders.routes';\n${routes.replace(
+        /export const routes: Routes = \[\s*\];?/,
+        'export const routes: Routes = [...ordersRoutes];',
+      )}`,
+    );
+    tree.create(
+      `${APP}/features/orders.routes.ts`,
+      "import type { Routes } from '@angular/router';\n\nexport const ordersRoutes: Routes = [\n  {\n    path: 'orders',\n    loadComponent: () => import('./orders-page').then((m) => m.OrdersPage),\n  },\n];\n",
+    );
+  }
+
+  async function protect(tree: UnitTestTree, options: object = {}): Promise<UnitTestTree> {
+    tree.overwrite(`/${DOCUMENT_PATH}`, documentWithAccess('"protected"'));
+    return runner.runSchematic('material-app', { document: DOCUMENT_PATH, ...options }, tree);
+  }
+
+  it('TC-APP-18: applies the existing guard to a protected route and hides its link from anonymous visitors', async () => {
+    const tree = await generate();
+    addSiteGuard(tree);
+    const generated = await protect(tree);
+
+    const ordersRoutes = generated.readContent(`${APP}/features/orders.routes.ts`);
+    expect(ordersRoutes).toContain("import { authGuard } from '../auth/auth.guard';");
+    expect(ordersRoutes).toContain("path: 'orders',\n    canActivate: [authGuard]");
+    const template = generated.readContent(`${APP}/app.html`);
+    expect(template).toContain('@if (canAccessProtected()) {');
+    expect(template.indexOf('@if (canAccessProtected())')).toBeLessThan(
+      template.indexOf('routerLink="/orders"'),
+    );
+    expect(template).toMatch(/routerLink="\/me\/profile"/);
+    expect(template.split('canAccessProtected').length - 1).toBe(1);
+    const component = generated.readContent(`${APP}/app.ts`);
+    expect(component).toContain("import { authGuard } from './auth/auth.guard';");
+    expect(component).toContain('protected readonly canAccessProtected = toSignal(');
+    expect(component).toContain('authGuard(state.root, state)');
+    // The route stays declared once; the shell and the route configuration share the guard.
+    expect(generated.readContent(`${APP}/app.routes.ts`)).not.toContain('canActivate');
+  });
+
+  it('TC-APP-19: fails naming the guard when the application does not import it', async () => {
+    const tree = await generate();
+    tree.overwrite(`/${DOCUMENT_PATH}`, documentWithAccess('"protected"'));
+    await expect(
+      runner.runSchematic('material-app', { document: DOCUMENT_PATH }, tree),
+    ).rejects.toThrow(
+      '"authGuard" guard, but "/projects/shop/src/app/app.routes.ts" does not import it',
+    );
+
+    addSiteGuard(tree, 'adminGuard');
+    await expect(
+      runner.runSchematic('material-app', { document: DOCUMENT_PATH }, tree),
+    ).rejects.toThrow('need the existing "authGuard" guard');
+    const generated = await runner.runSchematic(
+      'material-app',
+      { document: DOCUMENT_PATH, authGuard: 'adminGuard' },
+      tree,
+    );
+    expect(generated.readContent(`${APP}/features/orders.routes.ts`)).toContain(
+      'canActivate: [adminGuard]',
+    );
+  });
+
+  it('TC-APP-20: leaves public routes unchanged', async () => {
+    const withoutAccess = await generate();
+    for (const access of ['"public"', undefined]) {
+      const generated = await generate(access);
+      for (const file of ['app.html', 'app.ts', 'app.routes.ts']) {
+        expect(generated.readContent(`${APP}/${file}`)).toBe(
+          withoutAccess.readContent(`${APP}/${file}`),
+        );
+      }
+    }
+    expect(withoutAccess.readContent(`${APP}/app.html`)).not.toContain('canAccessProtected');
+    expect(withoutAccess.readContent(`${APP}/app.ts`)).not.toContain('access');
+  });
+
+  it('TC-APP-21: a re-run is idempotent and a route made public again loses the guarded link', async () => {
+    const tree = await generate();
+    addSiteGuard(tree);
+    const first = await protect(tree);
+    const snapshot = Object.fromEntries(
+      ['app.html', 'app.ts', 'features/orders.routes.ts'].map((file) => [
+        file,
+        first.readContent(`${APP}/${file}`),
+      ]),
+    );
+    const second = await protect(first);
+    for (const [file, content] of Object.entries(snapshot)) {
+      expect(second.readContent(`${APP}/${file}`)).toBe(content);
+    }
+
+    second.overwrite(`/${DOCUMENT_PATH}`, documentWithAccess('"public"'));
+    const reverted = await runner.runSchematic('material-app', { document: DOCUMENT_PATH }, second);
+    expect(reverted.readContent(`${APP}/app.html`)).not.toContain('canAccessProtected');
+    expect(reverted.readContent(`${APP}/app.ts`)).not.toContain('canAccessProtected');
+  });
+
+  it('TC-APP-22: rejects an unsupported uses.access value', async () => {
+    const tree = await createWorkspaceWith(angularRunner, documentWithAccess('"admin"'));
+    await expect(
+      runner.runSchematic('material-app', { document: DOCUMENT_PATH }, tree),
+    ).rejects.toThrow('uses.access="admin" is not supported. Supported values: public, protected.');
+  });
+});
+
+async function createWorkspaceWith(
+  angularRunner: SchematicTestRunner,
+  document: string,
+): Promise<UnitTestTree> {
+  const tree = (await angularRunner.runSchematic(
+    'workspace',
+    { name: 'demo', version: '22.0.0', newProjectRoot: 'projects' },
+    Tree.empty(),
+  )) as UnitTestTree;
+  tree.create(`/${DOCUMENT_PATH}`, document);
+  return tree;
+}
