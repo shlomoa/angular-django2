@@ -1086,7 +1086,10 @@
           "ToolBarRow",
           "ToolAction"
         ],
-        "attributes": { "supported": [] }
+        "attributes": { "supported": [] },
+        "notes": [
+          "A Form or page node that a Route targets through uses.target may sit among the Application children; the shell does not compile it (reactive-form and page do). Any other unsupported child is rejected."
+        ]
       },
       "html": {
         "scope": "application/indexHtml",
