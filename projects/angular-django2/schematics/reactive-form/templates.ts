@@ -58,9 +58,28 @@ export interface ReactiveFormTemplateOptions {
   lang?: string;
 }
 
-/** TypeScript type of a control value for each supported control kind. */
+/** TypeScript type of a nullable control value for each supported control kind. */
 export function controlValueType(control: ReactiveFormControlKind): string {
   return control === 'number' ? 'number | null' : 'string | null';
+}
+
+/**
+ * Whether the control is created `nonNullable`: a required text-like field. Its value is a
+ * `string` (initial value `''` or the declared one), so `getRawValue()` is assignable to the
+ * generated client types that require `string`. Optional fields keep `string | null` (an empty
+ * optional field is sent as `null`, not `''`), and a number control keeps `number | null` because
+ * `0` would satisfy `Validators.required` and make an empty required number look filled.
+ */
+export function isNonNullableControl(field: ReactiveFormFieldDefinition): boolean {
+  return (
+    field.control !== 'number' &&
+    resolveFieldValidators(field).some((validator) => validator.type === 'required')
+  );
+}
+
+/** TypeScript type of the value of a field, following {@link isNonNullableControl}. */
+export function fieldValueType(field: ReactiveFormFieldDefinition): string {
+  return isNonNullableControl(field) ? 'string' : controlValueType(field.control);
 }
 
 /**
@@ -165,7 +184,7 @@ export function reactiveFormComponentSource(options: ReactiveFormTemplateOptions
   lines.push(` */`);
   lines.push(`export interface ${payloadType} {`);
   for (const field of options.fields) {
-    lines.push(`  ${field.definition.name}: ${controlValueType(field.definition.control)};`);
+    lines.push(`  ${field.definition.name}: ${fieldValueType(field.definition)};`);
   }
   lines.push(`}`);
   lines.push('');
@@ -524,10 +543,12 @@ export function reactiveFormStylesheet(options: ReactiveFormTemplateOptions): st
  * wrapped inside the default 100-column width when it carries validators.
  */
 function controlLines(field: ReactiveFormFieldDefinition): string[] {
-  const type = controlValueType(field.control);
+  const nonNullable = isNonNullableControl(field);
+  const type = fieldValueType(field);
   const initial = initialValueSource(field);
   const validators = resolveFieldValidators(field).map(validatorSource);
-  const call = `this.formBuilder.control<${type}>(${initial}`;
+  const factory = nonNullable ? 'this.formBuilder.nonNullable.control' : 'this.formBuilder.control';
+  const call = `${factory}<${type}>(${initial}`;
   if (validators.length === 0) {
     return [`    ${field.name}: ${call}),`];
   }
@@ -548,7 +569,7 @@ function controlLines(field: ReactiveFormFieldDefinition): string[] {
 function initialValueSource(field: ReactiveFormFieldDefinition): string {
   const initialValue = field.initialValue ?? null;
   if (initialValue === null) {
-    return 'null';
+    return isNonNullableControl(field) ? "''" : 'null';
   }
 
   return typeof initialValue === 'number'

@@ -232,8 +232,9 @@ resource operations.
 
 - `form` is built with the injected `FormBuilder` and stays strictly typed:
   each control is created through `formBuilder.control<T>(initialValue,
-validators)`, so `number` fields are `FormControl<number | null>` and
-  text-like fields are `FormControl<string | null>`
+validators)`, so `number` fields are `FormControl<number | null>` and optional
+  text-like fields are `FormControl<string | null>`; required text-like fields are
+  `nonNullable` `FormControl<string>` (see [Control value types](#control-value-types))
 - declared initial values are also emitted as a frozen `INITIAL_VALUES`
   constant typed as the payload, which `completeSubmit()` resets the form to
 - `<Name>FormPayload` mirrors the serializer fields; `<Name>FormServerErrors`
@@ -296,6 +297,17 @@ integration mode the component injects the artifact, calls
 `takeUntilDestroyed(this.destroyRef)`, and maps failures through
 `failSubmit()`. Without an `integration` block, the component emits a typed
 `submitted` output and leaves transport to the caller.
+
+### Control value types
+
+A required text-like field (`text`, `email`, `password`, `textarea`) is created with
+`this.formBuilder.nonNullable.control<string>(...)`, with the declared initial value or `''`, so
+its value is a `string` and `getRawValue()` is assignable to a client type that requires
+`string`. `Validators.required` still fails on `''`, and a reset returns to the initial value.
+An optional field stays `string | null`: an empty optional field is `null`, not `''`, which a
+Django serializer may reject for a field that does not allow blank. A `number` control stays
+`number | null`, required or not: `0` would satisfy `Validators.required` and make an empty
+required number look filled.
 
 ### Argument of the method
 
