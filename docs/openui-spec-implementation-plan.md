@@ -155,10 +155,11 @@ These are current behavior, documented by maintainer decision rather than fixed:
   beyond what the validator checks (its reference types); only `material-app`
   does.
 - Some accepted attributes are validated but not used: `Route` `uses.title`,
-  `Route` `uses.access`, `Routing` `uses.defaultRoute`, `Route`
-  `uses.redirectTo`, `Navigation` `uses.ariaLabel`, and `NavGroup`
+  `Routing` `uses.defaultRoute`, `Route` `uses.redirectTo`, `Navigation` `uses.ariaLabel`, and `NavGroup`
   `uses.expanded`. `NavGroup` entries are flattened, and its `uses.label` is
   not rendered. `page`'s `uses.icon` is validated but not used.
+- `Route` `uses.access` is used by `material-app --document` (`public` or
+  `protected`; a protected route gets an existing guard), not by `application`.
 - Nested `Route` paths are not composed. OpenUI defines `Route` `uses.path` as
   relative to the parent route, but a link to a child route uses the child's
   path alone.
