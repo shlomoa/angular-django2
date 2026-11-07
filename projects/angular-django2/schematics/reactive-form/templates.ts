@@ -35,6 +35,11 @@ export interface ResolvedReactiveFormIntegration {
    * does with `promises` enabled. The submit wraps it with `from(...)`; an Observable is used as is.
    */
   returnsPromise?: boolean;
+  /**
+   * The method takes a parameter object with a `body` property (the ng-openapi-gen
+   * `<Operation>$Params` type); the submit passes `{ body: <form value> }`.
+   */
+  wrapsBody?: boolean;
 }
 
 export interface ReactiveFormTemplateOptions {
@@ -270,11 +275,14 @@ export function reactiveFormComponentSource(options: ReactiveFormTemplateOptions
   if (options.integration) {
     const property = `this.${options.integration.propertyName}`;
     const method = options.integration.method;
+    const argument = options.integration.wrapsBody
+      ? '{ body: this.form.getRawValue() }'
+      : 'this.form.getRawValue()';
     if (options.integration.returnsPromise) {
-      lines.push(`    from(${property}.${method}(this.form.getRawValue()))`);
+      lines.push(`    from(${property}.${method}(${argument}))`);
     } else {
       lines.push(`    ${property}`);
-      lines.push(`      .${method}(this.form.getRawValue())`);
+      lines.push(`      .${method}(${argument})`);
     }
     lines.push(`      .pipe(takeUntilDestroyed(this.destroyRef))`);
     lines.push(`      .subscribe({`);
