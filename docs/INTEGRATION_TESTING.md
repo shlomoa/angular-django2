@@ -69,7 +69,8 @@ The end-to-end suite is in `projects/angular-django-validation/e2e/schematics.e2
 
 These tests:
 
-- run under `npm run test:e2e`
+- run under `npm run test:e2e`, which needs npm 11 or newer (`engines.npm` of `package.json`); the
+  run is not part of CI, so it is checked by hand on the adjacent checkouts
 - create real Angular workspaces on disk
 - install the built package from `projects/angular-django2/dist`
 - execute real `ng add` and `ng generate` flows
@@ -121,7 +122,7 @@ Current E2E coverage includes:
 ### `data-service` against an `ng-openapi-gen` client
 
 `e2e/data_service_api.e2e.spec.ts` shares one Angular workspace (Angular Material,
-`ng-openapi-gen`, `@types/jasmine`) and resets the generated client between tests. Each
+`ng-openapi-gen`; the `vitest` typings come from the workspace that `ng new` creates) and resets the generated client between tests. Each
 test runs the documented flow — `openapi-setup`, `ng-openapi-gen`, `data-service` — and
 compiles the result with `tsc --strict`. Only diagnostics in `src/app/features/**` count,
 because the generated models of a large schema can fail `strict` for reasons unrelated
@@ -142,7 +143,8 @@ to this package (the GitHub schema has TS2411 in `nullable-integration.ts`).
 - `INT-DS-API-04` — an unknown resource, `services: false` and a missing
   `strict-http-response.ts` each fail with an actionable message and write no file; an
   ungenerated client gives a warning and a file with the computed path.
-- `INT-DS-API-05` — the generated `*.data.service.spec.ts` compiles with jasmine types.
+- `INT-DS-API-05` — the generated `*.data.service.spec.ts` compiles with the `vitest/globals`
+  typings that an Angular 22 workspace configures in `tsconfig.spec.json`.
 
 `-03` to `-05` use a small committed OpenAPI document (tag `search`) and run offline.
 

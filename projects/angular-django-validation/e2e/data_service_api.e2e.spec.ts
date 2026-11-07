@@ -247,13 +247,15 @@ describe('data-service against an ng-openapi-gen client', () => {
     execCommand(`npm install "${distDir}"`, workspace);
     execAngularCli(['add', 'angular-django2', '--skip-confirmation'], workspace);
 
-    // The generated service imports Angular Material; the generated spec uses jasmine types.
+    // The generated service imports Angular Material. The generated spec uses the vitest API of
+    // the Angular 22 runner; `ng new` already adds `vitest` and configures `vitest/globals` in
+    // `tsconfig.spec.json`, so no test typings are installed here.
     const coreVersion = (
       JSON.parse(read('node_modules', '@angular', 'core', 'package.json')) as { version: string }
     ).version;
     execCommand(
       `npm install @angular/material@${coreVersion} @angular/cdk@${coreVersion} ` +
-        'ng-openapi-gen@^1.0.5 --save-dev @types/jasmine',
+        'ng-openapi-gen@^1.0.5 --save-dev',
       workspace,
     );
   }, SETUP_TIMEOUT);
@@ -385,7 +387,7 @@ describe('data-service against an ng-openapi-gen client', () => {
 
     const specPath = 'src/app/features/search/services/search/search.data.service.spec.ts';
     expect(fs.existsSync(resolve(specPath))).toBe(true);
-    expect(compile([specPath], ['jasmine'])).toEqual([]);
+    expect(compile([specPath], ['vitest/globals'])).toEqual([]);
   });
 });
 
