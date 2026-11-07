@@ -47,8 +47,12 @@ Each hook accepts exactly one content source:
 
 ## OpenUI host documents
 
-With `--document`, the first `html` and icon `link` nodes of an OpenUI
-document describe the host files; `files.indexHtml` and `files.favicon` are not
+With `--document`, the `html` node and the first icon `link` node of an OpenUI
+document describe the host files. The `html` node is the first non-root `html`
+node, or the document root when the root is an `html` node that carries
+`uses.lang`, `uses.dir` or `uses.title` (its other attributes belong to the
+document and are ignored). A root and a non-root `html` node that both describe
+`index.html` are rejected; `files.indexHtml` and `files.favicon` are not
 allowed alongside it.
 
 ```bash
