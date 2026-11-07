@@ -209,6 +209,7 @@ export function compileAstChild(
         project: target.project,
         destinationPath: target.directory,
         subject,
+        documentPath: target.documentPath,
       }),
     };
   }

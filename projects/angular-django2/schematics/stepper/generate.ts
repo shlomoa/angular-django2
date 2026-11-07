@@ -19,6 +19,7 @@ import { generateComponent } from '../component/generate';
 import { composeAstChildren, readAstSlot } from '../embed-component/compose';
 import { slotSection } from '../embed-component/index';
 import { astNodeSubject } from '../utility/ast-compiler';
+import { documentLanguage } from '../utility/messages';
 import { stepperFromAst, type StepperAstOptions } from './ast';
 import {
   stepperComponentSource,
@@ -85,7 +86,7 @@ export function compileStepperFromAst(
       standalone: true,
       changeDetection: 'OnPush',
     }),
-    writeStepper(componentPath, templatePath, stepper),
+    writeStepper(componentPath, templatePath, stepper, options.documentPath),
     composeAstChildren(componentPath, children),
   ]);
 }
@@ -95,6 +96,7 @@ function writeStepper(
   componentPath: string,
   templatePath: string,
   stepper: StepperAstOptions,
+  documentPath: string,
 ): Rule {
   return (tree: Tree) => {
     const source = tree.read(componentPath)?.toString();
@@ -102,7 +104,7 @@ function writeStepper(
       throw new SchematicsException(`The generated component ${componentPath} was not found.`);
     }
     tree.overwrite(componentPath, stepperComponentSource(source, stepper));
-    tree.overwrite(templatePath, stepperTemplate(stepper));
+    tree.overwrite(templatePath, stepperTemplate(stepper, documentLanguage(tree, documentPath)));
 
     const styleUrl = /styleUrl:\s*['"]\.\/([^'"]+)['"]/.exec(source)?.[1];
     if (styleUrl !== undefined) {

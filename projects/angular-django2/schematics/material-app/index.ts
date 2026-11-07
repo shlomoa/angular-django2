@@ -13,6 +13,7 @@ import {
   type ToolBarAstOptions,
 } from '../application/ast';
 import { escapeTemplateText } from '../component/ast';
+import { messagesFor } from '../utility/messages';
 import { readOpenUiDocument } from '../utility/openui';
 import { ensureDependency, readPackageJson, writePackageJson } from '../utility/package-json';
 import type { WorkspaceConfig } from '../utility/workspace';
@@ -41,6 +42,8 @@ type ResolvedMaterialAppSchema = Required<Omit<MaterialAppSchema, 'document' | '
 export interface MaterialLayoutOptions {
   /** Toolbar title; defaults to the project name. */
   title?: string;
+  /** Document language (`uses.lang`); selects the Home entry text. */
+  lang?: string;
   /** Links added after the Home link, in order. */
   navigation?: readonly NavigationAstLink[];
   /** Command rows added after the title row. */
@@ -117,7 +120,7 @@ function resolveMaterialAppOptions(
       DEFAULT_MATERIAL_APP_OPTIONS.theme) as ResolvedMaterialAppSchema['theme'],
     typography: presentation.typography ?? DEFAULT_MATERIAL_APP_OPTIONS.typography,
     animations: presentation.animations ?? DEFAULT_MATERIAL_APP_OPTIONS.animations,
-    layout: { title: host?.title, navigation, toolBar: app.toolBar },
+    layout: { title: host?.title, lang: host?.lang, navigation, toolBar: app.toolBar },
     protectedRoutes,
   };
 }
@@ -409,7 +412,7 @@ export function generateMaterialLayout(
       tree,
       context,
       htmlPath,
-      materialLayoutTemplate(layout.navigation ?? [], layout.toolBar),
+      materialLayoutTemplate(layout.navigation ?? [], layout.toolBar, layout.lang),
       materialTemplateRegions(layout.navigation ?? [], layout.toolBar),
       'template',
     );
@@ -632,12 +635,13 @@ function addMissingActionHandlers(
 export function materialLayoutTemplate(
   navigation: readonly NavigationAstLink[],
   toolBar: ToolBarAstOptions | undefined = undefined,
+  lang: string | undefined = undefined,
 ): string {
   const regions = materialTemplateRegions(navigation, toolBar);
   const [toolbar, nav] = [regions[0], regions[1]];
-  return MATERIAL_LAYOUT_TEMPLATE.replace('TOOLBAR_REGION', () =>
-    renderRegion(toolbar.name, toolbar.style, toolbar.body),
-  ).replace('NAV_REGION', () => renderRegion(nav.name, nav.style, nav.body, '      '));
+  return MATERIAL_LAYOUT_TEMPLATE.replace('HOME_LABEL', () => messagesFor(lang).home)
+    .replace('TOOLBAR_REGION', () => renderRegion(toolbar.name, toolbar.style, toolbar.body))
+    .replace('NAV_REGION', () => renderRegion(nav.name, nav.style, nav.body, '      '));
 }
 
 /** The generated regions of the layout template: the toolbar and the sidenav links. */
