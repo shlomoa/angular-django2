@@ -486,23 +486,40 @@ export function presentationFromAst(
 }
 
 /**
- * Decode the first non-root `html` node of the document, if any.
+ * Decode the `html` node of the document, if any. The node is the first non-root
+ * `html` node, or the document root itself when the root is an `html` node that
+ * carries `uses.lang`, `uses.dir` or `uses.title` (other root attributes belong to
+ * the document and are ignored).
  *
- * @throws SchematicsException for unsupported attributes or a `uses.dir` other than `ltr`, `rtl`, `auto`.
+ * @throws SchematicsException for unsupported attributes, a `uses.dir` other than `ltr`, `rtl`, `auto`,
+ * or a root and a non-root `html` node that both describe the host document.
  */
 export function indexHtmlFromAst(
   document: OpenUiDocument,
   documentPath: string,
 ): IndexHtmlAstOptions | undefined {
-  const node = [...createAstNodeResolver(document).walk()].find(
+  const indexKeys: readonly string[] = Object.values(INDEX_HTML_ATTRIBUTES);
+  const nested = [...createAstNodeResolver(document).walk()].find(
     (candidate) => candidate.type === 'html' && candidate !== document,
   );
+  const rootDescribes =
+    document.type === 'html' &&
+    Object.keys(document.attrs ?? {}).some((k) => indexKeys.includes(k));
+  if (nested && rootDescribes) {
+    throw new SchematicsException(
+      `OpenUI document "${documentPath}": the root html node and the html node "${nested.id}" both describe ` +
+        `index.html (${indexKeys.join(', ')}); keep the attributes on one of them.`,
+    );
+  }
+  const node = nested ?? (rootDescribes ? document : undefined);
   if (!node) {
     return undefined;
   }
 
   const subject = astNodeSubject(documentPath, node);
-  assertAstAttributes(node, Object.values(INDEX_HTML_ATTRIBUTES), subject);
+  if (node !== document) {
+    assertAstAttributes(node, indexKeys, subject);
+  }
   const dir = readAstString(node, INDEX_HTML_ATTRIBUTES.dir, subject);
   if (dir !== undefined && !['ltr', 'rtl', 'auto'].includes(dir)) {
     throw new SchematicsException(

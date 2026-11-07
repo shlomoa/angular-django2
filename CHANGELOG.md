@@ -7,6 +7,7 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 ## [Unreleased]
 
 - `material-app --document` applies an existing guard to `Route` nodes with `uses.access` `protected` (#216). The guard (`--auth-guard`, default `authGuard`) must be imported by `app.routes.ts`; the command adds it to `canActivate` of the generated route with the same path and fails naming the guard when it is missing. The `NavItem` of a protected route is shown only to a visitor the guard lets in. `uses.access` accepts `public` (default) and `protected`; other values are rejected. No guard or authentication service is generated. See `docs/cli/material-app.md`. Tests `TC-APP-18` to `TC-APP-22`.
+- `workspace-setup --document` now also reads `uses.lang`, `uses.dir` and `uses.title` from a root `html` node (previously only a non-root `html` node counted, so a document whose root is the `html` element kept `lang="en"` and no `dir`). A root and a non-root `html` node that both describe `index.html` are rejected.
 
 ## [0.8.0]
 

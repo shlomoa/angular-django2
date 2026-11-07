@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { materialLayoutTemplate } from 'angular-django2/schematics/material-app/index';
 import {
   applicationFromAst,
+  indexHtmlFromAst,
   navigationLinksFromAst,
 } from 'angular-django2/schematics/application/ast';
 import { updateIndexHtml } from 'angular-django2/schematics/workspace-setup/index';
@@ -455,6 +456,53 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
           title: 'T',
         }),
       ).toBe('<html>\n  <head>\n    <title>T</title>\n  </head>');
+    });
+  });
+
+  describe('indexHtmlFromAst', () => {
+    const hebrewAttrs = { 'uses.lang': '"he"', 'uses.dir': '"rtl"', 'uses.title': '"גינות"' };
+
+    it('TC-APP-12: reads lang, dir and title from a root html node and ignores its document attributes', () => {
+      const root: OpenUiElement = {
+        id: 'root',
+        type: 'html',
+        attrs: { name: '"specialgardens"', ...hebrewAttrs },
+      };
+      expect(indexHtmlFromAst(root, DOCUMENT_PATH)).toEqual({
+        lang: 'he',
+        dir: 'rtl',
+        title: 'גינות',
+      });
+    });
+
+    it('TC-APP-13: a root html node without uses attributes describes nothing', () => {
+      const root: OpenUiElement = { id: 'root', type: 'html', attrs: { name: '"specialgardens"' } };
+      expect(indexHtmlFromAst(root, DOCUMENT_PATH)).toBeUndefined();
+    });
+
+    it('TC-APP-14: keeps reading a non-root html node', () => {
+      const root: OpenUiElement = {
+        id: 'root',
+        type: 'html',
+        attrs: { name: '"specialgardens"' },
+        children: [{ id: 'host', type: 'html', attrs: hebrewAttrs }],
+      };
+      expect(indexHtmlFromAst(root, DOCUMENT_PATH)?.dir).toBe('rtl');
+    });
+
+    it('TC-APP-15: rejects a root and a non-root html node that both describe index.html', () => {
+      const root: OpenUiElement = {
+        id: 'root',
+        type: 'html',
+        attrs: hebrewAttrs,
+        children: [{ id: 'host', type: 'html', attrs: hebrewAttrs }],
+      };
+      expect(() => indexHtmlFromAst(root, DOCUMENT_PATH)).toThrow(/both describe index\.html/);
+    });
+
+    it('TC-APP-16: rejects a root uses.dir other than ltr, rtl, auto', () => {
+      const root: OpenUiElement = { id: 'root', type: 'html', attrs: { 'uses.dir': '"up"' } };
+      expect(() => indexHtmlFromAst(root, DOCUMENT_PATH)).toThrow(/must be ltr, rtl, or auto/);
     });
   });
 
