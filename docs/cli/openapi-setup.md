@@ -24,6 +24,9 @@ Django integration helpers under `--helpers-path` (default
   `PaginatedResult` and `ResourceQuery`, plus shared `catchError` handling.
 - `index.ts` — barrel re-export for the above files, with co-located specs.
 
+The generated `resource-adapter.spec.ts` uses the vitest idiom of the Angular 22 test runner
+(async test functions awaiting `firstValueFrom`), not Jasmine `done` callbacks.
+
 Compose `provideDjangoApiTransport` at application bootstrap:
 
 ```typescript
