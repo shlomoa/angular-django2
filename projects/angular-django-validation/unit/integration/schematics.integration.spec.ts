@@ -947,7 +947,7 @@ export const appConfig: ApplicationConfig = {
       expect(component).toContain("  email: 'team@example.com',");
       expect(component).toContain('this.form.reset(INITIAL_VALUES);');
       expect(component).toContain(
-        "email: this.formBuilder.control<string | null>('team@example.com', [",
+        "email: this.formBuilder.nonNullable.control<string>('team@example.com', [",
       );
       expect(component).toContain(
         'notes: this.formBuilder.control<string | null>(null, [Validators.maxLength(240)]),',

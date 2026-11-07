@@ -103,16 +103,21 @@ describe('reactive-form schematic', () => {
     );
     expect(component).toContain('ChangeDetectionStrategy.OnPush');
     expect(component).toContain('export interface ContactFormPayload {');
-    expect(component).toContain('first_name: string | null;');
+    expect(component).toContain('first_name: string;');
     expect(component).toContain('seats: number | null;');
     expect(component).toContain("readonly endpoint = '/api/contacts/';");
     expect(component).toContain('private readonly formBuilder = inject(FormBuilder);');
     expect(component).toContain('readonly form = this.formBuilder.group({');
     expect(component).toContain(
-      'first_name: this.formBuilder.control<string | null>(null, [Validators.required]),',
+      "first_name: this.formBuilder.nonNullable.control<string>('', [Validators.required]),",
     );
     expect(component).toContain(
-      'email: this.formBuilder.control<string | null>(null, [Validators.required, Validators.email]),',
+      [
+        "email: this.formBuilder.nonNullable.control<string>('', [",
+        '      Validators.required,',
+        '      Validators.email,',
+        '    ]),',
+      ].join('\n'),
     );
     expect(component).toContain('notes: this.formBuilder.control<string | null>(null),');
     expect(component).toContain("readonly status = signal<ContactFormStatus>('idle');");
@@ -482,6 +487,41 @@ export class ContactSubmitService {
     });
   });
 
+  it('TC-REACTIVE-FORM-27: required text fields are nonNullable strings; optional and number fields keep null', () => {
+    const definition = {
+      ...DEFINITION,
+      fields: [
+        { name: 'username', label: 'Username', control: 'text', required: true },
+        { name: 'nickname', label: 'Nickname', control: 'text' },
+        { name: 'age', label: 'Age', control: 'number', required: true },
+        { name: 'city', label: 'City', control: 'text', required: true, initialValue: 'Haifa' },
+      ],
+    };
+
+    const component = readContent(generate(createApplicationTree(definition)), COMPONENT_PATH);
+
+    // The payload type, and so getRawValue(), is assignable to `{ username: string; ... }`.
+    expect(component).toContain('  username: string;');
+    expect(component).toContain('  nickname: string | null;');
+    expect(component).toContain('  age: number | null;');
+    expect(component).toContain('  city: string;');
+    expect(component).toContain(
+      "username: this.formBuilder.nonNullable.control<string>('', [Validators.required]),",
+    );
+    expect(component).toContain('nickname: this.formBuilder.control<string | null>(null),');
+    expect(component).toContain(
+      'age: this.formBuilder.control<number | null>(null, [Validators.required]),',
+    );
+    expect(component).toContain(
+      "city: this.formBuilder.nonNullable.control<string>('Haifa', [Validators.required]),",
+    );
+    // A reset returns to the initial values, which are strings for the non-nullable fields.
+    expect(component).toContain("  username: '',");
+    expect(component).toContain("  city: 'Haifa',");
+    expect(component).toContain('  nickname: null,');
+    expect(component).toContain('this.form.reset(INITIAL_VALUES);');
+  });
+
   it('TC-REACTIVE-FORM-09: is create-only and deterministic on rerun', () => {
     const tree = createApplicationTree();
     const context = createContext();
@@ -632,7 +672,7 @@ export class ContactSubmitService {
     // Validators are emitted in canonical order regardless of declaration order.
     expect(component).toContain(
       [
-        'fullName: this.formBuilder.control<string | null>(null, [',
+        "fullName: this.formBuilder.nonNullable.control<string>('', [",
         '      Validators.required,',
         '      Validators.minLength(2),',
         '      Validators.maxLength(120),',
@@ -645,7 +685,7 @@ export class ContactSubmitService {
     );
     expect(component).toContain('notes: this.formBuilder.control<string | null>(null),');
     expect(component).toContain(
-      "email: this.formBuilder.control<string | null>('team@example.com', [",
+      "email: this.formBuilder.nonNullable.control<string>('team@example.com', [",
     );
     // `control: 'email'` still contributes Validators.email exactly once.
     expect(component.match(/Validators\.email/g)).toHaveLength(1);
@@ -734,7 +774,7 @@ export class ContactSubmitService {
     );
     const component = readContent(generated, COMPONENT_PATH);
     expect(component).toContain(
-      'value: this.formBuilder.control<string | null>(null, [Validators.required]),',
+      "value: this.formBuilder.nonNullable.control<string>('', [Validators.required]),",
     );
     expect(component.match(/Validators\.required/g)).toHaveLength(1);
   });
