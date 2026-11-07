@@ -118,5 +118,6 @@ a guard or an authentication service: that code belongs to the site.
   path without extension) the command adds `import { authGuard } from './auth/auth.guard';` to
   `app.routes.ts` itself, unless the file already imports the guard, so a first generation
   succeeds and a re-run never duplicates the import. The guard file does not have to exist when
-  the command runs (the site adds it before the build); a path with an extension, an absolute
+  the command runs (the site adds it before the build; the `page` step of a protected page then
+  needs only that import in `app.routes.ts` and adds its own guarded route); a path with an extension, an absolute
   path or a path outside the project is rejected.

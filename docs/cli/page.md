@@ -20,7 +20,7 @@ ng generate angular-django2:page orders \
 | `--project`          | no             | inferred          | Angular application project; required when more than one application is available. |
 | `--route-path`       | no             | `name`            | Lowercase URL path using letters, digits, hyphens, or slashes.                     |
 | `--access`           | no             | `public`          | `public` or `protected`.                                                           |
-| `--auth-guard`       | protected only | `authGuard`       | Existing JavaScript identifier already applied in `app.routes.ts`.                 |
+| `--auth-guard`       | protected only | `authGuard`       | Existing JavaScript identifier that `app.routes.ts` already imports.               |
 | `--navigation-label` | no             | classified `name` | Non-empty label stored in route navigation metadata.                               |
 | `--navigation-icon`  | no             | —                 | Material icon name using lowercase letters, digits, or underscores.                |
 
@@ -40,9 +40,14 @@ an unsafe edit. Re-running the same command is idempotent; duplicate route
 paths, incomplete owned registrations, modified generated files, and paths
 outside the application source root fail with actionable errors.
 
-`public` is the default and adds no guard. A `protected` page only reuses an
-already imported and applied guard from `app.routes.ts`; the schematic does not
-create a guard or application-wide authorization policy. Client-side guards
+`public` is the default and adds no guard. A `protected` page only reuses a guard
+that `app.routes.ts` already imports; the page's own route gets
+`canActivate: [guard]`, so the page works on a first generation, where
+`app.routes.ts` has the import (added by
+[`material-app --auth-guard-path`](material-app.md#protected-routes)) but no route yet.
+The guard file does not have to exist when the page is generated: it is a site file
+that the build resolves. Without the import the command fails naming the guard.
+The schematic does not create a guard or application-wide authorization policy. Client-side guards
 are navigation controls, not an authorization boundary—Django must continue to
 authorize every protected backend operation.
 
@@ -56,7 +61,7 @@ through their declared interfaces when building out the generated feature.
 - `@angular/material`, `@angular/cdk`, and `@angular/router` installed
 - `src/app/app.routes.ts` exporting `routes: Routes`
 - `src/app/app.config.ts` configuring `provideRouter(routes)`
-- for `--access=protected`, a configured reusable guard matching `--auth-guard`
+- for `--access=protected`, an import of the guard named by `--auth-guard` in `app.routes.ts`
 
 Run `ng add @angular/material` and generate the Angular application with
 routing enabled before running this schematic.
