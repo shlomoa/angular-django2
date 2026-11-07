@@ -37,6 +37,63 @@ export function findImportedGuard(source: string, guardName: string): ImportedGu
   return undefined;
 }
 
+/**
+ * The module specifier, relative to `appRoutesDirectory`, of the guard file at the project-relative
+ * module path `guardPath` (no extension).
+ *
+ * @throws SchematicsException for an empty, absolute, extension-bearing or project-escaping path.
+ */
+export function guardModuleSpecifier(
+  projectRoot: string,
+  guardPath: string,
+  appRoutesDirectory: string,
+): string {
+  const normalized = path.posix.normalize(guardPath.trim().replace(/\\/g, '/'));
+  if (
+    normalized === '' ||
+    normalized === '.' ||
+    normalized.startsWith('/') ||
+    normalized.startsWith('..') ||
+    /\.[cm]?[jt]s$/.test(normalized)
+  ) {
+    throw new SchematicsException(
+      `--auth-guard-path "${guardPath}" must be a project-relative module path inside the project, ` +
+        'without a file extension, for example "src/app/auth/auth.guard".',
+    );
+  }
+  const relative = path.posix.relative(
+    appRoutesDirectory,
+    path.posix.join(projectRoot, normalized),
+  );
+  return relative.startsWith('.') ? relative : `./${relative}`;
+}
+
+/**
+ * Makes `appRoutesPath` import `guardName` from `moduleSpecifier`, unless it already imports the
+ * guard (from anywhere). The guard file does not have to exist.
+ *
+ * @throws SchematicsException when `appRoutesPath` does not exist.
+ */
+export function ensureGuardImport(
+  tree: Tree,
+  appRoutesPath: string,
+  guardName: string,
+  moduleSpecifier: string,
+): void {
+  const source = tree.read(appRoutesPath)?.toString();
+  if (source === undefined) {
+    throw new SchematicsException(`"${appRoutesPath}" was not found; cannot import the guard.`);
+  }
+  if (findImportedGuard(source, guardName)) {
+    return;
+  }
+  const imports = parse(source, appRoutesPath).statements.filter(ts.isImportDeclaration);
+  const statement = `import { ${guardName} } from '${moduleSpecifier}';`;
+  const position = imports.length > 0 ? imports.at(-1)!.end : 0;
+  const text = imports.length > 0 ? `\n${statement}` : `${statement}\n`;
+  tree.overwrite(appRoutesPath, `${source.slice(0, position)}${text}${source.slice(position)}`);
+}
+
 /** Route files of the application: `app.routes.ts` and the feature-owned `*.routes.ts` files. */
 function routeFiles(tree: Tree, appRoutesPath: string): string[] {
   const appDirectory = path.posix.dirname(appRoutesPath);

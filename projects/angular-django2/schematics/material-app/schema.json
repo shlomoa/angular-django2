@@ -65,6 +65,11 @@
       "description": "Identifier of the existing guard that app.routes.ts already imports. With --document, it is applied to every Route whose uses.access is protected; the command fails naming it when it is not imported. Defaults to authGuard.",
       "aliases": ["auth-guard", "authGuard"]
     },
+    "authGuardPath": {
+      "type": "string",
+      "description": "Project-relative module path of the guard file, without extension (for example src/app/auth/auth.guard). With --document and protected routes, app.routes.ts gets the import of the guard when it lacks one; the file does not have to exist when the schematic runs. Without it, app.routes.ts must already import the guard.",
+      "aliases": ["auth-guard-path", "authGuardPath"]
+    },
     "document": {
       "type": "string",
       "format": "path",
