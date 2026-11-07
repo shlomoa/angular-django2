@@ -253,34 +253,32 @@ export function generateSpecContent(
 
   return `import { HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { ${names.serviceName} } from './${names.fileName}.data.service';
 import { ${apiServiceImport} } from '${imports.apiServicesImport}';
 import type { StrictHttpResponse } from '${imports.apiRootImport}/strict-http-response';
 
 describe('${names.serviceName}', () => {
   let service: ${names.serviceName};
-  let mockApiService: jasmine.SpyObj<${apiServiceImport}>;
 
   beforeEach(() => {
-    const apiServiceSpy = jasmine.createSpyObj('${apiServiceImport}', [
-      'searchMethod',
-      'listMethod',
-      'getMethod',
-      'createMethod',
-      'updateMethod',
-      'deleteMethod',
-    ]);
+    const apiServiceStub = {
+      searchMethod: vi.fn(),
+      listMethod: vi.fn(),
+      getMethod: vi.fn(),
+      createMethod: vi.fn(),
+      updateMethod: vi.fn(),
+      deleteMethod: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         ${names.serviceName},
-        { provide: ${apiServiceImport}, useValue: apiServiceSpy },
+        { provide: ${apiServiceImport}, useValue: apiServiceStub },
       ],
     });
 
     service = TestBed.inject(${names.serviceName});
-    mockApiService = TestBed.inject(${apiServiceImport}) as jasmine.SpyObj<${apiServiceImport}>;
   });
 
   it('should be created', () => {
@@ -288,160 +286,132 @@ describe('${names.serviceName}', () => {
   });
 
   describe('search', () => {
-    it('should transform and return search results', (done) => {
+    it('should transform and return search results', async () => {
       const mockResponse = new HttpResponse<{ results: any[]; count: number }>({
         body: { results: [{ id: 1 }, { id: 2 }], count: 2 },
         status: 200,
       }) as StrictHttpResponse<{ results: any[]; count: number }>;
 
-      const searchFn = jasmine.createSpy('searchFn').and.returnValue(of(mockResponse));
+      const searchFn = vi.fn().mockReturnValue(of(mockResponse));
       const toItems = (body: any) => ({ items: body.results, total_count: body.count });
 
-      service.search('created', 'desc', 0, 'test', searchFn, toItems).subscribe({
-        next: (result) => {
-          expect(result.items.length).toBe(2);
-          expect(result.total_count).toBe(2);
-          expect(searchFn).toHaveBeenCalledWith({
-            query: 'test',
-            sort: 'created',
-            order: 'desc',
-            page: 1,
-            per_page: 30,
-          });
-          done();
-        },
-        error: done.fail,
+      const result = await firstValueFrom(
+        service.search('created', 'desc', 0, 'test', searchFn, toItems),
+      );
+
+      expect(result.items.length).toBe(2);
+      expect(result.total_count).toBe(2);
+      expect(searchFn).toHaveBeenCalledWith({
+        query: 'test',
+        sort: 'created',
+        order: 'desc',
+        page: 1,
+        per_page: 30,
       });
     });
 
-    it('should handle search errors', (done) => {
-      const searchFn = jasmine.createSpy('searchFn').and.returnValue(
+    it('should handle search errors', async () => {
+      const searchFn = vi.fn().mockReturnValue(
         throwError(() => new Error('Search failed'))
       );
       const toItems = (body: any) => ({ items: body.results, total_count: body.count });
-      spyOn(console, 'error');
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-      service.search('created', 'desc', 0, 'test', searchFn, toItems).subscribe({
-        next: () => done.fail('Should have thrown an error'),
-        error: (error) => {
-          expect(error.message).toBe('Search failed');
-          expect(console.error).toHaveBeenCalledWith('Search error:', jasmine.any(Error));
-          done();
-        },
-      });
+      await expect(
+        firstValueFrom(service.search('created', 'desc', 0, 'test', searchFn, toItems)),
+      ).rejects.toThrow('Search failed');
+
+      expect(consoleError).toHaveBeenCalledWith('Search error:', expect.any(Error));
+      consoleError.mockRestore();
     });
   });
 
   describe('list', () => {
-    it('should return list results', (done) => {
+    it('should return list results', async () => {
       const mockResponse = new HttpResponse<any[]>({
         body: [{ id: 1 }, { id: 2 }],
         status: 200,
       }) as StrictHttpResponse<any[]>;
 
-      const listFn = jasmine.createSpy('listFn').and.returnValue(of(mockResponse));
+      const listFn = vi.fn().mockReturnValue(of(mockResponse));
 
-      service.list(listFn).subscribe({
-        next: (result) => {
-          expect(result).toEqual([{ id: 1 }, { id: 2 }]);
-          done();
-        },
-        error: done.fail,
-      });
+      const result = await firstValueFrom(service.list(listFn));
+
+      expect(result).toEqual([{ id: 1 }, { id: 2 }]);
     });
 
-    it('should transform list results when transform function provided', (done) => {
+    it('should transform list results when transform function provided', async () => {
       const mockResponse = new HttpResponse<{ data: any[] }>({
         body: { data: [{ id: 1 }, { id: 2 }] },
         status: 200,
       }) as StrictHttpResponse<{ data: any[] }>;
 
-      const listFn = jasmine.createSpy('listFn').and.returnValue(of(mockResponse));
+      const listFn = vi.fn().mockReturnValue(of(mockResponse));
       const transform = (body: any) => body.data;
 
-      service.list(listFn, transform).subscribe({
-        next: (result) => {
-          expect(result).toEqual([{ id: 1 }, { id: 2 }]);
-          done();
-        },
-        error: done.fail,
-      });
+      const result = await firstValueFrom(service.list(listFn, transform));
+
+      expect(result).toEqual([{ id: 1 }, { id: 2 }]);
     });
   });
 
   describe('get', () => {
-    it('should return a single item', (done) => {
+    it('should return a single item', async () => {
       const mockResponse = new HttpResponse<any>({
         body: { id: 1, name: 'Test' },
         status: 200,
       }) as StrictHttpResponse<any>;
 
-      const getFn = jasmine.createSpy('getFn').and.returnValue(of(mockResponse));
+      const getFn = vi.fn().mockReturnValue(of(mockResponse));
 
-      service.get(getFn).subscribe({
-        next: (result) => {
-          expect(result).toEqual({ id: 1, name: 'Test' });
-          done();
-        },
-        error: done.fail,
-      });
+      const result = await firstValueFrom(service.get(getFn));
+
+      expect(result).toEqual({ id: 1, name: 'Test' });
     });
   });
 
   describe('create', () => {
-    it('should create and return the created item', (done) => {
+    it('should create and return the created item', async () => {
       const mockResponse = new HttpResponse<any>({
         body: { id: 1, name: 'New Item' },
         status: 201,
       }) as StrictHttpResponse<any>;
 
-      const createFn = jasmine.createSpy('createFn').and.returnValue(of(mockResponse));
+      const createFn = vi.fn().mockReturnValue(of(mockResponse));
 
-      service.create(createFn).subscribe({
-        next: (result) => {
-          expect(result).toEqual({ id: 1, name: 'New Item' });
-          done();
-        },
-        error: done.fail,
-      });
+      const result = await firstValueFrom(service.create(createFn));
+
+      expect(result).toEqual({ id: 1, name: 'New Item' });
     });
   });
 
   describe('update', () => {
-    it('should update and return the updated item', (done) => {
+    it('should update and return the updated item', async () => {
       const mockResponse = new HttpResponse<any>({
         body: { id: 1, name: 'Updated Item' },
         status: 200,
       }) as StrictHttpResponse<any>;
 
-      const updateFn = jasmine.createSpy('updateFn').and.returnValue(of(mockResponse));
+      const updateFn = vi.fn().mockReturnValue(of(mockResponse));
 
-      service.update(updateFn).subscribe({
-        next: (result) => {
-          expect(result).toEqual({ id: 1, name: 'Updated Item' });
-          done();
-        },
-        error: done.fail,
-      });
+      const result = await firstValueFrom(service.update(updateFn));
+
+      expect(result).toEqual({ id: 1, name: 'Updated Item' });
     });
   });
 
   describe('delete', () => {
-    it('should delete an item', (done) => {
+    it('should delete an item', async () => {
       const mockResponse = new HttpResponse<void>({
         body: undefined,
         status: 204,
       }) as StrictHttpResponse<void>;
 
-      const deleteFn = jasmine.createSpy('deleteFn').and.returnValue(of(mockResponse));
+      const deleteFn = vi.fn().mockReturnValue(of(mockResponse));
 
-      service.delete(deleteFn).subscribe({
-        next: (result) => {
-          expect(result).toBeUndefined();
-          done();
-        },
-        error: done.fail,
-      });
+      const result = await firstValueFrom(service.delete(deleteFn));
+
+      expect(result).toBeUndefined();
     });
   });
 });

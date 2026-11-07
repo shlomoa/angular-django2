@@ -6,6 +6,8 @@ The format is inspired by Keep a Changelog and follows semantic versioning for r
 
 ## [Unreleased]
 
+- Fixed the `*.data.service.spec.ts` that `data-service` generates (#225). It used Jasmine-style `(done) => ...` callbacks (`done()`, `done.fail`) and the Jasmine helpers `jasmine.createSpy`, `jasmine.createSpyObj`, `jasmine.SpyObj`, `jasmine.any` and `spyOn`, which do not compile under the Angular 22 vitest runner. The generated specs are now async functions that await `firstValueFrom` and use `vi.fn()` stubs and `vi.spyOn`.
+
 - Fixed the `resource-adapter.spec.ts` that `openapi-setup` generates (#222). It used Jasmine-style `(done) => ...` callbacks (`done()`, `done.fail`), which do not compile under the Angular 22 vitest runner (`TS2349`, `TS2339`), so `ng test` failed on every workspace produced by `openapi-setup`. The generated specs are now async functions that await `firstValueFrom`. The `data-service` spec template still has `done` callbacks and is tracked separately.
 
 - `material-app --document` applies an existing guard to `Route` nodes with `uses.access` `protected` (#216). The guard (`--auth-guard`, default `authGuard`) must be imported by `app.routes.ts`; the command adds it to `canActivate` of the generated route with the same path and fails naming the guard when it is missing. The `NavItem` of a protected route is shown only to a visitor the guard lets in. `uses.access` accepts `public` (default) and `protected`; other values are rejected. No guard or authentication service is generated. See `docs/cli/material-app.md`. Tests `TC-APP-18` to `TC-APP-22`.

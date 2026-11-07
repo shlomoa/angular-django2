@@ -88,6 +88,21 @@ describe('angular-django2 schematics', () => {
       expect(specContent).toContain('UsersApiService');
     });
 
+    it('TC-DS-23: the generated spec uses the vitest idiom, with no done callback or Jasmine API', () => {
+      const tree = workspaceTree();
+      const context = { logger: { info: vi.fn(), warn: vi.fn() } } as never;
+
+      const spec = (dataService({ name: 'users' })(tree, context) as Tree)
+        .read('src/app/features/users/services/users/users.data.service.spec.ts')!
+        .toString();
+
+      expect(spec).not.toMatch(/\bdone\b/);
+      expect(spec).not.toMatch(/jasmine|(?<!vi\.)spyOn\(/);
+      expect(spec).toContain("import { firstValueFrom, of, throwError } from 'rxjs';");
+      expect(spec).toContain("it('should return a single item', async () => {");
+      expect(spec).toContain(".rejects.toThrow('Search failed')");
+    });
+
     it('TC-DS-03: skips spec file when skipTests is true', () => {
       const tree = workspaceTree();
 
@@ -303,7 +318,7 @@ describe('angular-django2 schematics', () => {
 
       // Check for test structure
       expect(specContent).toContain('TestBed.configureTestingModule');
-      expect(specContent).toContain('jasmine.createSpyObj');
+      expect(specContent).toContain('searchMethod: vi.fn()');
       expect(specContent).toContain("describe('search'");
       expect(specContent).toContain("describe('list'");
       expect(specContent).toContain("describe('get'");
