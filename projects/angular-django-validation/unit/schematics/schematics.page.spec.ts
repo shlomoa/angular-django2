@@ -125,6 +125,27 @@ describe('page schematic', () => {
     expect(route).toContain("access: 'protected'");
   });
 
+  it('adds the route of a protected page on a first generation, when app.routes.ts only imports the guard', () => {
+    const tree = createApplicationTree();
+    tree.overwrite(
+      '/projects/demo/src/app/app.routes.ts',
+      "import type { Routes } from '@angular/router';\nimport { authGuard } from './auth/auth.guard';\n\nexport const routes: Routes = [];\n",
+    );
+
+    page({ ...publicOptions, access: 'protected' })(tree, {} as never);
+
+    const route = tree
+      .read('/projects/demo/src/app/features/orders/orders.page.routes.ts')!
+      .toString();
+    expect(route).toContain("import { authGuard } from '../../auth/auth.guard';");
+    expect(route).toContain('canActivate: [authGuard]');
+    expect(tree.read('/projects/demo/src/app/app.routes.ts')!.toString()).toContain(
+      '...ordersPageRoutes,',
+    );
+    // The guard module is a site file resolved by the build; the page never creates it.
+    expect(tree.exists('/projects/demo/src/app/auth/auth.guard.ts')).toBe(false);
+  });
+
   it('rejects protected pages without an applied reusable guard', () => {
     const tree = createApplicationTree();
 

@@ -268,10 +268,15 @@ function readRoutingPrerequisites(tree: Tree, resolved: ResolvedPageOptions): st
   return content;
 }
 
+/**
+ * The import of the configured guard in `app.routes.ts`. Only the import is required: the page
+ * adds its own route with `canActivate: [guard]`, so a first generation, where `app.routes.ts` has
+ * the import (added by `material-app --auth-guard-path`) but no route yet, works. The guard file
+ * itself does not have to exist; it is a site file that the build resolves.
+ */
 function findConfiguredGuard(appRoutesSource: string, resolved: ResolvedPageOptions): GuardImport {
   const sourceFile = sourceFileFor(appRoutesSource);
   let guardImport: GuardImport | undefined;
-  let isApplied = false;
 
   const visit = (node: ts.Node): void => {
     if (
@@ -289,24 +294,13 @@ function findConfiguredGuard(appRoutesSource: string, resolved: ResolvedPageOpti
         }
       }
     }
-
-    if (
-      ts.isPropertyAssignment(node) &&
-      node.name.getText(sourceFile) === 'canActivate' &&
-      ts.isArrayLiteralExpression(node.initializer) &&
-      node.initializer.elements.some(
-        (element) => ts.isIdentifier(element) && element.text === resolved.authGuard,
-      )
-    ) {
-      isApplied = true;
-    }
     node.forEachChild(visit);
   };
   visit(sourceFile);
 
-  if (!guardImport || !isApplied) {
+  if (!guardImport) {
     throw new SchematicsException(
-      `Protected pages require the configured reusable "${resolved.authGuard}" guard to be imported and applied in app.routes.ts. Client-side guards are not an authorization boundary; enforce authorization on the backend too.`,
+      `Protected pages require the configured reusable "${resolved.authGuard}" guard to be imported in app.routes.ts. Client-side guards are not an authorization boundary; enforce authorization on the backend too.`,
     );
   }
 
