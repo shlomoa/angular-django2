@@ -21,7 +21,7 @@ export const MATERIAL_LAYOUT_TEMPLATE = `TOOLBAR_REGION
     <mat-nav-list>
       <a mat-list-item routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <mat-icon matListItemIcon>home</mat-icon>
-        <span matListItemTitle>Home</span>
+        <span matListItemTitle>HOME_LABEL</span>
       </a>
       NAV_REGION
     </mat-nav-list>

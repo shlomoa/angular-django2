@@ -858,6 +858,22 @@ describe('reactive-form schematic: OpenUI Form documents', () => {
     ).toThrow('OpenUI node "otherNotes" has type "TextInputs" but this schematic expects "Form".');
   });
 
+  it('TC-REACTIVE-FORM-OPENUI-12: generates Hebrew validation messages when the html node says uses.lang he, English otherwise', () => {
+    const host = { id: 'host', type: 'html', attrs: { 'uses.lang': '"he"', 'uses.dir': '"rtl"' } };
+    const hebrew = readContent(
+      generateFromDocument(createDocumentTree(documentOf(host, CONTACT_FORM))),
+      COMPONENT_PATH,
+    );
+    expect(hebrew).toContain('return `${label} הוא שדה חובה.`;');
+    expect(hebrew).toContain('return `${label} חייב להיות כתובת דוא״ל תקינה.`;');
+    expect(hebrew).toContain('return `${label} אינו תקין.`;');
+    expect(hebrew).not.toContain('is required');
+
+    const english = readContent(generateFromDocument(createDocumentTree()), COMPONENT_PATH);
+    expect(english).toContain('return `${label} is required.`;');
+    expect(english).toContain('return `${label} is invalid.`;');
+  });
+
   it.each([
     [
       'an unsupported Form attribute',

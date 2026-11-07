@@ -1,4 +1,5 @@
 import { strings } from '@angular-devkit/core';
+import { messageTemplateLiteral, messagesFor } from '../utility/messages';
 import type { FormFieldPrimitiveBinding } from '../form-field/schema';
 import {
   REACTIVE_FORM_VALIDATOR_KINDS,
@@ -43,6 +44,8 @@ export interface ReactiveFormTemplateOptions {
   definition: ReactiveFormDefinition;
   fields: readonly ResolvedReactiveFormField[];
   integration?: ResolvedReactiveFormIntegration;
+  /** Document language (`uses.lang` of the `html` node); selects the generated message texts. */
+  lang?: string;
 }
 
 /** TypeScript type of a control value for each supported control kind. */
@@ -93,6 +96,7 @@ export function reactiveFormComponentSource(options: ReactiveFormTemplateOptions
   const hasInitialValues = options.fields.some(
     (field) => (field.definition.initialValue ?? null) !== null,
   );
+  const messages = messagesFor(options.lang);
   const inlineValidatorKinds = new Set<ReactiveFormValidatorKind>(
     inlineFields.flatMap((field) =>
       resolveFieldValidators(field.definition).map((validator) => validator.type),
@@ -338,16 +342,16 @@ export function reactiveFormComponentSource(options: ReactiveFormTemplateOptions
     lines.push('');
     lines.push(`    const label = this.labels[field] ?? field;`);
     lines.push(`    if (control.errors['required']) {`);
-    lines.push('      return `${label} is required.`;');
+    lines.push(`      return \`${messageTemplateLiteral(messages.required)}\`;`);
     lines.push(`    }`);
     lines.push(`    if (control.errors['email']) {`);
-    lines.push('      return `${label} must be a valid email address.`;');
+    lines.push(`      return \`${messageTemplateLiteral(messages.email)}\`;`);
     lines.push(`    }`);
     if (inlineValidatorKinds.has('minLength')) {
       lines.push(`    const minLength = control.errors['minlength'];`);
       lines.push(`    if (minLength) {`);
       lines.push(
-        '      return `${label} must be at least ${minLength.requiredLength} characters.`;',
+        `      return \`${messageTemplateLiteral(messages.minLength, 'minLength.requiredLength')}\`;`,
       );
       lines.push(`    }`);
     }
@@ -355,29 +359,29 @@ export function reactiveFormComponentSource(options: ReactiveFormTemplateOptions
       lines.push(`    const maxLength = control.errors['maxlength'];`);
       lines.push(`    if (maxLength) {`);
       lines.push(
-        '      return `${label} must be at most ${maxLength.requiredLength} characters.`;',
+        `      return \`${messageTemplateLiteral(messages.maxLength, 'maxLength.requiredLength')}\`;`,
       );
       lines.push(`    }`);
     }
     if (inlineValidatorKinds.has('min')) {
       lines.push(`    const min = control.errors['min'];`);
       lines.push(`    if (min) {`);
-      lines.push('      return `${label} must be ${min.min} or more.`;');
+      lines.push(`      return \`${messageTemplateLiteral(messages.min, 'min.min')}\`;`);
       lines.push(`    }`);
     }
     if (inlineValidatorKinds.has('max')) {
       lines.push(`    const max = control.errors['max'];`);
       lines.push(`    if (max) {`);
-      lines.push('      return `${label} must be ${max.max} or less.`;');
+      lines.push(`      return \`${messageTemplateLiteral(messages.max, 'max.max')}\`;`);
       lines.push(`    }`);
     }
     if (inlineValidatorKinds.has('pattern')) {
       lines.push(`    if (control.errors['pattern']) {`);
-      lines.push('      return `${label} has an invalid format.`;');
+      lines.push(`      return \`${messageTemplateLiteral(messages.pattern)}\`;`);
       lines.push(`    }`);
     }
     lines.push('');
-    lines.push('    return `${label} is invalid.`;');
+    lines.push(`    return \`${messageTemplateLiteral(messages.invalid)}\`;`);
     lines.push(`  }`);
   }
   lines.push('');

@@ -59,6 +59,8 @@ allowed alongside it.
 ng generate angular-django2:workspace-setup --name=shop --project=shop --document=app.openui.json
 ```
 
+- `html` `uses.lang` also selects the language of the texts the schematics generate
+  (see [Generated texts and the document language](reactive-form.md#generated-texts-and-the-document-language)).
 - `html` `uses.lang` and `uses.dir` (`ltr`, `rtl`, or `auto`) are set on the
   existing `<html>` element and `uses.title` replaces the `<title>` text.
 - `link` `uses.href` with `uses.rel` set to `"\"icon\""` names a workspace-relative icon file that replaces the

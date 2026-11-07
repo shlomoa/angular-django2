@@ -21,6 +21,7 @@ import {
   resolveApplicationProjectName,
   type WorkspaceProject,
 } from '../utility/workspace';
+import { documentLanguage } from '../utility/messages';
 import { FORM_AST_TYPE, reactiveFormDefinitionFromAst, reactiveFormDefinitionToAst } from './ast';
 import { parseReactiveFormDefinition } from './definition';
 import type {
@@ -61,6 +62,8 @@ export interface FormCompilationOptions {
   readonly primitivesDirectory: string;
   /** Diagnostic subject for the node (a definition path or `<document>#<nodeId>`). */
   readonly subject: string;
+  /** Document language (`uses.lang` of the `html` node) selecting the generated message texts. */
+  readonly lang?: string;
 }
 
 /**
@@ -97,7 +100,14 @@ export function reactiveForm(options: ReactiveFormSchema): Rule {
     compileFormFromAst(
       node,
       { tree, context, workspace, projectName, project, destinationPath },
-      { name: options.name, primitivesDirectory, subject },
+      {
+        name: options.name,
+        primitivesDirectory,
+        subject,
+        ...(options.document !== undefined
+          ? { lang: documentLanguage(tree, options.document) }
+          : {}),
+      },
     );
 
     return tree;
@@ -114,6 +124,8 @@ export interface NestedFormCompilationOptions {
   readonly destinationPath: string;
   /** Diagnostic subject for the node (`<document>#<nodeId>`). */
   readonly subject: string;
+  /** Workspace-relative path of the OpenUI document; its `html` language selects the message texts. */
+  readonly documentPath?: string;
 }
 
 /**
@@ -146,6 +158,9 @@ export function compileNestedFormFromAst(
           DEFAULT_PRIMITIVES_PATH,
         ),
         subject: options.subject,
+        ...(options.documentPath !== undefined
+          ? { lang: documentLanguage(tree, options.documentPath) }
+          : {}),
       },
     );
 
@@ -211,6 +226,7 @@ export function compileFormFromAst(
     definition,
     fields,
     integration,
+    options.lang,
   );
   tree.create(componentPath, reactiveFormComponentSource(templateOptions));
   tree.create(templatePath, reactiveFormTemplate(templateOptions));
@@ -275,6 +291,7 @@ function buildTemplateOptions(
   definition: ReactiveFormDefinition,
   fields: readonly ResolvedReactiveFormField[],
   integration: ResolvedReactiveFormIntegration | undefined,
+  lang: string | undefined,
 ): ReactiveFormTemplateOptions {
   return {
     name,
@@ -284,6 +301,7 @@ function buildTemplateOptions(
     definition,
     fields,
     ...(integration ? { integration } : {}),
+    ...(lang !== undefined ? { lang } : {}),
   };
 }
 

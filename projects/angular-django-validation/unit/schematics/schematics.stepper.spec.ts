@@ -591,6 +591,25 @@ describe('stepper schematic (widgets/stepper)', () => {
       expect(Object.values(STEP_ATTRIBUTES)).toEqual(['uses.label', 'uses.optional']);
     });
 
+    it('TC-STEPPER-22: stepperTemplate writes Hebrew Back, Next and Finish texts for lang he', () => {
+      const stepper = stepperFromAst(
+        {
+          id: 'wizard',
+          type: 'Stepper',
+          attrs: { 'produces.complete': null },
+          children: [step('a'), step('b')],
+        },
+        'doc.openui.json',
+      );
+      const hebrew = stepperTemplate(stepper, 'he-IL');
+
+      expect(hebrew).toContain('matStepperPrevious>הקודם</button>');
+      expect(hebrew).toContain('matStepperNext>הבא</button>');
+      expect(hebrew).toContain('(click)="finish()">סיום</button>');
+      expect(stepperTemplate(stepper, 'fr')).toBe(stepperTemplate(stepper));
+      expect(stepperTemplate(stepper)).toContain('matStepperNext>Next</button>');
+    });
+
     it('TC-STEPPER-21: stepperFromAst itself rejects an orientation outside the enum', () => {
       expect(() =>
         stepperFromAst(

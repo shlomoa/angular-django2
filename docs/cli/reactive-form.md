@@ -201,6 +201,19 @@ Validators are emitted in the canonical order shown above, so generated output
 does not depend on authoring order. Inline controls render a matching message
 for each declared validator through `mat-error`.
 
+### Generated texts and the document language
+
+Labels, titles and button texts come from the OpenUI document. The few texts no
+attribute reaches are generated from a built-in table selected by the `uses.lang`
+of the document's `html` node (`workspace-setup --document`): the validation
+messages above, the **Home** entry of the [`material-app`](material-app.md)
+sidenav, and the **Back**, **Next** and **Finish** buttons of the
+[`stepper`](stepper.md). The primary language subtag decides (`he` and `he-IL`
+both select Hebrew). The tables are English (`en`, the default, also used when
+`uses.lang` is absent or has no table) and Hebrew (`he`); adding a language is
+adding an entry to `schematics/utility/messages.ts`. Without `--document` (the
+legacy `--definition`) the messages stay English.
+
 The definition is validated **atomically, before any file is written**. The
 schematic rejects — without creating output — invalid JSON, a file holding more
 than one definition, unknown keys, duplicate or malformed field names, an

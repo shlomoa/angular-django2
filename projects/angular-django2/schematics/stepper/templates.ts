@@ -7,6 +7,7 @@
 import { SchematicsException } from '@angular-devkit/schematics';
 
 import { templateSectionMarkers } from '../embed-component/index';
+import { messagesFor } from '../utility/messages';
 import type { StepAstOptions, StepperAstOptions } from './ast';
 
 /** Template section that hosts the children of one step slot (`header`, `children`, `actions`). */
@@ -35,17 +36,20 @@ function escapeAttributeText(value: string): string {
  * `actions`), followed by the navigation buttons. The last step finishes the
  * stepper only when the node declares `produces.complete`.
  */
-export function stepperTemplate(options: StepperAstOptions): string {
+export function stepperTemplate(options: StepperAstOptions, lang?: string): string {
+  const messages = messagesFor(lang);
   const lastIndex = options.steps.length - 1;
   const steps = options.steps.map((step, index) => {
     const buttons = [
       ...(index > 0
-        ? ['      <button mat-button type="button" matStepperPrevious>Back</button>']
+        ? [`      <button mat-button type="button" matStepperPrevious>${messages.back}</button>`]
         : []),
       ...(index < lastIndex
-        ? ['      <button mat-button type="button" matStepperNext>Next</button>']
+        ? [`      <button mat-button type="button" matStepperNext>${messages.next}</button>`]
         : options.complete
-          ? ['      <button mat-flat-button type="button" (click)="finish()">Finish</button>']
+          ? [
+              `      <button mat-flat-button type="button" (click)="finish()">${messages.finish}</button>`,
+            ]
           : []),
     ];
     const optional = step.optional ? ' [optional]="true"' : '';
