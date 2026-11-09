@@ -465,7 +465,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
       type: 'Route',
       attrs: { 'uses.path': `"${id}"`, 'uses.target': `"${target}"` },
     });
-    const gardens = (...extra: OpenUiElement[]): OpenUiElement => ({
+    const sampleApp = (...extra: OpenUiElement[]): OpenUiElement => ({
       id: 'root',
       type: 'Application',
       children: [
@@ -483,7 +483,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
     });
 
     it('TC-APP-30: accepts the Form and page nodes that a Route targets and leaves them to their own schematics', () => {
-      const document = gardens();
+      const document = sampleApp();
       const result = applicationFromAst(document, DOCUMENT_PATH, undefined);
 
       expect(result.name).toBe('root');
@@ -493,7 +493,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
 
     it('TC-APP-31: still rejects a Form that no Route targets', () => {
       expect(() =>
-        applicationFromAst(gardens({ id: 'strayForm', type: 'Form' }), DOCUMENT_PATH, undefined),
+        applicationFromAst(sampleApp({ id: 'strayForm', type: 'Form' }), DOCUMENT_PATH, undefined),
       ).toThrow(
         'OpenUI node "app.openui.json#strayForm" has type "Form", which is not a supported Application child.',
       );
@@ -501,23 +501,23 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
   });
 
   describe('indexHtmlFromAst', () => {
-    const hebrewAttrs = { 'uses.lang': '"he"', 'uses.dir': '"rtl"', 'uses.title': '"גינות"' };
+    const hebrewAttrs = { 'uses.lang': '"he"', 'uses.dir': '"rtl"', 'uses.title': '"אתר"' };
 
     it('TC-APP-12: reads lang, dir and title from a root html node and ignores its document attributes', () => {
       const root: OpenUiElement = {
         id: 'root',
         type: 'html',
-        attrs: { name: '"specialgardens"', ...hebrewAttrs },
+        attrs: { name: '"sample"', ...hebrewAttrs },
       };
       expect(indexHtmlFromAst(root, DOCUMENT_PATH)).toEqual({
         lang: 'he',
         dir: 'rtl',
-        title: 'גינות',
+        title: 'אתר',
       });
     });
 
     it('TC-APP-13: a root html node without uses attributes describes nothing', () => {
-      const root: OpenUiElement = { id: 'root', type: 'html', attrs: { name: '"specialgardens"' } };
+      const root: OpenUiElement = { id: 'root', type: 'html', attrs: { name: '"sample"' } };
       expect(indexHtmlFromAst(root, DOCUMENT_PATH)).toBeUndefined();
     });
 
@@ -525,7 +525,7 @@ describe('OpenUI page and application compilers (plan phase 4)', () => {
       const root: OpenUiElement = {
         id: 'root',
         type: 'html',
-        attrs: { name: '"specialgardens"' },
+        attrs: { name: '"sample"' },
         children: [{ id: 'host', type: 'html', attrs: hebrewAttrs }],
       };
       expect(indexHtmlFromAst(root, DOCUMENT_PATH)?.dir).toBe('rtl');
